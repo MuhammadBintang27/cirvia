@@ -100,7 +100,7 @@ export default function PracticumPage() {
         const batteries = elements.filter(el => el.type === 'battery')
         if (batteries.length < 3) {
           const newBattery = {
-            id: battery_${Date.now()},
+            id: `battery_${Date.now()}`,
             type: 'battery' as const,
             value: 9,
             position: { x: 50 + batteries.length * 150, y: 150 },
@@ -137,7 +137,7 @@ export default function PracticumPage() {
     const resistors = elements.filter(el => el.type === 'resistor')
     if (resistors.length < 5) {
       const newResistor = {
-        id: resistor_${Date.now()},
+        id: `resistor_${Date.now()}`,
         type: 'resistor' as const,
         value: Math.floor(Math.random() * 500) + 50,
         position: { x: 200 + resistors.length * 100, y: 250 },
@@ -272,8 +272,8 @@ Hasil Perhitungan Rangkaian:
                         : 'hover:scale-105'
                     }`}
                     style={{
-                      left: ${Math.min(Math.max(element.position.x, 50), 90)}%,
-                      top: ${Math.min(Math.max(element.position.y, 50), 90)}%
+                      left: `${Math.min(Math.max(element.position.x, 50), 90)}%`,
+                      top: `${Math.min(Math.max(element.position.y, 50), 90)}%`
                     }}
                     onClick={() => setSelectedElement(selectedElement === element.id ? null : element.id)}
                   >
@@ -304,11 +304,11 @@ Hasil Perhitungan Rangkaian:
                     const prevElement = elements[index - 1]
                     return (
                       <line
-                        key={line-${element.id}}
-                        x1={${Math.min(Math.max(prevElement.position.x, 5), 95)}%}
-                        y1={${Math.min(Math.max(prevElement.position.y, 5), 95)}%}
-                        x2={${Math.min(Math.max(element.position.x, 5), 95)}%}
-                        y2={${Math.min(Math.max(element.position.y, 5), 95)}%}
+                        key={`line-${element.id}`}
+                        x1={`${Math.min(Math.max(prevElement.position.x, 5), 95)}%`}
+                        y1={`${Math.min(Math.max(prevElement.position.y, 5), 95)}%`}
+                        x2={`${Math.min(Math.max(element.position.x, 5), 95)}%`}
+                        y2={`${Math.min(Math.max(element.position.y, 5), 95)}%`}
                         stroke="#374151"
                         strokeWidth="2"
                         strokeDasharray="5,5"
