@@ -100,7 +100,7 @@ export default function PracticumPage() {
         const batteries = elements.filter(el => el.type === 'battery')
         if (batteries.length < 3) {
           const newBattery = {
-            id: `battery_${Date.now()}`,
+            id: battery_${Date.now()},
             type: 'battery' as const,
             value: 9,
             position: { x: 50 + batteries.length * 150, y: 150 },
@@ -137,7 +137,7 @@ export default function PracticumPage() {
     const resistors = elements.filter(el => el.type === 'resistor')
     if (resistors.length < 5) {
       const newResistor = {
-        id: `resistor_${Date.now()}`,
+        id: resistor_${Date.now()},
         type: 'resistor' as const,
         value: Math.floor(Math.random() * 500) + 50,
         position: { x: 200 + resistors.length * 100, y: 250 },
@@ -272,8 +272,8 @@ Hasil Perhitungan Rangkaian:
                         : 'hover:scale-105'
                     }`}
                     style={{
-                      left: `${Math.min(Math.max(element.position.x, 50), 90)}%`,
-                      top: `${Math.min(Math.max(element.position.y, 50), 90)}%`
+                      left: ${Math.min(Math.max(element.position.x, 50), 90)}%,
+                      top: ${Math.min(Math.max(element.position.y, 50), 90)}%
                     }}
                     onClick={() => setSelectedElement(selectedElement === element.id ? null : element.id)}
                   >
@@ -304,11 +304,11 @@ Hasil Perhitungan Rangkaian:
                     const prevElement = elements[index - 1]
                     return (
                       <line
-                        key={`line-${element.id}`}
-                        x1={`${Math.min(Math.max(prevElement.position.x, 5), 95)}%`}
-                        y1={`${Math.min(Math.max(prevElement.position.y, 5), 95)}%`}
-                        x2={`${Math.min(Math.max(element.position.x, 5), 95)}%`}
-                        y2={`${Math.min(Math.max(element.position.y, 5), 95)}%`}
+                        key={line-${element.id}}
+                        x1={${Math.min(Math.max(prevElement.position.x, 5), 95)}%}
+                        y1={${Math.min(Math.max(prevElement.position.y, 5), 95)}%}
+                        x2={${Math.min(Math.max(element.position.x, 5), 95)}%}
+                        y2={${Math.min(Math.max(element.position.y, 5), 95)}%}
                         stroke="#374151"
                         strokeWidth="2"
                         strokeDasharray="5,5"
@@ -351,7 +351,7 @@ Hasil Perhitungan Rangkaian:
                       onClick={() => handleGestureCommand('clear_circuit')}
                       className="px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded-lg font-medium transition-colors"
                     >
-                      🗑️ Reset
+                      🗑 Reset
                     </button>
                   </div>
 
@@ -413,7 +413,7 @@ Hasil Perhitungan Rangkaian:
                         : 'bg-green-500 hover:bg-green-600 text-white'
                     }`}
                   >
-                    {showGestures ? '⏹️ Stop' : '▶️ Start'}
+                    {showGestures ? '⏹ Stop' : '▶ Start'}
                   </button>
                 </div>
 
@@ -428,7 +428,7 @@ Hasil Perhitungan Rangkaian:
                       <div className="space-y-2 text-sm text-gray-600">
                         <p>✋ <strong>Telapak Terbuka:</strong> Tambah Resistor</p>
                         <p>👍 <strong>Jempol:</strong> Tambah Baterai</p>  
-                        <p>✌️ <strong>Peace Sign:</strong> Hitung Rangkaian</p>
+                        <p>✌ <strong>Peace Sign:</strong> Hitung Rangkaian</p>
                         <p>✊ <strong>Kepalan:</strong> Reset Rangkaian</p>
                       </div>
                     </div>
@@ -499,7 +499,7 @@ Hasil Perhitungan Rangkaian:
                     <tr className="border-b">
                       <td className="text-left py-2 px-3">Hand Gesture Detection</td>
                       <td className="py-2 px-3 text-green-500">✅ Advanced</td>
-                      <td className="py-2 px-3 text-yellow-500">⚠️ Basic</td>
+                      <td className="py-2 px-3 text-yellow-500">⚠ Basic</td>
                       <td className="py-2 px-3 text-green-500">✅ Advanced</td>
                     </tr>
                     <tr className="border-b">
@@ -516,14 +516,14 @@ Hasil Perhitungan Rangkaian:
                     </tr>
                     <tr className="border-b">
                       <td className="text-left py-2 px-3">Installation Required</td>
-                      <td className="py-2 px-3 text-yellow-500">⚠️ Python Only</td>
+                      <td className="py-2 px-3 text-yellow-500">⚠ Python Only</td>
                       <td className="py-2 px-3 text-green-500">✅ None</td>
                       <td className="py-2 px-3 text-red-500">❌ Full Setup</td>
                     </tr>
                     <tr>
                       <td className="text-left py-2 px-3">Performance</td>
                       <td className="py-2 px-3 text-green-500">✅ High</td>
-                      <td className="py-2 px-3 text-yellow-500">⚠️ Medium</td>
+                      <td className="py-2 px-3 text-yellow-500">⚠ Medium</td>
                       <td className="py-2 px-3 text-green-500">✅ Highest</td>
                     </tr>
                   </tbody>

@@ -1,41 +1,14 @@
 import Link from 'next/link'
+import Navbar from '@/components/Navbar'
 
 export default function HomePage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-cyan-50">
-      {/* Header */}
-      <header className="bg-white shadow-lg border-b-4 border-blue-500">
-        <div className="container mx-auto px-4 py-6">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3">
-              <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-xl">⚡</span>
-              </div>
-              <div>
-                <h1 className="text-2xl font-bold text-gray-800">CIRVIA</h1>
-                <p className="text-gray-600 text-sm">Circuit Virtual Interactive Application</p>
-              </div>
-            </div>
-            <nav className="hidden md:flex space-x-6">
-              <Link href="/" className="text-gray-700 hover:text-blue-600 font-medium transition-colors">
-                Beranda
-              </Link>
-              <Link href="/about" className="text-gray-700 hover:text-blue-600 font-medium transition-colors">
-                Tentang Kami
-              </Link>
-              <Link href="/materials" className="text-gray-700 hover:text-blue-600 font-medium transition-colors">
-                Materi
-              </Link>
-              <Link href="/practicum" className="text-gray-700 hover:text-blue-600 font-medium transition-colors">
-                Praktikum
-              </Link>
-            </nav>
-          </div>
-        </div>
-      </header>
+      {/* Navbar */}
+      <Navbar />
 
       {/* Hero Section */}
-      <main className="container mx-auto px-4 py-12">
+      <main className="container mx-auto px-4 py-12 pb-24 md:pb-12">
         <div className="text-center mb-16">
           <h2 className="text-4xl md:text-5xl font-bold text-gray-800 mb-6">
             CIRVIA - Circuit Virtual Interactive Application
