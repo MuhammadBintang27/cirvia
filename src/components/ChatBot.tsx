@@ -19,7 +19,7 @@ const ChatBot: React.FC<ChatBotProps> = ({ isOpen, onClose }) => {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
-      text: 'Halo! Saya CIRVIA Assistant 🤖 Saya siap membantu Anda memahami konsep rangkaian listrik. Apa yang ingin Anda pelajari hari ini?',
+      text: 'Halo! Aku CIRVIA Assistant 🤖✨ \n\nAku di sini untuk jadi teman belajar kamu tentang rangkaian listrik! Mau tanya apa aja boleh - mulai dari yang basic sampai yang rumit. Aku jelasin pakai bahasa yang gampang dipahami kok! \n\nYuk, mulai petualangan belajar fisika yang seru! Ada yang mau ditanyakan? 😊🔌',
       sender: 'bot',
       timestamp: new Date()
     }
@@ -31,15 +31,23 @@ const ChatBot: React.FC<ChatBotProps> = ({ isOpen, onClose }) => {
 
   // Knowledge base untuk chatbot
   const knowledgeBase = {
-    'hukum ohm': 'Hukum Ohm menyatakan bahwa arus listrik (I) berbanding lurus dengan tegangan (V) dan berbanding terbalik dengan hambatan (R). Rumusnya: V = I × R',
-    'rangkaian seri': 'Rangkaian seri adalah rangkaian yang komponen-komponennya disusun berurutan. Ciri-ciri: arus sama di semua titik, tegangan terbagi, dan hambatan total = R1 + R2 + R3...',
-    'rangkaian paralel': 'Rangkaian paralel adalah rangkaian yang komponen-komponennya disusun bercabang. Ciri-ciri: tegangan sama di semua cabang, arus terbagi, dan 1/Rtotal = 1/R1 + 1/R2 + 1/R3...',
-    'daya listrik': 'Daya listrik adalah energi listrik yang digunakan per satuan waktu. Rumus: P = V × I = I²R = V²/R, dengan satuan Watt (W)',
-    'tegangan': 'Tegangan atau beda potensial adalah energi per satuan muatan yang diperlukan untuk memindahkan muatan dari satu titik ke titik lain. Satuan: Volt (V)',
-    'arus listrik': 'Arus listrik adalah aliran muatan listrik per satuan waktu. Satuan: Ampere (A). Arah arus konvensional dari potensial tinggi ke rendah',
-    'hambatan': 'Hambatan atau resistansi adalah kemampuan suatu bahan untuk menghambat aliran arus listrik. Satuan: Ohm (Ω)',
-    'praktikum': 'Di CIRVIA, Anda bisa melakukan praktikum virtual dengan menambahkan komponen seperti baterai dan resistor, lalu melihat perhitungan real-time!',
-    'gesture control': 'CIRVIA dilengkapi teknologi computer vision yang memungkinkan kontrol menggunakan gerakan tangan: 👆 untuk pilih, ✋ untuk tambah resistor, ✊ untuk hapus, 👋 untuk reset'
+    'hukum ohm': 'Hukum Ohm itu seperti resep masakan listrik! 😊 Bayangkan listrik seperti air yang mengalir. Hukum ini bilang kalau tegangan (V) itu seperti tekanan air, arus (I) seperti aliran airnya, dan hambatan (R) seperti pipa yang sempit. Rumusnya sederhana: V = I × R. Jadi kalau tegangannya besar, arusnya juga besar, tapi kalau hambatannya besar, arusnya jadi kecil. Mudah kan? 💡',
+    
+    'rangkaian seri': 'Rangkaian seri itu seperti kereta api! 🚂 Semua gerbongnya tersambung berurutan dalam satu jalur. Jadi kalau satu lampu mati, semua ikut mati (seperti lampu natal jaman dulu). Yang unik: arusnya sama di mana-mana, tapi tegangannya dibagi-bagi ke setiap komponen. Untuk menghitung hambatan totalnya tinggal dijumlah aja: R total = R1 + R2 + R3... Gampang!',
+    
+    'rangkaian paralel': 'Rangkaian paralel itu kebalikan dari seri - seperti jalan tol yang bercabang! 🛣️ Kalau satu lampu mati, yang lain tetap nyala. Di sini tegangannya sama di semua cabang, tapi arusnya yang terbagi. Untuk hambatan totalnya agak tricky: 1/R total = 1/R1 + 1/R2... Intinya, makin banyak cabang, makin kecil hambatan totalnya.',
+    
+    'daya listrik': 'Daya listrik itu seperti seberapa "rakus" alat listrik menghabiskan energi! 🔋 Lampu 10W hemat, setrika 1000W boros. Rumusnya P = V × I, artinya tegangan dikali arus. Makanya tagihan listrik dihitung dalam kWh (kilowatt-hour) - berapa lama kita pakai alat berdaya tinggi. Semakin besar dayanya, semakin cepat meteran listrik berputar! 💸',
+    
+    'tegangan': 'Tegangan itu seperti "semangat" listrik untuk mengalir! ⚡ Bayangkan seperti air terjun - makin tinggi terjunnya, makin kencang airnya jatuh. Tegangan diukur dalam Volt (V). Stop kontak rumah biasanya 220V, powerbank 5V, baterai AA 1.5V. Tegangan tinggi = energi besar, makanya hati-hati dengan listrik PLN ya! 😅',
+    
+    'arus listrik': 'Arus listrik itu seperti aliran sungai, tapi yang mengalir adalah elektron! 🌊 Diukur dalam Ampere (A). Charger HP biasanya 1-2A, rumah tangga sekitar 10-20A. Fun fact: arah arus yang kita pelajari (dari + ke -) sebenarnya kebalikan dari arah elektron yang sesungguhnya! Tapi tenang, hitungannya tetap benar kok.',
+    
+    'hambatan': 'Hambatan itu seperti "kemacetan" buat arus listrik! 🚗 Diukur dalam Ohm (Ω). Kabel tembaga hambatannya kecil (jalan tol), karet hambatannya besar (jalan sempit). Resistor sengaja dibuat untuk "menghambat" arus supaya komponen lain nggak kebakar. Makin besar hambatan, makin susah arus mengalir.',
+    
+    'praktikum': 'Wah, praktikum CIRVIA seru banget! 🎉 Kamu bisa jadi "insinyur listrik" virtual - tambah baterai, pasang resistor, terus lihat hasilnya langsung! Yang keren, semua perhitungan Hukum Ohm muncul real-time. Nggak perlu takut kesetrum atau komponen rusak. Plus ada mode gesture control pakai kamera - futuristik banget! 🤖',
+    
+    'gesture control': 'Fitur andalan CIRVIA nih! 🔥 Pakai kamera laptop/HP, kamu bisa kontrol rangkaian pakai gerakan tangan:\n\n👆 Tunjuk = pilih komponen\n✋ Telapak terbuka = tambah resistor\n✊ Kepal = hapus komponen\n👋 Lambaian = reset rangkaian\n\nBerasa kayak Tony Stark ngontrol hologram! Teknologi computer vision yang mudah dipelajari. Coba deh, dijamin ketagihan! 😎'
   }
 
   const scrollToBottom = () => {
@@ -60,19 +68,23 @@ const ChatBot: React.FC<ChatBotProps> = ({ isOpen, onClose }) => {
     }
 
     // Default responses untuk pertanyaan umum
-    if (lowerQuestion.includes('halo') || lowerQuestion.includes('hai')) {
-      return 'Halo! Senang bertemu dengan Anda. Saya siap membantu menjawab pertanyaan tentang rangkaian listrik!'
+    if (lowerQuestion.includes('halo') || lowerQuestion.includes('hai') || lowerQuestion.includes('hello')) {
+      return 'Halo! 👋 Senang banget ketemu kamu! Aku CIRVIA Assistant, siap bantu kamu memahami dunia rangkaian listrik yang seru. Ada yang mau ditanyakan? Jangan malu-malu ya! 😊'
     }
     
-    if (lowerQuestion.includes('help') || lowerQuestion.includes('bantuan')) {
-      return 'Saya bisa membantu Anda dengan topik: Hukum Ohm, Rangkaian Seri/Paralel, Daya Listrik, Tegangan, Arus, Hambatan, Praktikum Virtual, dan Gesture Control. Silakan tanya!'
+    if (lowerQuestion.includes('help') || lowerQuestion.includes('bantuan') || lowerQuestion.includes('bisa apa')) {
+      return 'Aku bisa bantu kamu dengan banyak hal nih! 🌟\n\n📚 Materi: Hukum Ohm, Rangkaian Seri/Paralel, Daya Listrik\n⚡ Konsep: Tegangan, Arus, Hambatan\n🎮 Fitur CIRVIA: Praktikum Virtual & Gesture Control\n\nTinggal tanya aja, aku jelasin dengan bahasa yang gampang dipahami! 💫'
     }
 
-    if (lowerQuestion.includes('rumus')) {
-      return 'Beberapa rumus penting:\n• Hukum Ohm: V = I × R\n• Daya: P = V × I\n• Rangkaian Seri: Rtotal = R1 + R2 + R3...\n• Rangkaian Paralel: 1/Rtotal = 1/R1 + 1/R2...'
+    if (lowerQuestion.includes('rumus') || lowerQuestion.includes('formula')) {
+      return 'Nih rumus-rumus penting yang wajib kamu tahu! 📝✨\n\n⚡ Hukum Ohm: V = I × R\n🔋 Daya Listrik: P = V × I\n🔗 Rangkaian Seri: R total = R1 + R2 + R3...\n🌐 Rangkaian Paralel: 1/R total = 1/R1 + 1/R2...\n\nMau penjelasan detail salah satunya? Tinggal bilang aja! 😄'
     }
 
-    return 'Maaf, saya belum memahami pertanyaan Anda. Coba tanyakan tentang: Hukum Ohm, Rangkaian Seri/Paralel, Daya Listrik, atau fitur CIRVIA lainnya. 😊'
+    if (lowerQuestion.includes('cara') || lowerQuestion.includes('bagaimana')) {
+      return 'Wah, pertanyaan yang bagus! 🤔 Aku suka orang yang ingin tahu caranya. Coba spesifik dikit ya - mau tahu cara apa? Misalnya "cara menghitung arus" atau "cara menggunakan praktikum CIRVIA". Biar aku bisa kasih penjelasan yang tepat sasaran! 🎯'
+    }
+
+    return 'Hmm, sepertinya aku belum paham betul dengan pertanyaan kamu 🤔 Tapi jangan khawatir! Coba tanyakan tentang:\n\n💡 Konsep dasar: Hukum Ohm, Tegangan, Arus, Hambatan\n🔌 Rangkaian: Seri atau Paralel\n⚡ Daya Listrik dan perhitungannya\n🎮 Fitur CIRVIA: Praktikum Virtual dan Gesture Control\n\nAtau kasih contoh soal juga boleh lho! Aku siap bantu! 😊✨'
   }
 
   const speakText = (text: string) => {
