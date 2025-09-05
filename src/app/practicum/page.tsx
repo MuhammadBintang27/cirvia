@@ -1,28 +1,30 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import Navbar from '@/components/Navbar'
 import SimpleGestureDemo from '../../components/SimpleGestureDemo'
-
-
+import CVPracticumLauncher from '../../components/CVPracticumLauncher'
+import EmbeddedCVPracticum from '../../components/EmbeddedCVPracticum'
+import EmbeddedPythonCV from '../../components/EmbeddedPythonCV'
 
 interface CircuitElement {
   id: string
   type: 'battery' | 'resistor' | 'wire'
   value: number
-  position: { x: number, y: number }
+  position: { x: number; y: number }
   connections: string[]
 }
 
-interface CircuitCalculations {
-  totalResistance: number
-  current: number
-  voltage: number
-  power: number
+interface GestureResult {
+  gesture: string
+  confidence: number
 }
 
 export default function PracticumPage() {
+  // Tab state
+  const [activeTab, setActiveTab] = useState<'web' | 'cv'>('web')
+  
+  // Circuit elements state
   const [elements, setElements] = useState<CircuitElement[]>([
     {
       id: 'battery1',
@@ -39,27 +41,19 @@ export default function PracticumPage() {
       connections: ['wire2', 'wire3']
     }
   ])
-
-  const [calculations, setCalculations] = useState<CircuitCalculations>({
-    totalResistance: 100,
-    current: 0.12,
-    voltage: 12,
-    power: 1.44
-  })
-
-  const [handGestureMode, setHandGestureMode] = useState(false)
+  
+  // UI state
   const [selectedElement, setSelectedElement] = useState<string | null>(null)
-  const [gestureCommand, setGestureCommand] = useState<string>('')
+  const [showGestures, setShowGestures] = useState(false)
 
-  // Handle gesture detection
-  const handleGestureDetected = (gesture: string, confidence: number) => {
-    setGestureCommand(gesture)
+  // Gesture handling
+  const onGestureDetected = (result: GestureResult) => {
+    const { gesture, confidence } = result
     
     if (confidence > 0.7) {
       switch (gesture) {
         case 'point':
         case 'small_motion':
-          // Select first element if none selected
           if (!selectedElement && elements.length > 0) {
             setSelectedElement(elements[0].id)
           }
@@ -67,12 +61,10 @@ export default function PracticumPage() {
           
         case 'open_palm':
         case 'large_motion':
-          // Add resistor
           addResistor()
           break
           
         case 'fist':
-          // Delete selected element
           if (selectedElement && selectedElement !== 'battery1' && selectedElement !== 'resistor1') {
             removeElement(selectedElement)
             setSelectedElement(null)
@@ -80,7 +72,6 @@ export default function PracticumPage() {
           break
           
         case 'wave':
-          // Reset circuit to default
           setElements([
             {
               id: 'battery1',
@@ -103,26 +94,26 @@ export default function PracticumPage() {
     }
   }
 
-  // Handle gesture commands from SimpleGestureDemo
   const handleGestureCommand = (command: string) => {
     switch(command) {
       case 'add_battery':
-        // Add a new battery if not at limit
         const batteries = elements.filter(el => el.type === 'battery')
         if (batteries.length < 3) {
           const newBattery = {
-            id: `battery_${Date.now()}`,
+            id: battery_${Date.now()},
             type: 'battery' as const,
             value: 9,
             position: { x: 50 + batteries.length * 150, y: 150 },
             connections: []
           }
-          setElements([...elements, newBattery])
+          setElements(prev => [...prev, newBattery])
         }
         break
+        
       case 'add_resistor':
         addResistor()
         break
+        
       case 'clear_circuit':
         setElements([
           {
@@ -131,291 +122,416 @@ export default function PracticumPage() {
             value: 12,
             position: { x: 100, y: 200 },
             connections: ['wire1', 'wire4']
-          },
-          {
-            id: 'resistor1',
-            type: 'resistor',
-            value: 100,
-            position: { x: 300, y: 200 },
-            connections: ['wire2', 'wire3']
           }
         ])
         setSelectedElement(null)
         break
-      case 'show_stats':
-        alert(`Circuit Statistics:\nVoltage: ${calculations.voltage}V\nCurrent: ${calculations.current}A\nResistance: ${calculations.totalResistance}Ω\nPower: ${calculations.power}W`)
+        
+      case 'calculate':
+        calculateCircuit()
         break
     }
   }
 
-  const calculateCircuit = useCallback(() => {
-    // Hitung resistansi total untuk rangkaian seri
-    const resistors = elements.filter(el => el.type === 'resistor')
-    const totalResistance = resistors.reduce((sum, resistor) => sum + resistor.value, 0)
-    
-    // Ambil tegangan dari baterai
-    const battery = elements.find(el => el.type === 'battery')
-    const voltage = battery ? battery.value : 0
-    
-    // Hitung arus menggunakan hukum Ohm (I = V/R)
-    const current = voltage > 0 && totalResistance > 0 ? voltage / totalResistance : 0
-    
-    // Hitung daya (P = V*I)
-    const power = voltage * current
-
-    setCalculations({
-      totalResistance,
-      current,
-      voltage,
-      power
-    })
-  }, [elements])
-
-  useEffect(() => {
-    calculateCircuit()
-  }, [calculateCircuit])
-
   const addResistor = () => {
-    const newResistor: CircuitElement = {
-      id: `resistor${Date.now()}`,
-      type: 'resistor',
-      value: 50,
-      position: { x: 400 + elements.length * 50, y: 200 },
-      connections: []
+    const resistors = elements.filter(el => el.type === 'resistor')
+    if (resistors.length < 5) {
+      const newResistor = {
+        id: resistor_${Date.now()},
+        type: 'resistor' as const,
+        value: Math.floor(Math.random() * 500) + 50,
+        position: { x: 200 + resistors.length * 100, y: 250 },
+        connections: []
+      }
+      setElements(prev => [...prev, newResistor])
     }
-    setElements([...elements, newResistor])
   }
 
-  const removeElement = (id: string) => {
-    setElements(elements.filter(el => el.id !== id))
+  const removeElement = (elementId: string) => {
+    setElements(prev => prev.filter(el => el.id !== elementId))
   }
 
-  const updateElementValue = (id: string, newValue: number) => {
-    setElements(elements.map(el => 
-      el.id === id ? { ...el, value: newValue } : el
+  const calculateCircuit = () => {
+    const batteries = elements.filter(el => el.type === 'battery')
+    const resistors = elements.filter(el => el.type === 'resistor')
+    
+    if (batteries.length === 0 || resistors.length === 0) {
+      alert('Circuit membutuhkan minimal 1 baterai dan 1 resistor!')
+      return
+    }
+    
+    const totalVoltage = batteries.reduce((sum, battery) => sum + battery.value, 0)
+    const totalResistance = resistors.reduce((sum, resistor) => sum + resistor.value, 0)
+    const current = totalVoltage / totalResistance
+    const power = totalVoltage * current
+    
+    alert(`
+Hasil Perhitungan Rangkaian:
+• Total Tegangan: ${totalVoltage}V
+• Total Resistansi: ${totalResistance}Ω  
+• Arus: ${current.toFixed(3)}A
+• Daya: ${power.toFixed(3)}W
+    `)
+  }
+
+  const updateElementValue = (elementId: string, newValue: number) => {
+    setElements(prev => prev.map(el => 
+      el.id === elementId ? { ...el, value: newValue } : el
     ))
   }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-cyan-50">
-      {/* Navbar */}
-      <Navbar showBackButton backUrl="/materials" backText="Kembali ke Materi" />
-
-      <div className="container mx-auto px-4 py-8 pb-24 md:pb-8">
-        <div className="flex items-center justify-between mb-6">
-          <h1 className="text-3xl font-bold text-gray-800">Praktikum Rangkaian Listrik</h1>
-          <button
-            onClick={() => setHandGestureMode(!handGestureMode)}
-            className={`px-4 py-2 rounded-lg font-medium transition-all ${
-              handGestureMode 
-                ? 'bg-green-500 text-white shadow-lg' 
-                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-            }`}
-          >
-            👋 {handGestureMode ? 'Mode Gerakan Aktif' : 'Aktifkan Mode Gerakan'}
-          </button>
-        </div>
-        <div className="grid lg:grid-cols-3 gap-8">
-          {/* Computer Vision Panel */}
-          {handGestureMode && (
-            <div className="lg:col-span-3 mb-8">
-              <div className="bg-white rounded-xl shadow-lg p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-xl font-bold text-gray-800">Computer Vision Control</h2>
-                  <div className="text-sm text-gray-600">
-                    Current Command: <span className="font-semibold text-blue-600">{gestureCommand}</span>
-                  </div>
+      {/* Header */}
+      <header className="bg-white shadow-sm border-b border-gray-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16">
+            <div className="flex items-center">
+              <Link href="/" className="flex items-center space-x-3">
+                <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+                  <span className="text-white font-bold">⚡</span>
                 </div>
-                <SimpleGestureDemo onGestureCommand={handleGestureCommand} />
-              </div>
+                <h1 className="text-xl font-bold text-gray-900">CIRVIA</h1>
+              </Link>
             </div>
-          )}
+            
+            <nav className="flex space-x-8">
+              <Link href="/about" className="text-gray-600 hover:text-gray-900 font-medium">
+                Tentang
+              </Link>
+              <Link href="/materials" className="text-gray-600 hover:text-gray-900 font-medium">
+                Materi
+              </Link>
+              <Link href="/pretest" className="text-gray-600 hover:text-gray-900 font-medium">
+                Pre-test
+              </Link>
+              <Link href="/practicum" className="text-blue-600 font-semibold">
+                Praktikum
+              </Link>
+              <Link href="/posttest" className="text-gray-600 hover:text-gray-900 font-medium">
+                Post-test
+              </Link>
+            </nav>
+          </div>
+        </div>
+      </header>
 
-          {/* Circuit Canvas */}
-          <div className={handGestureMode ? "lg:col-span-2" : "lg:col-span-2"}>
-            <div className="bg-white rounded-xl shadow-lg p-6">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-bold text-gray-800">Rangkaian Listrik Seri</h2>
-                <div className="flex space-x-2">
-                  <button
-                    onClick={addResistor}
-                    className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg font-medium transition-colors"
-                  >
-                    + Tambah Resistor
-                  </button>
-                </div>
-              </div>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Page Title */}
+        <div className="text-center mb-8">
+          <h1 className="text-4xl font-bold text-gray-900 mb-4">
+            🔬 Praktikum Rangkaian Listrik
+          </h1>
+          <p className="text-lg text-gray-600 max-w-3xl mx-auto">
+            Praktikum interaktif untuk memahami konsep dasar rangkaian listrik melalui simulasi dan gesture control
+          </p>
+        </div>
 
-              {/* Circuit Visualization */}
-              <div className="bg-gray-50 rounded-lg p-8 min-h-96 relative border-2 border-dashed border-gray-300">
-                <svg width="100%" height="400" className="absolute inset-0">
-                  {/* Wire connections */}
-                  <line x1="150" y1="200" x2="250" y2="200" stroke="#4B5563" strokeWidth="3" />
-                  <line x1="350" y1="200" x2="450" y2="200" stroke="#4B5563" strokeWidth="3" />
-                  <line x1="450" y1="200" x2="450" y2="300" stroke="#4B5563" strokeWidth="3" />
-                  <line x1="450" y1="300" x2="150" y2="300" stroke="#4B5563" strokeWidth="3" />
-                  <line x1="150" y1="300" x2="150" y2="200" stroke="#4B5563" strokeWidth="3" />
-                </svg>
+        {/* Tab Navigation */}
+        <div className="flex justify-center mb-8">
+          <div className="bg-white rounded-lg shadow-md p-2 inline-flex">
+            <button
+              onClick={() => setActiveTab('web')}
+              className={`px-6 py-2 rounded-md font-medium transition-colors ${
+                activeTab === 'web'
+                  ? 'bg-blue-600 text-white'
+                  : 'text-gray-700 hover:text-gray-900'
+              }`}
+            >
+              🌐 Web Practicum
+            </button>
+            <button
+              onClick={() => setActiveTab('cv')}
+              className={`px-6 py-2 rounded-md font-medium transition-colors ${
+                activeTab === 'cv'
+                  ? 'bg-blue-600 text-white'
+                  : 'text-gray-700 hover:text-gray-900'
+              }`}
+            >
+              🤖 Computer Vision
+            </button>
+          </div>
+        </div>
 
+        {/* Web Practicum Content */}
+        {activeTab === 'web' && (
+          <div className="max-w-6xl mx-auto">
+            {/* Circuit Visualization */}
+            <div className="bg-white rounded-lg shadow-lg p-6 mb-8">
+              <h2 className="text-2xl font-bold text-gray-800 mb-4">
+                ⚡ Simulasi Rangkaian
+              </h2>
+              <div className="bg-gray-50 border-2 border-dashed border-gray-300 rounded-lg p-8 min-h-96 relative overflow-hidden">
                 {/* Circuit Elements */}
-                {elements.map((element, index) => (
+                {elements.map((element) => (
                   <div
                     key={element.id}
-                    className={`absolute transform -translate-x-1/2 -translate-y-1/2 cursor-pointer transition-all hover:scale-110 ${
-                      selectedElement === element.id ? 'ring-4 ring-blue-500 ring-opacity-50' : ''
+                    className={`absolute transform -translate-x-1/2 -translate-y-1/2 cursor-pointer transition-all duration-200 ${
+                      selectedElement === element.id
+                        ? 'scale-110 z-10'
+                        : 'hover:scale-105'
                     }`}
                     style={{
-                      left: element.position.x,
-                      top: element.position.y
+                      left: ${Math.min(Math.max(element.position.x, 50), 90)}%,
+                      top: ${Math.min(Math.max(element.position.y, 50), 90)}%
                     }}
-                    onClick={() => setSelectedElement(element.id)}
+                    onClick={() => setSelectedElement(selectedElement === element.id ? null : element.id)}
                   >
-                    {element.type === 'battery' && (
-                      <div className="bg-yellow-400 w-16 h-8 rounded flex items-center justify-center border-2 border-yellow-600">
-                        <span className="text-xs font-bold">🔋 {element.value}V</span>
+                    {element.type === 'battery' ? (
+                      <div className={`w-16 h-8 rounded-md flex items-center justify-center text-white font-bold text-sm border-2 ${
+                        selectedElement === element.id
+                          ? 'bg-yellow-500 border-yellow-600 shadow-lg'
+                          : 'bg-red-500 border-red-600 shadow-md'
+                      }`}>
+                        {element.value}V
                       </div>
-                    )}
-                    {element.type === 'resistor' && (
-                      <div className="bg-orange-400 w-20 h-6 rounded flex items-center justify-center border-2 border-orange-600 relative">
-                        <span className="text-xs font-bold text-white">{element.value}Ω</span>
-                        {element.id !== 'resistor1' && (
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation()
-                              removeElement(element.id)
-                            }}
-                            className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs hover:bg-red-600"
-                          >
-                            ×
-                          </button>
-                        )}
+                    ) : (
+                      <div className={`w-12 h-12 rounded-lg flex items-center justify-center text-white font-bold text-xs border-2 transform rotate-45 ${
+                        selectedElement === element.id
+                          ? 'bg-yellow-500 border-yellow-600 shadow-lg'
+                          : 'bg-green-500 border-green-600 shadow-md'
+                      }`}>
+                        <span className="transform -rotate-45">{element.value}Ω</span>
                       </div>
                     )}
                   </div>
                 ))}
-
-                {/* Current Flow Animation */}
-                <div className="absolute">
-                  <div className="w-2 h-2 bg-blue-500 rounded-full animate-ping" 
-                       style={{ left: '200px', top: '195px' }}></div>
-                  <div className="w-2 h-2 bg-blue-500 rounded-full animate-ping" 
-                       style={{ left: '300px', top: '195px', animationDelay: '0.5s' }}></div>
-                  <div className="w-2 h-2 bg-blue-500 rounded-full animate-ping" 
-                       style={{ left: '400px', top: '195px', animationDelay: '1s' }}></div>
-                </div>
+                
+                {/* Connection lines (simplified) */}
+                <svg className="absolute inset-0 w-full h-full pointer-events-none">
+                  {elements.length > 1 && elements.map((element, index) => {
+                    if (index === 0) return null
+                    const prevElement = elements[index - 1]
+                    return (
+                      <line
+                        key={line-${element.id}}
+                        x1={${Math.min(Math.max(prevElement.position.x, 5), 95)}%}
+                        y1={${Math.min(Math.max(prevElement.position.y, 5), 95)}%}
+                        x2={${Math.min(Math.max(element.position.x, 5), 95)}%}
+                        y2={${Math.min(Math.max(element.position.y, 5), 95)}%}
+                        stroke="#374151"
+                        strokeWidth="2"
+                        strokeDasharray="5,5"
+                      />
+                    )
+                  })}
+                </svg>
               </div>
+            </div>
 
+            {/* Control Panel */}
+            <div className="grid lg:grid-cols-2 gap-8">
               {/* Element Controls */}
-              {selectedElement && (
-                <div className="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
-                  <h3 className="font-semibold text-blue-800 mb-3">
-                    Edit {elements.find(el => el.id === selectedElement)?.type === 'battery' ? 'Baterai' : 'Resistor'}
-                  </h3>
-                  <div className="flex items-center space-x-4">
-                    <label className="text-sm font-medium text-blue-700">
-                      Nilai: 
-                    </label>
-                    <input
-                      type="number"
-                      value={elements.find(el => el.id === selectedElement)?.value || 0}
-                      onChange={(e) => updateElementValue(selectedElement, Number(e.target.value))}
-                      className="border border-blue-300 rounded px-3 py-1 w-20 text-center"
-                    />
-                    <span className="text-sm text-blue-600">
-                      {elements.find(el => el.id === selectedElement)?.type === 'battery' ? 'V' : 'Ω'}
-                    </span>
-                    <button
-                      onClick={() => setSelectedElement(null)}
-                      className="bg-blue-500 text-white px-3 py-1 rounded text-sm hover:bg-blue-600"
+              <div className="bg-white rounded-lg shadow-lg p-6">
+                <h3 className="text-xl font-bold text-gray-800 mb-4">
+                  🔧 Kontrol Elemen
+                </h3>
+                
+                <div className="space-y-4">
+                  <div className="flex flex-wrap gap-3">
+                    <button 
+                      onClick={() => handleGestureCommand('add_battery')}
+                      className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg font-medium transition-colors"
                     >
-                      Selesai
+                      + Baterai
+                    </button>
+                    <button 
+                      onClick={() => handleGestureCommand('add_resistor')}
+                      className="px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg font-medium transition-colors"
+                    >
+                      + Resistor
+                    </button>
+                    <button 
+                      onClick={() => handleGestureCommand('calculate')}
+                      className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-medium transition-colors"
+                    >
+                      📊 Hitung
+                    </button>
+                    <button 
+                      onClick={() => handleGestureCommand('clear_circuit')}
+                      className="px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded-lg font-medium transition-colors"
+                    >
+                      🗑 Reset
                     </button>
                   </div>
+
+                  {/* Selected Element Info */}
+                  {selectedElement && (
+                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                      <h4 className="font-semibold text-blue-900 mb-2">
+                        Elemen Terpilih: {selectedElement}
+                      </h4>
+                      {(() => {
+                        const element = elements.find(el => el.id === selectedElement)
+                        if (!element) return null
+                        
+                        return (
+                          <div className="space-y-2">
+                            <p className="text-sm text-blue-800">
+                              Tipe: {element.type === 'battery' ? 'Baterai' : 'Resistor'}
+                            </p>
+                            <div className="flex items-center space-x-2">
+                              <label className="text-sm text-blue-800">
+                                {element.type === 'battery' ? 'Tegangan (V):' : 'Resistansi (Ω):'}
+                              </label>
+                              <input
+                                type="number"
+                                value={element.value}
+                                onChange={(e) => updateElementValue(element.id, Number(e.target.value))}
+                                className="w-20 px-2 py-1 border border-blue-300 rounded text-sm"
+                                min="1"
+                                max={element.type === 'battery' ? "24" : "1000"}
+                              />
+                            </div>
+                            {element.id !== 'battery1' && element.id !== 'resistor1' && (
+                              <button
+                                onClick={() => removeElement(element.id)}
+                                className="px-3 py-1 bg-red-500 hover:bg-red-600 text-white rounded text-sm transition-colors"
+                              >
+                                Hapus Elemen
+                              </button>
+                            )}
+                          </div>
+                        )
+                      })()}
+                    </div>
+                  )}
                 </div>
-              )}
+              </div>
+
+              {/* Gesture Control */}
+              <div className="bg-white rounded-lg shadow-lg p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-xl font-bold text-gray-800">
+                    👋 Kontrol Gesture
+                  </h3>
+                  <button
+                    onClick={() => setShowGestures(!showGestures)}
+                    className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                      showGestures
+                        ? 'bg-red-500 hover:bg-red-600 text-white'
+                        : 'bg-green-500 hover:bg-green-600 text-white'
+                    }`}
+                  >
+                    {showGestures ? '⏹ Stop' : '▶ Start'}
+                  </button>
+                </div>
+
+                {showGestures && (
+                  <div className="space-y-4">
+                    <SimpleGestureDemo 
+                      onGestureCommand={handleGestureCommand}
+                    />
+                    
+                    <div className="bg-gray-50 rounded-lg p-4">
+                      <h4 className="font-semibold text-gray-800 mb-2">Panduan Gesture:</h4>
+                      <div className="space-y-2 text-sm text-gray-600">
+                        <p>✋ <strong>Telapak Terbuka:</strong> Tambah Resistor</p>
+                        <p>👍 <strong>Jempol:</strong> Tambah Baterai</p>  
+                        <p>✌ <strong>Peace Sign:</strong> Hitung Rangkaian</p>
+                        <p>✊ <strong>Kepalan:</strong> Reset Rangkaian</p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
+        )}
 
-          {/* Calculations Panel */}
-          <div className="space-y-6">
-            {/* Real-time Calculations */}
-            <div className="bg-white rounded-xl shadow-lg p-6">
-              <h3 className="text-xl font-bold text-gray-800 mb-4">Perhitungan Real-time</h3>
-              
-              <div className="space-y-4">
-                <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
-                  <div className="flex items-center justify-between">
-                    <span className="font-medium text-blue-700">Tegangan (V)</span>
-                    <span className="text-xl font-bold text-blue-800">{calculations.voltage.toFixed(2)} V</span>
-                  </div>
-                </div>
+        {/* Computer Vision Practicum Content */}
+        {activeTab === 'cv' && (
+          <div className="max-w-6xl mx-auto">
+            <div className="text-center mb-6">
+              <h2 className="text-3xl font-bold text-gray-800 mb-4">
+                Praktikum Computer Vision
+              </h2>
+              <p className="text-lg text-gray-600 max-w-3xl mx-auto">
+                Aplikasi Python CV lengkap dengan gesture detection, embedded langsung di platform web tanpa jendela terpisah!
+              </p>
+            </div>
 
-                <div className="p-4 bg-green-50 rounded-lg border border-green-200">
-                  <div className="flex items-center justify-between">
-                    <span className="font-medium text-green-700">Arus (I)</span>
-                    <span className="text-xl font-bold text-green-800">{calculations.current.toFixed(3)} A</span>
-                  </div>
-                </div>
+            {/* Main Python CV Application - Embedded */}
+            <EmbeddedPythonCV />
 
-                <div className="p-4 bg-orange-50 rounded-lg border border-orange-200">
-                  <div className="flex items-center justify-between">
-                    <span className="font-medium text-orange-700">Resistansi Total (R)</span>
-                    <span className="text-xl font-bold text-orange-800">{calculations.totalResistance.toFixed(2)} Ω</span>
-                  </div>
-                </div>
+            {/* Alternative Options */}
+            <div className="mt-8 grid md:grid-cols-2 gap-6">
+              {/* Simple Web Version */}
+              <div className="bg-gray-50 rounded-lg p-6">
+                <h3 className="text-lg font-bold text-gray-800 mb-4">
+                  🌐 Alternative: Simple Web Version
+                </h3>
+                <p className="text-gray-600 mb-4">
+                  Jika Python server tidak bisa berjalan, gunakan versi web sederhana:
+                </p>
+                <EmbeddedCVPracticum />
+              </div>
 
-                <div className="p-4 bg-purple-50 rounded-lg border border-purple-200">
-                  <div className="flex items-center justify-between">
-                    <span className="font-medium text-purple-700">Daya (P)</span>
-                    <span className="text-xl font-bold text-purple-800">{calculations.power.toFixed(3)} W</span>
-                  </div>
-                </div>
+              {/* Desktop Application */}
+              <div className="bg-gray-50 rounded-lg p-6">
+                <h3 className="text-lg font-bold text-gray-800 mb-4">
+                  💻 Alternative: Desktop Application
+                </h3>
+                <p className="text-gray-600 mb-4">
+                  Atau gunakan aplikasi desktop Python yang berjalan secara terpisah:
+                </p>
+                <CVPracticumLauncher />
               </div>
             </div>
 
-            {/* Formulas */}
-            <div className="bg-white rounded-xl shadow-lg p-6">
-              <h3 className="text-xl font-bold text-gray-800 mb-4">Rumus yang Digunakan</h3>
+            {/* Feature Comparison */}
+            <div className="mt-8 bg-white rounded-lg shadow-lg p-6">
+              <h3 className="text-xl font-bold text-gray-800 mb-4">
+                📊 Perbandingan Fitur
+              </h3>
               
-              <div className="space-y-3 text-sm">
-                <div className="p-3 bg-gray-50 rounded-lg">
-                  <div className="font-semibold text-gray-700">Hukum Ohm:</div>
-                  <div className="text-gray-600 font-mono">I = V / R</div>
-                </div>
-                
-                <div className="p-3 bg-gray-50 rounded-lg">
-                  <div className="font-semibold text-gray-700">Resistansi Seri:</div>
-                  <div className="text-gray-600 font-mono">R_total = R₁ + R₂ + R₃ + ...</div>
-                </div>
-                
-                <div className="p-3 bg-gray-50 rounded-lg">
-                  <div className="font-semibold text-gray-700">Daya Listrik:</div>
-                  <div className="text-gray-600 font-mono">P = V × I</div>
-                </div>
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b">
+                      <th className="text-left py-2 px-3">Fitur</th>
+                      <th className="text-center py-2 px-3 text-blue-600">🤖 Python CV<br/><small>(Embedded)</small></th>
+                      <th className="text-center py-2 px-3 text-green-600">🌐 Web Version<br/><small>(Simple)</small></th>
+                      <th className="text-center py-2 px-3 text-purple-600">💻 Desktop App<br/><small>(Separate)</small></th>
+                    </tr>
+                  </thead>
+                  <tbody className="text-center">
+                    <tr className="border-b">
+                      <td className="text-left py-2 px-3">Hand Gesture Detection</td>
+                      <td className="py-2 px-3 text-green-500">✅ Advanced</td>
+                      <td className="py-2 px-3 text-yellow-500">⚠ Basic</td>
+                      <td className="py-2 px-3 text-green-500">✅ Advanced</td>
+                    </tr>
+                    <tr className="border-b">
+                      <td className="text-left py-2 px-3">Real-time Calculations</td>
+                      <td className="py-2 px-3 text-green-500">✅</td>
+                      <td className="py-2 px-3 text-green-500">✅</td>
+                      <td className="py-2 px-3 text-green-500">✅</td>
+                    </tr>
+                    <tr className="border-b">
+                      <td className="text-left py-2 px-3">Embedded in Platform</td>
+                      <td className="py-2 px-3 text-green-500">✅</td>
+                      <td className="py-2 px-3 text-green-500">✅</td>
+                      <td className="py-2 px-3 text-red-500">❌</td>
+                    </tr>
+                    <tr className="border-b">
+                      <td className="text-left py-2 px-3">Installation Required</td>
+                      <td className="py-2 px-3 text-yellow-500">⚠ Python Only</td>
+                      <td className="py-2 px-3 text-green-500">✅ None</td>
+                      <td className="py-2 px-3 text-red-500">❌ Full Setup</td>
+                    </tr>
+                    <tr>
+                      <td className="text-left py-2 px-3">Performance</td>
+                      <td className="py-2 px-3 text-green-500">✅ High</td>
+                      <td className="py-2 px-3 text-yellow-500">⚠ Medium</td>
+                      <td className="py-2 px-3 text-green-500">✅ Highest</td>
+                    </tr>
+                  </tbody>
+                </table>
               </div>
             </div>
-
-            {/* Hand Gesture Info */}
-            {handGestureMode && (
-              <div className="bg-green-50 rounded-xl shadow-lg p-6 border border-green-200">
-                <h3 className="text-lg font-bold text-green-800 mb-3">🤖 AI Control Active</h3>
-                <div className="space-y-2 text-sm text-green-700">
-                  <div className="flex items-center justify-between">
-                    <span>Current Gesture:</span>
-                    <span className="font-semibold">{gestureCommand || 'none'}</span>
-                  </div>
-                  <div className="border-t border-green-200 pt-2 mt-2">
-                    <div className="font-medium mb-1">Available Commands:</div>
-                    <div>👆 Point/Small Motion → Select element</div>
-                    <div>✋ Open Palm/Large Motion → Add resistor</div>
-                    <div>✊ Fist → Delete element</div>
-                    <div>👋 Wave/Fast Motion → Reset circuit</div>
-                  </div>
-                </div>
-              </div>
-            )}
           </div>
-        </div>
+        )}
       </div>
     </div>
   )
