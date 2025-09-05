@@ -3,9 +3,11 @@
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
+import Navbar from '@/components/Navbar'
 import AudioPlayer from '@/components/AudioPlayer'
 import InteractiveCircuitDemo from '@/components/InteractiveCircuitDemo'
 import { useProgressTracking } from '@/hooks/useProgressTracking'
+import { CheckCircle, Clock, BookOpen, Volume2, Zap } from 'lucide-react'
 
 // Data modules
 const modulesData = {
@@ -187,85 +189,168 @@ export default function ModuleDetailPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-cyan-50">
-      {/* Header */}
-      <header className="bg-white shadow-lg border-b-4 border-blue-500">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3">
-              <Link href="/materials" className="text-blue-600 hover:text-blue-800">
-                ← Kembali ke Materi
-              </Link>
-              <h1 className="text-2xl font-bold text-gray-800">{module.title}</h1>
-            </div>
-            
-            {/* Progress Button */}
-            <button
-              onClick={handleMarkComplete}
-              className={`px-4 py-2 rounded-lg font-semibold transition-all ${
-                isModuleCompleted(module.id)
-                  ? 'bg-green-500 text-white cursor-default'
-                  : 'bg-blue-500 text-white hover:bg-blue-600'
-              }`}
-              disabled={isModuleCompleted(module.id)}
-            >
-              {isModuleCompleted(module.id) ? '✓ Selesai' : 'Tandai Selesai'}
-            </button>
-          </div>
-        </div>
-      </header>
+      {/* Navbar */}
+      <Navbar showBackButton backUrl="/materials" backText="Kembali ke Materi" />
 
-      <div className="container mx-auto px-4 py-12">
+      <div className="container mx-auto px-4 py-8 pb-24 md:pb-8">
         <div className="max-w-4xl mx-auto">
           {/* Module Header */}
-          <div className={`bg-gradient-to-r ${module.gradientColors} rounded-xl text-white p-8 mb-8`}>
-            <h2 className="text-3xl font-bold mb-2">{module.title}</h2>
-            <p className="text-lg opacity-90">{module.subtitle}</p>
-            <p className="mt-4 text-sm opacity-80">{module.description}</p>
+          <div className={`bg-gradient-to-r ${module.gradientColors} rounded-2xl text-white p-8 mb-8 relative overflow-hidden`}>
+            <div className="relative z-10">
+              <div className="flex items-start justify-between mb-4">
+                <div className="flex-1">
+                  <h1 className="text-4xl font-bold mb-3">{module.title}</h1>
+                  <p className="text-xl opacity-90 mb-2">{module.subtitle}</p>
+                  <p className="text-sm opacity-80">{module.description}</p>
+                </div>
+                
+                {/* Status Badge */}
+                <div className={`flex items-center space-x-2 px-4 py-2 rounded-full ${
+                  isModuleCompleted(module.id) 
+                    ? 'bg-green-500 bg-opacity-20 text-green-100' 
+                    : 'bg-white bg-opacity-20 text-white'
+                }`}>
+                  {isModuleCompleted(module.id) ? (
+                    <>
+                      <CheckCircle className="w-5 h-5" />
+                      <span className="font-semibold">Selesai</span>
+                    </>
+                  ) : (
+                    <>
+                      <Clock className="w-5 h-5" />
+                      <span className="font-semibold">Belum Selesai</span>
+                    </>
+                  )}
+                </div>
+              </div>
+
+              {/* Features */}
+              <div className="flex items-center space-x-6 text-sm">
+                <div className="flex items-center space-x-2">
+                  <BookOpen className="w-4 h-4" />
+                  <span>Materi Lengkap</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Volume2 className="w-4 h-4" />
+                  <span>Audio Learning</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Zap className="w-4 h-4" />
+                  <span>Demo Interaktif</span>
+                </div>
+              </div>
+            </div>
+            
+            {/* Background Decoration */}
+            <div className="absolute top-0 right-0 w-64 h-64 bg-white bg-opacity-10 rounded-full -translate-y-16 translate-x-16"></div>
+            <div className="absolute bottom-0 left-0 w-48 h-48 bg-white bg-opacity-5 rounded-full translate-y-16 -translate-x-16"></div>
           </div>
 
-          {/* Audio Learning Section */}
-          <div className="mb-8">
-            <AudioPlayer 
-              title={module.audioData.title}
-              description={module.audioData.description}
-              chapters={module.audioData.chapters}
-            />
-          </div>
+          {/* Content Sections */}
+          <div className="space-y-8">
+            {/* Audio Learning Section */}
+            <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
+              <div className="flex items-center space-x-3 mb-6">
+                <div className="bg-green-100 p-3 rounded-full">
+                  <Volume2 className="w-6 h-6 text-green-600" />
+                </div>
+                <div>
+                  <h3 className="text-xl font-bold text-gray-800">Audio Pembelajaran</h3>
+                  <p className="text-gray-600">Dengarkan penjelasan dengan gaya podcast edukatif</p>
+                </div>
+              </div>
+              <AudioPlayer 
+                title={module.audioData.title}
+                description={module.audioData.description}
+                chapters={module.audioData.chapters}
+              />
+            </div>
 
-          {/* Main Content */}
-          <div className="bg-white rounded-xl shadow-lg p-8 mb-8">
-            <div 
-              className="prose prose-lg max-w-none"
-              dangerouslySetInnerHTML={{ __html: module.content }}
-              style={{
-                lineHeight: '1.8',
-              }}
-            />
-          </div>
+            {/* Main Content */}
+            <div className="bg-white rounded-2xl shadow-lg p-8 border border-gray-100">
+              <div className="flex items-center space-x-3 mb-6">
+                <div className="bg-blue-100 p-3 rounded-full">
+                  <BookOpen className="w-6 h-6 text-blue-600" />
+                </div>
+                <div>
+                  <h3 className="text-xl font-bold text-gray-800">Materi Pembelajaran</h3>
+                  <p className="text-gray-600">Penjelasan lengkap dan mudah dipahami</p>
+                </div>
+              </div>
+              <div 
+                className="prose prose-lg max-w-none text-gray-700 leading-relaxed"
+                dangerouslySetInnerHTML={{ __html: module.content }}
+                style={{
+                  lineHeight: '1.8',
+                }}
+              />
+            </div>
 
-          {/* Interactive Demo */}
-          <div className="mb-8">
-            <InteractiveCircuitDemo
-              voltage={module.demoData.voltage}
-              resistance={module.demoData.resistance}
-              title={module.demoData.title}
-            />
+            {/* Interactive Demo */}
+            <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
+              <div className="flex items-center space-x-3 mb-6">
+                <div className="bg-purple-100 p-3 rounded-full">
+                  <Zap className="w-6 h-6 text-purple-600" />
+                </div>
+                <div>
+                  <h3 className="text-xl font-bold text-gray-800">Demo Interaktif</h3>
+                  <p className="text-gray-600">Simulasi rangkaian untuk pemahaman lebih baik</p>
+                </div>
+              </div>
+              <InteractiveCircuitDemo
+                voltage={module.demoData.voltage}
+                resistance={module.demoData.resistance}
+                title={module.demoData.title}
+              />
+            </div>
+
+            {/* Completion Section */}
+            <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-2xl p-6 border border-green-100">
+              <div className="text-center">
+                {!isModuleCompleted(module.id) ? (
+                  <div>
+                    <h3 className="text-xl font-bold text-gray-800 mb-3">Selesaikan Modul Ini</h3>
+                    <p className="text-gray-600 mb-6">
+                      Tandai modul sebagai selesai setelah memahami semua materi
+                    </p>
+                    <button
+                      onClick={handleMarkComplete}
+                      className="bg-gradient-to-r from-green-500 to-emerald-600 text-white px-8 py-3 rounded-xl font-bold hover:from-green-600 hover:to-emerald-700 transition-all transform hover:scale-105 shadow-lg"
+                    >
+                      ✅ Tandai Selesai
+                    </button>
+                  </div>
+                ) : (
+                  <div>
+                    <div className="inline-flex items-center justify-center w-16 h-16 bg-green-500 rounded-full mb-4">
+                      <CheckCircle className="w-8 h-8 text-white" />
+                    </div>
+                    <h3 className="text-xl font-bold text-green-700 mb-2">Modul Selesai! 🎉</h3>
+                    <p className="text-green-600">
+                      Selamat! Anda telah menyelesaikan modul ini dengan baik.
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
 
           {/* Navigation */}
-          <div className="flex justify-between items-center">
+          <div className="flex justify-between items-center mt-12 pt-8 border-t border-gray-200">
             <Link 
               href="/materials" 
-              className="bg-gray-500 text-white px-6 py-3 rounded-lg font-semibold hover:bg-gray-600 transition-all"
+              className="flex items-center space-x-2 text-gray-600 hover:text-gray-800 font-semibold transition-colors"
             >
-              ← Kembali ke Daftar Materi
+              <span>←</span>
+              <span>Kembali ke Daftar Materi</span>
             </Link>
             
             <Link 
               href="/practicum" 
-              className="bg-gradient-to-r from-blue-600 to-cyan-600 text-white px-6 py-3 rounded-lg font-semibold hover:from-blue-700 hover:to-cyan-700 transition-all transform hover:scale-105 shadow-lg"
+              className="flex items-center space-x-2 bg-gradient-to-r from-blue-600 to-cyan-600 text-white px-6 py-3 rounded-xl font-bold hover:from-blue-700 hover:to-cyan-700 transition-all transform hover:scale-105 shadow-lg"
             >
-              Lanjut ke Praktikum →
+              <span>Lanjut ke Praktikum</span>
+              <span>→</span>
             </Link>
           </div>
         </div>

@@ -13,7 +13,7 @@ const FloatingChatButton = () => {
   return (
     <>
       {/* Floating Chat Button */}
-      <div className="fixed bottom-6 right-6 z-50">
+      <div className="fixed bottom-20 md:bottom-6 right-6 z-50">
         <button
           onClick={toggleChat}
           className="relative w-16 h-16 bg-gradient-to-r from-blue-500 to-cyan-500 text-white rounded-full shadow-2xl hover:shadow-3xl transform hover:scale-110 transition-all duration-300 flex items-center justify-center focus:outline-none focus:ring-4 focus:ring-blue-300"

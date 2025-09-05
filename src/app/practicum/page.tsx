@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import Navbar from '@/components/Navbar'
 import SimpleGestureDemo from '../../components/SimpleGestureDemo'
 
 
@@ -197,33 +198,23 @@ export default function PracticumPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-cyan-50">
-      {/* Header */}
-      <header className="bg-white shadow-lg border-b-4 border-blue-500">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3">
-              <Link href="/" className="text-blue-600 hover:text-blue-800">
-                ← Kembali
-              </Link>
-              <h1 className="text-2xl font-bold text-gray-800">Praktikum Rangkaian Listrik</h1>
-            </div>
-            <div className="flex items-center space-x-4">
-              <button
-                onClick={() => setHandGestureMode(!handGestureMode)}
-                className={`px-4 py-2 rounded-lg font-medium transition-all ${
-                  handGestureMode 
-                    ? 'bg-green-500 text-white shadow-lg' 
-                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                }`}
-              >
-                👋 {handGestureMode ? 'Mode Gerakan Aktif' : 'Aktifkan Mode Gerakan'}
-              </button>
-            </div>
-          </div>
-        </div>
-      </header>
+      {/* Navbar */}
+      <Navbar showBackButton backUrl="/materials" backText="Kembali ke Materi" />
 
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4 py-8 pb-24 md:pb-8">
+        <div className="flex items-center justify-between mb-6">
+          <h1 className="text-3xl font-bold text-gray-800">Praktikum Rangkaian Listrik</h1>
+          <button
+            onClick={() => setHandGestureMode(!handGestureMode)}
+            className={`px-4 py-2 rounded-lg font-medium transition-all ${
+              handGestureMode 
+                ? 'bg-green-500 text-white shadow-lg' 
+                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+            }`}
+          >
+            👋 {handGestureMode ? 'Mode Gerakan Aktif' : 'Aktifkan Mode Gerakan'}
+          </button>
+        </div>
         <div className="grid lg:grid-cols-3 gap-8">
           {/* Computer Vision Panel */}
           {handGestureMode && (

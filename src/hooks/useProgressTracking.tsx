@@ -45,7 +45,7 @@ export const useProgressTracking = () => {
         newCompleted.push(moduleId)
       }
       
-      const totalModules = 5 // Total number of modules
+      const totalModules = 3 // Total number of modules (updated to 3)
       const newTotalProgress = (newCompleted.length / totalModules) * 100
       
       return {
@@ -148,42 +148,66 @@ export const OverallProgress: React.FC<OverallProgressProps> = ({
   completedModules, 
   totalModules 
 }) => {
+  const progressText = completedModules === totalModules ? 'Selamat! Semua modul selesai! 🎉' : 'Tetap semangat belajar! 💪'
+  const progressColor = completedModules === totalModules ? 'from-green-500 to-emerald-500' : 'from-blue-500 to-cyan-500'
+  
   return (
-    <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-200">
-      <h3 className="text-lg font-bold text-gray-800 mb-4">Progress Belajar Anda</h3>
+    <div className="bg-gradient-to-br from-white to-blue-50 rounded-2xl shadow-lg p-6 border border-blue-100">
+      <div className="flex items-center justify-between mb-6">
+        <h3 className="text-xl font-bold text-gray-800">Progress Belajar Anda</h3>
+        <div className="text-2xl">
+          {completedModules === totalModules ? '🏆' : '📚'}
+        </div>
+      </div>
       
-      <div className="space-y-4">
+      <div className="space-y-6">
+        {/* Main Progress Bar */}
         <div>
-          <div className="flex justify-between text-sm text-gray-600 mb-2">
-            <span>Kemajuan Keseluruhan</span>
-            <span>{Math.round(totalProgress)}%</span>
+          <div className="flex justify-between text-sm text-gray-700 mb-3">
+            <span className="font-medium">Kemajuan Keseluruhan</span>
+            <span className="font-bold text-blue-600">{Math.round(totalProgress)}%</span>
           </div>
-          <div className="w-full bg-gray-200 rounded-full h-3">
+          <div className="w-full bg-gray-200 rounded-full h-4 overflow-hidden">
             <div 
-              className="bg-gradient-to-r from-blue-500 to-cyan-500 h-3 rounded-full transition-all duration-500"
+              className={`bg-gradient-to-r ${progressColor} h-4 rounded-full transition-all duration-1000 ease-out shadow-sm`}
               style={{ width: `${totalProgress}%` }}
-            ></div>
+            >
+              <div className="h-full bg-white bg-opacity-30 rounded-full animate-pulse"></div>
+            </div>
+          </div>
+          <p className="text-center text-sm text-gray-600 mt-2 font-medium">
+            {progressText}
+          </p>
+        </div>
+        
+        {/* Stats Grid */}
+        <div className="grid grid-cols-3 gap-4">
+          <div className="text-center p-4 bg-blue-50 rounded-xl border border-blue-100">
+            <div className="text-2xl font-bold text-blue-600">{completedModules}</div>
+            <div className="text-xs text-blue-600 font-medium">Selesai</div>
+          </div>
+          <div className="text-center p-4 bg-orange-50 rounded-xl border border-orange-100">
+            <div className="text-2xl font-bold text-orange-600">{totalModules - completedModules}</div>
+            <div className="text-xs text-orange-600 font-medium">Tersisa</div>
+          </div>
+          <div className="text-center p-4 bg-green-50 rounded-xl border border-green-100">
+            <div className="text-2xl font-bold text-green-600">{Math.round(totalProgress)}%</div>
+            <div className="text-xs text-green-600 font-medium">Total</div>
           </div>
         </div>
         
-        <div className="flex justify-between text-sm">
-          <span className="text-gray-600">Modul Selesai:</span>
-          <span className="font-semibold text-blue-600">
-            {completedModules} dari {totalModules}
-          </span>
-        </div>
-        
-        <div className="pt-3 border-t border-gray-200">
-          <div className="grid grid-cols-2 gap-4 text-center">
-            <div className="p-3 bg-blue-50 rounded-lg">
-              <div className="text-2xl font-bold text-blue-600">{completedModules}</div>
-              <div className="text-xs text-blue-600">Modul Selesai</div>
-            </div>
-            <div className="p-3 bg-green-50 rounded-lg">
-              <div className="text-2xl font-bold text-green-600">{Math.round(totalProgress)}%</div>
-              <div className="text-xs text-green-600">Progress Total</div>
-            </div>
-          </div>
+        {/* Module Status */}
+        <div className="flex items-center justify-center space-x-2">
+          {Array.from({ length: totalModules }).map((_, index) => (
+            <div
+              key={index}
+              className={`w-3 h-3 rounded-full transition-all duration-300 ${
+                index < completedModules
+                  ? 'bg-green-500 scale-110'
+                  : 'bg-gray-300'
+              }`}
+            />
+          ))}
         </div>
       </div>
     </div>
