@@ -1,0 +1,24 @@
+# Requirements for Circuit Builder CV
+# Computer Vision Circuit Builder untuk Siswa SMA
+
+# Computer Vision dan Image Processing
+opencv-python==4.8.1.78
+mediapipe==0.10.8
+
+# GUI dan Graphics
+pygame==2.5.2
+
+# Web Server untuk Embedded Mode
+flask==2.3.3
+
+# Scientific Computing
+numpy==1.24.4
+
+# Optional: untuk development dan testing
+pytest==7.4.3
+black==23.9.1
+flake8==6.1.0
+
+# Optional: untuk packaging
+setuptools==68.2.2
+wheel==0.41.3
