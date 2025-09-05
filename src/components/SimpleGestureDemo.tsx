@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 
 interface SimpleGestureProps {
   onGestureCommand?: (command: string) => void
@@ -18,7 +18,7 @@ const SimpleGestureDemo: React.FC<SimpleGestureProps> = ({
   const [autoGestureTimer, setAutoGestureTimer] = useState<NodeJS.Timeout | null>(null)
 
   // Helper function to trigger gesture callbacks
-  const triggerGesture = (gesture: string, confidence: number = 0.9) => {
+  const triggerGesture = useCallback((gesture: string, confidence: number = 0.9) => {
     setCurrentGesture(gesture)
     if (onGestureDetected) {
       onGestureDetected(gesture, confidence)
@@ -36,7 +36,7 @@ const SimpleGestureDemo: React.FC<SimpleGestureProps> = ({
         onGestureCommand(command)
       }
     }
-  }
+  }, [onGestureDetected, onGestureCommand])
 
   // Auto demo cycle through gestures
   useEffect(() => {
@@ -68,7 +68,7 @@ const SimpleGestureDemo: React.FC<SimpleGestureProps> = ({
         setAutoGestureTimer(null)
       }
     }
-  }, [demoMode, isActive])
+  }, [demoMode, isActive, triggerGesture, autoGestureTimer])
 
   // Manual gesture trigger
   const manualTriggerGesture = (gesture: string) => {

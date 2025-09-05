@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
 import Navbar from '@/components/Navbar'
 import SimpleGestureDemo from '../../components/SimpleGestureDemo'
@@ -148,11 +148,7 @@ export default function PracticumPage() {
     }
   }
 
-  useEffect(() => {
-    calculateCircuit()
-  }, [elements])
-
-  const calculateCircuit = () => {
+  const calculateCircuit = useCallback(() => {
     // Hitung resistansi total untuk rangkaian seri
     const resistors = elements.filter(el => el.type === 'resistor')
     const totalResistance = resistors.reduce((sum, resistor) => sum + resistor.value, 0)
@@ -173,7 +169,11 @@ export default function PracticumPage() {
       voltage,
       power
     })
-  }
+  }, [elements])
+
+  useEffect(() => {
+    calculateCircuit()
+  }, [calculateCircuit])
 
   const addResistor = () => {
     const newResistor: CircuitElement = {

@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import React, { useRef, useState, useEffect, useCallback } from 'react'
 
 interface GestureControlProps {
   onGestureDetected: (gesture: string, confidence: number) => void
@@ -20,55 +20,8 @@ const GestureControl: React.FC<GestureControlProps> = ({
   const [currentGesture, setCurrentGesture] = useState<string>('none')
   const [error, setError] = useState<string>('')
 
-  // Initialize camera
-  const initCamera = async () => {
-    if (!isActive) return
-
-    try {
-      setCameraStatus('starting')
-      setError('')
-      
-      // Stop existing stream first
-      if (streamRef.current) {
-        streamRef.current.getTracks().forEach(track => track.stop())
-      }
-
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: {
-          width: 640,
-          height: 480,
-          facingMode: 'user'
-        }
-      })
-
-      streamRef.current = stream
-
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream
-        
-        // Wait for video to be ready
-        videoRef.current.onloadedmetadata = () => {
-          if (videoRef.current) {
-            videoRef.current.play().then(() => {
-              setCameraStatus('active')
-              startProcessing()
-            }).catch(err => {
-              console.error('Error playing video:', err)
-              setCameraStatus('error')
-              setError('Failed to start video playback')
-            })
-          }
-        }
-      }
-    } catch (err) {
-      console.error('Camera error:', err)
-      setCameraStatus('error')
-      setError('Camera access denied. Please allow camera permission and refresh the page.')
-    }
-  }
-
   // Process video frames
-  const startProcessing = () => {
+  const startProcessing = useCallback(() => {
     if (!videoRef.current || !canvasRef.current || !isActive) return
 
     const video = videoRef.current
@@ -124,7 +77,54 @@ const GestureControl: React.FC<GestureControlProps> = ({
     }
 
     processFrame()
-  }
+  }, [isActive, cameraStatus, currentGesture, onGestureDetected])
+
+  // Initialize camera
+  const initCamera = useCallback(async () => {
+    if (!isActive) return
+
+    try {
+      setCameraStatus('starting')
+      setError('')
+      
+      // Stop existing stream first
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach(track => track.stop())
+      }
+
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: {
+          width: 640,
+          height: 480,
+          facingMode: 'user'
+        }
+      })
+
+      streamRef.current = stream
+
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream
+        
+        // Wait for video to be ready
+        videoRef.current.onloadedmetadata = () => {
+          if (videoRef.current) {
+            videoRef.current.play().then(() => {
+              setCameraStatus('active')
+              startProcessing()
+            }).catch(err => {
+              console.error('Error playing video:', err)
+              setCameraStatus('error')
+              setError('Failed to start video playback')
+            })
+          }
+        }
+      }
+    } catch (err) {
+      console.error('Camera error:', err)
+      setCameraStatus('error')
+      setError('Camera access denied. Please allow camera permission and refresh the page.')
+    }
+  }, [isActive, startProcessing])
 
   // Cleanup function
   const cleanup = () => {
@@ -150,7 +150,7 @@ const GestureControl: React.FC<GestureControlProps> = ({
     }
 
     return cleanup
-  }, [isActive])
+  }, [isActive, initCamera])
 
   // Manual gesture triggers for testing
   const triggerGesture = (gesture: string) => {
