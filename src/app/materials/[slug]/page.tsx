@@ -16,29 +16,28 @@ const modulesData = {
     title: 'Konsep Dasar Listrik',
     subtitle: 'Memahami arus, tegangan, dan resistansi',
     description: 'Pelajari dasar-dasar listrik dengan cara yang mudah dipahami',
-    content: `
-      <h4>Apa itu Listrik?</h4>
-      <p>Listrik adalah energi yang kita gunakan setiap hari. Bayangkan listrik seperti air yang mengalir di dalam pipa. Air membutuhkan tekanan untuk bisa mengalir, begitu juga listrik membutuhkan "tekanan" yang disebut <strong>tegangan</strong>.</p>
-      
-      <h4>Tiga Hal Penting dalam Listrik:</h4>
-      <ul>
-        <li><strong>Arus Listrik (I)</strong>: Seperti air yang mengalir, arus listrik adalah aliran muatan listrik. Diukur dalam Ampere (A).</li>
-        <li><strong>Tegangan (V)</strong>: Seperti tekanan air, tegangan adalah "dorongan" yang membuat arus mengalir. Diukur dalam Volt (V).</li>
-        <li><strong>Resistansi (R)</strong>: Seperti pipa yang sempit menghambat aliran air, resistansi menghambat aliran listrik. Diukur dalam Ohm (Ω).</li>
-      </ul>
-      
-      <h4>Hukum Ohm - Rumus Ajaib</h4>
-      <p>Georg Ohm menemukan hubungan sederhana: <strong>V = I × R</strong></p>
-      <p>Artinya: Tegangan = Arus × Resistansi</p>
-      <p>Contoh: Jika lampu memiliki resistansi 10Ω dan dialiri arus 2A, maka tegangannya adalah 10 × 2 = 20V</p>
-      
-      <h4>Contoh dalam Kehidupan Sehari-hari:</h4>
-      <ul>
-        <li><strong>Lampu LED 10W</strong>: Hemat energi karena resistansi tinggi</li>
-        <li><strong>Setrika 350W</strong>: Butuh arus besar untuk menghasilkan panas</li>
-        <li><strong>Charger HP 5V</strong>: Tegangan rendah untuk keamanan</li>
-      </ul>
-    `,
+      content: `
+        <h4>Pengenalan Arus Searah</h4>
+        <p>Arus listrik searah (Direct Current/DC) adalah aliran listrik yang mengalir dalam satu arah konstan dalam suatu rangkaian tertutup. Arus ini memiliki polaritas tetap, artinya arah alirannya selalu sama.</p>
+        <h4>Rangkaian Listrik</h4>
+        <p>Rangkaian listrik adalah susunan dari beberapa komponen listrik (seperti sumber listrik, kabel, saklar, dan beban) yang saling terhubung sehingga arus listrik bisa mengalir. Komponen-komponen listrik meliputi:</p>
+        <ul>
+          <li>Sumber daya (Baterai atau generator DC)</li>
+          <li>Konduktor (Kabel dan kawat)</li>
+          <li>Sakelar</li>
+          <li>Beban (lampu, resistor, atau motor)</li>
+        </ul>
+        <h4>Contoh Kontekstual</h4>
+        <p>Bayangkan kamu punya sebuah senter. Di dalam senter ada baterai sebagai sumber listrik, kabel kecil sebagai penghantar, tombol on/off sebagai saklar, dan lampu kecil sebagai bebannya. Saat tombol ditekan, arus listrik mengalir dari baterai melalui kabel ke lampu, sehingga lampu menyala. Kalau tombol dilepas, aliran listrik terputus dan lampu pun mati.</p>
+        <h4>Hukum Ohm</h4>
+        <p>Karena polaritas pada rangkaian arus searah adalah tetap, maka prinsip Hukum Ohm berlaku. Hukum Ohm menghubungkan tegangan, kuat arus, dan hambatan dalam suatu rangkaian listrik:</p>
+        <p><strong>V = I × R</strong></p>
+        <ul>
+          <li>I = kuat arus listrik (A)</li>
+          <li>V = tegangan listrik (V)</li>
+          <li>R = hambatan listrik (Ω)</li>
+        </ul>
+      `,
     audioData: {
       title: 'Audio: Konsep Dasar Listrik',
       description: 'Penjelasan sederhana tentang arus, tegangan, dan resistansi',
@@ -62,38 +61,38 @@ const modulesData = {
     title: 'Rangkaian Seri',
     subtitle: 'Komponen tersusun berurutan',
     description: 'Pelajari bagaimana komponen listrik disusun berurutan',
-    content: `
-      <h4>Apa itu Rangkaian Seri?</h4>
-      <p>Bayangkan rangkaian seri seperti kereta api yang berisi gerbong-gerbong. Semua gerbong tersambung berurutan dalam satu jalur. Jika satu gerbong terputus, seluruh kereta berhenti.</p>
-      
-      <h4>Ciri-ciri Rangkaian Seri:</h4>
-      <ul>
-        <li><strong>Arus sama di semua tempat</strong>: Seperti air dalam pipa tunggal, arus yang masuk sama dengan arus yang keluar</li>
-        <li><strong>Tegangan terbagi</strong>: Tegangan baterai dibagi-bagi ke setiap komponen</li>
-        <li><strong>Jika satu rusak, semua mati</strong>: Seperti lampu natal lama, jika satu mati semua ikut mati</li>
-      </ul>
-      
-      <h4>Rumus Rangkaian Seri:</h4>
-      <ul>
-        <li><strong>Resistansi Total</strong>: R_total = R1 + R2 + R3 + ...</li>
-        <li><strong>Arus</strong>: I sama di semua komponen</li>
-        <li><strong>Tegangan</strong>: V_total = V1 + V2 + V3 + ...</li>
-      </ul>
-      
-      <h4>Contoh Mudah:</h4>
-      <p>Jika ada 3 lampu (masing-masing 10Ω) disambung seri dengan baterai 30V:</p>
-      <ul>
-        <li>R_total = 10 + 10 + 10 = 30Ω</li>
-        <li>I = V/R = 30V/30Ω = 1A</li>
-        <li>Setiap lampu mendapat tegangan 10V</li>
-      </ul>
-      
-      <h4>Keuntungan dan Kerugian:</h4>
-      <ul>
-        <li><strong>Keuntungan</strong>: Mudah dibuat, hemat kabel</li>
-        <li><strong>Kerugian</strong>: Jika satu rusak semua mati, tegangan tidak merata</li>
-      </ul>
-    `,
+      content: `
+        <h4>Rangkaian Listrik Seri</h4>
+        <p>Rangkaian listrik seri adalah jenis rangkaian listrik yang semua komponennya disusun secara berurutan atau berderet dalam satu jalur tunggal, tanpa ada percabangan.</p>
+        <h4>Ciri-ciri Rangkaian Seri</h4>
+        <ul>
+          <li>Kuat arus total sama dengan kuat arus di setiap hambatan: <strong>I<sub>tot</sub> = I<sub>1</sub> = I<sub>2</sub> = ...</strong></li>
+          <li>Tegangan total adalah jumlah tegangan di tiap hambatan: <strong>V<sub>tot</sub> = V<sub>1</sub> + V<sub>2</sub> + ...</strong></li>
+          <li>Hambatan total adalah jumlah seluruh hambatan: <strong>R<sub>tot</sub> = R<sub>1</sub> + R<sub>2</sub> + ...</strong></li>
+          <li>Jika salah satu komponen diputus, arus listrik berhenti.</li>
+        </ul>
+        <h4>Contoh Kontekstual</h4>
+        <p>Bayangkan kamu menghias pohon natal dengan lampu hias warna-warni yang disusun berderet panjang (seri). Jika satu lampu putus, semua lampu lain ikut padam.</p>
+        <ul>
+          <li>Arus listrik sama besar di semua lampu.</li>
+          <li>Tegangan terbagi-bagi sesuai jumlah lampu.</li>
+          <li>Jika satu lampu putus, semua padam.</li>
+        </ul>
+        <h4>Contoh Soal</h4>
+        <p>Tiga buah hambatan disusun seri dan dihubungkan dengan baterai 12 V. Nilai hambatan masing-masing adalah R1 = 2 Ω, R2 = 4 Ω, R3 = 6 Ω.</p>
+        <ol>
+          <li>Hambatan total: R<sub>tot</sub> = R1 + R2 + R3 = 2 + 4 + 6 = 12 Ω</li>
+          <li>Arus listrik: I = V/R<sub>tot</sub> = 12/12 = 1 A</li>
+          <li>Tegangan pada masing-masing hambatan:
+            <ul>
+              <li>V1 = I × R1 = 1 × 2 = 2 V</li>
+              <li>V2 = I × R2 = 1 × 4 = 4 V</li>
+              <li>V3 = I × R3 = 1 × 6 = 6 V</li>
+            </ul>
+          </li>
+        </ol>
+        <p>Cek: V1 + V2 + V3 = 2 + 4 + 6 = 12 V (sesuai sumber tegangan).</p>
+      `,
     audioData: {
       title: 'Audio: Rangkaian Seri',
       description: 'Memahami karakteristik dan perhitungan rangkaian seri',
@@ -113,42 +112,33 @@ const modulesData = {
   },
   'daya-listrik': {
     id: 'module-3',
-    title: 'Daya Listrik',
-    subtitle: 'Energi yang digunakan peralatan listrik',
-    description: 'Pelajari konsep daya listrik dan cara menghitungnya',
+    title: 'Rangkaian Paralel',
+    subtitle: 'Komponen tersusun bercabang',
+    description: 'Pelajari konsep rangkaian listrik paralel dan cara menghitungnya',
     content: `
-      <h4>Apa itu Daya Listrik?</h4>
-      <p>Daya listrik adalah seberapa cepat alat listrik menggunakan energi. Bayangkan seperti seberapa cepat mobil menghabiskan bensin. Semakin besar daya, semakin cepat energi terpakai.</p>
-      
-      <h4>Mengapa Daya Penting?</h4>
+      <h4>Rangkaian Listrik Paralel</h4>
+      <p>Rangkaian listrik paralel adalah susunan komponen listrik di mana terdapat lebih dari satu jalur untuk arus listrik mengalir, sehingga setiap komponen mendapatkan tegangan yang sama.</p>
+      <h4>Ciri-ciri Rangkaian Paralel</h4>
       <ul>
-        <li><strong>Untuk menghitung tagihan listrik</strong>: PLN menagih berdasarkan berapa banyak energi yang kita pakai</li>
-        <li><strong>Memilih alat yang tepat</strong>: Lampu 10W lebih hemat dari lampu 60W</li>
-        <li><strong>Keamanan</strong>: Jangan pasang alat berdaya tinggi di colokan kecil</li>
+        <li>Kuat arus total adalah jumlah arus di tiap cabang: <strong>I<sub>tot</sub> = I<sub>1</sub> + I<sub>2</sub> + ...</strong></li>
+        <li>Tegangan di setiap cabang sama dengan tegangan sumber: <strong>V<sub>tot</sub> = V<sub>1</sub> = V<sub>2</sub> = ...</strong></li>
+        <li>Hambatan total: <strong>1/R<sub>tot</sub> = 1/R<sub>1</sub> + 1/R<sub>2</sub> + ...</strong></li>
+        <li>Jika satu komponen dicabut, komponen lain tetap menyala.</li>
       </ul>
-      
-      <h4>Rumus Daya Listrik:</h4>
-      <ul>
-        <li><strong>P = V × I</strong> (Daya = Tegangan × Arus)</li>
-        <li><strong>P = I² × R</strong> (Daya = Arus kuadrat × Resistansi)</li>
-        <li><strong>P = V² / R</strong> (Daya = Tegangan kuadrat / Resistansi)</li>
-      </ul>
-      
-      <h4>Contoh Sehari-hari:</h4>
-      <p>Lampu 60W di rumah (220V):</p>
-      <ul>
-        <li>P = 60W, V = 220V</li>
-        <li>I = P/V = 60/220 = 0.27A</li>
-        <li>Jika nyala 5 jam: Energi = 60W × 5h = 300Wh = 0.3 kWh</li>
-      </ul>
-      
-      <h4>Tips Hemat Listrik:</h4>
-      <ul>
-        <li>Gunakan lampu LED (daya rendah)</li>
-        <li>Cabut charger yang tidak dipakai</li>
-        <li>Pilih AC dengan rating energi tinggi</li>
-        <li>Matikan peralatan yang tidak digunakan</li>
-      </ul>
+      <h4>Contoh Kontekstual</h4>
+      <p>Bayangkan di rumah ada stop kontak dengan beberapa lubang colokan. Karena susunannya paralel, tegangan sama besar untuk semua alat, arus terbagi sesuai kebutuhan, dan tidak saling bergantung.</p>
+      <h4>Contoh Soal</h4>
+      <p>Sebuah rangkaian paralel terdiri dari 2 lampu identik, masing-masing hambatan 6 Ω, dihubungkan ke sumber tegangan 12 V.</p>
+      <ol>
+        <li>Tegangan pada tiap lampu: V<sub>total</sub> = V1 = V2 = 12 V</li>
+        <li>Arus pada masing-masing lampu:
+          <ul>
+            <li>I1 = V/R1 = 12/6 = 2 A</li>
+            <li>I2 = V/R2 = 12/6 = 2 A</li>
+          </ul>
+        </li>
+        <li>Arus total: I<sub>total</sub> = I1 + I2 = 2 + 2 = 4 A</li>
+      </ol>
     `,
     audioData: {
       title: 'Audio: Daya Listrik',

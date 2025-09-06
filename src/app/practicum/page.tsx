@@ -1,4 +1,7 @@
+
 'use client'
+
+import Navbar from '@/components/Navbar'
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
@@ -182,50 +185,20 @@ Hasil Perhitungan Rangkaian:
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-cyan-50">
-      {/* Header */}
-      <header className="bg-white shadow-sm border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            <div className="flex items-center">
-              <Link href="/" className="flex items-center space-x-3">
-                <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-                  <span className="text-white font-bold">⚡</span>
-                </div>
-                <h1 className="text-xl font-bold text-gray-900">CIRVIA</h1>
-              </Link>
-            </div>
-            
-            <nav className="flex space-x-8">
-              <Link href="/about" className="text-gray-600 hover:text-gray-900 font-medium">
-                Tentang
-              </Link>
-              <Link href="/materials" className="text-gray-600 hover:text-gray-900 font-medium">
-                Materi
-              </Link>
-              <Link href="/pretest" className="text-gray-600 hover:text-gray-900 font-medium">
-                Pre-test
-              </Link>
-              <Link href="/practicum" className="text-blue-600 font-semibold">
-                Praktikum
-              </Link>
-              <Link href="/posttest" className="text-gray-600 hover:text-gray-900 font-medium">
-                Post-test
-              </Link>
-            </nav>
-          </div>
+      {/* Navbar */}
+      <Navbar />
+      {/* Header - Always Visible & Standardized */}
+      <div className="text-center mb-12 pt-8">
+        <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full mb-6">
+          <span className="text-3xl">🔬</span>
         </div>
-      </header>
+        <h1 className="text-5xl font-bold text-gray-800 mb-4">Praktikum Rangkaian Listrik</h1>
+        <p className="text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed">
+          Praktikum interaktif untuk memahami konsep dasar rangkaian listrik melalui simulasi dan gesture control
+        </p>
+      </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Page Title */}
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">
-            🔬 Praktikum Rangkaian Listrik
-          </h1>
-          <p className="text-lg text-gray-600 max-w-3xl mx-auto">
-            Praktikum interaktif untuk memahami konsep dasar rangkaian listrik melalui simulasi dan gesture control
-          </p>
-        </div>
 
         {/* Tab Navigation */}
         <div className="flex justify-center mb-8">

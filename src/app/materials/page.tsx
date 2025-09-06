@@ -15,23 +15,23 @@ export default function MaterialsPage() {
   const modulesData = [
     {
       id: 'module-1',
-      title: 'Modul 1: Konsep Dasar Listrik',
-      subtitle: 'Memahami arus, tegangan, dan resistansi',
-      description: 'Pelajari dasar-dasar listrik dengan cara yang mudah dipahami',
+      title: 'Materi 1: Pengenalan Arus Searah & Hukum Ohm',
+      subtitle: 'Arus listrik searah, rangkaian, dan hukum Ohm',
+      description: 'Pelajari konsep arus searah, komponen rangkaian listrik, dan penerapan hukum Ohm secara kontekstual.',
       gradientColors: 'from-blue-500 to-cyan-500'
     },
     {
       id: 'module-2',
-      title: 'Modul 2: Rangkaian Seri',
-      subtitle: 'Komponen tersusun berurutan',
-      description: 'Pelajari bagaimana komponen listrik disusun berurutan',
+      title: 'Materi 2: Rangkaian Listrik Seri',
+      subtitle: 'Komponen tersusun berurutan dalam satu jalur',
+      description: 'Pahami ciri-ciri, rumus, dan contoh rangkaian listrik seri beserta penerapannya dalam kehidupan sehari-hari.',
       gradientColors: 'from-green-500 to-blue-500'
     },
     {
       id: 'module-3',
-      title: 'Modul 3: Daya Listrik',
-      subtitle: 'Energi yang digunakan peralatan listrik',
-      description: 'Pelajari konsep daya listrik dan cara menghitungnya',
+      title: 'Materi 3: Rangkaian Listrik Paralel',
+      subtitle: 'Komponen tersusun bercabang dan arus terbagi',
+      description: 'Pelajari konsep, rumus, dan contoh rangkaian listrik paralel serta penerapannya di rumah dan lingkungan sekitar.',
       gradientColors: 'from-purple-500 to-pink-500'
     }
   ]

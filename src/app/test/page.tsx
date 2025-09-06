@@ -1,4 +1,5 @@
 import Navbar from '@/components/Navbar'
+import Link from 'next/link'
 
 export default function TestPage() {
   return (
@@ -33,9 +34,11 @@ export default function TestPage() {
                 <p className="text-gray-600 mb-6">
                   Tes awal untuk mengukur pemahaman dasar Anda tentang rangkaian listrik sebelum mulai belajar
                 </p>
-                <button className="w-full bg-blue-500 text-white py-3 px-6 rounded-xl font-semibold hover:bg-blue-600 transition-all transform hover:scale-105">
-                  Mulai Pre-Test
-                </button>
+                <Link href="/pretest" passHref legacyBehavior>
+                  <button className="w-full bg-blue-500 text-white py-3 px-6 rounded-xl font-semibold hover:bg-blue-600 transition-all transform hover:scale-105">
+                    Mulai Pre-Test
+                  </button>
+                </Link>
               </div>
             </div>
 
@@ -49,9 +52,11 @@ export default function TestPage() {
                 <p className="text-gray-600 mb-6">
                   Tes akhir untuk mengukur peningkatan pemahaman Anda setelah mempelajari semua materi
                 </p>
-                <button className="w-full bg-green-500 text-white py-3 px-6 rounded-xl font-semibold hover:bg-green-600 transition-all transform hover:scale-105">
-                  Mulai Post-Test
-                </button>
+                <Link href="/posttest" passHref legacyBehavior>
+                  <button className="w-full bg-green-500 text-white py-3 px-6 rounded-xl font-semibold hover:bg-green-600 transition-all transform hover:scale-105">
+                    Mulai Post-Test
+                  </button>
+                </Link>
               </div>
             </div>
 

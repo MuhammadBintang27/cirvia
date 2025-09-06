@@ -111,16 +111,18 @@ export default function PretestPage() {
     
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-cyan-50">
-        <header className="bg-white shadow-lg border-b-4 border-blue-500">
-          <div className="container mx-auto px-4 py-4">
-            <div className="flex items-center space-x-3">
-              <Link href="/" className="text-blue-600 hover:text-blue-800">
-                ← Kembali ke Beranda
-              </Link>
-              <h1 className="text-2xl font-bold text-gray-800">Hasil Pre-Test</h1>
-            </div>
+        <div className="text-center mb-12">
+          <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full mb-6 mx-auto">
+            <span className="text-3xl">📊</span>
           </div>
-        </header>
+          <h1 className="text-4xl font-bold text-gray-800 mb-4">Hasil Pre-Test</h1>
+          <p className="text-lg text-gray-600 max-w-2xl mx-auto leading-relaxed">
+            Berikut hasil pre-test Anda. Silakan pelajari materi jika hasil belum maksimal.
+          </p>
+          <Link href="/" className="text-blue-600 hover:text-blue-800 block mt-4">
+            ← Kembali ke Beranda
+          </Link>
+        </div>
 
         <div className="container mx-auto px-4 py-12">
           <div className="max-w-2xl mx-auto">
