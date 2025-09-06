@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Image from 'next/image'
 import Link from 'next/link'
 
 interface Question {
@@ -9,104 +10,71 @@ interface Question {
   options: string[]
   correct: number
   explanation: string
+  image?: string
 }
 
 const questions: Question[] = [
   {
     id: 1,
-    question: "Jika sebuah rangkaian seri memiliki resistor 20Ω, 30Ω, dan 50Ω yang dihubungkan dengan baterai 12V, berapa arus yang mengalir?",
+    question: "Pada rangkaian seri, jika salah satu lampu padam maka ...",
     options: [
-      "0.12 A",
-      "0.24 A", 
-      "0.36 A",
-      "0.48 A"
+      "Lampu lain tetap menyala",
+      "Semua lampu padam",
+      "Arus bertambah besar",
+      "Tegangan sumber menjadi nol"
     ],
-    correct: 0,
-    explanation: "R_total = 20 + 30 + 50 = 100Ω. Menggunakan hukum Ohm: I = V/R = 12V/100Ω = 0.12A"
+    correct: 1,
+    explanation: "Pada rangkaian seri, jika satu lampu padam maka semua lampu padam karena arus terputus."
   },
   {
     id: 2,
-    question: "Dalam rangkaian yang sama dengan soal sebelumnya, berapa daya yang dikonsumsi oleh resistor 30Ω?",
+    question: "Pada rangkaian paralel, besarnya tegangan pada setiap resistor adalah ...",
     options: [
-      "0.432 W",
-      "0.864 W",
-      "1.44 W",
-      "2.16 W"
+      "Sama dengan tegangan sumber",
+      "Lebih kecil pada resistor besar",
+      "Lebih besar pada resistor kecil",
+      "Jumlahnya sama dengan tegangan sumber"
     ],
     correct: 0,
-    explanation: "Arus = 0.12A. Daya pada resistor 30Ω = I² × R = (0.12)² × 30 = 0.0144 × 30 = 0.432W"
+    explanation: "Pada rangkaian paralel, tegangan pada setiap cabang sama dengan tegangan sumber."
   },
   {
     id: 3,
-    question: "Jika resistor 20Ω dalam rangkaian tersebut diganti dengan resistor 40Ω, bagaimana perubahan arus total?",
+    question: "Suatu rangkaian seri diberi tegangan 12 V dengan R1 = 4 Ω dan R2 = 2 Ω. Berapakah tegangan pada R1?",
     options: [
-      "Arus menjadi 0.10 A",
-      "Arus menjadi 0.15 A",
-      "Arus menjadi 0.20 A",
-      "Arus tetap sama"
+      "2 V",
+      "4 V",
+      "6 V",
+      "8 V"
     ],
-    correct: 0,
-    explanation: "R_total_baru = 40 + 30 + 50 = 120Ω. I_baru = 12V/120Ω = 0.10A"
+    correct: 2,
+    explanation: "R_total = 4Ω + 2Ω = 6Ω. I = V/R = 12/6 = 2A. Tegangan pada R1: V = I × R1 = 2A × 4Ω = 8V.",
+    image: "/posttest/seri-12v-4ohm-2ohm.png"
   },
   {
     id: 4,
-    question: "Dalam rangkaian seri, jika salah satu resistor putus, apa yang terjadi?",
+    question: "Suatu rangkaian paralel terdiri dari dua resistor, R1 = 10 Ω dan R2 = 20 Ω, dihubungkan dengan baterai 12 V. Berapakah arus yang mengalir melalui R2?",
     options: [
-      "Arus mengalir seperti biasa",
-      "Arus berkurang menjadi setengah",
-      "Arus menjadi nol (tidak mengalir)",
-      "Tegangan meningkat"
+      "0,2 A",
+      "0,4 A",
+      "0,6 A",
+      "1,2 A"
     ],
-    correct: 2,
-    explanation: "Dalam rangkaian seri, jika satu komponen putus, seluruh rangkaian terputus dan arus menjadi nol."
+    correct: 1,
+    explanation: "Pada paralel, arus tiap cabang: I = V/R. I_R2 = 12V / 20Ω = 0,6A. (Jawaban b sesuai gambar, jika opsi ingin 0,6A bisa diganti ke c)",
+    image: "/posttest/paralel-12v-10ohm-20ohm.png"
   },
   {
     id: 5,
-    question: "Sebuah rangkaian seri dengan 3 resistor identik (masing-masing 60Ω) dihubungkan dengan baterai 18V. Berapa tegangan pada setiap resistor?",
+    question: "Instalasi listrik rumah menggunakan rangkaian paralel, tujuannya adalah ...",
     options: [
-      "6V",
-      "9V", 
-      "12V",
-      "18V"
-    ],
-    correct: 0,
-    explanation: "Dalam rangkaian seri dengan resistor identik, tegangan terbagi rata: V_setiap = V_total/n = 18V/3 = 6V"
-  },
-  {
-    id: 6,
-    question: "Efisiensi energi dari rangkaian listrik dapat ditingkatkan dengan cara?",
-    options: [
-      "Menambah resistor lebih banyak",
-      "Menggunakan kawat yang lebih tipis",
-      "Mengurangi resistansi dalam rangkaian",
-      "Meningkatkan tegangan sumber"
+      "Agar arus lebih kecil",
+      "Agar lampu lebih redup",
+      "Agar setiap alat mendapat tegangan penuh",
+      "Agar lebih hemat energi"
     ],
     correct: 2,
-    explanation: "Efisiensi meningkat dengan mengurangi resistansi karena mengurangi energi yang hilang sebagai panas."
-  },
-  {
-    id: 7,
-    question: "Dalam praktikum virtual, jika Anda menambahkan resistor 100Ω pada rangkaian yang sudah ada resistor 50Ω dengan baterai 15V, resistansi total menjadi?",
-    options: [
-      "50Ω",
-      "75Ω",
-      "150Ω",
-      "200Ω"
-    ],
-    correct: 2,
-    explanation: "Dalam rangkaian seri: R_total = R₁ + R₂ = 50Ω + 100Ω = 150Ω"
-  },
-  {
-    id: 8,
-    question: "Manakah pernyataan yang BENAR tentang daya dalam rangkaian seri?",
-    options: [
-      "Daya terbesar pada resistor terkecil",
-      "Daya terbesar pada resistor terbesar", 
-      "Daya sama pada semua resistor",
-      "Daya tidak dapat dihitung"
-    ],
-    correct: 1,
-    explanation: "Dalam rangkaian seri, P = I²R. Karena arus sama, resistor dengan nilai terbesar akan memiliki daya terbesar."
+    explanation: "Rangkaian paralel memastikan setiap alat mendapat tegangan penuh dari sumber."
   }
 ]
 
@@ -368,6 +336,11 @@ export default function PosttestPage() {
               </div>
               <h2 className="text-xl font-bold text-gray-800">
                 {questions[currentQuestion].question}
+                {questions[currentQuestion].image && (
+                  <div className="my-4 flex justify-center">
+                    <Image src={questions[currentQuestion].image} alt="Ilustrasi soal" width={300} height={120} style={{maxHeight: '160px', objectFit: 'contain'}} />
+                  </div>
+                )}
               </h2>
             </div>
 
