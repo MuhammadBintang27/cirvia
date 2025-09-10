@@ -184,16 +184,19 @@ Hasil Perhitungan Rangkaian:
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-cyan-50">
+    <div className="min-h-screen bg-gradient-to-br from-primary-50 via-neutral-50 to-primary-100">
       {/* Navbar */}
       <Navbar />
       {/* Header - Always Visible & Standardized */}
-      <div className="text-center mb-12 pt-8">
-        <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full mb-6">
+      <div className="text-center mb-12 pt-8 animate-fade-in">
+        <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-r from-primary-500 to-primary-600 rounded-full mb-6 shadow-lg">
           <span className="text-3xl">🔬</span>
         </div>
-        <h1 className="text-5xl font-bold text-gray-800 mb-4">Praktikum Rangkaian Listrik</h1>
-        <p className="text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed">
+        <h1 className="text-5xl font-bold mb-4 drop-shadow-sm">
+          <span className="text-primary-800">Praktikum</span>{' '}
+          <span className="text-accent-500">Rangkaian Listrik</span>
+        </h1>
+        <p className="text-xl text-primary-700 max-w-2xl mx-auto leading-relaxed">
           Praktikum interaktif untuk memahami konsep dasar rangkaian listrik melalui simulasi dan gesture control
         </p>
       </div>
@@ -201,24 +204,24 @@ Hasil Perhitungan Rangkaian:
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
         {/* Tab Navigation */}
-        <div className="flex justify-center mb-8">
-          <div className="bg-white rounded-lg shadow-md p-2 inline-flex">
+        <div className="flex justify-center mb-8 animate-slide-in">
+          <div className="bg-white rounded-xl shadow-lg p-2 inline-flex border border-primary-100">
             <button
               onClick={() => setActiveTab('web')}
-              className={`px-6 py-2 rounded-md font-medium transition-colors ${
+              className={`px-6 py-2 rounded-lg font-medium transition-all transform hover:scale-105 ${
                 activeTab === 'web'
-                  ? 'bg-blue-600 text-white'
-                  : 'text-gray-700 hover:text-gray-900'
+                  ? 'bg-primary-500 text-white shadow-md'
+                  : 'text-primary-700 hover:text-primary-800 hover:bg-primary-50'
               }`}
             >
               🌐 Web Practicum
             </button>
             <button
               onClick={() => setActiveTab('cv')}
-              className={`px-6 py-2 rounded-md font-medium transition-colors ${
+              className={`px-6 py-2 rounded-lg font-medium transition-all transform hover:scale-105 ${
                 activeTab === 'cv'
-                  ? 'bg-blue-600 text-white'
-                  : 'text-gray-700 hover:text-gray-900'
+                  ? 'bg-primary-500 text-white shadow-md'
+                  : 'text-primary-700 hover:text-primary-800 hover:bg-primary-50'
               }`}
             >
               🤖 Computer Vision
@@ -230,11 +233,11 @@ Hasil Perhitungan Rangkaian:
         {activeTab === 'web' && (
           <div className="max-w-6xl mx-auto">
             {/* Circuit Visualization */}
-            <div className="bg-white rounded-lg shadow-lg p-6 mb-8">
-              <h2 className="text-2xl font-bold text-gray-800 mb-4">
+            <div className="bg-white rounded-xl shadow-lg p-6 mb-8 border border-primary-100 animate-scale-in">
+              <h2 className="text-2xl font-bold text-primary-800 mb-4">
                 ⚡ Simulasi Rangkaian
               </h2>
-              <div className="bg-gray-50 border-2 border-dashed border-gray-300 rounded-lg p-8 min-h-96 relative overflow-hidden">
+              <div className="bg-primary-50 border-2 border-dashed border-primary-300 rounded-lg p-8 min-h-96 relative overflow-hidden">
                 {/* Circuit Elements */}
                 {elements.map((element) => (
                   <div
@@ -295,34 +298,34 @@ Hasil Perhitungan Rangkaian:
             {/* Control Panel */}
             <div className="grid lg:grid-cols-2 gap-8">
               {/* Element Controls */}
-              <div className="bg-white rounded-lg shadow-lg p-6">
-                <h3 className="text-xl font-bold text-gray-800 mb-4">
+              <div className="bg-white rounded-xl shadow-lg p-6 border border-primary-100 animate-slide-in">
+                <h3 className="text-xl font-bold text-primary-800 mb-4">
                   🔧 Kontrol Elemen
                 </h3>
                 
                 <div className="space-y-4">
                   <div className="flex flex-wrap gap-3">
-                    <button 
+                    <button
                       onClick={() => handleGestureCommand('add_battery')}
-                      className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg font-medium transition-colors"
+                      className="px-5 py-3 bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700 text-white rounded-lg font-semibold transition-all transform hover:scale-105 shadow-lg hover:shadow-xl"
                     >
-                      + Baterai
+                      🔋 + Baterai
                     </button>
                     <button 
                       onClick={() => handleGestureCommand('add_resistor')}
-                      className="px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg font-medium transition-colors"
+                      className="px-5 py-3 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white rounded-lg font-semibold transition-all transform hover:scale-105 shadow-lg hover:shadow-xl"
                     >
-                      + Resistor
+                      ⚡ + Resistor
                     </button>
                     <button 
                       onClick={() => handleGestureCommand('calculate')}
-                      className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-medium transition-colors"
+                      className="px-5 py-3 bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 text-white rounded-lg font-semibold transition-all transform hover:scale-105 shadow-lg hover:shadow-xl"
                     >
                       📊 Hitung
                     </button>
                     <button 
                       onClick={() => handleGestureCommand('clear_circuit')}
-                      className="px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded-lg font-medium transition-colors"
+                      className="px-5 py-3 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white rounded-lg font-semibold transition-all transform hover:scale-105 shadow-lg hover:shadow-xl"
                     >
                       🗑 Reset
                     </button>
@@ -330,8 +333,8 @@ Hasil Perhitungan Rangkaian:
 
                   {/* Selected Element Info */}
                   {selectedElement && (
-                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                      <h4 className="font-semibold text-blue-900 mb-2">
+                    <div className="bg-primary-50 border border-primary-200 rounded-lg p-4">
+                      <h4 className="font-semibold text-primary-800 mb-2">
                         Elemen Terpilih: {selectedElement}
                       </h4>
                       {(() => {
@@ -340,18 +343,18 @@ Hasil Perhitungan Rangkaian:
                         
                         return (
                           <div className="space-y-2">
-                            <p className="text-sm text-blue-800">
+                            <p className="text-sm text-primary-700">
                               Tipe: {element.type === 'battery' ? 'Baterai' : 'Resistor'}
                             </p>
                             <div className="flex items-center space-x-2">
-                              <label className="text-sm text-blue-800">
+                              <label className="text-sm text-primary-700">
                                 {element.type === 'battery' ? 'Tegangan (V):' : 'Resistansi (Ω):'}
                               </label>
                               <input
                                 type="number"
                                 value={element.value}
                                 onChange={(e) => updateElementValue(element.id, Number(e.target.value))}
-                                className="w-20 px-2 py-1 border border-blue-300 rounded text-sm"
+                                className="w-20 px-3 py-2 border-2 border-primary-300 rounded-lg text-sm font-semibold text-primary-800 bg-white focus:border-primary-500 focus:ring-2 focus:ring-primary-200 transition-all"
                                 min="1"
                                 max={element.type === 'battery' ? "24" : "1000"}
                               />
@@ -359,9 +362,9 @@ Hasil Perhitungan Rangkaian:
                             {element.id !== 'battery1' && element.id !== 'resistor1' && (
                               <button
                                 onClick={() => removeElement(element.id)}
-                                className="px-3 py-1 bg-red-500 hover:bg-red-600 text-white rounded text-sm transition-colors"
+                                className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg text-sm font-semibold transition-all transform hover:scale-105 shadow-md"
                               >
-                                Hapus Elemen
+                                🗑 Hapus Elemen
                               </button>
                             )}
                           </div>
@@ -373,17 +376,17 @@ Hasil Perhitungan Rangkaian:
               </div>
 
               {/* Gesture Control */}
-              <div className="bg-white rounded-lg shadow-lg p-6">
+              <div className="bg-white rounded-xl shadow-lg p-6 border border-primary-100 animate-slide-in">
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-xl font-bold text-gray-800">
+                  <h3 className="text-xl font-bold text-primary-800">
                     👋 Kontrol Gesture
                   </h3>
                   <button
                     onClick={() => setShowGestures(!showGestures)}
-                    className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                    className={`px-5 py-3 rounded-lg font-semibold transition-all transform hover:scale-105 shadow-lg hover:shadow-xl ${
                       showGestures
-                        ? 'bg-red-500 hover:bg-red-600 text-white'
-                        : 'bg-green-500 hover:bg-green-600 text-white'
+                        ? 'bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white'
+                        : 'bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 text-white'
                     }`}
                   >
                     {showGestures ? '⏹ Stop' : '▶ Start'}
@@ -396,13 +399,13 @@ Hasil Perhitungan Rangkaian:
                       onGestureCommand={handleGestureCommand}
                     />
                     
-                    <div className="bg-gray-50 rounded-lg p-4">
-                      <h4 className="font-semibold text-gray-800 mb-2">Panduan Gesture:</h4>
-                      <div className="space-y-2 text-sm text-gray-600">
-                        <p>✋ <strong>Telapak Terbuka:</strong> Tambah Resistor</p>
-                        <p>👍 <strong>Jempol:</strong> Tambah Baterai</p>  
-                        <p>✌ <strong>Peace Sign:</strong> Hitung Rangkaian</p>
-                        <p>✊ <strong>Kepalan:</strong> Reset Rangkaian</p>
+                    <div className="bg-gradient-to-r from-primary-50 to-accent-50 rounded-lg p-5 border-l-4 border-primary-500">
+                      <h4 className="font-bold text-primary-800 mb-3 text-lg">📖 Panduan Gesture:</h4>
+                      <div className="space-y-3 text-sm">
+                        <p className="flex items-center text-primary-700"><span className="text-lg mr-2">✋</span> <strong className="text-primary-800 mr-2">Telapak Terbuka:</strong> Tambah Resistor</p>
+                        <p className="flex items-center text-primary-700"><span className="text-lg mr-2">👍</span> <strong className="text-primary-800 mr-2">Jempol:</strong> Tambah Baterai</p>  
+                        <p className="flex items-center text-primary-700"><span className="text-lg mr-2">✌</span> <strong className="text-primary-800 mr-2">Peace Sign:</strong> Hitung Rangkaian</p>
+                        <p className="flex items-center text-primary-700"><span className="text-lg mr-2">✊</span> <strong className="text-primary-800 mr-2">Kepalan:</strong> Reset Rangkaian</p>
                       </div>
                     </div>
                   </div>
@@ -415,11 +418,11 @@ Hasil Perhitungan Rangkaian:
         {/* Computer Vision Practicum Content */}
         {activeTab === 'cv' && (
           <div className="max-w-6xl mx-auto">
-            <div className="text-center mb-6">
-              <h2 className="text-3xl font-bold text-gray-800 mb-4">
+            <div className="text-center mb-6 animate-fade-in">
+              <h2 className="text-3xl font-bold text-primary-800 mb-4">
                 Praktikum Computer Vision
               </h2>
-              <p className="text-lg text-gray-600 max-w-3xl mx-auto">
+              <p className="text-lg text-primary-600 max-w-3xl mx-auto">
                 Aplikasi Python CV lengkap dengan gesture detection, embedded langsung di platform web tanpa jendela terpisah!
               </p>
             </div>
@@ -430,22 +433,22 @@ Hasil Perhitungan Rangkaian:
             {/* Alternative Options */}
             <div className="mt-8 grid md:grid-cols-2 gap-6">
               {/* Simple Web Version */}
-              <div className="bg-gray-50 rounded-lg p-6">
-                <h3 className="text-lg font-bold text-gray-800 mb-4">
+              <div className="bg-primary-50 rounded-xl p-6 border border-primary-100 animate-slide-in">
+                <h3 className="text-lg font-bold text-primary-800 mb-4">
                   🌐 Alternative: Simple Web Version
                 </h3>
-                <p className="text-gray-600 mb-4">
+                <p className="text-primary-600 mb-4">
                   Jika Python server tidak bisa berjalan, gunakan versi web sederhana:
                 </p>
                 <EmbeddedCVPracticum />
               </div>
 
               {/* Desktop Application */}
-              <div className="bg-gray-50 rounded-lg p-6">
-                <h3 className="text-lg font-bold text-gray-800 mb-4">
+              <div className="bg-primary-50 rounded-xl p-6 border border-primary-100 animate-slide-in">
+                <h3 className="text-lg font-bold text-primary-800 mb-4">
                   💻 Alternative: Desktop Application
                 </h3>
-                <p className="text-gray-600 mb-4">
+                <p className="text-primary-600 mb-4">
                   Atau gunakan aplikasi desktop Python yang berjalan secara terpisah:
                 </p>
                 <CVPracticumLauncher />
@@ -453,51 +456,51 @@ Hasil Perhitungan Rangkaian:
             </div>
 
             {/* Feature Comparison */}
-            <div className="mt-8 bg-white rounded-lg shadow-lg p-6">
-              <h3 className="text-xl font-bold text-gray-800 mb-4">
+            <div className="mt-8 bg-white rounded-xl shadow-lg p-6 border border-primary-100 animate-scale-in">
+              <h3 className="text-xl font-bold text-primary-800 mb-4">
                 📊 Perbandingan Fitur
               </h3>
               
-              <div className="overflow-x-auto">
+              <div className="overflow-x-auto bg-primary-50 rounded-lg p-4">
                 <table className="w-full text-sm">
                   <thead>
-                    <tr className="border-b">
-                      <th className="text-left py-2 px-3">Fitur</th>
-                      <th className="text-center py-2 px-3 text-blue-600">🤖 Python CV<br/><small>(Embedded)</small></th>
-                      <th className="text-center py-2 px-3 text-green-600">🌐 Web Version<br/><small>(Simple)</small></th>
-                      <th className="text-center py-2 px-3 text-purple-600">💻 Desktop App<br/><small>(Separate)</small></th>
+                    <tr className="border-b-2 border-primary-200 bg-white">
+                      <th className="text-left py-4 px-4 font-bold text-primary-800">Fitur</th>
+                      <th className="text-center py-4 px-4 text-primary-600 font-bold">🤖 Python CV<br/><small className="font-normal text-primary-500">(Embedded)</small></th>
+                      <th className="text-center py-4 px-4 text-green-600 font-bold">🌐 Web Version<br/><small className="font-normal text-green-500">(Simple)</small></th>
+                      <th className="text-center py-4 px-4 text-purple-600 font-bold">💻 Desktop App<br/><small className="font-normal text-purple-500">(Separate)</small></th>
                     </tr>
                   </thead>
                   <tbody className="text-center">
-                    <tr className="border-b">
-                      <td className="text-left py-2 px-3">Hand Gesture Detection</td>
-                      <td className="py-2 px-3 text-green-500">✅ Advanced</td>
-                      <td className="py-2 px-3 text-yellow-500">⚠ Basic</td>
-                      <td className="py-2 px-3 text-green-500">✅ Advanced</td>
+                    <tr className="border-b border-primary-100 bg-white hover:bg-primary-25">
+                      <td className="text-left py-3 px-4 font-semibold text-primary-800">Hand Gesture Detection</td>
+                      <td className="py-3 px-4 text-green-600 font-semibold">✅ Advanced</td>
+                      <td className="py-3 px-4 text-yellow-600 font-semibold">⚠ Basic</td>
+                      <td className="py-3 px-4 text-green-600 font-semibold">✅ Advanced</td>
                     </tr>
-                    <tr className="border-b">
-                      <td className="text-left py-2 px-3">Real-time Calculations</td>
-                      <td className="py-2 px-3 text-green-500">✅</td>
-                      <td className="py-2 px-3 text-green-500">✅</td>
-                      <td className="py-2 px-3 text-green-500">✅</td>
+                    <tr className="border-b border-primary-100 bg-white hover:bg-primary-25">
+                      <td className="text-left py-3 px-4 font-semibold text-primary-800">Real-time Calculations</td>
+                      <td className="py-3 px-4 text-green-600 font-semibold">✅</td>
+                      <td className="py-3 px-4 text-green-600 font-semibold">✅</td>
+                      <td className="py-3 px-4 text-green-600 font-semibold">✅</td>
                     </tr>
-                    <tr className="border-b">
-                      <td className="text-left py-2 px-3">Embedded in Platform</td>
-                      <td className="py-2 px-3 text-green-500">✅</td>
-                      <td className="py-2 px-3 text-green-500">✅</td>
-                      <td className="py-2 px-3 text-red-500">❌</td>
+                    <tr className="border-b border-primary-100 bg-white hover:bg-primary-25">
+                      <td className="text-left py-3 px-4 font-semibold text-primary-800">Embedded in Platform</td>
+                      <td className="py-3 px-4 text-green-600 font-semibold">✅</td>
+                      <td className="py-3 px-4 text-green-600 font-semibold">✅</td>
+                      <td className="py-3 px-4 text-red-600 font-semibold">❌</td>
                     </tr>
-                    <tr className="border-b">
-                      <td className="text-left py-2 px-3">Installation Required</td>
-                      <td className="py-2 px-3 text-yellow-500">⚠ Python Only</td>
-                      <td className="py-2 px-3 text-green-500">✅ None</td>
-                      <td className="py-2 px-3 text-red-500">❌ Full Setup</td>
+                    <tr className="border-b border-primary-100 bg-white hover:bg-primary-25">
+                      <td className="text-left py-3 px-4 font-semibold text-primary-800">Installation Required</td>
+                      <td className="py-3 px-4 text-yellow-600 font-semibold">⚠ Python Only</td>
+                      <td className="py-3 px-4 text-green-600 font-semibold">✅ None</td>
+                      <td className="py-3 px-4 text-red-600 font-semibold">❌ Full Setup</td>
                     </tr>
-                    <tr>
-                      <td className="text-left py-2 px-3">Performance</td>
-                      <td className="py-2 px-3 text-green-500">✅ High</td>
-                      <td className="py-2 px-3 text-yellow-500">⚠ Medium</td>
-                      <td className="py-2 px-3 text-green-500">✅ Highest</td>
+                    <tr className="bg-white hover:bg-primary-25">
+                      <td className="text-left py-3 px-4 font-semibold text-primary-800">Performance</td>
+                      <td className="py-3 px-4 text-green-600 font-semibold">✅ High</td>
+                      <td className="py-3 px-4 text-yellow-600 font-semibold">⚠ Medium</td>
+                      <td className="py-3 px-4 text-green-600 font-semibold">✅ Highest</td>
                     </tr>
                   </tbody>
                 </table>
