@@ -222,16 +222,7 @@ export default function HomePage() {
             </div>
           </section>
 
-          {/* Footer */}
-          <footer className="bg-gradient-to-r from-blue-900 to-indigo-900 text-white py-8 mt-16 animate-fade-in rounded-t-3xl">
-            <div className="container mx-auto px-4">
-              <div className="text-center">
-                <h3 className="text-xl font-semibold mb-2">Physics Circuit Simulator</h3>
-                <p className="text-blue-200">Platform Pembelajaran Rangkaian Listrik Interaktif</p>
-                <p className="text-blue-300 text-sm mt-4">© 2024 Physics Circuit Simulator. All rights reserved.</p>
-              </div>
-            </div>
-          </footer>
+          
         </div>
       </main>
     </div>

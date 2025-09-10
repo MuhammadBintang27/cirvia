@@ -1,6 +1,7 @@
 import './globals.css'
 import { Inter } from 'next/font/google'
 import FloatingChatButton from '@/components/FloatingChatButton'
+import Footer from '@/components/Footer'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -17,7 +18,12 @@ export default function RootLayout({
   return (
     <html lang="id">
       <body className={inter.className}>
-        {children}
+        <div className="min-h-screen flex flex-col">
+          <main className="flex-grow">
+            {children}
+          </main>
+          <Footer />
+        </div>
         <FloatingChatButton />
       </body>
     </html>
