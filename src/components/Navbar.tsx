@@ -1,5 +1,6 @@
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { Home, BookOpen, FlaskConical, ClipboardCheck, Users, ArrowLeft } from 'lucide-react';
 
 export default function Navbar() {
@@ -18,8 +19,14 @@ export default function Navbar() {
         <div className="container mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <Link href="/" className="flex items-center space-x-3">
-              <div className="bg-gradient-to-r from-blue-400 to-cyan-300 p-2 rounded-lg">
-                <FlaskConical className="w-6 h-6 text-white" />
+              <div className=" ">
+                <Image 
+                  src="/logo.png" 
+                  alt="CIRVIA Logo" 
+                  width={30} 
+                  height={30} 
+                  className="w-9 h-9"
+                />
               </div>
               <span className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-cyan-300 bg-clip-text text-transparent">CIRVIA</span>
             </Link>

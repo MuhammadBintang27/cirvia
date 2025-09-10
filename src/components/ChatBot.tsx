@@ -154,44 +154,64 @@ const ChatBot: React.FC<ChatBotProps> = ({ isOpen, onClose }) => {
   if (!isOpen) return null
 
   return (
-    <div className="fixed bottom-4 right-4 w-96 h-[500px] bg-white rounded-2xl shadow-2xl border border-gray-200 flex flex-col z-50">
+    <div className="fixed inset-4 md:bottom-4 md:right-4 md:top-auto md:left-auto md:w-96 md:h-[600px] w-full h-full md:max-h-[80vh] bg-gradient-to-br from-slate-900/95 via-blue-950/95 to-indigo-900/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/20 flex flex-col z-50 overflow-hidden">
+      {/* Animated Background Elements */}
+      <div className="absolute inset-0 pointer-events-none">
+        <div className="absolute top-10 left-10 w-20 h-20 bg-purple-500/10 rounded-full blur-xl animate-pulse"></div>
+        <div className="absolute bottom-20 right-10 w-24 h-24 bg-cyan-500/10 rounded-full blur-xl animate-pulse delay-1000"></div>
+        
+        {/* Floating particles */}
+        {[...Array(8)].map((_, i) => (
+          <div
+            key={i}
+            className="absolute w-1 h-1 bg-blue-400/30 rounded-full animate-ping"
+            style={{
+              left: `${Math.random() * 100}%`,
+              top: `${Math.random() * 100}%`,
+              animationDelay: `${Math.random() * 3}s`,
+              animationDuration: `${3 + Math.random() * 2}s`
+            }}
+          ></div>
+        ))}
+      </div>
+
       {/* Header */}
-      <div className="flex items-center justify-between p-4 bg-gradient-to-r from-blue-500 to-cyan-500 text-white rounded-t-2xl">
+      <div className="relative flex items-center justify-between p-4 md:p-4 bg-gradient-to-r from-purple-500/20 to-cyan-500/20 backdrop-blur-xl border-b border-white/10 rounded-t-2xl shrink-0">
         <div className="flex items-center space-x-3">
-          <div className="w-10 h-10 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
-            <span className="text-xl">🤖</span>
+          <div className="w-10 h-10 md:w-12 md:h-12 bg-gradient-to-br from-purple-500/20 to-cyan-500/20 rounded-full flex items-center justify-center backdrop-blur-sm border border-white/20 shadow-lg">
+            <span className="text-xl md:text-2xl">🤖</span>
           </div>
           <div>
-            <h3 className="font-semibold">CIRVIA Assistant</h3>
-            <p className="text-xs opacity-90">Expert System Fisika</p>
+            <h3 className="font-bold text-white text-base md:text-lg">CIRVIA Assistant</h3>
+            <p className="text-xs text-blue-200/80">🧠 AI Physics Expert</p>
           </div>
         </div>
         <button
           onClick={onClose}
-          className="p-1 hover:bg-white hover:bg-opacity-20 rounded-full transition-colors"
+          className="p-2 hover:bg-white/10 rounded-full transition-all duration-300 backdrop-blur-sm border border-white/10 hover:border-white/20"
         >
-          <X size={20} />
+          <X size={20} className="text-white" />
         </button>
       </div>
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+      <div className="relative flex-1 min-h-0 overflow-y-auto p-3 md:p-4 space-y-3 md:space-y-4 scrollbar-thin scrollbar-thumb-white/20 scrollbar-track-transparent hover:scrollbar-thumb-white/30">
         {messages.map((message) => (
           <div
             key={message.id}
             className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}
           >
             <div
-              className={`max-w-[80%] p-3 rounded-2xl ${
+              className={`max-w-[85%] md:max-w-[80%] p-3 md:p-4 rounded-2xl backdrop-blur-sm border transition-all duration-300 hover:scale-[1.01] md:hover:scale-[1.02] ${
                 message.sender === 'user'
-                  ? 'bg-blue-500 text-white rounded-br-sm'
-                  : 'bg-gray-100 text-gray-800 rounded-bl-sm'
+                  ? 'bg-gradient-to-r from-purple-500/80 to-pink-500/80 text-white border-purple-400/30 rounded-br-sm shadow-lg shadow-purple-500/25'
+                  : 'bg-gradient-to-br from-white/10 to-white/5 text-white border-white/20 rounded-bl-sm shadow-lg'
               }`}
             >
-              <p className="text-sm whitespace-pre-line">{message.text}</p>
+              <p className="text-sm md:text-sm whitespace-pre-line leading-relaxed">{message.text}</p>
               {message.sender === 'bot' && (
-                <div className="flex items-center justify-between mt-2">
-                  <span className="text-xs opacity-70">
+                <div className="flex items-center justify-between mt-2 md:mt-3 pt-2 border-t border-white/10">
+                  <span className="text-xs text-blue-200/70 font-medium">
                     {message.timestamp.toLocaleTimeString('id-ID', { 
                       hour: '2-digit', 
                       minute: '2-digit' 
@@ -199,9 +219,9 @@ const ChatBot: React.FC<ChatBotProps> = ({ isOpen, onClose }) => {
                   </span>
                   <button
                     onClick={() => isSpeaking ? stopSpeaking() : speakText(message.text)}
-                    className="p-1 hover:bg-gray-200 rounded-full transition-colors"
+                    className="p-1.5 md:p-2 hover:bg-white/10 rounded-full transition-all duration-300 backdrop-blur-sm border border-white/10 hover:border-white/20"
                   >
-                    {isSpeaking ? <VolumeX size={14} /> : <Volume2 size={14} />}
+                    {isSpeaking ? <VolumeX size={12} className="text-red-400 md:w-[14px] md:h-[14px]" /> : <Volume2 size={12} className="text-cyan-400 md:w-[14px] md:h-[14px]" />}
                   </button>
                 </div>
               )}
@@ -211,11 +231,14 @@ const ChatBot: React.FC<ChatBotProps> = ({ isOpen, onClose }) => {
         
         {isTyping && (
           <div className="flex justify-start">
-            <div className="bg-gray-100 text-gray-800 p-3 rounded-2xl rounded-bl-sm">
-              <div className="flex space-x-1">
-                <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
-                <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+            <div className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-sm border border-white/20 text-white p-3 md:p-4 rounded-2xl rounded-bl-sm shadow-lg">
+              <div className="flex items-center space-x-2">
+                <div className="flex space-x-1">
+                  <div className="w-1.5 h-1.5 md:w-2 md:h-2 bg-cyan-400 rounded-full animate-bounce"></div>
+                  <div className="w-1.5 h-1.5 md:w-2 md:h-2 bg-purple-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+                  <div className="w-1.5 h-1.5 md:w-2 md:h-2 bg-pink-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                </div>
+                <span className="text-xs text-blue-200/70 ml-2">CIRVIA sedang berpikir...</span>
               </div>
             </div>
           </div>
@@ -224,36 +247,44 @@ const ChatBot: React.FC<ChatBotProps> = ({ isOpen, onClose }) => {
       </div>
 
       {/* Input */}
-      <div className="p-4 border-t border-gray-200">
-        <div className="flex space-x-2">
+      <div className="relative p-3 md:p-4 bg-gradient-to-r from-white/5 to-white/10 backdrop-blur-xl border-t border-white/10 shrink-0">
+        <div className="flex space-x-2 md:space-x-3">
           <input
             type="text"
             value={inputText}
             onChange={(e) => setInputText(e.target.value)}
             onKeyPress={handleKeyPress}
             placeholder="Tanyakan tentang rangkaian listrik..."
-            className="flex-1 p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+            className="flex-1 p-2.5 md:p-3 bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl focus:outline-none focus:ring-2 focus:ring-cyan-400/50 focus:border-cyan-400/50 text-white placeholder-blue-200/60 text-sm transition-all duration-300"
           />
           <button
             onClick={handleSendMessage}
             disabled={!inputText.trim() || isTyping}
-            className="p-3 bg-blue-500 text-white rounded-xl hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            className="p-2.5 md:p-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-xl hover:from-purple-600 hover:to-pink-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-purple-500/25 backdrop-blur-sm border border-purple-400/30"
           >
-            <Send size={16} />
+            <Send size={14} className="md:w-4 md:h-4" />
           </button>
         </div>
         
         {/* Quick Questions */}
-        <div className="mt-3 flex flex-wrap gap-2">
+        <div className="mt-3 md:mt-4 flex flex-wrap gap-1.5 md:gap-2">
           {['Hukum Ohm', 'Rangkaian Seri', 'Daya Listrik', 'Praktikum'].map((topic) => (
             <button
               key={topic}
               onClick={() => setInputText(`Jelaskan tentang ${topic.toLowerCase()}`)}
-              className="px-3 py-1 text-xs bg-gray-100 text-gray-600 rounded-full hover:bg-gray-200 transition-colors"
+              className="px-2.5 md:px-3 py-1.5 md:py-2 text-xs bg-gradient-to-r from-cyan-500/20 to-blue-500/20 text-cyan-300 rounded-full hover:from-cyan-500/30 hover:to-blue-500/30 transition-all duration-300 backdrop-blur-sm border border-cyan-400/30 hover:border-cyan-400/50 transform hover:scale-105"
             >
               {topic}
             </button>
           ))}
+        </div>
+        
+        {/* AI Status Indicator */}
+        <div className="mt-2 md:mt-3 flex items-center justify-center">
+          <div className="flex items-center space-x-2 px-2.5 md:px-3 py-1 bg-gradient-to-r from-purple-500/10 to-cyan-500/10 rounded-full border border-purple-400/20">
+            <div className="w-1.5 h-1.5 md:w-2 md:h-2 bg-green-400 rounded-full animate-pulse"></div>
+            <span className="text-xs text-blue-200/70 font-medium">AI Online</span>
+          </div>
         </div>
       </div>
     </div>

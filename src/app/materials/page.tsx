@@ -19,7 +19,7 @@ const ModuleCard = ({ id, title, subtitle, description, gradientColors, isComple
       <div className={`absolute -inset-1 bg-gradient-to-r ${gradientColors} rounded-3xl blur opacity-20 group-hover:opacity-40 transition duration-1000`}></div>
       
       {/* Main Card */}
-      <div className="relative bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl rounded-3xl p-8 border border-white/20 hover:border-white/30 transition-all duration-500 transform hover:scale-[1.02] hover:-translate-y-2 shadow-2xl">
+      <div className="relative bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl rounded-3xl p-8 border border-white/20 hover:border-white/30 transition-all duration-500 transform hover:scale-[1.02] hover:-translate-y-2 shadow-2xl h-full flex flex-col">
         {/* Status Badge */}
         <div className={`absolute top-4 right-4 flex items-center space-x-2 px-3 py-1 rounded-full text-sm font-semibold ${
           isCompleted 
@@ -39,37 +39,41 @@ const ModuleCard = ({ id, title, subtitle, description, gradientColors, isComple
           )}
         </div>
 
-        {/* Content */}
-        <div className="mb-6">
-          <h3 className="text-2xl font-bold text-white mb-2">{title}</h3>
-          <p className="text-lg text-blue-200 font-medium mb-3">{subtitle}</p>
-          <p className="text-blue-200/80 leading-relaxed">{description}</p>
+        {/* Content - Fixed Height for Consistency */}
+        <div className="mb-6 flex-grow">
+          <div className="h-32 mb-4">
+            <h3 className="text-2xl font-bold text-white mb-2 line-clamp-2">{title}</h3>
+            <p className="text-lg text-blue-200 font-medium mb-3 line-clamp-1">{subtitle}</p>
+            <p className="text-blue-200/80 leading-relaxed line-clamp-2">{description}</p>
+          </div>
         </div>
 
         {/* Features */}
-        <div className="flex items-center space-x-4 mb-6 text-sm">
-          <div className="flex items-center space-x-1 text-blue-300">
+        <div className="flex items-center justify-between mb-6 text-sm">
+          <div className="flex items-center space-x-1 text-blue-300 flex-1 justify-center">
             <BookOpen className="w-4 h-4" />
             <span>Materi</span>
           </div>
-          <div className="flex items-center space-x-1 text-purple-300">
+          <div className="flex items-center space-x-1 text-purple-300 flex-1 justify-center">
             <Play className="w-4 h-4" />
             <span>Audio</span>
           </div>
-          <div className="flex items-center space-x-1 text-orange-300">
+          <div className="flex items-center space-x-1 text-orange-300 flex-1 justify-center">
             <Zap className="w-4 h-4" />
             <span>Demo</span>
           </div>
         </div>
 
         {/* Action Button */}
-        <button
-          className={`w-full bg-gradient-to-r ${gradientColors} text-white py-3 px-6 rounded-xl font-bold hover:scale-105 transition-all shadow-lg flex items-center justify-center group`}
-          onClick={() => window.location.href = `/materials/${id}`}
-        >
-          <span>Pelajari Sekarang</span>
-          <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
-        </button>
+        <div className="mt-auto">
+          <button
+            className={`w-full bg-gradient-to-r ${gradientColors} text-white py-3 px-6 rounded-xl font-bold hover:scale-105 transition-all shadow-lg flex items-center justify-center group`}
+            onClick={() => window.location.href = `/materials/${id}`}
+          >
+            <span>Pelajari Sekarang</span>
+            <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
+          </button>
+        </div>
       </div>
     </div>
   );

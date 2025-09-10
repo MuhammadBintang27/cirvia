@@ -2,6 +2,8 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import { Trophy, Star, Sparkles, ArrowRight, CheckCircle, XCircle, Clock, Target } from 'lucide-react'
+import Navbar from '@/components/Navbar'
 
 interface Question {
   id: number
@@ -110,95 +112,142 @@ export default function PretestPage() {
     const scoreMessage = getScoreMessage(score)
     
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-cyan-50">
-        <div className="text-center mb-12">
-          <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full mb-6 mx-auto">
-            <span className="text-3xl">📊</span>
-          </div>
-          <h1 className="text-4xl font-bold text-gray-800 mb-4">Hasil Pre-Test</h1>
-          <p className="text-lg text-gray-600 max-w-2xl mx-auto leading-relaxed">
-            Berikut hasil pre-test Anda. Silakan pelajari materi jika hasil belum maksimal.
-          </p>
-          <Link href="/" className="text-blue-600 hover:text-blue-800 block mt-4">
-            ← Kembali ke Beranda
-          </Link>
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-950 to-indigo-900 relative overflow-hidden">
+        {/* Animated Background Elements */}
+        <div className="absolute inset-0">
+          <div className="absolute top-20 left-10 w-72 h-72 bg-blue-500/10 rounded-full blur-3xl animate-pulse"></div>
+          <div className="absolute top-40 right-20 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
+          <div className="absolute bottom-20 left-1/3 w-80 h-80 bg-cyan-500/10 rounded-full blur-3xl animate-pulse delay-2000"></div>
+          
+          {[...Array(20)].map((_, i) => (
+            <div
+              key={i}
+              className="absolute w-1 h-1 bg-blue-400/30 rounded-full animate-ping"
+              style={{
+                left: `${Math.random() * 100}%`,
+                top: `${Math.random() * 100}%`,
+                animationDelay: `${Math.random() * 3}s`,
+                animationDuration: `${3 + Math.random() * 2}s`
+              }}
+            ></div>
+          ))}
         </div>
 
-        <div className="container mx-auto px-4 py-12">
-          <div className="max-w-2xl mx-auto">
-            <div className="bg-white rounded-xl shadow-lg p-8 text-center">
-              <div className="w-24 h-24 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full flex items-center justify-center mx-auto mb-6">
-                <span className="text-3xl text-white">📊</span>
-              </div>
-              
-              <h2 className="text-3xl font-bold text-gray-800 mb-4">Pre-Test Selesai!</h2>
-              
-              <div className="text-6xl font-bold text-blue-600 mb-2">
-                {score}/{questions.length}
-              </div>
-              
-              <div className="text-xl text-gray-600 mb-4">
-                Skor: {Math.round((score / questions.length) * 100)}%
-              </div>
-              
-              <p className={`text-lg font-medium mb-8 ${scoreMessage.color}`}>
-                {scoreMessage.message}
-              </p>
+        <Navbar />
 
-              <div className="space-y-4 mb-8">
-                <Link 
-                  href="/materials" 
-                  className="block bg-gradient-to-r from-blue-600 to-cyan-600 text-white px-8 py-3 rounded-lg font-semibold hover:from-blue-700 hover:to-cyan-700 transition-all transform hover:scale-105 shadow-lg"
-                >
-                  📚 Pelajari Materi
-                </Link>
-                
-                <Link 
-                  href="/practicum" 
-                  className="block bg-gradient-to-r from-green-600 to-blue-600 text-white px-8 py-3 rounded-lg font-semibold hover:from-green-700 hover:to-blue-700 transition-all transform hover:scale-105 shadow-lg"
-                >
-                  🔬 Mulai Praktikum
-                </Link>
+        <div className="container mx-auto px-6 py-16 relative z-10">
+          <div className="max-w-4xl mx-auto">
+            {/* Hero Section */}
+            <div className="text-center mb-12">
+              <div className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-blue-400/20 to-indigo-400/20 rounded-full border border-blue-400/30 backdrop-blur-sm mb-8">
+                <Trophy className="w-4 h-4 text-blue-400 mr-2" />
+                <span className="text-blue-400 text-sm font-medium">Tes Diagnostik Results</span>
+                <Sparkles className="w-4 h-4 text-blue-400 ml-2" />
               </div>
 
-              <details className="text-left">
-                <summary className="cursor-pointer text-blue-600 hover:text-blue-800 font-medium mb-4">
-                  📋 Lihat Review Jawaban
-                </summary>
-                
-                <div className="space-y-4">
-                  {questions.map((question, index) => (
-                    <div key={question.id} className="border border-gray-200 rounded-lg p-4">
-                      <h4 className="font-medium text-gray-800 mb-2">
-                        {index + 1}. {question.question}
-                      </h4>
-                      
-                      <div className="flex items-center space-x-4 mb-2">
-                        <span className="text-sm text-gray-600">Jawaban Anda:</span>
-                        <span className={`font-medium ${
-                          answers[index] === question.correct ? 'text-green-600' : 'text-red-600'
-                        }`}>
-                          {answers[index] !== -1 ? question.options[answers[index]] : 'Tidak dijawab'}
-                        </span>
-                        {answers[index] === question.correct ? '✅' : '❌'}
-                      </div>
-                      
-                      {answers[index] !== question.correct && (
-                        <div className="text-sm">
-                          <span className="text-gray-600">Jawaban yang benar:</span>
-                          <span className="text-green-600 font-medium ml-2">
-                            {question.options[question.correct]}
-                          </span>
-                        </div>
-                      )}
-                      
-                      <div className="text-sm text-gray-600 mt-2 italic">
-                        {question.explanation}
-                      </div>
-                    </div>
-                  ))}
+              <div className="relative mb-8">
+                <div className="inline-flex items-center justify-center w-32 h-32 rounded-full bg-gradient-to-br from-blue-500/20 to-indigo-600/20 backdrop-blur-xl border border-white/20 shadow-2xl">
+                  <div className="absolute inset-0 rounded-full bg-gradient-to-br from-blue-400/10 to-purple-600/10 animate-pulse"></div>
+                  <span className="text-6xl relative z-10">📊</span>
                 </div>
-              </details>
+                <div className="absolute -inset-4 bg-gradient-to-r from-blue-500/20 to-indigo-500/20 rounded-full blur-xl"></div>
+              </div>
+
+              <h1 className="text-6xl font-black mb-6 leading-tight">
+                <span className="bg-gradient-to-r from-white via-blue-200 to-cyan-300 bg-clip-text text-transparent drop-shadow-2xl">
+                  Hasil
+                </span>
+                <br />
+                <span className="bg-gradient-to-r from-cyan-300 via-blue-400 to-indigo-400 bg-clip-text text-transparent">
+                  Tes Diagnostik
+                </span>
+              </h1>
+            </div>
+
+            {/* Results Card */}
+            <div className="relative">
+              <div className="absolute -inset-1 bg-gradient-to-r from-blue-500/30 to-indigo-600/30 rounded-3xl blur"></div>
+              <div className="relative bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl rounded-3xl p-12 border border-white/20 text-center">
+                <div className="flex items-center justify-center w-24 h-24 bg-gradient-to-br from-blue-500/20 to-indigo-600/20 rounded-full mb-8 mx-auto">
+                  <Trophy className="w-12 h-12 text-blue-400" />
+                </div>
+                
+                <h2 className="text-4xl font-bold text-white mb-6">Tes Diagnostik Selesai!</h2>
+                
+                <div className="text-7xl font-black text-transparent bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text mb-4">
+                  {score}/{questions.length}
+                </div>
+                
+                <div className="text-2xl text-blue-200 mb-6">
+                  Skor: {Math.round((score / questions.length) * 100)}%
+                </div>
+                
+                <p className="text-lg text-blue-200/90 mb-8 max-w-2xl mx-auto">
+                  {scoreMessage.message}
+                </p>
+
+                <div className="grid md:grid-cols-2 gap-4 mb-8 max-w-2xl mx-auto">
+                  <Link 
+                    href="/materials" 
+                    className="group bg-gradient-to-r from-blue-500 to-cyan-500 text-white px-8 py-4 rounded-2xl font-bold text-lg hover:from-blue-600 hover:to-cyan-600 transition-all transform hover:scale-105 shadow-2xl flex items-center justify-center"
+                  >
+                    📚 Pelajari Materi
+                    <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
+                  </Link>
+                  
+                  <Link 
+                    href="/practicum" 
+                    className="group bg-gradient-to-r from-green-500 to-blue-500 text-white px-8 py-4 rounded-2xl font-bold text-lg hover:from-green-600 hover:to-blue-600 transition-all transform hover:scale-105 shadow-2xl flex items-center justify-center"
+                  >
+                    🔬 Mulai Praktikum
+                    <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
+                  </Link>
+                </div>
+
+                <details className="text-left max-w-4xl mx-auto">
+                  <summary className="cursor-pointer text-blue-300 hover:text-blue-100 font-medium mb-6 text-center">
+                    📋 Lihat Review Jawaban Lengkap
+                  </summary>
+                  
+                  <div className="space-y-4">
+                    {questions.map((question, index) => (
+                      <div key={question.id} className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl p-6">
+                        <h4 className="font-medium text-white mb-3">
+                          {index + 1}. {question.question}
+                        </h4>
+                        
+                        <div className="flex items-center space-x-4 mb-3">
+                          <span className="text-sm text-blue-200">Jawaban Anda:</span>
+                          <div className="flex items-center space-x-2">
+                            <span className={`font-medium ${
+                              answers[index] === question.correct ? 'text-green-400' : 'text-red-400'
+                            }`}>
+                              {answers[index] !== -1 ? question.options[answers[index]] : 'Tidak dijawab'}
+                            </span>
+                            {answers[index] === question.correct ? 
+                              <CheckCircle className="w-5 h-5 text-green-400" /> : 
+                              <XCircle className="w-5 h-5 text-red-400" />
+                            }
+                          </div>
+                        </div>
+                        
+                        {answers[index] !== question.correct && (
+                          <div className="text-sm mb-3">
+                            <span className="text-blue-200">Jawaban yang benar:</span>
+                            <span className="text-green-400 font-medium ml-2">
+                              {question.options[question.correct]}
+                            </span>
+                          </div>
+                        )}
+                        
+                        <div className="text-sm text-blue-200/80 italic bg-blue-500/10 p-3 rounded-lg">
+                          💡 {question.explanation}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </details>
+              </div>
             </div>
           </div>
         </div>
@@ -207,107 +256,147 @@ export default function PretestPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-cyan-50">
-      <header className="bg-white shadow-lg border-b-4 border-blue-500">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3">
-              <Link href="/" className="text-blue-600 hover:text-blue-800">
-                ← Kembali ke Beranda
-              </Link>
-              <h1 className="text-2xl font-bold text-gray-800">Pre-Test</h1>
-            </div>
-            
-            <div className="text-sm text-gray-600">
-              Pertanyaan {currentQuestion + 1} dari {questions.length}
-            </div>
-          </div>
-        </div>
-      </header>
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-950 to-indigo-900 relative overflow-hidden">
+      {/* Animated Background Elements */}
+      <div className="absolute inset-0">
+        <div className="absolute top-20 left-10 w-72 h-72 bg-blue-500/10 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute top-40 right-20 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
+        <div className="absolute bottom-20 left-1/3 w-80 h-80 bg-cyan-500/10 rounded-full blur-3xl animate-pulse delay-2000"></div>
+        
+        {[...Array(20)].map((_, i) => (
+          <div
+            key={i}
+            className="absolute w-1 h-1 bg-blue-400/30 rounded-full animate-ping"
+            style={{
+              left: `${Math.random() * 100}%`,
+              top: `${Math.random() * 100}%`,
+              animationDelay: `${Math.random() * 3}s`,
+              animationDuration: `${3 + Math.random() * 2}s`
+            }}
+          ></div>
+        ))}
+      </div>
 
-      <div className="container mx-auto px-4 py-12">
-        <div className="max-w-2xl mx-auto">
+      <Navbar />
+
+      <div className="container mx-auto px-6 py-16 relative z-10">
+        <div className="max-w-4xl mx-auto">
+          {/* Header */}
+          <div className="text-center mb-12">
+            <div className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-blue-400/20 to-indigo-400/20 rounded-full border border-blue-400/30 backdrop-blur-sm mb-8">
+              <Trophy className="w-4 h-4 text-blue-400 mr-2" />
+              <span className="text-blue-400 text-sm font-medium">Tes Diagnostik</span>
+              <span className="text-blue-300 text-sm ml-2">
+                Pertanyaan {currentQuestion + 1} dari {questions.length}
+              </span>
+            </div>
+
+            <h1 className="text-5xl font-black mb-6 leading-tight">
+              <span className="bg-gradient-to-r from-white via-blue-200 to-cyan-300 bg-clip-text text-transparent drop-shadow-2xl">
+                Tes Diagnostik
+              </span>
+            </h1>
+          </div>
+
           {/* Progress Bar */}
           <div className="mb-8">
-            <div className="flex justify-between text-sm text-gray-600 mb-2">
+            <div className="flex justify-between text-sm text-blue-200 mb-2">
               <span>Progress</span>
               <span>{Math.round(((currentQuestion + 1) / questions.length) * 100)}%</span>
             </div>
-            <div className="w-full bg-gray-200 rounded-full h-2">
+            <div className="w-full bg-blue-900/30 rounded-full h-3 overflow-hidden shadow-inner">
               <div 
-                className="bg-gradient-to-r from-blue-500 to-cyan-500 h-2 rounded-full transition-all duration-300"
+                className="bg-gradient-to-r from-blue-500 to-cyan-500 h-3 rounded-full transition-all duration-500 relative overflow-hidden"
                 style={{ width: `${((currentQuestion + 1) / questions.length) * 100}%` }}
-              ></div>
+              >
+                <div className="absolute inset-0 bg-white/20 rounded-full animate-pulse"></div>
+              </div>
             </div>
           </div>
 
           {/* Question Card */}
-          <div className="bg-white rounded-xl shadow-lg p-8">
-            <div className="mb-6">
-              <h2 className="text-xl font-bold text-gray-800 mb-4">
-                {questions[currentQuestion].question}
-              </h2>
-            </div>
+          <div className="relative">
+            <div className="absolute -inset-1 bg-gradient-to-r from-blue-500/30 to-indigo-600/30 rounded-3xl blur"></div>
+            <div className="relative bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl rounded-3xl p-10 border border-white/20">
+              <div className="mb-8">
+                <div className="flex items-center mb-4">
+                  <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full flex items-center justify-center text-white font-bold mr-4">
+                    {currentQuestion + 1}
+                  </div>
+                  <div className="w-2 h-2 bg-blue-400 rounded-full animate-pulse"></div>
+                </div>
+                <h2 className="text-2xl font-bold text-white mb-4 leading-relaxed">
+                  {questions[currentQuestion].question}
+                </h2>
+              </div>
 
-            <div className="space-y-3 mb-8">
-              {questions[currentQuestion].options.map((option, index) => (
+              <div className="space-y-4 mb-10">
+                {questions[currentQuestion].options.map((option, index) => (
+                  <button
+                    key={index}
+                    onClick={() => handleAnswerSelect(index)}
+                    className={`w-full text-left p-6 rounded-2xl border-2 transition-all transform hover:scale-[1.02] ${
+                      selectedAnswer === index
+                        ? 'border-blue-400 bg-blue-500/20 text-white shadow-lg shadow-blue-500/25'
+                        : 'border-white/20 hover:border-white/30 text-blue-100 hover:bg-white/5'
+                    }`}
+                  >
+                    <div className="flex items-center">
+                      <div className={`w-8 h-8 rounded-full border-2 flex items-center justify-center mr-4 transition-all ${
+                        selectedAnswer === index
+                          ? 'border-blue-400 bg-blue-500 text-white'
+                          : 'border-white/30 text-white/70'
+                      }`}>
+                        {selectedAnswer === index ? (
+                          <CheckCircle className="w-5 h-5" />
+                        ) : (
+                          <span className="font-bold">{String.fromCharCode(65 + index)}</span>
+                        )}
+                      </div>
+                      <span className="font-medium text-lg">{option}</span>
+                    </div>
+                  </button>
+                ))}
+              </div>
+
+              {/* Navigation */}
+              <div className="flex justify-between">
                 <button
-                  key={index}
-                  onClick={() => handleAnswerSelect(index)}
-                  className={`w-full text-left p-4 rounded-lg border-2 transition-all ${
-                    selectedAnswer === index
-                      ? 'border-blue-500 bg-blue-50 text-blue-700'
-                      : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
+                  onClick={handlePrevious}
+                  disabled={currentQuestion === 0}
+                  className={`px-8 py-4 rounded-2xl font-bold text-lg transition-all ${
+                    currentQuestion === 0
+                      ? 'bg-gray-700 text-gray-500 cursor-not-allowed'
+                      : 'bg-white/10 text-white hover:bg-white/20 border border-white/20 hover:border-white/30'
                   }`}
                 >
-                  <div className="flex items-center">
-                    <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center mr-4 ${
-                      selectedAnswer === index
-                        ? 'border-blue-500 bg-blue-500'
-                        : 'border-gray-300'
-                    }`}>
-                      {selectedAnswer === index && (
-                        <span className="text-white text-sm">✓</span>
-                      )}
-                    </div>
-                    <span className="font-medium">{String.fromCharCode(65 + index)}.</span>
-                    <span className="ml-2">{option}</span>
-                  </div>
+                  ← Sebelumnya
                 </button>
-              ))}
-            </div>
 
-            {/* Navigation */}
-            <div className="flex justify-between">
-              <button
-                onClick={handlePrevious}
-                disabled={currentQuestion === 0}
-                className={`px-6 py-2 rounded-lg font-medium transition-all ${
-                  currentQuestion === 0
-                    ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                    : 'bg-gray-300 text-gray-700 hover:bg-gray-400'
-                }`}
-              >
-                ← Sebelumnya
-              </button>
-
-              <button
-                onClick={handleNext}
-                disabled={selectedAnswer === -1}
-                className={`px-6 py-2 rounded-lg font-medium transition-all ${
-                  selectedAnswer === -1
-                    ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                    : 'bg-gradient-to-r from-blue-600 to-cyan-600 text-white hover:from-blue-700 hover:to-cyan-700 shadow-lg'
-                }`}
-              >
-                {currentQuestion === questions.length - 1 ? 'Selesai' : 'Selanjutnya →'}
-              </button>
+                <button
+                  onClick={handleNext}
+                  disabled={selectedAnswer === -1}
+                  className={`px-8 py-4 rounded-2xl font-bold text-lg transition-all transform hover:scale-105 shadow-2xl flex items-center ${
+                    selectedAnswer === -1
+                      ? 'bg-gray-700 text-gray-500 cursor-not-allowed'
+                      : 'bg-gradient-to-r from-blue-500 to-cyan-500 text-white hover:from-blue-600 hover:to-cyan-600 hover:shadow-blue-500/25'
+                  }`}
+                >
+                  {currentQuestion === questions.length - 1 ? 'Selesai' : 'Selanjutnya'}
+                  <ArrowRight className="w-5 h-5 ml-2" />
+                </button>
+              </div>
             </div>
           </div>
 
           {/* Instructions */}
-          <div className="mt-6 text-center text-sm text-gray-600">
-            💡 <strong>Petunjuk:</strong> Pilih salah satu jawaban yang paling tepat untuk setiap pertanyaan
+          <div className="mt-8 text-center">
+            <div className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-cyan-500/20 to-blue-500/20 rounded-full border border-cyan-400/30 backdrop-blur-sm">
+              <Clock className="w-5 h-5 text-cyan-400 mr-2" />
+              <span className="text-cyan-300 font-medium">
+                💡 Pilih salah satu jawaban yang paling tepat untuk setiap pertanyaan
+              </span>
+            </div>
           </div>
         </div>
       </div>

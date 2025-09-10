@@ -1,4 +1,6 @@
 
+'use client'
+
 import React from 'react';
 import { ChevronRight, Trophy, Target, Brain, Zap, Sparkles, Star, ArrowRight } from 'lucide-react';
 import Navbar from '@/components/Navbar';
@@ -100,7 +102,7 @@ const TestPage = () => {
                   <Trophy className="w-10 h-10 text-blue-400" />
                 </div>
                 
-                <h3 className="text-3xl font-bold text-white mb-4">Pre-Assessment</h3>
+                <h3 className="text-3xl font-bold text-white mb-4">Tes Diagnostik</h3>
                 <p className="text-blue-200/80 mb-8 text-lg leading-relaxed">
                   Evaluasi komprehensif untuk mengukur baseline knowledge Anda dengan teknologi adaptive testing
                 </p>
@@ -120,8 +122,11 @@ const TestPage = () => {
                   </div>
                 </div>
                 
-                <button className="w-full bg-gradient-to-r from-blue-500 to-blue-600 text-white py-4 px-8 rounded-2xl font-bold text-lg hover:from-blue-600 hover:to-blue-700 transition-all transform hover:scale-105 shadow-2xl hover:shadow-blue-500/25 flex items-center justify-center group">
-                  Mulai Pre-Assessment
+                <button 
+                  className="w-full bg-gradient-to-r from-blue-500 to-blue-600 text-white py-4 px-8 rounded-2xl font-bold text-lg hover:from-blue-600 hover:to-blue-700 transition-all transform hover:scale-105 shadow-2xl hover:shadow-blue-500/25 flex items-center justify-center group"
+                  onClick={() => window.location.href = '/pretest'}
+                >
+                  Mulai Tes Diagnostik
                   <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
                 </button>
               </div>
@@ -141,7 +146,7 @@ const TestPage = () => {
                   <Target className="w-10 h-10 text-emerald-400" />
                 </div>
                 
-                <h3 className="text-3xl font-bold text-white mb-4">Post-Assessment</h3>
+                <h3 className="text-3xl font-bold text-white mb-4">Tes Sumatif</h3>
                 <p className="text-blue-200/80 mb-8 text-lg leading-relaxed">
                   Validasi pencapaian learning outcomes dengan standar internasional dan sertifikasi digital
                 </p>
@@ -161,8 +166,11 @@ const TestPage = () => {
                   </div>
                 </div>
                 
-                <button className="w-full bg-gradient-to-r from-emerald-500 to-teal-600 text-white py-4 px-8 rounded-2xl font-bold text-lg hover:from-emerald-600 hover:to-teal-700 transition-all transform hover:scale-105 shadow-2xl hover:shadow-emerald-500/25 flex items-center justify-center group">
-                  Mulai Post-Assessment
+                <button 
+                  className="w-full bg-gradient-to-r from-emerald-500 to-teal-600 text-white py-4 px-8 rounded-2xl font-bold text-lg hover:from-emerald-600 hover:to-teal-700 transition-all transform hover:scale-105 shadow-2xl hover:shadow-emerald-500/25 flex items-center justify-center group"
+                  onClick={() => window.location.href = '/posttest'}
+                >
+                  Mulai Tes Sumatif
                   <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
                 </button>
               </div>
@@ -184,7 +192,10 @@ const TestPage = () => {
                   Gamified learning dengan sistem poin, leaderboard, dan achievements untuk motivasi maksimal
                 </p>
                 
-                <button className="w-full bg-gradient-to-r from-purple-500 to-pink-600 text-white py-4 px-8 rounded-2xl font-bold text-lg hover:from-purple-600 hover:to-pink-700 transition-all transform hover:scale-105 shadow-2xl flex items-center justify-center group">
+                <button 
+                  className="w-full bg-gradient-to-r from-purple-500 to-pink-600 text-white py-4 px-8 rounded-2xl font-bold text-lg hover:from-purple-600 hover:to-pink-700 transition-all transform hover:scale-105 shadow-2xl flex items-center justify-center group"
+                  onClick={() => window.location.href = '/quiz'}
+                >
                   Launch Quiz Platform
                   <ChevronRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
                 </button>
@@ -204,7 +215,10 @@ const TestPage = () => {
                   Laboratorium virtual dengan simulasi circuit yang realistis dan feedback instan
                 </p>
                 
-                <button className="w-full bg-gradient-to-r from-orange-500 to-red-600 text-white py-4 px-8 rounded-2xl font-bold text-lg hover:from-orange-600 hover:to-red-700 transition-all transform hover:scale-105 shadow-2xl flex items-center justify-center group">
+                <button 
+                  className="w-full bg-gradient-to-r from-orange-500 to-red-600 text-white py-4 px-8 rounded-2xl font-bold text-lg hover:from-orange-600 hover:to-red-700 transition-all transform hover:scale-105 shadow-2xl flex items-center justify-center group"
+                  onClick={() => window.location.href = '/practicum'}
+                >
                   Enter Practice Lab
                   <Sparkles className="w-5 h-5 ml-2 group-hover:rotate-12 transition-transform" />
                 </button>
