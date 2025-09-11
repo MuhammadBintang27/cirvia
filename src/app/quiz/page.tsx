@@ -75,7 +75,7 @@ const QuizPage = () => {
         showHint: false
       }));
     }
-  }, [quizState.currentQuestionIndex]);
+  }, [quizState.currentQuestionIndex, currentQuestion]);
 
   const handleSlotClick = (slotIndex: number) => {
     setQuizState(prev => ({

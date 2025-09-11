@@ -1,5 +1,7 @@
+
 import Link from 'next/link'
 import Navbar from '@/components/Navbar'
+import Image from 'next/image'
 
 
 export default function HomePage() {
@@ -175,21 +177,21 @@ export default function HomePage() {
                 <h3 className="text-2xl font-bold text-blue-200 mb-6 text-center">Apa Kata Mereka</h3>
                 <div className="space-y-6">
                   <div className="flex items-start gap-4">
-                    <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="Testimoni 1" className="w-14 h-14 rounded-full border-2 border-blue-400" />
+                    <Image src="https://randomuser.me/api/portraits/men/32.jpg" alt="Testimoni 1" width={56} height={56} className="w-14 h-14 rounded-full border-2 border-blue-400" />
                     <div>
                       <p className="text-blue-300 italic">“Belajar listrik jadi jauh lebih seru dan mudah dipahami. Praktikum virtualnya sangat membantu!”</p>
                       <span className="block text-sm text-blue-200 mt-2 font-semibold">Rizky, Siswa SMA</span>
                     </div>
                   </div>
                   <div className="flex items-start gap-4">
-                    <img src="https://randomuser.me/api/portraits/women/44.jpg" alt="Testimoni 2" className="w-14 h-14 rounded-full border-2 border-blue-300" />
+                    <Image src="https://randomuser.me/api/portraits/women/44.jpg" alt="Testimoni 2" width={56} height={56} className="w-14 h-14 rounded-full border-2 border-blue-300" />
                     <div>
                       <p className="text-blue-300 italic">“Teknologi deteksi gerakan tangan bikin simulasi rangkaian listrik jadi interaktif banget!”</p>
                       <span className="block text-sm text-blue-200 mt-2 font-semibold">Dewi, Guru Fisika</span>
                     </div>
                   </div>
                   <div className="flex items-start gap-4">
-                    <img src="https://randomuser.me/api/portraits/men/65.jpg" alt="Testimoni 3" className="w-14 h-14 rounded-full border-2 border-blue-200" />
+                    <Image src="https://randomuser.me/api/portraits/men/65.jpg" alt="Testimoni 3" width={56} height={56} className="w-14 h-14 rounded-full border-2 border-blue-200" />
                     <div>
                       <p className="text-blue-300 italic">“CIRVIA sangat membantu saya memahami konsep rangkaian listrik dengan cara yang menyenangkan.”</p>
                       <span className="block text-sm text-blue-200 mt-2 font-semibold">Andi, Mahasiswa</span>

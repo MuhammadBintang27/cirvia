@@ -326,7 +326,7 @@ Hasil Perhitungan Rangkaian:
                         </li>
                         <li className="flex items-start">
                           <span className="text-cyan-400 mr-2">•</span>
-                          <span>Aktifkan "Mode Koneksi" untuk menarik kabel antar terminal</span>
+                          <span>Aktifkan &quot;Mode Koneksi&quot; untuk menarik kabel antar terminal</span>
                         </li>
                       </ul>
                       <ul className="space-y-2">
