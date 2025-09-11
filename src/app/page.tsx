@@ -34,9 +34,9 @@ export default function HomePage() {
           {/* Hero Section */}
           <div className="text-center mb-20">
             <div className="relative mb-8">
-              <div className="inline-flex items-center justify-center w-32 h-32 rounded-full bg-gradient-to-br from-blue-500/20 to-indigo-600/20 backdrop-blur-xl border border-white/20 shadow-2xl">
+              <div className="inline-flex items-center justify-center w-32 h-32 rounded-full bg-gradient-to-br from-blue-500/20 to-indigo-600/20 backdrop-blur-xl border border-white/20 shadow-2xl relative">
                 <div className="absolute inset-0 rounded-full bg-gradient-to-br from-blue-400/10 to-purple-600/10 animate-pulse"></div>
-                <span className="text-6xl relative z-10">⚡</span>
+                <Image src="/logo.png" alt="CIRVIA Logo" width={80} height={80} className="relative z-10 w-20 h-20 object-contain" />
               </div>
               <div className="absolute -inset-4 bg-gradient-to-r from-blue-500/20 to-indigo-500/20 rounded-full blur-xl"></div>
             </div>
