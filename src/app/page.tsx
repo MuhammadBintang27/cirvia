@@ -40,12 +40,11 @@ export default function HomePage() {
               </div>
               <div className="absolute -inset-4 bg-gradient-to-r from-blue-500/20 to-indigo-500/20 rounded-full blur-xl"></div>
             </div>
-            <h1 className="text-7xl font-black mb-6 leading-tight">
-              <span className="bg-gradient-to-r from-white via-blue-200 to-cyan-300 bg-clip-text text-transparent drop-shadow-2xl">
+            <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black mb-4 sm:mb-6 leading-tight">
+              <span className="bg-gradient-to-r from-white via-blue-200 to-cyan-300 bg-clip-text text-transparent drop-shadow-2xl block">
                 CIRVIA
               </span>
-              <br />
-              <span className="bg-gradient-to-r from-cyan-300 via-blue-400 to-indigo-400 bg-clip-text text-transparent">
+              <span className="bg-gradient-to-r from-cyan-300 via-blue-400 to-indigo-400 bg-clip-text text-transparent block text-lg sm:text-2xl md:text-3xl lg:text-4xl mt-2">
                 Circuit Virtual Interactive Application
               </span>
             </h1>

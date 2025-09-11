@@ -14,6 +14,62 @@ const AudioPlayer = ({ title, description, chapters }: AudioPlayerProps) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentChapter, setCurrentChapter] = useState(0);
   const [progress, setProgress] = useState(0);
+  const audioRef = React.useRef<HTMLAudioElement>(null);
+
+  // Assume audio file name is based on title, e.g. 'konsep-dasar-listrik.mp3'
+  const audioFileName = title.toLowerCase().replace(/[^a-z0-9]+/g, '-') + '.mp3';
+  const audioSrc = `/audio/${audioFileName}`;
+
+  // Handle play/pause
+  const handlePlayPause = () => {
+    if (!audioRef.current) return;
+    if (isPlaying) {
+      audioRef.current.pause();
+    } else {
+      audioRef.current.currentTime = chapters[currentChapter]?.startTime || 0;
+      audioRef.current.play();
+    }
+    setIsPlaying(!isPlaying);
+  };
+
+  // Handle chapter change
+  const handleChapterChange = (next: boolean) => {
+    let newChapter = currentChapter + (next ? 1 : -1);
+    if (newChapter < 0) newChapter = 0;
+    if (newChapter > chapters.length - 1) newChapter = chapters.length - 1;
+    setCurrentChapter(newChapter);
+    if (audioRef.current) {
+      audioRef.current.currentTime = chapters[newChapter]?.startTime || 0;
+      if (isPlaying) audioRef.current.play();
+    }
+    setProgress(0);
+  };
+
+  // Update progress bar
+  React.useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
+    const updateProgress = () => {
+      const chapter = chapters[currentChapter];
+      if (!chapter) return;
+      const elapsed = audio.currentTime - chapter.startTime;
+      const percent = Math.min(100, (elapsed / chapter.duration) * 100);
+      setProgress(percent);
+      // Auto next chapter
+      if (percent >= 100) {
+        setIsPlaying(false);
+        setProgress(0);
+      }
+    };
+    if (isPlaying) {
+      audio.addEventListener('timeupdate', updateProgress);
+    } else {
+      audio.removeEventListener('timeupdate', updateProgress);
+    }
+    return () => {
+      audio.removeEventListener('timeupdate', updateProgress);
+    };
+  }, [isPlaying, currentChapter, chapters]);
 
   return (
     <div className="bg-gradient-to-br from-purple-500/10 to-indigo-500/10 backdrop-blur-sm rounded-2xl p-6 border border-purple-400/20">
@@ -24,11 +80,38 @@ const AudioPlayer = ({ title, description, chapters }: AudioPlayerProps) => {
         </div>
         <div className="text-2xl">🎧</div>
       </div>
-      
+
+      <audio ref={audioRef} src={audioSrc} preload="auto" onEnded={() => setIsPlaying(false)} />
+
+      {/* Chapters List */}
+      <div className="mb-4">
+        <div className="mb-2 text-purple-200 font-semibold text-sm">Bab Audio</div>
+        <div className="rounded-xl overflow-hidden border border-purple-400/10 bg-white/5">
+          {chapters.map((chapter, idx) => (
+            <button
+              key={idx}
+              className={`flex items-center justify-between w-full px-4 py-2 text-left text-sm transition-colors ${idx === currentChapter ? 'bg-purple-100/20 text-purple-300 font-bold' : 'hover:bg-purple-900/10 text-purple-200'}`}
+              onClick={() => {
+                setCurrentChapter(idx);
+                if (audioRef.current) {
+                  audioRef.current.currentTime = chapter.startTime;
+                  if (isPlaying) audioRef.current.play();
+                }
+                setProgress(0);
+              }}
+            >
+              <span>{chapter.title}</span>
+              <span className="ml-2 text-xs text-purple-400">{`${Math.floor(chapter.startTime/60)}:${(chapter.startTime%60).toString().padStart(2,'0')}`}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Progress Bar */}
       <div className="mb-4">
         <div className="flex justify-between text-sm text-purple-200 mb-2">
           <span>Chapter {currentChapter + 1}: {chapters[currentChapter]?.title}</span>
-          <span>{progress}%</span>
+          <span>{progress.toFixed(0)}%</span>
         </div>
         <div className="w-full bg-purple-900/30 rounded-full h-2">
           <div 
@@ -37,32 +120,18 @@ const AudioPlayer = ({ title, description, chapters }: AudioPlayerProps) => {
           ></div>
         </div>
       </div>
-      
-      <div className="flex items-center justify-center space-x-4">
+
+      {/* Controls */}
+      <div className="flex items-center justify-center space-x-4 mb-4">
         <button 
-          onClick={() => setCurrentChapter(Math.max(0, currentChapter - 1))}
+          onClick={() => handleChapterChange(false)}
           className="p-2 bg-purple-500/20 rounded-full hover:bg-purple-500/30 transition-colors"
         >
           <SkipBack className="w-4 h-4 text-purple-300" />
         </button>
-        
+
         <button 
-          onClick={() => {
-            setIsPlaying(!isPlaying);
-            if (!isPlaying) {
-              // Simulate progress
-              const interval = setInterval(() => {
-                setProgress(prev => {
-                  if (prev >= 100) {
-                    clearInterval(interval);
-                    setIsPlaying(false);
-                    return 0;
-                  }
-                  return prev + 2;
-                });
-              }, 100);
-            }
-          }}
+          onClick={handlePlayPause}
           className="p-4 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full hover:from-purple-600 hover:to-pink-600 transition-all transform hover:scale-105"
         >
           {isPlaying ? (
@@ -71,13 +140,21 @@ const AudioPlayer = ({ title, description, chapters }: AudioPlayerProps) => {
             <Play className="w-6 h-6 text-white" />
           )}
         </button>
-        
+
         <button 
-          onClick={() => setCurrentChapter(Math.min(chapters.length - 1, currentChapter + 1))}
+          onClick={() => handleChapterChange(true)}
           className="p-2 bg-purple-500/20 rounded-full hover:bg-purple-500/30 transition-colors"
         >
           <SkipForward className="w-4 h-4 text-purple-300" />
         </button>
+      </div>
+
+      {/* Download Button */}
+      <div className="flex justify-center mt-2">
+        <a href={audioSrc} download className="flex items-center space-x-2 text-purple-300 hover:text-purple-400 text-sm py-2 px-4 rounded-lg transition-colors">
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5m0 0l5-5m-5 5V4" /></svg>
+          <span>Download Audio untuk Offline</span>
+        </a>
       </div>
     </div>
   );

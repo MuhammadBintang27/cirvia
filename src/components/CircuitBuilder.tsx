@@ -773,7 +773,7 @@ export default function CircuitBuilder() {
         <div className="space-y-1">
           <div>• Mode Koneksi: klik terminal untuk menghubungkan kabel</div>
           <div>• Double-tap saklar untuk buka/tutup</div>
-          {!isMobile && <div>• Pilih komponen lalu klik "↻ Rotasi"</div>}
+          {!isMobile && <div>• Pilih komponen lalu klik &quot;↻ Rotasi&quot;</div>}
         </div>
       </div>
 

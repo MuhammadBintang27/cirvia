@@ -187,7 +187,7 @@ const TestPage = () => {
                   <Brain className="w-10 h-10 text-purple-400" />
                 </div>
                 
-                <h3 className="text-3xl font-bold text-white mb-4">Interactive Quiz</h3>
+                <h3 className="text-3xl font-bold text-white mb-4">Kuis Formatif</h3>
                 <p className="text-blue-200/80 mb-8 text-lg">
                   Gamified learning dengan sistem poin, leaderboard, dan achievements untuk motivasi maksimal
                 </p>
