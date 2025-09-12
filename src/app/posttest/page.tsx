@@ -16,63 +16,63 @@ interface Question {
 const questions: Question[] = [
   {
     id: 1,
-    question: "Dalam rangkaian seri dengan 3 resistor (R1=2Ω, R2=3Ω, R3=5Ω) dan tegangan sumber 20V, berapa arus yang mengalir?",
+    question: "Pada rangkaian seri, jika salah satu lampu padam maka …",
     options: [
-      "2 A",
-      "4 A", 
-      "10 A",
-      "20 A"
+      "Lampu lain tetap menyala",
+      "Semua lampu padam",
+      "Arus bertambah besar",
+      "Tegangan sumber menjadi nol"
     ],
-    correct: 0,
-    explanation: "Rtotal = R1 + R2 + R3 = 2 + 3 + 5 = 10Ω. I = V/R = 20V/10Ω = 2A"
+    correct: 1,
+    explanation: "Pada rangkaian seri, jika satu lampu padam maka semua lampu padam karena arus terputus."
   },
   {
     id: 2,
-    question: "Dalam rangkaian paralel dengan 2 resistor (R1=6Ω, R2=3Ω), berapa resistansi total?",
+    question: "Pada rangkaian paralel, besarnya tegangan pada setiap resistor adalah …",
     options: [
-      "2 Ω",
-      "3 Ω",
-      "6 Ω", 
-      "9 Ω"
+      "Sama dengan tegangan sumber",
+      "Lebih kecil pada resistor besar",
+      "Lebih besar pada resistor kecil",
+      "Jumlahnya sama dengan tegangan sumber"
     ],
     correct: 0,
-    explanation: "1/Rtotal = 1/R1 + 1/R2 = 1/6 + 1/3 = 1/6 + 2/6 = 3/6 = 1/2. Maka Rtotal = 2Ω"
+    explanation: "Pada rangkaian paralel, tegangan pada setiap resistor sama dengan tegangan sumber."
   },
   {
     id: 3,
-    question: "Jika resistor 100Ω dialiri arus 0.5A, berapa daya yang dikonsumsi?",
+    question: "Suatu rangkaian seri diberi tegangan 12 V dengan R1 = 4 Ω dan R2 = 2 Ω. Berapakah tegangan pada R1?",
     options: [
-      "25 W",
-      "50 W",
-      "100 W",
-      "200 W"
+      "2 V",
+      "4 V",
+      "6 V",
+      "8 V"
     ],
-    correct: 0,
-    explanation: "P = I²R = (0.5)² × 100 = 0.25 × 100 = 25W"
+    correct: 2,
+    explanation: "Tegangan pada R1: V1 = I × R1. Rtotal = 4 + 2 = 6Ω, I = 12/6 = 2A, V1 = 2A × 4Ω = 8V."
   },
   {
     id: 4,
-    question: "Dalam hukum Kirchhoff I (KCL), apa yang berlaku pada node/titik percabangan?",
+    question: "Suatu rangkaian paralel terdiri dari dua resistor, R1 = 10 Ω dan R2 = 20 Ω, dihubungkan dengan baterai 12 V. Berapakah arus yang mengalir melalui R2?",
     options: [
-      "Jumlah arus masuk = jumlah arus keluar",
-      "Jumlah tegangan = 0",
-      "Jumlah resistansi minimum",
-      "Arus maksimal mengalir"
+      "0,2 A",
+      "0,4 A",
+      "0,6 A",
+      "1,2 A"
     ],
-    correct: 0,
-    explanation: "Hukum Kirchhoff I menyatakan bahwa jumlah arus yang masuk ke suatu node sama dengan jumlah arus yang keluar dari node tersebut"
+    correct: 1,
+    explanation: "I2 = V/R2 = 12V/20Ω = 0,6A. Jawaban yang benar adalah 0,6A."
   },
   {
     id: 5,
-    question: "Komponen apa yang dapat menyimpan energi dalam bentuk medan listrik?",
+    question: "Instalasi listrik rumah menggunakan rangkaian paralel, tujuannya adalah …",
     options: [
-      "Kapasitor",
-      "Induktor", 
-      "Resistor",
-      "Dioda"
+      "Agar arus lebih kecil",
+      "Agar lampu lebih redup",
+      "Agar setiap alat mendapat tegangan penuh",
+      "Agar lebih hemat energi"
     ],
-    correct: 0,
-    explanation: "Kapasitor menyimpan energi dalam bentuk medan listrik di antara dua konduktor yang dipisahkan oleh isolator"
+    correct: 2,
+    explanation: "Rangkaian paralel memastikan setiap alat mendapat tegangan penuh dari sumber."
   }
 ]
 
@@ -360,6 +360,13 @@ export default function PostTest() {
                 </div>
                 <h2 className="text-2xl font-bold text-white mb-4 leading-relaxed">
                   {questions[currentQuestion].question}
+                  {/* Show image for question 3 and 4 */}
+                  {currentQuestion === 2 && (
+                    <img src="/soal/soal3.png" alt="Soal 3" className="mt-4 rounded-lg mx-auto max-w-xs shadow-lg" />
+                  )}
+                  {currentQuestion === 3 && (
+                    <img src="/soal/soal4.png" alt="Soal 4" className="mt-4 rounded-lg mx-auto max-w-xs shadow-lg" />
+                  )}
                 </h2>
               </div>
 

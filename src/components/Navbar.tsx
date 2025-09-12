@@ -16,7 +16,7 @@ export default function Navbar() {
     <>
       {/* Desktop Navbar */}
       <nav className="relative z-50 backdrop-blur-xl bg-white/5 border-b border-white/10">
-        <div className="container mx-auto px-6 py-4">
+        <div className="container mx-auto px-8 py-4">
           <div className="flex items-center justify-between">
             <Link href="/" className="flex items-center space-x-3">
               <div className=" ">
@@ -46,7 +46,7 @@ export default function Navbar() {
       </nav>
 
       {/* Mobile Bottom Navigation */}
-      <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-white/10 backdrop-blur-xl border-t border-white/10 shadow-lg">
+      <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-white/10 backdrop-blur-xl border-t border-white/10 shadow-lg px-4">
         <div className="grid grid-cols-5 py-1">
           {navigation.map((item) => {
             const Icon = item.icon;
