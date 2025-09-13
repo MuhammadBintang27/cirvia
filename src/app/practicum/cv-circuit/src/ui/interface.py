@@ -353,15 +353,15 @@ class MainInterface:
             value_surface = self.font_medium.render(value, True, color)
             self.screen.blit(value_surface, (x_pos, info_y + 40))
         
-        # Circuit type
-        circuit_type = calc['circuit_type'].upper()
-        type_color = {
-            'SERIES': self.colors['success'],
-            'PARALLEL': self.colors['warning'],
-            'OPEN': self.colors['error']
-        }.get(circuit_type, self.colors['text'])
-        
-        type_text = f"Rangkaian: {circuit_type}"
+        # Circuit type (Indonesian)
+        circuit_type_raw = calc['circuit_type'].lower()
+        type_map = {
+            'series': ('Seri', self.colors['success']),
+            'parallel': ('Paralel', self.colors['warning']),
+            'open': ('Terbuka', self.colors['error'])
+        }
+        type_label, type_color = type_map.get(circuit_type_raw, ('Tidak Diketahui', self.colors['text']))
+        type_text = f"Rangkaian: {type_label}"
         type_surface = self.font_medium.render(type_text, True, type_color)
         self.screen.blit(type_surface, (550, info_y + 40))
     
