@@ -1,9 +1,10 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { Trophy, Star, Sparkles, ArrowRight, CheckCircle, XCircle, Clock, Target } from 'lucide-react'
 import Navbar from '@/components/Navbar'
+import { useStudentAuth } from '@/hooks/useStudentAuth'
 
 interface Question {
   id: number
@@ -66,9 +67,23 @@ export default function PretestPage() {
   const [answers, setAnswers] = useState<number[]>(new Array(questions.length).fill(-1))
   const [showResults, setShowResults] = useState(false)
   const [selectedAnswer, setSelectedAnswer] = useState(-1)
+  const [testStarted, setTestStarted] = useState(false)
+  
+  const { requireStudentLogin, isLoggedInStudent } = useStudentAuth()
+
+  // Auto-start test jika sudah login sebagai student
+  useEffect(() => {
+    if (isLoggedInStudent) {
+      setTestStarted(true);
+    }
+  }, [isLoggedInStudent])
 
   const handleAnswerSelect = (answerIndex: number) => {
     setSelectedAnswer(answerIndex)
+  }
+
+  const startTest = () => {
+    setTestStarted(true)
   }
 
   const handleNext = () => {
@@ -105,6 +120,132 @@ export default function PretestPage() {
     if (percentage >= 60) return { message: "Good! Anda memiliki pemahaman yang cukup baik.", color: "text-blue-600" }
     if (percentage >= 40) return { message: "Fair. Anda perlu mempelajari materi lebih lanjut.", color: "text-yellow-600" }
     return { message: "Needs Improvement. Silakan pelajari materi dasar terlebih dahulu.", color: "text-red-600" }
+  }
+
+  // Welcome Screen - belum mulai test
+  if (!testStarted) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-950 to-indigo-900 relative overflow-hidden">
+        {/* Animated Background Elements */}
+        <div className="absolute inset-0">
+          <div className="absolute top-20 left-10 w-72 h-72 bg-blue-500/10 rounded-full blur-3xl animate-pulse"></div>
+          <div className="absolute top-40 right-20 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
+          <div className="absolute bottom-20 left-1/3 w-80 h-80 bg-cyan-500/10 rounded-full blur-3xl animate-pulse delay-2000"></div>
+          
+          {[...Array(20)].map((_, i) => (
+            <div
+              key={i}
+              className="absolute w-1 h-1 bg-blue-400/30 rounded-full animate-ping"
+              style={{
+                left: `${Math.random() * 100}%`,
+                top: `${Math.random() * 100}%`,
+                animationDelay: `${Math.random() * 3}s`,
+                animationDuration: `${3 + Math.random() * 2}s`
+              }}
+            ></div>
+          ))}
+        </div>
+
+        <Navbar />
+
+        <div className="container mx-auto px-6 py-16 relative z-10">
+          <div className="max-w-4xl mx-auto">
+            {/* Hero Section */}
+            <div className="text-center mb-12">
+              <div className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-blue-400/20 to-indigo-400/20 rounded-full border border-blue-400/30 backdrop-blur-sm mb-8">
+                <Trophy className="w-4 h-4 text-blue-400 mr-2" />
+                <span className="text-blue-400 text-sm font-medium">Tes Diagnostik Awal</span>
+                <Sparkles className="w-4 h-4 text-blue-400 ml-2" />
+              </div>
+
+              <div className="relative mb-8">
+                <div className="inline-flex items-center justify-center w-32 h-32 rounded-full bg-gradient-to-br from-blue-500/20 to-indigo-600/20 backdrop-blur-xl border border-white/20 shadow-2xl">
+                  <div className="absolute inset-0 rounded-full bg-gradient-to-br from-blue-400/10 to-purple-600/10 animate-pulse"></div>
+                  <span className="text-6xl relative z-10">📝</span>
+                </div>
+                <div className="absolute -inset-4 bg-gradient-to-r from-blue-500/20 to-indigo-500/20 rounded-full blur-xl"></div>
+              </div>
+
+              <h1 className="text-6xl font-black mb-6 leading-tight">
+                <span className="bg-gradient-to-r from-white via-blue-200 to-cyan-300 bg-clip-text text-transparent drop-shadow-2xl">
+                  Pre-Test
+                </span>
+                <br />
+                <span className="bg-gradient-to-r from-cyan-300 via-blue-400 to-indigo-400 bg-clip-text text-transparent text-3xl">
+                  Tes Diagnostik Awal
+                </span>
+              </h1>
+
+              <p className="text-xl text-blue-200/90 max-w-3xl mx-auto leading-relaxed mb-8">
+                Uji pemahaman awal Anda tentang konsep rangkaian listrik sebelum memulai pembelajaran. 
+                Hasil tes ini akan membantu mengukur progress belajar Anda.
+              </p>
+            </div>
+
+            {/* Info Card */}
+            <div className="relative mb-8">
+              <div className="absolute -inset-1 bg-gradient-to-r from-blue-500/30 to-indigo-600/30 rounded-3xl blur"></div>
+              <div className="relative bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl rounded-3xl p-8 border border-white/20">
+                <div className="grid md:grid-cols-3 gap-6 mb-8">
+                  <div className="text-center">
+                    <div className="w-16 h-16 bg-blue-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <Target className="w-8 h-8 text-blue-400" />
+                    </div>
+                    <h3 className="text-lg font-bold text-blue-200 mb-2">5 Soal</h3>
+                    <p className="text-blue-300/80 text-sm">Pertanyaan pilihan ganda</p>
+                  </div>
+                  <div className="text-center">
+                    <div className="w-16 h-16 bg-emerald-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <Clock className="w-8 h-8 text-emerald-400" />
+                    </div>
+                    <h3 className="text-lg font-bold text-emerald-200 mb-2">~10 Menit</h3>
+                    <p className="text-emerald-300/80 text-sm">Waktu perkiraan</p>
+                  </div>
+                  <div className="text-center">
+                    <div className="w-16 h-16 bg-purple-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <CheckCircle className="w-8 h-8 text-purple-400" />
+                    </div>
+                    <h3 className="text-lg font-bold text-purple-200 mb-2">Tersimpan</h3>
+                    <p className="text-purple-300/80 text-sm">Hasil otomatis disimpan</p>
+                  </div>
+                </div>
+
+                <div className="bg-gradient-to-r from-amber-500/10 to-orange-500/10 rounded-xl p-4 border border-amber-400/30 mb-8">
+                  <div className="flex items-start">
+                    <div className="w-6 h-6 bg-amber-500/20 rounded-full flex items-center justify-center mr-3 mt-0.5">
+                      <span className="text-amber-400 text-sm">💡</span>
+                    </div>
+                    <div>
+                      <h4 className="text-amber-300 font-medium mb-2">Penting untuk diketahui:</h4>
+                      <ul className="text-amber-200/80 text-sm space-y-1">
+                        <li>• Login diperlukan untuk menyimpan hasil tes Anda</li>
+                        <li>• Jawab semua pertanyaan dengan jujur sesuai pemahaman Anda</li>
+                        <li>• Tidak ada nilai "salah" - ini untuk mengukur kemajuan belajar</li>
+                        <li>• Hasil akan dibandingkan dengan post-test nanti</li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="text-center">
+                  <button
+                    onClick={() => requireStudentLogin('pretest', '/pretest')}
+                    className="group bg-gradient-to-r from-blue-500 to-cyan-500 text-white px-12 py-4 rounded-2xl font-bold text-xl hover:from-blue-600 hover:to-cyan-600 transition-all transform hover:scale-105 shadow-2xl flex items-center justify-center mx-auto"
+                  >
+                    🚀 Mulai Pre-Test
+                    <ArrowRight className="w-6 h-6 ml-3 group-hover:translate-x-1 transition-transform" />
+                  </button>
+                  <p className="text-blue-300/60 text-sm mt-4">
+                    Klik tombol di atas untuk memulai tes diagnostik awal
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    )
   }
 
   if (showResults) {
@@ -400,6 +541,7 @@ export default function PretestPage() {
           </div>
         </div>
       </div>
+
     </div>
   )
 }

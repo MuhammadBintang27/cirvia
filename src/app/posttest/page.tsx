@@ -1,144 +1,292 @@
 'use client'
 
-import { useState } from 'react'
-import Link from 'next/link'
-import { Trophy, Star, Sparkles, ArrowRight, CheckCircle, XCircle, Clock, Target, Award } from 'lucide-react'
-import Navbar from '@/components/Navbar'
+import React, { useState, useEffect } from 'react';
+import { 
+  Brain, 
+  Zap, 
+  Target, 
+  Trophy, 
+  ChevronRight, 
+  RotateCcw, 
+  CheckCircle, 
+  XCircle, 
+  Lightbulb,
+  Star,
+  Sparkles,
+  ArrowRight,
+  Play,
+  Pause,
+  SkipForward
+} from 'lucide-react';
+import Navbar from '@/components/Navbar';
+import CircuitDiagram from '@/components/CircuitDiagram';
+import ResistorSelector from '@/components/ResistorSelector';
+import { useStudentAuth } from '@/hooks/useStudentAuth';
+import { circuitQuestions, calculateQuizScore, Resistor, CircuitQuestion } from '@/lib/questions';
+import { calculateCircuit, checkAnswer, generateSolutionSteps } from '@/lib/circuitCalculations';
 
-interface Question {
-  id: number
-  question: string
-  options: string[]
-  correct: number
-  explanation: string
+interface QuizState {
+  currentQuestionIndex: number;
+  selectedResistors: (number | null)[];
+  activeSlot: number | null;
+  selectedResistor: Resistor | null;
+  answers: boolean[];
+  showResult: boolean;
+  showHint: boolean;
+  quizCompleted: boolean;
+  startTime: number;
+  score: number;
 }
 
-const questions: Question[] = [
-  {
-    id: 1,
-    question: "Pada rangkaian seri, jika salah satu lampu padam maka …",
-    options: [
-      "Lampu lain tetap menyala",
-      "Semua lampu padam",
-      "Arus bertambah besar",
-      "Tegangan sumber menjadi nol"
-    ],
-    correct: 1,
-    explanation: "Pada rangkaian seri, jika satu lampu padam maka semua lampu padam karena arus terputus."
-  },
-  {
-    id: 2,
-    question: "Pada rangkaian paralel, besarnya tegangan pada setiap resistor adalah …",
-    options: [
-      "Sama dengan tegangan sumber",
-      "Lebih kecil pada resistor besar",
-      "Lebih besar pada resistor kecil",
-      "Jumlahnya sama dengan tegangan sumber"
-    ],
-    correct: 0,
-    explanation: "Pada rangkaian paralel, tegangan pada setiap resistor sama dengan tegangan sumber."
-  },
-  {
-    id: 3,
-    question: "Suatu rangkaian seri diberi tegangan 12 V dengan R1 = 4 Ω dan R2 = 2 Ω. Berapakah tegangan pada R1?",
-    options: [
-      "2 V",
-      "4 V",
-      "6 V",
-      "8 V"
-    ],
-    correct: 2,
-    explanation: "Tegangan pada R1: V1 = I × R1. Rtotal = 4 + 2 = 6Ω, I = 12/6 = 2A, V1 = 2A × 4Ω = 8V."
-  },
-  {
-    id: 4,
-    question: "Suatu rangkaian paralel terdiri dari dua resistor, R1 = 10 Ω dan R2 = 20 Ω, dihubungkan dengan baterai 12 V. Berapakah arus yang mengalir melalui R2?",
-    options: [
-      "0,2 A",
-      "0,4 A",
-      "0,6 A",
-      "1,2 A"
-    ],
-    correct: 1,
-    explanation: "I2 = V/R2 = 12V/20Ω = 0,6A. Jawaban yang benar adalah 0,6A."
-  },
-  {
-    id: 5,
-    question: "Instalasi listrik rumah menggunakan rangkaian paralel, tujuannya adalah …",
-    options: [
-      "Agar arus lebih kecil",
-      "Agar lampu lebih redup",
-      "Agar setiap alat mendapat tegangan penuh",
-      "Agar lebih hemat energi"
-    ],
-    correct: 2,
-    explanation: "Rangkaian paralel memastikan setiap alat mendapat tegangan penuh dari sumber."
-  }
-]
-
-export default function PostTest() {
-  const [currentQuestion, setCurrentQuestion] = useState(0)
-  const [selectedAnswer, setSelectedAnswer] = useState(-1)
-  const [answers, setAnswers] = useState<number[]>(new Array(questions.length).fill(-1))
-  const [showResults, setShowResults] = useState(false)
-
-  const handleAnswerSelect = (answerIndex: number) => {
-    setSelectedAnswer(answerIndex)
-    const newAnswers = [...answers]
-    newAnswers[currentQuestion] = answerIndex
-    setAnswers(newAnswers)
-  }
-
-  const handleNext = () => {
-    if (selectedAnswer !== -1) {
-      if (currentQuestion < questions.length - 1) {
-        setCurrentQuestion(currentQuestion + 1)
-        setSelectedAnswer(answers[currentQuestion + 1])
-      } else {
-        setShowResults(true)
-      }
+const PostTestPage = () => {
+  const [testStarted, setTestStarted] = useState(false);
+  const { requireStudentLogin, isLoggedInStudent } = useStudentAuth();
+  
+  // Auto-start test jika sudah login sebagai student
+  useEffect(() => {
+    if (isLoggedInStudent) {
+      setTestStarted(true);
     }
-  }
+  }, [isLoggedInStudent]);
+  
+  const [quizState, setQuizState] = useState<QuizState>({
+    currentQuestionIndex: 0,
+    selectedResistors: [],
+    activeSlot: null,
+    selectedResistor: null,
+    answers: [],
+    showResult: false,
+    showHint: false,
+    quizCompleted: false,
+    startTime: Date.now(),
+    score: 0
+  });
 
-  const handlePrevious = () => {
-    if (currentQuestion > 0) {
-      setCurrentQuestion(currentQuestion - 1)
-      setSelectedAnswer(answers[currentQuestion - 1])
+  const currentQuestion = circuitQuestions[quizState.currentQuestionIndex];
+  const [timeElapsed, setTimeElapsed] = useState(0);
+
+  // Timer effect
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setTimeElapsed(Math.floor((Date.now() - quizState.startTime) / 1000));
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [quizState.startTime]);
+
+  // Initialize resistor slots when question changes
+  useEffect(() => {
+    if (currentQuestion) {
+      setQuizState(prev => ({
+        ...prev,
+        selectedResistors: new Array(currentQuestion.resistorSlots).fill(null),
+        activeSlot: null,
+        selectedResistor: null,
+        showResult: false,
+        showHint: false
+      }));
     }
-  }
+  }, [quizState.currentQuestionIndex, currentQuestion]);
 
-  const calculateScore = () => {
-    return answers.reduce((score, answer, index) => {
-      return score + (answer === questions[index].correct ? 1 : 0)
-    }, 0)
-  }
+  const handleSlotClick = (slotIndex: number) => {
+    setQuizState(prev => ({
+      ...prev,
+      activeSlot: slotIndex,
+      selectedResistor: null
+    }));
+  };
 
-  const getScoreMessage = (score: number) => {
-    const percentage = (score / questions.length) * 100
-    if (percentage >= 90) return { message: "Outstanding! Anda telah menguasai konsep rangkaian listrik dengan sangat baik.", color: "text-green-400", icon: "🏆" }
-    if (percentage >= 80) return { message: "Excellent! Pemahaman Anda terhadap rangkaian listrik sudah sangat baik.", color: "text-green-400", icon: "🌟" }
-    if (percentage >= 70) return { message: "Good! Anda memiliki pemahaman yang baik tentang rangkaian listrik.", color: "text-blue-400", icon: "👍" }
-    if (percentage >= 60) return { message: "Fair. Anda perlu meninjau kembali beberapa konsep rangkaian listrik.", color: "text-yellow-400", icon: "📚" }
-    return { message: "Needs Improvement. Silakan pelajari kembali materi rangkaian listrik secara menyeluruh.", color: "text-red-400", icon: "📖" }
-  }
+  const handleResistorSelect = (resistor: Resistor) => {
+    if (quizState.activeSlot !== null) {
+      const newSelectedResistors = [...quizState.selectedResistors];
+      newSelectedResistors[quizState.activeSlot] = resistor.value;
+      
+      setQuizState(prev => ({
+        ...prev,
+        selectedResistors: newSelectedResistors,
+        selectedResistor: resistor,
+        activeSlot: null
+      }));
+    } else {
+      setQuizState(prev => ({
+        ...prev,
+        selectedResistor: resistor
+      }));
+    }
+  };
 
-  if (showResults) {
-    const score = calculateScore()
-    const scoreMessage = getScoreMessage(score)
-    const percentage = Math.round((score / questions.length) * 100)
+  const handleSubmitAnswer = () => {
+    const filledSlots = quizState.selectedResistors.filter(r => r !== null);
     
+    if (filledSlots.length !== currentQuestion.resistorSlots) {
+      alert('Silakan lengkapi semua slot resistor terlebih dahulu!');
+      return;
+    }
+
+    const resistorValues = quizState.selectedResistors as number[];
+    const result = calculateCircuit(currentQuestion.circuitType, currentQuestion.voltage, resistorValues);
+    const answerCheck = checkAnswer(result, currentQuestion.targetCurrent, currentQuestion.targetVoltage);
+
+    const newAnswers = [...quizState.answers];
+    newAnswers[quizState.currentQuestionIndex] = answerCheck.isCorrect;
+
+    setQuizState(prev => ({
+      ...prev,
+      answers: newAnswers,
+      showResult: true
+    }));
+  };
+
+  const startTest = () => {
+    setTestStarted(true);
+  };
+
+  const handleNextQuestion = () => {
+    if (quizState.currentQuestionIndex < circuitQuestions.length - 1) {
+      setQuizState(prev => ({
+        ...prev,
+        currentQuestionIndex: prev.currentQuestionIndex + 1
+      }));
+    } else {
+      // Quiz completed
+      const correctAnswers = quizState.answers.filter(Boolean).length;
+      const scoreData = calculateQuizScore(correctAnswers, circuitQuestions.length);
+      
+      setQuizState(prev => ({
+        ...prev,
+        quizCompleted: true,
+        score: scoreData.score
+      }));
+    }
+  };
+
+  const handleResetQuiz = () => {
+    setQuizState({
+      currentQuestionIndex: 0,
+      selectedResistors: [],
+      activeSlot: null,
+      selectedResistor: null,
+      answers: [],
+      showResult: false,
+      showHint: false,
+      quizCompleted: false,
+      startTime: Date.now(),
+      score: 0
+    });
+    setTimeElapsed(0);
+  };
+
+  const formatTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  };
+
+  const getCurrentResult = () => {
+    const filledSlots = quizState.selectedResistors.filter(r => r !== null);
+    if (filledSlots.length === currentQuestion.resistorSlots) {
+      const resistorValues = quizState.selectedResistors as number[];
+      return calculateCircuit(currentQuestion.circuitType, currentQuestion.voltage, resistorValues);
+    }
+    return null;
+  };
+
+  if (quizState.quizCompleted) {
+    const correctAnswers = quizState.answers.filter(Boolean).length;
+    const scoreData = calculateQuizScore(correctAnswers, circuitQuestions.length);
+    
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-950 to-indigo-900 relative overflow-hidden">
+        {/* Animated Background */}
+        <div className="absolute inset-0">
+          <div className="absolute top-20 left-10 w-72 h-72 bg-purple-500/10 rounded-full blur-3xl animate-pulse"></div>
+          <div className="absolute top-40 right-20 w-96 h-96 bg-pink-500/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
+          <div className="absolute bottom-20 left-1/3 w-80 h-80 bg-cyan-500/10 rounded-full blur-3xl animate-pulse delay-2000"></div>
+        </div>
+
+        <Navbar />
+
+        <div className="container mx-auto px-6 py-16 relative z-10">
+          <div className="max-w-4xl mx-auto text-center">
+            {/* Completion Badge */}
+            <div className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-yellow-400/20 to-amber-400/20 rounded-full border border-yellow-400/30 backdrop-blur-sm mb-8">
+              <Trophy className="w-6 h-6 text-yellow-400 mr-3" />
+              <span className="text-yellow-400 text-lg font-bold">Post-Test Selesai!</span>
+              <Sparkles className="w-6 h-6 text-yellow-400 ml-3" />
+            </div>
+
+            {/* Score Display */}
+            <div className="relative mb-12">
+              <div className="inline-flex items-center justify-center w-40 h-40 rounded-full bg-gradient-to-br from-purple-500/20 to-pink-600/20 backdrop-blur-xl border border-white/20 shadow-2xl">
+                <div className="text-center">
+                  <div className="text-5xl font-black text-white mb-2">{Math.round(scoreData.score)}%</div>
+                  <div className="text-lg font-bold text-purple-300">{scoreData.grade}</div>
+                </div>
+              </div>
+            </div>
+
+            {/* Results */}
+            <h1 className="text-5xl font-black mb-6 bg-gradient-to-r from-white via-purple-200 to-pink-300 bg-clip-text text-transparent">
+              {scoreData.message}
+            </h1>
+
+            {/* Statistics */}
+            <div className="grid md:grid-cols-4 gap-6 mb-12">
+              <div className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl rounded-2xl p-6 border border-white/20">
+                <div className="text-2xl font-bold text-white mb-2">{correctAnswers}/{circuitQuestions.length}</div>
+                <div className="text-purple-300">Jawaban Benar</div>
+              </div>
+              <div className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl rounded-2xl p-6 border border-white/20">
+                <div className="text-2xl font-bold text-white mb-2">{formatTime(timeElapsed)}</div>
+                <div className="text-purple-300">Waktu Total</div>
+              </div>
+              <div className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl rounded-2xl p-6 border border-white/20">
+                <div className="text-2xl font-bold text-white mb-2">{Math.round(timeElapsed / circuitQuestions.length)}s</div>
+                <div className="text-purple-300">Rata-rata/Soal</div>
+              </div>
+              <div className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl rounded-2xl p-6 border border-white/20">
+                <div className="text-2xl font-bold text-white mb-2">{scoreData.grade}</div>
+                <div className="text-purple-300">Grade</div>
+              </div>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <button
+                onClick={handleResetQuiz}
+                className="flex items-center justify-center px-8 py-4 bg-gradient-to-r from-purple-500 to-pink-600 text-white rounded-2xl font-bold text-lg hover:from-purple-600 hover:to-pink-700 transition-all transform hover:scale-105 shadow-2xl"
+              >
+                <RotateCcw className="w-5 h-5 mr-2" />
+                Ulangi Post-Test
+              </button>
+              <button
+                onClick={() => window.location.href = '/test'}
+                className="flex items-center justify-center px-8 py-4 bg-gradient-to-r from-blue-500 to-cyan-600 text-white rounded-2xl font-bold text-lg hover:from-blue-600 hover:to-cyan-700 transition-all transform hover:scale-105 shadow-2xl"
+              >
+                Kembali ke Menu
+                <ArrowRight className="w-5 h-5 ml-2" />
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Welcome Screen - belum mulai test
+  if (!testStarted) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-950 to-indigo-900 relative overflow-hidden">
         {/* Animated Background Elements */}
         <div className="absolute inset-0">
-          <div className="absolute top-20 left-10 w-72 h-72 bg-emerald-500/10 rounded-full blur-3xl animate-pulse"></div>
-          <div className="absolute top-40 right-20 w-96 h-96 bg-teal-500/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
+          <div className="absolute top-20 left-10 w-72 h-72 bg-purple-500/10 rounded-full blur-3xl animate-pulse"></div>
+          <div className="absolute top-40 right-20 w-96 h-96 bg-pink-500/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
           <div className="absolute bottom-20 left-1/3 w-80 h-80 bg-cyan-500/10 rounded-full blur-3xl animate-pulse delay-2000"></div>
           
           {[...Array(20)].map((_, i) => (
             <div
               key={i}
-              className="absolute w-1 h-1 bg-emerald-400/30 rounded-full animate-ping"
+              className="absolute w-1 h-1 bg-purple-400/30 rounded-full animate-ping"
               style={{
                 left: `${Math.random() * 100}%`,
                 top: `${Math.random() * 100}%`,
@@ -155,135 +303,98 @@ export default function PostTest() {
           <div className="max-w-4xl mx-auto">
             {/* Hero Section */}
             <div className="text-center mb-12">
-              <div className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-emerald-400/20 to-teal-400/20 rounded-full border border-emerald-400/30 backdrop-blur-sm mb-8">
-                <Award className="w-4 h-4 text-emerald-400 mr-2" />
-                <span className="text-emerald-400 text-sm font-medium">Tes Sumatif Results</span>
-                <Sparkles className="w-4 h-4 text-emerald-400 ml-2" />
+              <div className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-purple-400/20 to-pink-400/20 rounded-full border border-purple-400/30 backdrop-blur-sm mb-8">
+                <Trophy className="w-4 h-4 text-purple-400 mr-2" />
+                <span className="text-purple-400 text-sm font-medium">Tes Evaluasi Akhir</span>
+                <Sparkles className="w-4 h-4 text-purple-400 ml-2" />
               </div>
 
               <div className="relative mb-8">
-                <div className="inline-flex items-center justify-center w-32 h-32 rounded-full bg-gradient-to-br from-emerald-500/20 to-teal-600/20 backdrop-blur-xl border border-white/20 shadow-2xl">
-                  <div className="absolute inset-0 rounded-full bg-gradient-to-br from-emerald-400/10 to-teal-600/10 animate-pulse"></div>
-                  <span className="text-6xl relative z-10">{scoreMessage.icon}</span>
+                <div className="inline-flex items-center justify-center w-32 h-32 rounded-full bg-gradient-to-br from-purple-500/20 to-pink-600/20 backdrop-blur-xl border border-white/20 shadow-2xl">
+                  <div className="absolute inset-0 rounded-full bg-gradient-to-br from-purple-400/10 to-pink-600/10 animate-pulse"></div>
+                  <span className="text-6xl relative z-10">✅</span>
                 </div>
-                <div className="absolute -inset-4 bg-gradient-to-r from-emerald-500/20 to-teal-500/20 rounded-full blur-xl"></div>
+                <div className="absolute -inset-4 bg-gradient-to-r from-purple-500/20 to-pink-500/20 rounded-full blur-xl"></div>
               </div>
 
               <h1 className="text-6xl font-black mb-6 leading-tight">
-                <span className="bg-gradient-to-r from-white via-emerald-200 to-teal-300 bg-clip-text text-transparent drop-shadow-2xl">
-                  Tes Sumatif
+                <span className="bg-gradient-to-r from-white via-purple-200 to-pink-300 bg-clip-text text-transparent drop-shadow-2xl">
+                  Post-Test
                 </span>
                 <br />
-                <span className="bg-gradient-to-r from-teal-300 via-emerald-400 to-green-400 bg-clip-text text-transparent">
-                  Complete!
+                <span className="bg-gradient-to-r from-pink-300 via-purple-400 to-indigo-400 bg-clip-text text-transparent text-3xl">
+                  Tes Evaluasi Akhir
                 </span>
               </h1>
+
+              <p className="text-xl text-purple-200/90 max-w-3xl mx-auto leading-relaxed mb-8">
+                Uji pemahaman Anda setelah mempelajari materi dan mengikuti praktikum rangkaian listrik. 
+                Bandingkan kemajuan Anda dengan hasil pre-test sebelumnya.
+              </p>
             </div>
 
-            {/* Results Card */}
-            <div className="relative">
-              <div className="absolute -inset-1 bg-gradient-to-r from-emerald-500/30 to-teal-600/30 rounded-3xl blur"></div>
-              <div className="relative bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl rounded-3xl p-12 border border-white/20 text-center">
-                <div className="flex items-center justify-center w-24 h-24 bg-gradient-to-br from-emerald-500/20 to-teal-600/20 rounded-full mb-8 mx-auto">
-                  <Trophy className="w-12 h-12 text-emerald-400" />
-                </div>
-                
-                <h2 className="text-4xl font-bold text-white mb-6">Selamat! Assessment Selesai</h2>
-                
-                <div className="text-7xl font-black text-transparent bg-gradient-to-r from-emerald-400 to-teal-400 bg-clip-text mb-4">
-                  {score}/{questions.length}
-                </div>
-                
-                <div className="text-2xl text-emerald-200 mb-6">
-                  Final Score: {percentage}%
-                </div>
-                
-                <p className={`text-lg mb-8 max-w-2xl mx-auto ${scoreMessage.color}`}>
-                  {scoreMessage.message}
-                </p>
-
-                {/* Achievement Badge */}
-                {percentage >= 80 && (
-                  <div className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-yellow-400/20 to-amber-400/20 rounded-full border border-yellow-400/30 backdrop-blur-sm mb-8">
-                    <Award className="w-5 h-5 text-yellow-400 mr-2" />
-                    <span className="text-yellow-400 font-medium">Achievement Unlocked: Circuit Master!</span>
-                    <Sparkles className="w-5 h-5 text-yellow-400 ml-2" />
+            {/* Info Card */}
+            <div className="relative mb-8">
+              <div className="absolute -inset-1 bg-gradient-to-r from-purple-500/30 to-pink-600/30 rounded-3xl blur"></div>
+              <div className="relative bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl rounded-3xl p-8 border border-white/20">
+                <div className="grid md:grid-cols-3 gap-6 mb-8">
+                  <div className="text-center">
+                    <div className="w-16 h-16 bg-purple-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <Brain className="w-8 h-8 text-purple-400" />
+                    </div>
+                    <h3 className="text-lg font-bold text-purple-200 mb-2">Circuit Analysis</h3>
+                    <p className="text-purple-300/80 text-sm">Analisis rangkaian interaktif</p>
                   </div>
-                )}
-
-                <div className="grid md:grid-cols-3 gap-4 mb-8 max-w-3xl mx-auto">
-                  <Link 
-                    href="/materials" 
-                    className="group bg-gradient-to-r from-blue-500 to-cyan-500 text-white px-6 py-4 rounded-2xl font-bold text-lg hover:from-blue-600 hover:to-cyan-600 transition-all transform hover:scale-105 shadow-2xl flex items-center justify-center"
-                  >
-                    📚 Review Materi
-                    <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
-                  </Link>
-                  
-                  <Link 
-                    href="/practicum" 
-                    className="group bg-gradient-to-r from-purple-500 to-pink-500 text-white px-6 py-4 rounded-2xl font-bold text-lg hover:from-purple-600 hover:to-pink-600 transition-all transform hover:scale-105 shadow-2xl flex items-center justify-center"
-                  >
-                    🔬 Practice More
-                    <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
-                  </Link>
-
-                  <Link 
-                    href="/quiz" 
-                    className="group bg-gradient-to-r from-orange-500 to-red-500 text-white px-6 py-4 rounded-2xl font-bold text-lg hover:from-orange-600 hover:to-red-600 transition-all transform hover:scale-105 shadow-2xl flex items-center justify-center"
-                  >
-                    🎯 Try Quiz
-                    <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
-                  </Link>
+                  <div className="text-center">
+                    <div className="w-16 h-16 bg-pink-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <Zap className="w-8 h-8 text-pink-400" />
+                    </div>
+                    <h3 className="text-lg font-bold text-pink-200 mb-2">Real Calculation</h3>
+                    <p className="text-pink-300/80 text-sm">Perhitungan I, V, R aktual</p>
+                  </div>
+                  <div className="text-center">
+                    <div className="w-16 h-16 bg-indigo-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <Target className="w-8 h-8 text-indigo-400" />
+                    </div>
+                    <h3 className="text-lg font-bold text-indigo-200 mb-2">Progress Tracking</h3>
+                    <p className="text-indigo-300/80 text-sm">Monitor kemajuan belajar</p>
+                  </div>
                 </div>
 
-                <details className="text-left max-w-4xl mx-auto">
-                  <summary className="cursor-pointer text-emerald-300 hover:text-emerald-100 font-medium mb-6 text-center">
-                    📋 Lihat Review Jawaban Lengkap
-                  </summary>
-                  
-                  <div className="space-y-4">
-                    {questions.map((question, index) => (
-                      <div key={question.id} className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl p-6">
-                        <h4 className="font-medium text-white mb-3">
-                          {index + 1}. {question.question}
-                        </h4>
-                        
-                        <div className="flex items-center space-x-4 mb-3">
-                          <span className="text-sm text-emerald-200">Jawaban Anda:</span>
-                          <div className="flex items-center space-x-2">
-                            <span className={`font-medium ${
-                              answers[index] === question.correct ? 'text-green-400' : 'text-red-400'
-                            }`}>
-                              {answers[index] !== -1 ? question.options[answers[index]] : 'Tidak dijawab'}
-                            </span>
-                            {answers[index] === question.correct ? 
-                              <CheckCircle className="w-5 h-5 text-green-400" /> : 
-                              <XCircle className="w-5 h-5 text-red-400" />
-                            }
-                          </div>
-                        </div>
-                        
-                        {answers[index] !== question.correct && (
-                          <div className="text-sm mb-3">
-                            <span className="text-emerald-200">Jawaban yang benar:</span>
-                            <span className="text-green-400 font-medium ml-2">
-                              {question.options[question.correct]}
-                            </span>
-                          </div>
-                        )}
-                        
-                        <div className="text-sm text-emerald-200/80 italic bg-emerald-500/10 p-3 rounded-lg">
-                          💡 {question.explanation}
-                        </div>
-                      </div>
-                    ))}
+                <div className="bg-gradient-to-r from-emerald-500/10 to-teal-500/10 rounded-xl p-4 border border-emerald-400/30 mb-8">
+                  <div className="flex items-start">
+                    <div className="w-6 h-6 bg-emerald-500/20 rounded-full flex items-center justify-center mr-3 mt-0.5">
+                      <span className="text-emerald-400 text-sm">🎯</span>
+                    </div>
+                    <div>
+                      <h4 className="text-emerald-300 font-medium mb-2">Fitur Post-Test:</h4>
+                      <ul className="text-emerald-200/80 text-sm space-y-1">
+                        <li>• Simulasi rangkaian listrik interaktif dengan drag & drop</li>
+                        <li>• Perhitungan otomatis nilai I (Arus), V (Tegangan), R (Resistansi)</li>
+                        <li>• Bandingkan hasil dengan pre-test untuk melihat progress</li>
+                        <li>• Feedback detail untuk setiap jawaban yang diberikan</li>
+                      </ul>
+                    </div>
                   </div>
-                </details>
+                </div>
+
+                <div className="text-center">
+                  <button
+                    onClick={() => requireStudentLogin('posttest', '/posttest')}
+                    className="group bg-gradient-to-r from-purple-500 to-pink-500 text-white px-12 py-4 rounded-2xl font-bold text-xl hover:from-purple-600 hover:to-pink-600 transition-all transform hover:scale-105 shadow-2xl flex items-center justify-center mx-auto"
+                  >
+                    🚀 Mulai Post-Test
+                    <ArrowRight className="w-6 h-6 ml-3 group-hover:translate-x-1 transition-transform" />
+                  </button>
+                  <p className="text-purple-300/60 text-sm mt-4">
+                    Klik tombol di atas untuk memulai evaluasi akhir pembelajaran
+                  </p>
+                </div>
               </div>
             </div>
           </div>
         </div>
+
       </div>
     )
   }
@@ -292,14 +403,15 @@ export default function PostTest() {
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-950 to-indigo-900 relative overflow-hidden">
       {/* Animated Background Elements */}
       <div className="absolute inset-0">
-        <div className="absolute top-20 left-10 w-72 h-72 bg-emerald-500/10 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute top-40 right-20 w-96 h-96 bg-teal-500/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
+        <div className="absolute top-20 left-10 w-72 h-72 bg-purple-500/10 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute top-40 right-20 w-96 h-96 bg-pink-500/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
         <div className="absolute bottom-20 left-1/3 w-80 h-80 bg-cyan-500/10 rounded-full blur-3xl animate-pulse delay-2000"></div>
         
-        {[...Array(20)].map((_, i) => (
+        {/* Floating particles */}
+        {[...Array(15)].map((_, i) => (
           <div
             key={i}
-            className="absolute w-1 h-1 bg-emerald-400/30 rounded-full animate-ping"
+            className="absolute w-1 h-1 bg-purple-400/30 rounded-full animate-ping"
             style={{
               left: `${Math.random() * 100}%`,
               top: `${Math.random() * 100}%`,
@@ -312,134 +424,235 @@ export default function PostTest() {
 
       <Navbar />
 
-      <div className="container mx-auto px-6 py-16 relative z-10">
-        <div className="max-w-4xl mx-auto">
+      <div className="container mx-auto px-6 py-8 relative z-10">
+        <div className="max-w-7xl mx-auto">
           {/* Header */}
-          <div className="text-center mb-12">
-            <div className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-emerald-400/20 to-teal-400/20 rounded-full border border-emerald-400/30 backdrop-blur-sm mb-8">
-              <Target className="w-4 h-4 text-emerald-400 mr-2" />
-              <span className="text-emerald-400 text-sm font-medium">Tes Sumatif</span>
-              <span className="text-emerald-300 text-sm ml-2">
-                Pertanyaan {currentQuestion + 1} dari {questions.length}
-              </span>
+          <div className="text-center mb-8">
+            <div className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-purple-400/20 to-pink-400/20 rounded-full border border-purple-400/30 backdrop-blur-sm mb-6">
+              <Brain className="w-5 h-5 text-purple-400 mr-2" />
+              <span className="text-purple-400 text-sm font-medium">Interactive Circuit Post-Test</span>
+              <Zap className="w-5 h-5 text-pink-400 ml-2" />
             </div>
 
-            <h1 className="text-5xl font-black mb-6 leading-tight">
-              <span className="bg-gradient-to-r from-white via-emerald-200 to-teal-300 bg-clip-text text-transparent drop-shadow-2xl">
-                Tes Sumatif
+            <h1 className="text-4xl md:text-6xl font-black mb-4 leading-tight">
+              <span className="bg-gradient-to-r from-white via-purple-200 to-pink-300 bg-clip-text text-transparent drop-shadow-2xl">
+                Post-Test Rangkaian
+              </span>
+              <br />
+              <span className="bg-gradient-to-r from-pink-300 via-purple-400 to-indigo-400 bg-clip-text text-transparent">
+                Listrik
               </span>
             </h1>
           </div>
 
           {/* Progress Bar */}
           <div className="mb-8">
-            <div className="flex justify-between text-sm text-emerald-200 mb-2">
-              <span>Progress</span>
-              <span>{Math.round(((currentQuestion + 1) / questions.length) * 100)}%</span>
-            </div>
-            <div className="w-full bg-emerald-900/30 rounded-full h-3 overflow-hidden shadow-inner">
-              <div 
-                className="bg-gradient-to-r from-emerald-500 to-teal-500 h-3 rounded-full transition-all duration-500 relative overflow-hidden"
-                style={{ width: `${((currentQuestion + 1) / questions.length) * 100}%` }}
-              >
-                <div className="absolute inset-0 bg-white/20 rounded-full animate-pulse"></div>
-              </div>
-            </div>
-          </div>
-
-          {/* Question Card */}
-          <div className="relative">
-            <div className="absolute -inset-1 bg-gradient-to-r from-emerald-500/30 to-teal-600/30 rounded-3xl blur"></div>
-            <div className="relative bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl rounded-3xl p-10 border border-white/20">
-              <div className="mb-8">
-                <div className="flex items-center mb-4">
-                  <div className="w-8 h-8 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-full flex items-center justify-center text-white font-bold mr-4">
-                    {currentQuestion + 1}
-                  </div>
-                  <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></div>
+            <div className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl rounded-2xl p-6 border border-white/20">
+              <div className="flex justify-between items-center mb-4">
+                <div className="text-white font-bold">
+                  Soal {quizState.currentQuestionIndex + 1} dari {circuitQuestions.length}
                 </div>
-                <h2 className="text-2xl font-bold text-white mb-4 leading-relaxed">
-                  {questions[currentQuestion].question}
-                  {/* Show image for question 3 and 4 */}
-                  {currentQuestion === 2 && (
-                    <img src="/soal/soal3.png" alt="Soal 3" className="mt-4 rounded-lg mx-auto max-w-xs shadow-lg" />
-                  )}
-                  {currentQuestion === 3 && (
-                    <img src="/soal/soal4.png" alt="Soal 4" className="mt-4 rounded-lg mx-auto max-w-xs shadow-lg" />
-                  )}
-                </h2>
+                <div className="flex items-center space-x-4">
+                  <div className="text-cyan-300 font-bold">{formatTime(timeElapsed)}</div>
+                  <div className="text-purple-300">
+                    Benar: {quizState.answers.filter(Boolean).length}
+                  </div>
+                </div>
+              </div>
+              <div className="w-full bg-white/10 rounded-full h-3">
+                <div 
+                  className="bg-gradient-to-r from-purple-500 to-pink-500 h-3 rounded-full transition-all duration-500"
+                  style={{ width: `${((quizState.currentQuestionIndex + 1) / circuitQuestions.length) * 100}%` }}
+                ></div>
+              </div>
+            </div>
+          </div>
+
+          {/* Question Section */}
+          <div className="grid lg:grid-cols-2 gap-8 mb-8">
+            {/* Question Info */}
+            <div className="space-y-6">
+              <div className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl rounded-2xl p-8 border border-white/20">
+                <div className="flex items-center mb-4">
+                  <div className={`w-3 h-3 rounded-full mr-3 ${currentQuestion.difficulty === 'easy' ? 'bg-green-400' : currentQuestion.difficulty === 'medium' ? 'bg-yellow-400' : 'bg-red-400'}`}></div>
+                  <span className="text-white/70 text-sm font-medium uppercase">
+                    {currentQuestion.difficulty === 'easy' ? 'Mudah' : currentQuestion.difficulty === 'medium' ? 'Sedang' : 'Sulit'}
+                  </span>
+                </div>
+                
+                <h2 className="text-2xl font-bold text-white mb-4">{currentQuestion.title}</h2>
+                <p className="text-blue-200/90 text-lg mb-6">{currentQuestion.description}</p>
+                
+                {/* Target Info */}
+                <div className="bg-gradient-to-r from-cyan-500/10 to-blue-500/10 rounded-xl p-4 border border-cyan-400/30 mb-6">
+                  <div className="flex items-center mb-2">
+                    <Target className="w-5 h-5 text-cyan-400 mr-2" />
+                    <span className="text-cyan-300 font-bold">Target:</span>
+                  </div>
+                  <div className="text-white">
+                    {currentQuestion.targetCurrent && (
+                      <div>Arus: <span className="font-bold text-cyan-300">{currentQuestion.targetCurrent}A</span></div>
+                    )}
+                    {currentQuestion.targetVoltage && (
+                      <div>Tegangan: <span className="font-bold text-cyan-300">{currentQuestion.targetVoltage}V</span></div>
+                    )}
+                    <div>Sumber tegangan: <span className="font-bold text-yellow-300">{currentQuestion.voltage}V</span></div>
+                  </div>
+                </div>
+
+                {/* Hint Button */}
+                <button
+                  onClick={() => setQuizState(prev => ({ ...prev, showHint: !prev.showHint }))}
+                  className="flex items-center px-4 py-2 bg-gradient-to-r from-yellow-500/20 to-amber-500/20 rounded-xl border border-yellow-400/30 text-yellow-300 hover:bg-yellow-500/30 transition-all"
+                >
+                  <Lightbulb className="w-4 h-4 mr-2" />
+                  {quizState.showHint ? 'Sembunyikan Hint' : 'Tampilkan Hint'}
+                </button>
+
+                {quizState.showHint && (
+                  <div className="mt-4 p-4 bg-gradient-to-r from-yellow-500/10 to-amber-500/10 rounded-xl border border-yellow-400/30">
+                    <p className="text-yellow-200">{currentQuestion.hint}</p>
+                  </div>
+                )}
               </div>
 
-              <div className="space-y-4 mb-10">
-                {questions[currentQuestion].options.map((option, index) => (
-                  <button
-                    key={index}
-                    onClick={() => handleAnswerSelect(index)}
-                    className={`w-full text-left p-6 rounded-2xl border-2 transition-all transform hover:scale-[1.02] ${
-                      selectedAnswer === index
-                        ? 'border-emerald-400 bg-emerald-500/20 text-white shadow-lg shadow-emerald-500/25'
-                        : 'border-white/20 hover:border-white/30 text-emerald-100 hover:bg-white/5'
-                    }`}
-                  >
-                    <div className="flex items-center">
-                      <div className={`w-8 h-8 rounded-full border-2 flex items-center justify-center mr-4 transition-all ${
-                        selectedAnswer === index
-                          ? 'border-emerald-400 bg-emerald-500 text-white'
-                          : 'border-white/30 text-white/70'
-                      }`}>
-                        {selectedAnswer === index ? (
-                          <CheckCircle className="w-5 h-5" />
-                        ) : (
-                          <span className="font-bold">{String.fromCharCode(65 + index)}</span>
-                        )}
+              {/* Resistor Selector */}
+              <ResistorSelector
+                availableResistors={currentQuestion.availableResistors}
+                onResistorSelect={handleResistorSelect}
+                selectedResistor={quizState.selectedResistor}
+                disabled={quizState.showResult}
+              />
+            </div>
+
+            {/* Circuit Diagram */}
+            <div className="space-y-6">
+              <CircuitDiagram
+                circuitType={currentQuestion.circuitType}
+                voltage={currentQuestion.voltage}
+                resistorValues={quizState.selectedResistors}
+                resistorSlots={currentQuestion.resistorSlots}
+                onSlotClick={handleSlotClick}
+                activeSlot={quizState.activeSlot ?? undefined}
+                showValues={true}
+              />
+
+              {/* Current Results Display */}
+              {getCurrentResult() && (
+                <div className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl rounded-2xl p-6 border border-white/20">
+                  <h4 className="text-white font-bold mb-4 flex items-center">
+                    <Zap className="w-5 h-5 mr-2 text-yellow-400" />
+                    Hasil Perhitungan
+                  </h4>
+                  {(() => {
+                    const result = getCurrentResult()!;
+                    return (
+                      <div className="space-y-2 text-sm">
+                        <div className="flex justify-between">
+                          <span className="text-blue-200/70">Resistansi Total:</span>
+                          <span className="text-white font-mono">{result.totalResistance.toFixed(2)}Ω</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-blue-200/70">Arus Total:</span>
+                          <span className="text-white font-mono">{result.totalCurrent.toFixed(4)}A</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-blue-200/70">Daya Total:</span>
+                          <span className="text-white font-mono">{result.totalPower.toFixed(4)}W</span>
+                        </div>
                       </div>
-                      <span className="font-medium text-lg">{option}</span>
+                    );
+                  })()}
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Action Buttons */}
+          <div className="flex justify-center space-x-4 mb-8">
+            {!quizState.showResult ? (
+              <button
+                onClick={handleSubmitAnswer}
+                disabled={quizState.selectedResistors.includes(null)}
+                className="flex items-center px-8 py-4 bg-gradient-to-r from-purple-500 to-pink-600 text-white rounded-2xl font-bold text-lg hover:from-purple-600 hover:to-pink-700 transition-all transform hover:scale-105 shadow-2xl disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+              >
+                <CheckCircle className="w-5 h-5 mr-2" />
+                Submit Jawaban
+              </button>
+            ) : (
+              <button
+                onClick={handleNextQuestion}
+                className="flex items-center px-8 py-4 bg-gradient-to-r from-blue-500 to-cyan-600 text-white rounded-2xl font-bold text-lg hover:from-blue-600 hover:to-cyan-700 transition-all transform hover:scale-105 shadow-2xl"
+              >
+                {quizState.currentQuestionIndex < circuitQuestions.length - 1 ? (
+                  <>
+                    Soal Berikutnya
+                    <SkipForward className="w-5 h-5 ml-2" />
+                  </>
+                ) : (
+                  <>
+                    Selesai Post-Test
+                    <Trophy className="w-5 h-5 ml-2" />
+                  </>
+                )}
+              </button>
+            )}
+          </div>
+
+          {/* Result Display */}
+          {quizState.showResult && (() => {
+            const result = getCurrentResult()!;
+            const answerCheck = checkAnswer(result, currentQuestion.targetCurrent, currentQuestion.targetVoltage);
+            
+            return (
+              <div className="mb-8">
+                <div className={`bg-gradient-to-br backdrop-blur-xl rounded-2xl p-8 border ${
+                  answerCheck.isCorrect 
+                    ? 'from-green-500/10 to-emerald-500/10 border-green-400/30' 
+                    : 'from-red-500/10 to-pink-500/10 border-red-400/30'
+                }`}>
+                  <div className="flex items-center mb-4">
+                    {answerCheck.isCorrect ? (
+                      <CheckCircle className="w-8 h-8 text-green-400 mr-3" />
+                    ) : (
+                      <XCircle className="w-8 h-8 text-red-400 mr-3" />
+                    )}
+                    <h3 className="text-2xl font-bold text-white">
+                      {answerCheck.isCorrect ? 'Benar!' : 'Kurang Tepat'}
+                    </h3>
+                  </div>
+                  
+                  <p className="text-lg text-white mb-4">{answerCheck.message}</p>
+                  <p className="text-blue-200/80 mb-6">{answerCheck.details}</p>
+                  
+                  {/* Solution Steps */}
+                  <div className="bg-white/5 rounded-xl p-6 border border-white/10">
+                    <h4 className="text-white font-bold mb-4">💡 Penjelasan Lengkap:</h4>
+                    <div className="space-y-2">
+                      {generateSolutionSteps(
+                        currentQuestion.circuitType,
+                        currentQuestion.voltage,
+                        quizState.selectedResistors as number[],
+                        result
+                      ).map((step, index) => (
+                        <div key={index} className="text-blue-200/80 text-sm font-mono">
+                          {step}
+                        </div>
+                      ))}
                     </div>
-                  </button>
-                ))}
+                    <div className="mt-4 pt-4 border-t border-white/10">
+                      <p className="text-cyan-200 text-sm">{currentQuestion.explanation}</p>
+                    </div>
+                  </div>
+                </div>
               </div>
-
-              {/* Navigation */}
-              <div className="flex justify-between">
-                <button
-                  onClick={handlePrevious}
-                  disabled={currentQuestion === 0}
-                  className={`px-8 py-4 rounded-2xl font-bold text-lg transition-all ${
-                    currentQuestion === 0
-                      ? 'bg-gray-700 text-gray-500 cursor-not-allowed'
-                      : 'bg-white/10 text-white hover:bg-white/20 border border-white/20 hover:border-white/30'
-                  }`}
-                >
-                  ← Sebelumnya
-                </button>
-
-                <button
-                  onClick={handleNext}
-                  disabled={selectedAnswer === -1}
-                  className={`px-8 py-4 rounded-2xl font-bold text-lg transition-all transform hover:scale-105 shadow-2xl flex items-center ${
-                    selectedAnswer === -1
-                      ? 'bg-gray-700 text-gray-500 cursor-not-allowed'
-                      : 'bg-gradient-to-r from-emerald-500 to-teal-500 text-white hover:from-emerald-600 hover:to-teal-600 hover:shadow-emerald-500/25'
-                  }`}
-                >
-                  {currentQuestion === questions.length - 1 ? 'Selesai' : 'Selanjutnya'}
-                  <ArrowRight className="w-5 h-5 ml-2" />
-                </button>
-              </div>
-            </div>
-          </div>
-
-          {/* Instructions */}
-          <div className="mt-8 text-center">
-            <div className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-teal-500/20 to-emerald-500/20 rounded-full border border-teal-400/30 backdrop-blur-sm">
-              <Clock className="w-5 h-5 text-teal-400 mr-2" />
-              <span className="text-teal-300 font-medium">
-                💡 Jawab semua pertanyaan untuk menyelesaikan Tes Sumatif
-              </span>
-            </div>
-          </div>
+            );
+          })()}
         </div>
       </div>
+
     </div>
-  )
-}
+  );
+};
+
+export default PostTestPage;
