@@ -22,8 +22,10 @@ import Navbar from '@/components/Navbar';
 import CircuitDiagram from '@/components/CircuitDiagram';
 import ResistorSelector from '@/components/ResistorSelector';
 import { useStudentAuth } from '@/hooks/useStudentAuth';
+import { useAuth } from '@/contexts/AuthContext';
 import { circuitQuestions, calculateQuizScore, Resistor, CircuitQuestion } from '@/lib/questions';
 import { calculateCircuit, checkAnswer, generateSolutionSteps } from '@/lib/circuitCalculations';
+import { SupabaseTestService, TestAnswerInput } from '@/lib/supabase-test-service';
 
 interface QuizState {
   currentQuestionIndex: number;
@@ -41,6 +43,7 @@ interface QuizState {
 const PostTestPage = () => {
   const [testStarted, setTestStarted] = useState(false);
   const { requireStudentLogin, isLoggedInStudent } = useStudentAuth();
+  const { user } = useAuth();
   
   // Auto-start test jika sudah login sebagai student
   useEffect(() => {
@@ -151,6 +154,43 @@ const PostTestPage = () => {
       // Quiz completed
       const correctAnswers = quizState.answers.filter(Boolean).length;
       const scoreData = calculateQuizScore(correctAnswers, circuitQuestions.length);
+      
+      // Save test result if user is logged in as student
+      if (user && user.role === 'student') {
+        const totalTimeSpent = Math.floor((Date.now() - quizState.startTime) / 1000);
+        
+        // Create test answers array for detailed tracking
+        const testAnswers: TestAnswerInput[] = circuitQuestions.map((question, index) => ({
+          questionId: question.id,
+          selectedAnswer: quizState.answers[index] ? 1 : 0, // 1 for correct, 0 for incorrect
+          correctAnswer: 1, // Always 1 for correct in circuit questions
+          isCorrect: quizState.answers[index],
+          questionText: question.title,
+          selectedText: quizState.answers[index] ? 'Benar' : 'Salah',
+          correctText: 'Benar',
+          explanation: question.explanation || question.hint
+        }));
+
+        const percentage = Math.round(scoreData.score);
+        const grade = SupabaseTestService.calculateGrade(percentage);
+
+        // Save to Supabase
+        SupabaseTestService.saveTestResult({
+          studentId: user.id,
+          studentName: user.name,
+          studentNis: user.nis,
+          testType: 'posttest',
+          score: correctAnswers,
+          totalQuestions: circuitQuestions.length,
+          correctAnswers,
+          percentage,
+          timeSpent: totalTimeSpent,
+          answers: testAnswers,
+          grade
+        }).catch(error => {
+          console.error('Error saving posttest result:', error);
+        });
+      }
       
       setQuizState(prev => ({
         ...prev,

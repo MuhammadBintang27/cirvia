@@ -23,32 +23,50 @@ Platform pembelajaran fisika interaktif untuk simulasi rangkaian listrik dengan 
 ## 🛠️ Teknologi yang Digunakan
 
 - **Framework**: Next.js 14 dengan TypeScript
-- **Styling**: Tailwind CSS
+- **Database**: Supabase PostgreSQL
+- **Authentication**: Supabase Auth dengan bcryptjs
+- **Styling**: Tailwind CSS dengan Glass Morphism
 - **Computer Vision**: MediaPipe, TensorFlow.js, WebRTC API
-- **Icons & Animations**: CSS animations, Emoji icons
+- **Icons & Animations**: Lucide React, CSS animations
 
 ## 🚀 Instalasi dan Menjalankan
 
-1. **Clone repository**
-   ```bash
-   git clone <repository-url>
-   cd physics-circuit-simulator
-   ```
+### 1. Clone Repository
+```bash
+git clone <repository-url>
+cd cirvia
+```
 
-2. **Install dependencies**
-   ```bash
-   npm install
-   ```
+### 2. Install Dependencies
+```bash
+npm install
+```
 
-3. **Jalankan development server**
+### 3. Setup Database (Supabase)
+1. Buat project di [supabase.com](https://supabase.com)
+2. Copy `.env.local.example` ke `.env.local`
+3. Isi dengan credentials Supabase:
    ```bash
-   npm run dev
+   NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+   NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
    ```
+4. Jalankan SQL schema dari `database/supabase-schema.sql`
 
-4. **Buka browser**
-   ```
-   http://localhost:3000
-   ```
+### 4. Jalankan Development Server
+```bash
+npm run dev
+```
+
+### 5. Buka Browser
+```
+http://localhost:3000
+```
+
+### 6. Login Default
+```
+Email: guru@cirvia.com
+Password: password123
+```
 
 ## 🎮 Gesture Commands
 

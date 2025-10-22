@@ -24,7 +24,7 @@ import {
   Clock,
   TrendingUp
 } from 'lucide-react';
-import { AuthDB } from '@/lib/auth-db';
+import { SupabaseAuthService } from '@/lib/supabase-auth-service';
 import { Student, Teacher } from '@/types/auth';
 import { TeacherRoute } from '@/components/ProtectedRoute';
 
@@ -50,10 +50,10 @@ const TeacherDashboard = () => {
     loadData();
   }, [isTeacher, router]);
 
-  const loadData = () => {
+  const loadData = async () => {
     if (teacher) {
-      const teacherStudents = AuthDB.getStudentsByTeacher(teacher.id);
-      const teacherClasses = AuthDB.getClassesByTeacher(teacher.id);
+      const teacherStudents = await SupabaseAuthService.getStudentsByTeacher(teacher.id);
+      const teacherClasses = await SupabaseAuthService.getClassesByTeacher(teacher.id);
       
       setStudents(teacherStudents);
       setClasses(teacherClasses);

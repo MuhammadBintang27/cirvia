@@ -3,19 +3,25 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
-import { Home, BookOpen, FlaskConical, ClipboardCheck, Users, LogIn, User, LogOut } from 'lucide-react';
+import { Home, BookOpen, FlaskConical, ClipboardCheck, Users, LogIn, User, LogOut, BarChart3 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 
 export default function Navbar() {
   const { user, logout } = useAuth();
   
-  const navigation = [
+  // Base navigation items
+  const baseNavigation = [
     { name: 'Beranda', href: '/', icon: Home },
     { name: 'Materi', href: '/materials', icon: BookOpen },
     { name: 'Praktikum', href: '/practicum', icon: FlaskConical },
     { name: 'Test', href: '/test', icon: ClipboardCheck },
     { name: 'Tentang', href: '/about', icon: Users },
   ];
+
+  // Add Progress menu only if user is logged in
+  const navigation = user 
+    ? [...baseNavigation.slice(0, 4), { name: 'Progress', href: '/progress', icon: BarChart3 }, ...baseNavigation.slice(4)]
+    : baseNavigation;
 
   return (
     <>

@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { Teacher, Student, LoginCredentials, RegisterTeacherData, AuthContextType, AuthResponse } from '@/types/auth';
-import { AuthDB } from '@/lib/auth-db';
+import { SupabaseAuthService } from '@/lib/supabase-auth-service';
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
@@ -13,24 +13,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     checkAuthStatus();
     // Create default teacher account for demo
-    AuthDB.createDefaultTeacher();
+    SupabaseAuthService.createDefaultTeacher();
   }, []);
 
   const checkAuthStatus = async () => {
     try {
       const sessionId = localStorage.getItem('cirvia_session');
       if (sessionId) {
-        const session = AuthDB.validateSession(sessionId);
+        const session = await SupabaseAuthService.validateSession(sessionId);
         if (session) {
           // Load user data based on session
-          if (session.userRole === 'teacher') {
-            const teachers = JSON.parse(localStorage.getItem('cirvia_teachers') || '[]');
-            const teacher = teachers.find((t: Teacher) => t.id === session.userId);
-            if (teacher) setUser(teacher);
-          } else {
-            const students = JSON.parse(localStorage.getItem('cirvia_students') || '[]');
-            const student = students.find((s: Student) => s.id === session.userId);
-            if (student) setUser(student);
+          const userData = await SupabaseAuthService.getUserById(session.userId, session.userRole);
+          if (userData) {
+            setUser(userData);
           }
         } else {
           localStorage.removeItem('cirvia_session');
@@ -52,13 +47,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           return { success: false, message: 'Email dan password harus diisi' };
         }
 
-        const teacher = await AuthDB.validateTeacherPassword(credentials.email, credentials.password);
+        const teacher = await SupabaseAuthService.validateTeacherPassword(credentials.email, credentials.password);
         if (!teacher) {
           return { success: false, message: 'Email atau password salah' };
         }
 
         // Create session
-        const sessionId = AuthDB.createSession(teacher);
+        const sessionId = await SupabaseAuthService.createSession(teacher);
         localStorage.setItem('cirvia_session', sessionId);
         
         setUser(teacher);
@@ -69,13 +64,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           return { success: false, message: 'Nama dan NIS harus diisi' };
         }
 
-        const student = await AuthDB.findStudentByNameAndNis(credentials.name, credentials.nis);
+        const student = await SupabaseAuthService.findStudentByNameAndNis(credentials.name, credentials.nis);
         if (!student) {
           return { success: false, message: 'Nama atau NIS tidak ditemukan. Hubungi guru Anda.' };
         }
 
         // Create session
-        const sessionId = AuthDB.createSession(student);
+        const sessionId = await SupabaseAuthService.createSession(student);
         localStorage.setItem('cirvia_session', sessionId);
         
         setUser(student);
@@ -104,10 +99,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return { success: false, message: 'Password minimal 6 karakter' };
       }
 
-      const teacher = await AuthDB.createTeacher(data);
+      const teacher = await SupabaseAuthService.createTeacher(data);
       
       // Auto login after registration
-      const sessionId = AuthDB.createSession(teacher);
+      const sessionId = await SupabaseAuthService.createSession(teacher);
       localStorage.setItem('cirvia_session', sessionId);
       
       setUser(teacher);
@@ -126,7 +121,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const logout = () => {
     const sessionId = localStorage.getItem('cirvia_session');
     if (sessionId) {
-      AuthDB.destroySession(sessionId);
+      SupabaseAuthService.destroySession(sessionId);
       localStorage.removeItem('cirvia_session');
     }
     setUser(null);

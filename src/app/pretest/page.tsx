@@ -5,6 +5,8 @@ import Link from 'next/link'
 import { Trophy, Star, Sparkles, ArrowRight, CheckCircle, XCircle, Clock, Target } from 'lucide-react'
 import Navbar from '@/components/Navbar'
 import { useStudentAuth } from '@/hooks/useStudentAuth'
+import { useAuth } from '@/contexts/AuthContext'
+import { SupabaseTestService, TestAnswerInput } from '@/lib/supabase-test-service'
 
 interface Question {
   id: number
@@ -68,13 +70,16 @@ export default function PretestPage() {
   const [showResults, setShowResults] = useState(false)
   const [selectedAnswer, setSelectedAnswer] = useState(-1)
   const [testStarted, setTestStarted] = useState(false)
+  const [startTime, setStartTime] = useState(0)
   
   const { requireStudentLogin, isLoggedInStudent } = useStudentAuth()
+  const { user } = useAuth()
 
   // Auto-start test jika sudah login sebagai student
   useEffect(() => {
     if (isLoggedInStudent) {
       setTestStarted(true);
+      setStartTime(Date.now());
     }
   }, [isLoggedInStudent])
 
@@ -84,6 +89,44 @@ export default function PretestPage() {
 
   const startTest = () => {
     setTestStarted(true)
+    setStartTime(Date.now())
+  }
+
+  const saveTestResult = async (score: number, answers: number[], timeSpent: number) => {
+    if (user && user.role === 'student') {
+      const testAnswers: TestAnswerInput[] = answers.map((answer, index) => ({
+        questionId: questions[index].id,
+        selectedAnswer: answer,
+        correctAnswer: questions[index].correct,
+        isCorrect: answer === questions[index].correct,
+        questionText: questions[index].question,
+        selectedText: answer !== -1 ? questions[index].options[answer] : 'Tidak dijawab',
+        correctText: questions[index].options[questions[index].correct],
+        explanation: questions[index].explanation
+      }))
+
+      const percentage = Math.round((score / questions.length) * 100)
+      const grade = SupabaseTestService.calculateGrade(percentage)
+
+      // Save to Supabase
+      try {
+        await SupabaseTestService.saveTestResult({
+          studentId: user.id,
+          studentName: user.name,
+          studentNis: user.nis,
+          testType: 'pretest',
+          score,
+          totalQuestions: questions.length,
+          correctAnswers: score,
+          percentage,
+          timeSpent,
+          answers: testAnswers,
+          grade
+        })
+      } catch (error) {
+        console.error('Error saving pretest result:', error)
+      }
+    }
   }
 
   const handleNext = () => {
@@ -96,6 +139,13 @@ export default function PretestPage() {
       if (currentQuestion < questions.length - 1) {
         setCurrentQuestion(currentQuestion + 1)
       } else {
+        // Calculate results and save
+        const score = calculateScore()
+        const timeSpent = Math.floor((Date.now() - startTime) / 1000)
+        
+        // Save test result
+        saveTestResult(score, newAnswers, timeSpent)
+        
         setShowResults(true)
       }
     }

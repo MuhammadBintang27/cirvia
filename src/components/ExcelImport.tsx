@@ -4,7 +4,7 @@ import React, { useState, useRef } from 'react';
 import { Upload, FileSpreadsheet, CheckCircle, XCircle, AlertCircle, Download, Users } from 'lucide-react';
 import * as XLSX from 'xlsx';
 import { useAuth } from '@/contexts/AuthContext';
-import { AuthDB } from '@/lib/auth-db';
+import { SupabaseAuthService } from '@/lib/supabase-auth-service';
 import { StudentImportData } from '@/types/auth';
 
 interface ExcelImportProps {
@@ -189,7 +189,7 @@ const ExcelImport: React.FC<ExcelImportProps> = ({ onImportComplete, onClose }) 
         phoneNumber: student.phoneNumber || undefined,
       }));
 
-      const importedStudents = await AuthDB.createStudentsBulk(user.id, studentData);
+      const importedStudents = await SupabaseAuthService.createStudentsBulk(user.id, studentData);
       
       const failedStudents = parsedData
         .filter(student => student.errors.length > 0)
