@@ -22,9 +22,13 @@ import {
   GraduationCap,
   Trophy,
   Clock,
-  TrendingUp
+  TrendingUp,
+  Brain,
+  Ear,
+  Hand
 } from 'lucide-react';
 import { SupabaseAuthService } from '@/lib/supabase-auth-service';
+import { SupabaseTestService } from '@/lib/supabase-test-service';
 import { Student, Teacher } from '@/types/auth';
 import { TeacherRoute } from '@/components/ProtectedRoute';
 
@@ -39,6 +43,8 @@ const TeacherDashboard = () => {
   const [showAddStudent, setShowAddStudent] = useState(false);
   const [showExcelImport, setShowExcelImport] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [learningStyleStats, setLearningStyleStats] = useState<{visual: number, auditory: number, kinesthetic: number} | null>(null);
+  const [studentsLearningStyle, setStudentsLearningStyle] = useState<{[key: string]: any}>({});
 
   const teacher = user as Teacher;
 
@@ -55,8 +61,27 @@ const TeacherDashboard = () => {
       const teacherStudents = await SupabaseAuthService.getStudentsByTeacher(teacher.id);
       const teacherClasses = await SupabaseAuthService.getClassesByTeacher(teacher.id);
       
+      // Load learning style data for all students
+      const learningStyleData: {[key: string]: any} = {};
+      for (const student of teacherStudents) {
+        const learningStyle = await SupabaseTestService.getLearningStyleResult(student.id);
+        if (learningStyle) {
+          learningStyleData[student.id] = learningStyle;
+        }
+      }
+      
+      // Calculate learning style statistics
+      const stats = { visual: 0, auditory: 0, kinesthetic: 0 };
+      Object.values(learningStyleData).forEach((style: any) => {
+        if (style.primaryStyle === 'visual') stats.visual++;
+        else if (style.primaryStyle === 'auditory') stats.auditory++;
+        else if (style.primaryStyle === 'kinesthetic') stats.kinesthetic++;
+      });
+      
       setStudents(teacherStudents);
       setClasses(teacherClasses);
+      setStudentsLearningStyle(learningStyleData);
+      setLearningStyleStats(stats);
       setIsLoading(false);
     }
   };
@@ -203,6 +228,80 @@ const TeacherDashboard = () => {
                     <p className="text-purple-200 font-medium">Rata-rata Post-Test</p>
                   </div>
                 </div>
+
+                {/* Learning Style Statistics */}
+                {learningStyleStats && (
+                  <div className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl rounded-2xl p-6 border border-white/20">
+                    <div className="flex items-center mb-6">
+                      <div className="w-12 h-12 bg-purple-500/20 rounded-full flex items-center justify-center mr-4">
+                        <Brain className="w-6 h-6 text-purple-400" />
+                      </div>
+                      <div>
+                        <h3 className="text-xl font-bold text-white">Statistik Gaya Belajar Kelas</h3>
+                        <p className="text-white/70">Distribusi gaya belajar siswa di kelas Anda</p>
+                      </div>
+                    </div>
+                    
+                    <div className="grid md:grid-cols-3 gap-6">
+                      {/* Visual Learners */}
+                      <div className="bg-blue-500/10 rounded-xl p-4 border border-blue-400/30">
+                        <div className="flex items-center mb-3">
+                          <Eye className="w-8 h-8 text-blue-400 mr-3" />
+                          <div>
+                            <h4 className="text-lg font-bold text-white">{learningStyleStats.visual}</h4>
+                            <p className="text-blue-200/70 text-sm">Visual Learners</p>
+                          </div>
+                        </div>
+                        <div className="w-full bg-white/10 rounded-full h-2">
+                          <div 
+                            className="bg-gradient-to-r from-blue-500 to-cyan-500 h-2 rounded-full"
+                            style={{ 
+                              width: `${Math.round((learningStyleStats.visual / (learningStyleStats.visual + learningStyleStats.auditory + learningStyleStats.kinesthetic)) * 100)}%` 
+                            }}
+                          ></div>
+                        </div>
+                      </div>
+
+                      {/* Auditory Learners */}
+                      <div className="bg-purple-500/10 rounded-xl p-4 border border-purple-400/30">
+                        <div className="flex items-center mb-3">
+                          <Ear className="w-8 h-8 text-purple-400 mr-3" />
+                          <div>
+                            <h4 className="text-lg font-bold text-white">{learningStyleStats.auditory}</h4>
+                            <p className="text-purple-200/70 text-sm">Auditory Learners</p>
+                          </div>
+                        </div>
+                        <div className="w-full bg-white/10 rounded-full h-2">
+                          <div 
+                            className="bg-gradient-to-r from-purple-500 to-pink-500 h-2 rounded-full"
+                            style={{ 
+                              width: `${Math.round((learningStyleStats.auditory / (learningStyleStats.visual + learningStyleStats.auditory + learningStyleStats.kinesthetic)) * 100)}%` 
+                            }}
+                          ></div>
+                        </div>
+                      </div>
+
+                      {/* Kinesthetic Learners */}
+                      <div className="bg-emerald-500/10 rounded-xl p-4 border border-emerald-400/30">
+                        <div className="flex items-center mb-3">
+                          <Hand className="w-8 h-8 text-emerald-400 mr-3" />
+                          <div>
+                            <h4 className="text-lg font-bold text-white">{learningStyleStats.kinesthetic}</h4>
+                            <p className="text-emerald-200/70 text-sm">Kinesthetic Learners</p>
+                          </div>
+                        </div>
+                        <div className="w-full bg-white/10 rounded-full h-2">
+                          <div 
+                            className="bg-gradient-to-r from-emerald-500 to-teal-500 h-2 rounded-full"
+                            style={{ 
+                              width: `${Math.round((learningStyleStats.kinesthetic / (learningStyleStats.visual + learningStyleStats.auditory + learningStyleStats.kinesthetic)) * 100)}%` 
+                            }}
+                          ></div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
 
                 {/* Quick Actions */}
                 <div className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl rounded-2xl p-6 border border-white/20">
@@ -369,6 +468,7 @@ const TeacherDashboard = () => {
                           <th className="px-6 py-4 text-left text-sm font-medium text-blue-200 uppercase tracking-wider">Kelas</th>
                           <th className="px-6 py-4 text-left text-sm font-medium text-blue-200 uppercase tracking-wider">Pre-Test</th>
                           <th className="px-6 py-4 text-left text-sm font-medium text-blue-200 uppercase tracking-wider">Post-Test</th>
+                          <th className="px-6 py-4 text-left text-sm font-medium text-blue-200 uppercase tracking-wider">Gaya Belajar</th>
                           <th className="px-6 py-4 text-left text-sm font-medium text-blue-200 uppercase tracking-wider">Aksi</th>
                         </tr>
                       </thead>
@@ -404,6 +504,32 @@ const TeacherDashboard = () => {
                                 <span className="text-purple-300 font-bold">{student.progress.postTestScore}%</span>
                               ) : (
                                 <span className="text-gray-400">-</span>
+                              )}
+                            </td>
+                            <td className="px-6 py-4">
+                              {studentsLearningStyle[student.id] ? (
+                                <div className="flex items-center">
+                                  {studentsLearningStyle[student.id].primaryStyle === 'visual' && (
+                                    <div className="flex items-center">
+                                      <Eye className="w-4 h-4 text-blue-400 mr-2" />
+                                      <span className="text-blue-300 text-sm font-medium">Visual</span>
+                                    </div>
+                                  )}
+                                  {studentsLearningStyle[student.id].primaryStyle === 'auditory' && (
+                                    <div className="flex items-center">
+                                      <Ear className="w-4 h-4 text-purple-400 mr-2" />
+                                      <span className="text-purple-300 text-sm font-medium">Auditory</span>
+                                    </div>
+                                  )}
+                                  {studentsLearningStyle[student.id].primaryStyle === 'kinesthetic' && (
+                                    <div className="flex items-center">
+                                      <Hand className="w-4 h-4 text-emerald-400 mr-2" />
+                                      <span className="text-emerald-300 text-sm font-medium">Kinesthetic</span>
+                                    </div>
+                                  )}
+                                </div>
+                              ) : (
+                                <span className="text-gray-400 text-sm">Belum tes</span>
                               )}
                             </td>
                             <td className="px-6 py-4">

@@ -184,6 +184,7 @@ export type Database = {
           time_improvement?: number
           completed_materials: string[]
           practice_history: any[]
+          learning_style?: 'visual' | 'auditory' | 'kinesthetic'
           created_at: string
           updated_at: string
         }
@@ -197,6 +198,7 @@ export type Database = {
           time_improvement?: number
           completed_materials?: string[]
           practice_history?: any[]
+          learning_style?: 'visual' | 'auditory' | 'kinesthetic'
           created_at?: string
           updated_at?: string
         }
@@ -210,8 +212,56 @@ export type Database = {
           time_improvement?: number
           completed_materials?: string[]
           practice_history?: any[]
+          learning_style?: 'visual' | 'auditory' | 'kinesthetic'
           created_at?: string
           updated_at?: string
+        }
+      }
+      learning_style_results: {
+        Row: {
+          id: string
+          student_id: string
+          student_name: string
+          student_nis: string
+          visual: number
+          auditory: number
+          kinesthetic: number
+          primary_style: 'visual' | 'auditory' | 'kinesthetic'
+          percentages: any
+          time_spent: number
+          answers: string[]
+          completed_at: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          student_id: string
+          student_name: string
+          student_nis: string
+          visual: number
+          auditory: number
+          kinesthetic: number
+          primary_style: 'visual' | 'auditory' | 'kinesthetic'
+          percentages: any
+          time_spent: number
+          answers: string[]
+          completed_at?: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          student_id?: string
+          student_name?: string
+          student_nis?: string
+          visual?: number
+          auditory?: number
+          kinesthetic?: number
+          primary_style?: 'visual' | 'auditory' | 'kinesthetic'
+          percentages?: any
+          time_spent?: number
+          answers?: string[]
+          completed_at?: string
+          created_at?: string
         }
       }
       sessions: {

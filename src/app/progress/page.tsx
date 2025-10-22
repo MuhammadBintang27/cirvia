@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
-import { SupabaseTestService, StudentProgressComplete, TestResultWithAnswers } from '@/lib/supabase-test-service'
+import { SupabaseTestService, StudentProgressComplete, TestResultWithAnswers, LearningStyleResult } from '@/lib/supabase-test-service'
 import Navbar from '@/components/Navbar'
 import StudentLoginPrompt from '@/components/StudentLoginPrompt'
 import { 
@@ -18,7 +18,11 @@ import {
   BarChart3,
   ArrowUp,
   ArrowDown,
-  Star
+  Star,
+  Brain,
+  Eye,
+  Ear,
+  Hand
 } from 'lucide-react'
 import Link from 'next/link'
 
@@ -262,6 +266,101 @@ export default function ProgressPage() {
                   </div>
                 </div>
               </div>
+
+              {/* Learning Style Result */}
+              {studentProgress?.learningStyleResult && (
+                <div className="relative mb-8">
+                  <div className="absolute -inset-1 bg-gradient-to-r from-purple-500/30 to-indigo-600/30 rounded-3xl blur"></div>
+                  <div className="relative bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl rounded-3xl p-8 border border-white/20">
+                    <div className="flex items-center mb-6">
+                      <div className="w-12 h-12 bg-purple-500/20 rounded-full flex items-center justify-center mr-4">
+                        <Brain className="w-6 h-6 text-purple-400" />
+                      </div>
+                      <div>
+                        <h3 className="text-2xl font-bold text-white">Gaya Belajar Anda</h3>
+                        <p className="text-purple-200/80">Hasil analisis kepribadian dan preferensi belajar</p>
+                      </div>
+                    </div>
+
+                    <div className="grid md:grid-cols-2 gap-6 mb-6">
+                      {/* Primary Learning Style */}
+                      <div className="bg-purple-500/10 rounded-xl p-6 border border-purple-400/30">
+                        <div className="flex items-center mb-4">
+                          {studentProgress.learningStyleResult.primaryStyle === 'visual' && <Eye className="w-8 h-8 text-blue-400 mr-3" />}
+                          {studentProgress.learningStyleResult.primaryStyle === 'auditory' && <Ear className="w-8 h-8 text-purple-400 mr-3" />}
+                          {studentProgress.learningStyleResult.primaryStyle === 'kinesthetic' && <Hand className="w-8 h-8 text-emerald-400 mr-3" />}
+                          <div>
+                            <h4 className="text-xl font-bold text-white capitalize">
+                              {studentProgress.learningStyleResult.primaryStyle} Learner
+                            </h4>
+                            <p className="text-purple-200/70 text-sm">Gaya belajar dominan Anda</p>
+                          </div>
+                        </div>
+                        
+                        {/* Percentages */}
+                        <div className="space-y-3">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center">
+                              <Eye className="w-4 h-4 text-blue-400 mr-2" />
+                              <span className="text-blue-200 text-sm">Visual</span>
+                            </div>
+                            <span className="text-white font-bold">
+                              {studentProgress.learningStyleResult.percentages.visual}%
+                            </span>
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center">
+                              <Ear className="w-4 h-4 text-purple-400 mr-2" />
+                              <span className="text-purple-200 text-sm">Auditory</span>
+                            </div>
+                            <span className="text-white font-bold">
+                              {studentProgress.learningStyleResult.percentages.auditory}%
+                            </span>
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center">
+                              <Hand className="w-4 h-4 text-emerald-400 mr-2" />
+                              <span className="text-emerald-200 text-sm">Kinesthetic</span>
+                            </div>
+                            <span className="text-white font-bold">
+                              {studentProgress.learningStyleResult.percentages.kinesthetic}%
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Test Info */}
+                      <div className="space-y-4">
+                        <div className="bg-white/5 rounded-xl p-4 border border-white/10">
+                          <div className="flex items-center justify-between mb-2">
+                            <span className="text-white/70 text-sm">Tanggal Tes:</span>
+                            <span className="text-white text-sm">
+                              {new Date(studentProgress.learningStyleResult.createdAt || '').toLocaleDateString('id-ID')}
+                            </span>
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <span className="text-white/70 text-sm">Waktu Pengerjaan:</span>
+                            <span className="text-white text-sm">
+                              {Math.floor((studentProgress.learningStyleResult.timeSpent || 0) / 60)}:
+                              {((studentProgress.learningStyleResult.timeSpent || 0) % 60).toString().padStart(2, '0')}
+                            </span>
+                          </div>
+                        </div>
+                        
+                        <div className="text-center">
+                          <Link
+                            href="/learning-style"
+                            className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-purple-500 to-indigo-500 text-white text-sm font-medium rounded-xl hover:from-purple-600 hover:to-indigo-600 transition-all"
+                          >
+                            <Brain className="w-4 h-4 mr-2" />
+                            Ulangi Tes Gaya Belajar
+                          </Link>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
 
               {/* Improvement Analysis */}
               {studentProgress?.improvement && (

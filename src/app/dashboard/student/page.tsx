@@ -19,15 +19,21 @@ import {
   Calendar,
   Target,
   Award,
-  BarChart3
+  BarChart3,
+  Brain,
+  Eye,
+  Ear,
+  Hand
 } from 'lucide-react';
 import { Student } from '@/types/auth';
 import { StudentRoute } from '@/components/ProtectedRoute';
+import { SupabaseTestService, LearningStyleResult } from '@/lib/supabase-test-service';
 
 const StudentDashboard = () => {
   const { user, logout, isStudent } = useAuth();
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(true);
+  const [learningStyleResult, setLearningStyleResult] = useState<LearningStyleResult | null>(null);
 
   const student = user as Student;
 
@@ -36,8 +42,17 @@ const StudentDashboard = () => {
       router.push('/login');
       return;
     }
-    setIsLoading(false);
-  }, [isStudent, router]);
+    
+    const loadLearningStyle = async () => {
+      if (student) {
+        const result = await SupabaseTestService.getLearningStyleResult(student.id);
+        setLearningStyleResult(result);
+      }
+      setIsLoading(false);
+    };
+    
+    loadLearningStyle();
+  }, [isStudent, router, student]);
 
   const handleLogout = () => {
     logout();
@@ -169,6 +184,82 @@ const StudentDashboard = () => {
             <p className="text-yellow-300/70 text-sm mt-1">Total jam praktik</p>
           </div>
         </div>
+
+        {/* Learning Style Result */}
+        {learningStyleResult && (
+          <div className="mb-8">
+            <div className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl rounded-2xl p-6 border border-white/20">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center space-x-4">
+                  <div className="w-12 h-12 bg-purple-500/20 rounded-full flex items-center justify-center border border-purple-400/30">
+                    <Brain className="w-6 h-6 text-purple-400" />
+                  </div>
+                  <div>
+                    <h4 className="text-lg font-bold text-white">Gaya Belajar Anda</h4>
+                    <p className="text-purple-200/80 capitalize">
+                      <strong>{learningStyleResult.primaryStyle} Learner</strong> - 
+                      Gaya belajar dominan Anda
+                    </p>
+                  </div>
+                </div>
+                
+                <div className="text-right">
+                  {learningStyleResult.primaryStyle === 'visual' && <Eye className="w-8 h-8 text-blue-400" />}
+                  {learningStyleResult.primaryStyle === 'auditory' && <Ear className="w-8 h-8 text-purple-400" />}
+                  {learningStyleResult.primaryStyle === 'kinesthetic' && <Hand className="w-8 h-8 text-emerald-400" />}
+                </div>
+              </div>
+              
+              <div className="grid md:grid-cols-3 gap-4 mb-4">
+                <div className="bg-blue-500/10 rounded-lg p-3 border border-blue-400/30">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center">
+                      <Eye className="w-4 h-4 text-blue-400 mr-2" />
+                      <span className="text-blue-200 text-sm">Visual</span>
+                    </div>
+                    <span className="text-white font-bold text-sm">
+                      {learningStyleResult.percentages.visual}%
+                    </span>
+                  </div>
+                </div>
+                
+                <div className="bg-purple-500/10 rounded-lg p-3 border border-purple-400/30">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center">
+                      <Ear className="w-4 h-4 text-purple-400 mr-2" />
+                      <span className="text-purple-200 text-sm">Auditory</span>
+                    </div>
+                    <span className="text-white font-bold text-sm">
+                      {learningStyleResult.percentages.auditory}%
+                    </span>
+                  </div>
+                </div>
+                
+                <div className="bg-emerald-500/10 rounded-lg p-3 border border-emerald-400/30">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center">
+                      <Hand className="w-4 h-4 text-emerald-400 mr-2" />
+                      <span className="text-emerald-200 text-sm">Kinesthetic</span>
+                    </div>
+                    <span className="text-white font-bold text-sm">
+                      {learningStyleResult.percentages.kinesthetic}%
+                    </span>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="text-center">
+                <Link
+                  href="/learning-style"
+                  className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-purple-500 to-indigo-500 text-white text-sm font-medium rounded-xl hover:from-purple-600 hover:to-indigo-600 transition-all"
+                >
+                  <Brain className="w-4 h-4 mr-2" />
+                  Lihat Detail & Tips Belajar
+                </Link>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Learning Path */}
         <div className="grid lg:grid-cols-3 gap-8">

@@ -9,7 +9,7 @@ import { useAuth } from '@/contexts/AuthContext';
 const StudentLoginPage: React.FC = () => {
   const searchParams = useSearchParams();
   const redirectTo = searchParams.get('redirect') || '/';
-  const testType = searchParams.get('testType') as 'pretest' | 'posttest' | null;
+  const testType = searchParams.get('testType') as 'pretest' | 'posttest' | 'learning-style' | null;
   const router = useRouter();
   const { login, user, isStudent } = useAuth();
   const [formData, setFormData] = useState({
@@ -78,6 +78,15 @@ const StudentLoginPage: React.FC = () => {
         bgColor: 'from-purple-500/10 to-pink-500/10',
         borderColor: 'border-purple-400/30',
         icon: '✅'
+      };
+    } else if (testType === 'learning-style') {
+      return {
+        title: 'Tes Gaya Belajar',
+        description: 'Temukan Gaya Belajar Anda',
+        color: 'from-purple-500 to-indigo-500',
+        bgColor: 'from-purple-500/10 to-indigo-500/10',
+        borderColor: 'border-purple-400/30',
+        icon: '🧠'
       };
     }
     return {

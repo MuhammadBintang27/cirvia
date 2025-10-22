@@ -7,7 +7,7 @@ export const useStudentAuth = () => {
   const { user, isStudent } = useAuth();
   const router = useRouter();
 
-  const requireStudentLogin = (testType: 'pretest' | 'posttest', redirectPath?: string) => {
+  const requireStudentLogin = (testType: 'pretest' | 'posttest' | 'learning-style', redirectPath?: string) => {
     if (user && isStudent()) {
       // User sudah login sebagai student, redirect ke path yang diinginkan
       if (redirectPath) {

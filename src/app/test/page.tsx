@@ -5,20 +5,23 @@ import React, { useState, useEffect } from 'react';
 import { ChevronRight, Trophy, Target, Brain, Zap, Star, ArrowRight, Sparkles, CheckCircle, Clock, Award } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import { useAuth } from '@/contexts/AuthContext';
-import { SupabaseTestService, TestResultWithAnswers } from '@/lib/supabase-test-service';
+import { SupabaseTestService, TestResultWithAnswers, LearningStyleResult } from '@/lib/supabase-test-service';
 
 const TestPage = () => {
   const { user, isStudent } = useAuth();
   const [preTestResult, setPreTestResult] = useState<TestResultWithAnswers | null>(null);
   const [postTestResult, setPostTestResult] = useState<TestResultWithAnswers | null>(null);
+  const [learningStyleResult, setLearningStyleResult] = useState<LearningStyleResult | null>(null);
 
   useEffect(() => {
     const loadTestResults = async () => {
       if (user && isStudent()) {
         const preResult = await SupabaseTestService.getLatestTestResult(user.id, 'pretest');
         const postResult = await SupabaseTestService.getLatestTestResult(user.id, 'posttest');
+        const learningStyleResult = await SupabaseTestService.getLearningStyleResult(user.id);
         setPreTestResult(preResult);
         setPostTestResult(postResult);
+        setLearningStyleResult(learningStyleResult);
       }
     }
     
@@ -103,7 +106,90 @@ const TestPage = () => {
           </div>
 
           {/* Premium Test Cards */}
-          <div className="grid lg:grid-cols-2 gap-8 mb-16">
+          <div className="grid lg:grid-cols-3 gap-8 mb-16">
+            {/* Learning Style Test */}
+            <div className="group relative">
+              <div className="absolute -inset-1 bg-gradient-to-r from-purple-500/50 to-pink-600/50 rounded-3xl blur opacity-25 group-hover:opacity-100 transition duration-1000 group-hover:duration-200"></div>
+              <div className="relative bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl rounded-3xl p-10 border border-white/20 hover:border-white/30 transition-all duration-500 transform hover:scale-[1.02] hover:-translate-y-2">
+                <div className="absolute top-6 right-6">
+                  {learningStyleResult ? (
+                    <div className="flex items-center space-x-2 px-3 py-1 bg-gradient-to-r from-green-500/20 to-emerald-500/20 rounded-full border border-green-400/30">
+                      <CheckCircle className="w-4 h-4 text-green-400" />
+                      <span className="text-green-400 text-sm font-medium">Selesai</span>
+                    </div>
+                  ) : (
+                    <div className="px-3 py-1 bg-gradient-to-r from-purple-500/20 to-pink-500/20 rounded-full border border-purple-400/30">
+                      <span className="text-purple-400 text-sm font-medium">Personality</span>
+                    </div>
+                  )}
+                </div>
+                
+                <div className="flex items-center justify-center w-20 h-20 bg-gradient-to-br from-purple-500/20 to-pink-600/20 rounded-2xl mb-6 group-hover:scale-110 transition-transform duration-300">
+                  <Brain className="w-10 h-10 text-purple-400" />
+                </div>
+                
+                <h3 className="text-3xl font-bold text-white mb-4">Tes Gaya Belajar</h3>
+                <p className="text-blue-200/80 mb-8 text-lg leading-relaxed">
+                  Temukan gaya belajar terbaik Anda: Visual, Auditory, atau Kinesthetic untuk optimasi pembelajaran
+                </p>
+
+                {/* Show results if completed */}
+                {learningStyleResult ? (
+                  <div className="space-y-4 mb-8">
+                    <div className="bg-gradient-to-r from-purple-500/10 to-pink-500/10 rounded-xl p-4 border border-purple-400/30">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-purple-300 font-medium">Gaya Belajar Anda:</span>
+                        <span className="text-2xl font-bold text-white capitalize">{learningStyleResult.primaryStyle}</span>
+                      </div>
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-purple-200/70 text-sm">Visual:</span>
+                        <span className="text-white">{learningStyleResult.percentages.visual}%</span>
+                      </div>
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-purple-200/70 text-sm">Auditory:</span>
+                        <span className="text-white">{learningStyleResult.percentages.auditory}%</span>
+                      </div>
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-purple-200/70 text-sm">Kinesthetic:</span>
+                        <span className="text-white">{learningStyleResult.percentages.kinesthetic}%</span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-purple-200/70 text-sm">Tanggal:</span>
+                        <span className="text-white text-sm">{learningStyleResult.createdAt ? new Date(learningStyleResult.createdAt).toLocaleDateString('id-ID') : '-'}</span>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="space-y-3 mb-8">
+                    <div className="flex items-center text-purple-300">
+                      <div className="w-2 h-2 bg-purple-400 rounded-full mr-3"></div>
+                      <span>20 Pertanyaan Psikologi</span>
+                    </div>
+                    <div className="flex items-center text-purple-300">
+                      <div className="w-2 h-2 bg-purple-400 rounded-full mr-3"></div>
+                      <span>Analisis Kepribadian Mendalam</span>
+                    </div>
+                    <div className="flex items-center text-purple-300">
+                      <div className="w-2 h-2 bg-purple-400 rounded-full mr-3"></div>
+                      <span>Rekomendasi Strategi Belajar</span>
+                    </div>
+                  </div>
+                )}
+                
+                <button 
+                  className={`w-full py-4 px-8 rounded-2xl font-bold text-lg transition-all transform hover:scale-105 shadow-2xl flex items-center justify-center group ${
+                    learningStyleResult 
+                      ? 'bg-gradient-to-r from-purple-600/50 to-pink-600/50 text-purple-200 border border-purple-400/30' 
+                      : 'bg-gradient-to-r from-purple-500 to-pink-600 text-white hover:from-purple-600 hover:to-pink-700 hover:shadow-purple-500/25'
+                  }`}
+                  onClick={() => window.location.href = '/learning-style'}
+                >
+                  {learningStyleResult ? 'Lihat Hasil / Ulangi' : 'Mulai Tes Gaya Belajar'}
+                  <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
+                </button>
+              </div>
+            </div>
+
             {/* Pre-test */}
             <div className="group relative">
               <div className="absolute -inset-1 bg-gradient-to-r from-blue-500/50 to-indigo-600/50 rounded-3xl blur opacity-25 group-hover:opacity-100 transition duration-1000 group-hover:duration-200"></div>
@@ -281,10 +367,11 @@ const TestPage = () => {
                 </button>
               </div>
             </div>
+
           </div>
 
           {/* Progress Summary for Students */}
-          {user && isStudent() && (preTestResult || postTestResult) && (
+          {user && isStudent() && (preTestResult || postTestResult || learningStyleResult) && (
             <div className="mb-16">
               <div className="relative">
                 <div className="absolute -inset-1 bg-gradient-to-r from-indigo-500/30 to-purple-600/30 rounded-3xl blur"></div>
@@ -294,7 +381,17 @@ const TestPage = () => {
                     <p className="text-indigo-200/80">Ringkasan kemajuan belajar dan pencapaian</p>
                   </div>
                   
-                  <div className="grid md:grid-cols-3 gap-6 mb-6">
+                  <div className="grid md:grid-cols-4 gap-6 mb-6">
+                    <div className="text-center">
+                      <div className="w-16 h-16 bg-purple-500/20 rounded-full flex items-center justify-center mx-auto mb-3">
+                        <Brain className="w-8 h-8 text-purple-400" />
+                      </div>
+                      <div className="text-2xl font-bold text-white mb-1 capitalize">
+                        {learningStyleResult ? learningStyleResult.primaryStyle : '-'}
+                      </div>
+                      <div className="text-purple-200/70 text-sm">Gaya Belajar</div>
+                    </div>
+                    
                     <div className="text-center">
                       <div className="w-16 h-16 bg-blue-500/20 rounded-full flex items-center justify-center mx-auto mb-3">
                         <Trophy className="w-8 h-8 text-blue-400" />
@@ -306,13 +403,13 @@ const TestPage = () => {
                     </div>
                     
                     <div className="text-center">
-                      <div className="w-16 h-16 bg-purple-500/20 rounded-full flex items-center justify-center mx-auto mb-3">
-                        <Target className="w-8 h-8 text-purple-400" />
+                      <div className="w-16 h-16 bg-teal-500/20 rounded-full flex items-center justify-center mx-auto mb-3">
+                        <Target className="w-8 h-8 text-teal-400" />
                       </div>
                       <div className="text-2xl font-bold text-white mb-1">
                         {postTestResult ? postTestResult.percentage : '-'}%
                       </div>
-                      <div className="text-purple-200/70 text-sm">Post-Test Score</div>
+                      <div className="text-teal-200/70 text-sm">Post-Test Score</div>
                     </div>
                     
                     <div className="text-center">

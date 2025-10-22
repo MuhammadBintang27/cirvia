@@ -14,6 +14,7 @@ export interface TestResultWithAnswers extends TestResult {
 export interface StudentProgressComplete extends StudentProgress {
   preTestResult?: TestResultWithAnswers
   postTestResult?: TestResultWithAnswers
+  learningStyleResult?: LearningStyleResult
   improvement?: {
     scoreIncrease: number
     percentageIncrease: number
@@ -44,6 +45,26 @@ export interface TestResultInput {
   timeSpent: number
   answers: TestAnswerInput[]
   grade: string
+}
+
+export interface LearningStyleResult {
+  id?: string
+  studentId: string
+  studentName: string
+  studentNis: string
+  visual: number
+  auditory: number
+  kinesthetic: number
+  primaryStyle: 'visual' | 'auditory' | 'kinesthetic'
+  percentages: {
+    visual: number
+    auditory: number
+    kinesthetic: number
+  }
+  timeSpent: number
+  answers: string[] // Array of 'a', 'b', 'c' answers
+  completedAt?: string
+  createdAt?: string
 }
 
 export class SupabaseTestService {
@@ -302,6 +323,9 @@ export class SupabaseTestService {
 
       if (error && error.code !== 'PGRST116') throw error
 
+      // Also get learning style result
+      const learningStyleResult = await this.getLearningStyleResult(studentId)
+
       if (!data) return null
 
       // Calculate improvement if both tests exist
@@ -323,6 +347,7 @@ export class SupabaseTestService {
         ...data,
         preTestResult: data.pre_test_result as TestResultWithAnswers,
         postTestResult: data.post_test_result as TestResultWithAnswers,
+        learningStyleResult,
         improvement
       }
 
@@ -450,6 +475,154 @@ export class SupabaseTestService {
     } catch (error) {
       console.error('Error exporting data:', error)
       return null
+    }
+  }
+
+  // Learning Style Test Methods
+  static async saveLearningStyleResult(result: Omit<LearningStyleResult, 'id' | 'completedAt' | 'createdAt'>): Promise<LearningStyleResult | null> {
+    try {
+      const { data, error } = await supabase
+        .from('learning_style_results')
+        .insert({
+          student_id: result.studentId,
+          student_name: result.studentName,
+          student_nis: result.studentNis,
+          visual: result.visual,
+          auditory: result.auditory,
+          kinesthetic: result.kinesthetic,
+          primary_style: result.primaryStyle,
+          percentages: result.percentages,
+          time_spent: result.timeSpent,
+          answers: result.answers,
+          completed_at: new Date().toISOString()
+        })
+        .select()
+        .single()
+
+      if (error) {
+        console.error('Error saving learning style result:', error)
+        return null
+      }
+
+      // Update student progress
+      await this.updateStudentLearningStyle(result.studentId, result.primaryStyle)
+
+      return this.convertLearningStyleFromDB(data)
+
+    } catch (error) {
+      console.error('Error saving learning style result:', error)
+      return null
+    }
+  }
+
+  static async getLearningStyleResult(studentId: string): Promise<LearningStyleResult | null> {
+    try {
+      const { data, error } = await supabase
+        .from('learning_style_results')
+        .select('*')
+        .eq('student_id', studentId)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .single()
+
+      if (error || !data) return null
+
+      return this.convertLearningStyleFromDB(data)
+
+    } catch (error) {
+      console.error('Error getting learning style result:', error)
+      return null
+    }
+  }
+
+  static async updateStudentLearningStyle(studentId: string, primaryStyle: string): Promise<void> {
+    try {
+      // Update student_progress table with learning style
+      const { error: progressError } = await supabase
+        .from('student_progress')
+        .upsert({
+          student_id: studentId,
+          learning_style: primaryStyle,
+          updated_at: new Date().toISOString()
+        }, {
+          onConflict: 'student_id'
+        })
+
+      if (progressError) {
+        console.error('Error updating student learning style:', progressError)
+      }
+
+    } catch (error) {
+      console.error('Error updating student learning style:', error)
+    }
+  }
+
+  static async getClassLearningStyles(teacherId: string): Promise<any> {
+    try {
+      // Get students for this teacher
+      const { data: students, error: studentsError } = await supabase
+        .from('students')
+        .select('id, name, nis')
+        .eq('teacher_id', teacherId)
+
+      if (studentsError || !students) return null
+
+      const studentIds = students.map(s => s.id)
+
+      // Get learning style results for these students
+      const { data: results, error: resultsError } = await supabase
+        .from('learning_style_results')
+        .select('*')
+        .in('student_id', studentIds)
+
+      if (resultsError) return null
+
+      // Calculate statistics
+      const styleDistribution = {
+        visual: 0,
+        auditory: 0,
+        kinesthetic: 0
+      }
+
+      const completedStudents = results?.length || 0
+      
+      results?.forEach(result => {
+        styleDistribution[result.primary_style as keyof typeof styleDistribution]++
+      })
+
+      return {
+        totalStudents: students.length,
+        completedLearningStyleTest: completedStudents,
+        styleDistribution,
+        percentageDistribution: {
+          visual: completedStudents > 0 ? Math.round((styleDistribution.visual / completedStudents) * 100) : 0,
+          auditory: completedStudents > 0 ? Math.round((styleDistribution.auditory / completedStudents) * 100) : 0,
+          kinesthetic: completedStudents > 0 ? Math.round((styleDistribution.kinesthetic / completedStudents) * 100) : 0
+        },
+        results: results?.map(this.convertLearningStyleFromDB) || []
+      }
+
+    } catch (error) {
+      console.error('Error getting class learning styles:', error)
+      return null
+    }
+  }
+
+  private static convertLearningStyleFromDB(data: any): LearningStyleResult {
+    return {
+      id: data.id,
+      studentId: data.student_id,
+      studentName: data.student_name,
+      studentNis: data.student_nis,
+      visual: data.visual,
+      auditory: data.auditory,
+      kinesthetic: data.kinesthetic,
+      primaryStyle: data.primary_style,
+      percentages: data.percentages,
+      timeSpent: data.time_spent,
+      answers: data.answers,
+      completedAt: data.completed_at,
+      createdAt: data.created_at
     }
   }
 }

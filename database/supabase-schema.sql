@@ -87,8 +87,29 @@ CREATE TABLE IF NOT EXISTS student_progress (
   time_improvement integer, -- in seconds
   completed_materials text[] DEFAULT '{}',
   practice_history jsonb DEFAULT '[]',
+  learning_style varchar CHECK (learning_style IN ('visual', 'auditory', 'kinesthetic')),
   created_at timestamptz DEFAULT now(),
   updated_at timestamptz DEFAULT now()
+);
+
+-- Table: learning_style_results
+CREATE TABLE IF NOT EXISTS learning_style_results (
+  id uuid DEFAULT uuid_generate_v4() PRIMARY KEY,
+  student_id uuid REFERENCES students(id) ON DELETE CASCADE,
+  student_name varchar NOT NULL,
+  student_nis varchar NOT NULL,
+  visual integer NOT NULL,
+  auditory integer NOT NULL,
+  kinesthetic integer NOT NULL,
+  primary_style varchar CHECK (primary_style IN ('visual', 'auditory', 'kinesthetic')) NOT NULL,
+  percentages jsonb NOT NULL, -- {visual: 40, auditory: 35, kinesthetic: 25}
+  time_spent integer NOT NULL, -- in seconds
+  answers text[] NOT NULL, -- Array of 'a', 'b', 'c' answers
+  completed_at timestamptz DEFAULT now(),
+  created_at timestamptz DEFAULT now(),
+  
+  -- Constraint: One result per student (allow retake by deleting previous)
+  UNIQUE(student_id)
 );
 
 -- Indexes untuk performance
@@ -99,6 +120,8 @@ CREATE INDEX IF NOT EXISTS idx_test_results_type ON test_results(test_type);
 CREATE INDEX IF NOT EXISTS idx_test_answers_result_id ON test_answers(test_result_id);
 CREATE INDEX IF NOT EXISTS idx_sessions_expires ON sessions(expires_at);
 CREATE INDEX IF NOT EXISTS idx_sessions_user ON sessions(user_id, user_role);
+CREATE INDEX IF NOT EXISTS idx_learning_style_student_id ON learning_style_results(student_id);
+CREATE INDEX IF NOT EXISTS idx_learning_style_primary ON learning_style_results(primary_style);
 
 -- Functions untuk auto-update timestamps
 CREATE OR REPLACE FUNCTION update_updated_at_column()
@@ -129,6 +152,7 @@ ALTER TABLE sessions ENABLE ROW LEVEL SECURITY;
 ALTER TABLE test_results ENABLE ROW LEVEL SECURITY;
 ALTER TABLE test_answers ENABLE ROW LEVEL SECURITY;
 ALTER TABLE student_progress ENABLE ROW LEVEL SECURITY;
+ALTER TABLE learning_style_results ENABLE ROW LEVEL SECURITY;
 
 -- Policies for teachers table
 CREATE POLICY "Teachers can view own data" 
@@ -153,6 +177,7 @@ CREATE POLICY "Allow all operations" ON sessions FOR ALL USING (true);
 CREATE POLICY "Allow all operations" ON test_results FOR ALL USING (true);
 CREATE POLICY "Allow all operations" ON test_answers FOR ALL USING (true);
 CREATE POLICY "Allow all operations" ON student_progress FOR ALL USING (true);
+CREATE POLICY "Allow all operations" ON learning_style_results FOR ALL USING (true);
 
 -- Insert default teacher account
 INSERT INTO teachers (email, password_hash, name, school, phone_number, is_verified)
@@ -210,3 +235,4 @@ COMMENT ON TABLE sessions IS 'Tabel untuk menyimpan session login';
 COMMENT ON TABLE test_results IS 'Tabel untuk menyimpan hasil test (pretest/posttest)';
 COMMENT ON TABLE test_answers IS 'Tabel untuk menyimpan jawaban detail setiap soal';
 COMMENT ON TABLE student_progress IS 'Tabel untuk tracking progress siswa';
+COMMENT ON TABLE learning_style_results IS 'Tabel untuk menyimpan hasil tes gaya belajar siswa';
