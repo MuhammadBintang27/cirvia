@@ -23,7 +23,7 @@ export interface StudentProgressComplete extends StudentProgress {
 }
 
 export interface TestAnswerInput {
-  questionId: number
+  questionId: number | string
   selectedAnswer: number
   correctAnswer: number
   isCorrect: boolean
