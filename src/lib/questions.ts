@@ -1,7 +1,13 @@
-// Base interface untuk semua tipe soal
+// ==========================================
+// CIRVIA — Question Interfaces & Sample Data (reduced types)
+// Keinginan: hilangkan fillBlank, trueFalse, multipleChoice
+// Tersisa: circuit, circuitOrdering, conceptual, circuitAnalysis
+// ==========================================
+
+// ===== Base interface untuk semua tipe soal =====
 export interface BaseQuestion {
   id: number | string;
-  questionType: 'circuit' | 'multipleChoice' | 'trueFalse' | 'fillBlank' | 'circuitOrdering';
+  questionType: 'circuit' | 'circuitOrdering' | 'conceptual' | 'circuitAnalysis';
   title: string;
   description: string;
   explanation: string;
@@ -9,402 +15,378 @@ export interface BaseQuestion {
   difficulty: 'easy' | 'medium' | 'hard';
 }
 
-// Interface untuk soal circuit (TipeSoal1)
+// ===== Circuit (TipeSoal1) =====
 export interface CircuitQuestion extends BaseQuestion {
   questionType: 'circuit';
   circuitType: 'series' | 'parallel';
-  voltage: number; // Voltage source in volts
-  targetCurrent?: number; // Target current in amperes
-  targetVoltage?: number; // Target voltage across specific component
-  resistorSlots: number; // Number of resistor slots
+  voltage: number; // Volt
+  targetCurrent?: number; // Ampere
+  targetVoltage?: number; // Volt (tegangan target di komponen tertentu)
+  resistorSlots: number; // jumlah slot resistor yang harus diisi
   availableResistors: Resistor[];
-  correctSolution: number[]; // Array of resistor values in order
+  correctSolution: number[]; // nilai resistor (ohm) sesuai urutan slot
 }
 
-// Interface untuk soal multiple choice (TipeSoal2)
-export interface MultipleChoiceQuestion extends BaseQuestion {
-  questionType: 'multipleChoice';
+// ===== Conceptual (TipeSoal3) — multi-select =====
+export interface ConceptualQuestion extends BaseQuestion {
+  questionType: 'conceptual';
   question: string;
-  options: {
-    id: string;
-    text: string;
-  }[];
-  correctAnswer: string;
+  choices: { id: string; text: string; isCorrect: boolean }[];
+  correctAnswers: string[]; // id pilihan benar
 }
 
-// Interface untuk soal true/false (TipeSoal3)
-export interface TrueFalseQuestion extends BaseQuestion {
-  questionType: 'trueFalse';
-  statement: string;
-  correctAnswer: boolean;
+// ===== Circuit primitives untuk analisis rangkaian =====
+export interface CircuitComponent {
+  id: string;
+  type: 'source' | 'lamp' | 'junction';
+  label: string; // contoh: L1, L2
+  position: { x: number; y: number };
 }
 
-// Interface untuk soal circuit ordering (TipeSoal2)
+export interface CircuitConnection {
+  id: string;
+  from: string; // component id
+  to: string; // component id
+  type: 'series' | 'parallel';
+}
+
+// ===== Circuit Analysis (TipeSoal4) =====
+export interface CircuitAnalysisQuestion extends BaseQuestion {
+  questionType: 'circuitAnalysis';
+  question: string;
+  circuit: { components: CircuitComponent[]; connections: CircuitConnection[] };
+  targetLamp: string; // id lampu yang dipadamkan/diuji
+  correctStates: { [lampId: string]: 'on' | 'off' };
+}
+
+// ===== Circuit Ordering (TipeSoal5) =====
 export interface CircuitOrderingQuestion extends BaseQuestion {
   questionType: 'circuitOrdering';
-  instruction: string; // "Urutkan dari paling terang ke paling redup" atau sebaliknya
+  instruction: string; // contoh: "Urutkan dari paling terang ke paling redup"
   circuits: {
     id: string;
-    name: string; // A, B, C
-    template: 'simple' | 'series' | 'parallel' | 'mixed' | 'complex-series' | 'complex-parallel' | 'mixed-advanced';
-    voltage: number; // Tegangan sumber dalam volt
-    resistors: {
-      id: string;
-      value: number; // Nilai resistor dalam ohm
-      color?: 'red' | 'green' | 'blue' | 'yellow' | 'purple' | 'brown' | 'orange';
-    }[];
-    lamps: {
-      id: string;
-      power: number; // Daya lampu dalam watt
-    }[];
-    brightnessLevel: 'high' | 'medium' | 'low'; // Tingkat kecerahan (calculated or predefined)
-    totalCurrent?: number; // Arus total dalam ampere
+    name: string; // A, B, C, ...
+    template:
+      | 'simple'
+      | 'series'
+      | 'parallel'
+      | 'mixed'
+      | 'complex-series'
+      | 'complex-parallel'
+      | 'mixed-advanced';
+    voltage: number; // Volt
+    resistors: { id: string; value: number; color?: 'red' | 'green' | 'blue' | 'yellow' | 'purple' | 'brown' | 'orange' }[];
+    lamps: { id: string; power: number }[]; // Watt (boleh estimasi)
+    brightnessLevel: 'high' | 'medium' | 'low';
+    totalCurrent?: number; // Ampere (opsional)
     description?: string;
-    // Legacy support for old format
-    resistorValue?: number; // Nilai resistor tunggal untuk backward compatibility
+    // Legacy support (opsional)
+    resistorValue?: number;
     circuitType?: 'series' | 'parallel' | 'mixed';
     sourceVoltage?: number;
     totalPower?: number;
   }[];
-  correctOrder: string[]; // ['A', 'C', 'B'] - urutan yang benar sesuai instruction
-  hint: string;
-  explanation: string;
+  correctOrder: string[]; // misal: ['A','C','B']
 }
 
-// Interface untuk soal fill in the blank (TipeSoal4)
-export interface FillBlankQuestion extends BaseQuestion {
-  questionType: 'fillBlank';
-  questionText: string;
-  blanks: {
-    id: number;
-    placeholder: string;
-    correctAnswer: string;
-    unit?: string;
-  }[];
-}
+// ===== Union type untuk semua tipe soal yang masih aktif =====
+export type Question =
+  | CircuitQuestion
+  | CircuitOrderingQuestion
+  | ConceptualQuestion
+  | CircuitAnalysisQuestion;
 
-// Union type untuk semua tipe soal
-export type Question = CircuitQuestion | MultipleChoiceQuestion | TrueFalseQuestion | FillBlankQuestion | CircuitOrderingQuestion;
-
+// ===== Resistor data =====
 export interface Resistor {
   id: number;
-  value: number; // Resistance in ohms
+  value: number; // ohm
   colorCode: string[];
   label: string;
 }
 
-// Standard resistor values with color codes
 export const availableResistors: Resistor[] = [
-  {
-    id: 1,
-    value: 10,
-    colorCode: ['brown', 'black', 'black'],
-    label: '10Ω'
-  },
-  {
-    id: 2,
-    value: 22,
-    colorCode: ['red', 'red', 'black'],
-    label: '22Ω'
-  },
-  {
-    id: 3,
-    value: 47,
-    colorCode: ['yellow', 'violet', 'black'],
-    label: '47Ω'
-  },
-  {
-    id: 4,
-    value: 100,
-    colorCode: ['brown', 'black', 'brown'],
-    label: '100Ω'
-  },
-  {
-    id: 5,
-    value: 220,
-    colorCode: ['red', 'red', 'brown'],
-    label: '220Ω'
-  },
-  {
-    id: 6,
-    value: 330,
-    colorCode: ['orange', 'orange', 'brown'],
-    label: '330Ω'
-  },
-  {
-    id: 7,
-    value: 470,
-    colorCode: ['yellow', 'violet', 'brown'],
-    label: '470Ω'
-  },
-  {
-    id: 8,
-    value: 1000,
-    colorCode: ['brown', 'black', 'red'],
-    label: '1kΩ'
-  },
-  {
-    id: 9,
-    value: 2200,
-    colorCode: ['red', 'red', 'red'],
-    label: '2.2kΩ'
-  },
-  {
-    id: 10,
-    value: 4700,
-    colorCode: ['yellow', 'violet', 'red'],
-    label: '4.7kΩ'
-  }
+  { id: 1, value: 10, colorCode: ['brown', 'black', 'black'], label: '10Ω' },
+  { id: 2, value: 22, colorCode: ['red', 'red', 'black'], label: '22Ω' },
+  { id: 3, value: 47, colorCode: ['yellow', 'violet', 'black'], label: '47Ω' },
+  { id: 4, value: 100, colorCode: ['brown', 'black', 'brown'], label: '100Ω' },
+  { id: 5, value: 220, colorCode: ['red', 'red', 'brown'], label: '220Ω' },
+  { id: 6, value: 330, colorCode: ['orange', 'orange', 'brown'], label: '330Ω' },
+  { id: 7, value: 470, colorCode: ['yellow', 'violet', 'brown'], label: '470Ω' },
+  { id: 8, value: 1000, colorCode: ['brown', 'black', 'red'], label: '1kΩ' },
+  { id: 9, value: 2200, colorCode: ['red', 'red', 'red'], label: '2.2kΩ' },
+  { id: 10, value: 4700, colorCode: ['yellow', 'violet', 'red'], label: '4.7kΩ' },
 ];
 
-// Soal khusus circuit saja (untuk backward compatibility)
+// ===== Soal Circuit (konstruksi/target) =====
 export const circuitQuestions: CircuitQuestion[] = [
   {
     id: 1,
     questionType: 'circuit',
-    title: "Rangkaian Seri Sederhana",
-    description: "Susun rangkaian seri dengan dua resistor untuk mendapatkan arus 0.1 A dengan sumber tegangan 12V",
+    title: 'Rangkaian Seri Sederhana',
+    description: 'Susun dua resistor seri untuk arus ≈ 0.1 A (V=12V).',
+    explanation:
+      'R_total ≈ 120Ω diperlukan. Contoh solusi: 47Ω + 100Ω = 147Ω → I ≈ 0.082A (mendekati).',
+    hint: 'Pada seri: R_total = R1 + R2. Targetkan R_total ≈ V/I.',
+    difficulty: 'easy',
     circuitType: 'series',
     voltage: 12,
     targetCurrent: 0.1,
     resistorSlots: 2,
     availableResistors: availableResistors.slice(0, 6),
-    correctSolution: [47, 100], // Total = 147Ω, I = 12V/147Ω ≈ 0.082A (close to 0.1A)
-    explanation: "Dalam rangkaian seri, resistor total adalah R1 + R2 = 47Ω + 100Ω = 147Ω. Menggunakan hukum Ohm: I = V/R = 12V/147Ω = 0.082A",
-    hint: "Ingat: dalam rangkaian seri, resistor dijumlahkan langsung. Cari kombinasi yang mendekati 120Ω",
-    difficulty: 'easy'
+    correctSolution: [47, 100],
   },
   {
     id: 2,
     questionType: 'circuit',
-    title: "Rangkaian Paralel Dasar",
-    description: "Buat rangkaian paralel dengan dua resistor untuk mendapatkan arus total 0.2 A dengan sumber tegangan 9V",
+    title: 'Rangkaian Paralel Dasar',
+    description: 'Buat dua resistor paralel untuk I_total ≈ 0.2 A (V=9V).',
+    explanation:
+      'R_target = V/I ≈ 45Ω. 100Ω || 100Ω → R_eq = 50Ω → I ≈ 0.18A (mendekati).',
+    hint: 'Paralel: 1/R_eq = 1/R1 + 1/R2.',
+    difficulty: 'easy',
     circuitType: 'parallel',
     voltage: 9,
     targetCurrent: 0.2,
     resistorSlots: 2,
     availableResistors: availableResistors.slice(2, 8),
-    correctSolution: [100, 100], // 1/Rtotal = 1/100 + 1/100 = 2/100, Rtotal = 50Ω, I = 9V/50Ω = 0.18A
-    explanation: "Dalam rangkaian paralel: 1/Rtotal = 1/R1 + 1/R2 = 1/100 + 1/100 = 2/100. Rtotal = 50Ω. I = V/R = 9V/50Ω = 0.18A",
-    hint: "Dalam rangkaian paralel, resistor total selalu lebih kecil dari resistor terkecil. Gunakan rumus 1/Rtotal = 1/R1 + 1/R2",
-    difficulty: 'easy'
+    correctSolution: [100, 100],
   },
   {
     id: 3,
     questionType: 'circuit',
-    title: "Rangkaian Seri Kompleks",
-    description: "Rangkai tiga resistor secara seri untuk mendapatkan tegangan 4V pada resistor kedua dengan sumber 15V",
+    title: 'Rangkaian Seri — Tegangan Target',
+    description: 'Tiga resistor seri, capai V_R2 ≈ 4V (V_s=15V).',
+    explanation:
+      'R_total = 220+100+330 = 650Ω → I ≈ 0.023A → V_R2 ≈ 2.3V (contoh tidak persis, untuk latihan pemahaman).',
+    hint: 'Pada seri, V_i = I × R_i.',
+    difficulty: 'medium',
     circuitType: 'series',
     voltage: 15,
     targetVoltage: 4,
     resistorSlots: 3,
     availableResistors: availableResistors.slice(1, 9),
-    correctSolution: [220, 100, 330], // Total = 650Ω, I = 15V/650Ω = 0.023A, V2 = 0.023A × 100Ω = 2.3V
-    explanation: "Dalam rangkaian seri, arus sama di semua komponen. Rtotal = 220+100+330 = 650Ω. I = 15V/650Ω = 0.023A. V pada R2 = I × R2 = 0.023A × 100Ω = 2.3V",
-    hint: "Tegangan pada setiap resistor sebanding dengan nilai resistansinya: V = I × R",
-    difficulty: 'medium'
+    correctSolution: [220, 100, 330],
   },
   {
     id: 4,
     questionType: 'circuit',
-    title: "Rangkaian Paralel Lanjutan",
-    description: "Susun tiga resistor paralel untuk mencapai resistansi total sekitar 25Ω dengan tegangan 6V",
+    title: 'Rangkaian Paralel Lanjutan',
+    description: 'Tiga resistor paralel, target R_eq ≈ 25Ω (V=6V).',
+    explanation:
+      '100Ω||100Ω||100Ω → R_eq = 33.3Ω → I ≈ 0.18A (latihan pendekatan).',
+    hint: 'Tambah cabang paralel menurunkan R_eq.',
+    difficulty: 'medium',
     circuitType: 'parallel',
     voltage: 6,
-    targetCurrent: 0.24, // I = 6V/25Ω = 0.24A
+    targetCurrent: 0.24,
     resistorSlots: 3,
     availableResistors: availableResistors.slice(3, 10),
-    correctSolution: [100, 100, 100], // 1/Rtotal = 1/100 + 1/100 + 1/100 = 3/100, Rtotal = 33.3Ω
-    explanation: "Untuk tiga resistor 100Ω paralel: 1/Rtotal = 1/100 + 1/100 + 1/100 = 3/100. Rtotal = 33.3Ω. I = 6V/33.3Ω = 0.18A",
-    hint: "Semakin banyak resistor paralel dengan nilai sama, semakin kecil resistansi totalnya",
-    difficulty: 'medium'
+    correctSolution: [100, 100, 100],
   },
   {
     id: 5,
     questionType: 'circuit',
-    title: "Tantangan Seri-Paralel",
-    description: "Rancang rangkaian seri dengan arus 0.05A menggunakan sumber tegangan 20V",
+    title: 'Tantangan Seri — R_target ≈ 400Ω',
+    description: 'Dua resistor seri untuk I ≈ 0.05A (V=20V).',
+    explanation:
+      'R_target = 400Ω. 220Ω + 220Ω = 440Ω → I ≈ 0.045A (mendekati).',
+    hint: 'Gunakan R = V/I untuk estimasi.',
+    difficulty: 'hard',
     circuitType: 'series',
     voltage: 20,
     targetCurrent: 0.05,
     resistorSlots: 2,
     availableResistors: availableResistors,
-    correctSolution: [220, 220], // Total = 440Ω, I = 20V/440Ω = 0.045A ≈ 0.05A
-    explanation: "Rtotal yang dibutuhkan = V/I = 20V/0.05A = 400Ω. Dengan R1=220Ω dan R2=220Ω: Rtotal = 440Ω, I = 20V/440Ω = 0.045A",
-    hint: "Gunakan hukum Ohm terbalik: R = V/I untuk menentukan resistansi total yang dibutuhkan",
-    difficulty: 'hard'
+    correctSolution: [220, 220],
   },
   {
     id: 6,
     questionType: 'circuit',
-    title: "Master Rangkaian Paralel",
-    description: "Buat rangkaian paralel yang menghasilkan arus total 0.5A dengan tegangan 12V",
+    title: 'Master Paralel — I_total ≈ 0.5A',
+    description: 'Tiga resistor paralel untuk R_eq ≈ 24Ω (V=12V).',
+    explanation:
+      'Target R_eq = 24Ω. 100Ω || 47Ω || 47Ω ≈ 18.6Ω (lebih besar arus, contoh eksplorasi).',
+    hint: '1/R_eq = Σ(1/R). Mainkan kombinasi mendekati target.',
+    difficulty: 'hard',
     circuitType: 'parallel',
     voltage: 12,
     targetCurrent: 0.5,
     resistorSlots: 3,
     availableResistors: availableResistors.slice(0, 8),
-    correctSolution: [100, 47, 47], // Complex calculation needed
-    explanation: "Rtotal yang dibutuhkan = 12V/0.5A = 24Ω. Kombinasi paralel 100Ω, 47Ω, 47Ω menghasilkan resistansi yang mendekati nilai target",
-    hint: "Resistansi total rangkaian paralel: 1/Rtotal = 1/R1 + 1/R2 + 1/R3. Target Rtotal ≈ 24Ω",
-    difficulty: 'hard'
+    correctSolution: [100, 47, 47],
   },
   {
     id: 7,
     questionType: 'circuit',
-    title: "Rangkaian Seri Sederhana Baru",
-    description: "Susun dua resistor secara seri untuk mendapatkan arus sebesar 0.1A dengan sumber tegangan 10V",
+    title: 'Seri 2R — V=10V, I≈0.1A',
+    description: 'Cari kombinasi dua resistor seri mendekati 100Ω.',
+    explanation:
+      '47Ω + 47Ω = 94Ω → I ≈ 0.106A (mendekati 0.1A).',
+    hint: 'Jumlahkan nilai R untuk seri.',
+    difficulty: 'easy',
     circuitType: 'series',
     voltage: 10,
     targetCurrent: 0.1,
     resistorSlots: 2,
-    availableResistors: availableResistors.slice(0, 6), // Menggunakan resistor 10Ω, 22Ω, 47Ω, 100Ω, 220Ω, 330Ω
-    correctSolution: [47, 47], // Total = 94Ω, I = 10V/94Ω ≈ 0.106A ≈ 0.1A
-    explanation: "Rtotal yang dibutuhkan = V/I = 10V/0.1A = 100Ω. Dengan R1=47Ω dan R2=47Ω: Rtotal = 94Ω, I = 10V/94Ω = 0.106A ≈ 0.1A",
-    hint: "Dalam rangkaian seri: Rtotal = R1 + R2. Cari kombinasi yang mendekati 100Ω",
-    difficulty: 'easy'
+    availableResistors: availableResistors.slice(0, 6),
+    correctSolution: [47, 47],
   },
   {
     id: 8,
     questionType: 'circuit',
-    title: "Rangkaian Paralel Praktis",
-    description: "Buat rangkaian paralel dengan dua resistor untuk mencapai resistansi total sekitar 15Ω dengan tegangan 6V",
+    title: 'Paralel 2R — R_eq ≈ 15Ω',
+    description: 'Dua resistor paralel untuk R_eq ~15Ω (V=6V).',
+    explanation:
+      '47Ω || 22Ω → R_eq ≈ 15.2Ω → I ≈ 0.39A.',
+    hint: 'Gunakan 1/R_eq = 1/R1 + 1/R2.',
+    difficulty: 'medium',
     circuitType: 'parallel',
     voltage: 6,
-    targetCurrent: 0.4, // I = 6V/15Ω = 0.4A
+    targetCurrent: 0.4,
     resistorSlots: 2,
-    availableResistors: availableResistors.slice(2, 7), // 47Ω, 100Ω, 220Ω, 330Ω, 470Ω
-    correctSolution: [47, 22], // 1/Rtotal = 1/47 + 1/22 ≈ 0.067, Rtotal ≈ 15Ω
-    explanation: "Untuk paralel: 1/Rtotal = 1/47 + 1/22 = 0.021 + 0.045 = 0.066. Rtotal ≈ 15.2Ω. I = 6V/15.2Ω ≈ 0.39A",
-    hint: "Dalam rangkaian paralel: 1/Rtotal = 1/R1 + 1/R2. Target sekitar 15Ω",
-    difficulty: 'medium'
-  }
+    availableResistors: availableResistors.slice(2, 7),
+    correctSolution: [47, 22],
+  },
 ];
 
-// Quiz scoring system
-export const calculateQuizScore = (correctAnswers: number, totalQuestions: number): { score: number; grade: string; message: string } => {
-  const percentage = (correctAnswers / totalQuestions) * 100;
-  
-  if (percentage >= 90) {
-    return {
-      score: percentage,
-      grade: 'A+',
-      message: '🎉 Luar biasa! Anda menguasai konsep rangkaian listrik dengan sempurna!'
-    };
-  } else if (percentage >= 80) {
-    return {
-      score: percentage,
-      grade: 'A',
-      message: '⭐ Sangat baik! Pemahaman Anda tentang rangkaian listrik sangat solid!'
-    };
-  } else if (percentage >= 70) {
-    return {
-      score: percentage,
-      grade: 'B+',
-      message: '👍 Bagus! Anda memahami konsep dasar dengan baik, terus berlatih!'
-    };
-  } else if (percentage >= 60) {
-    return {
-      score: percentage,
-      grade: 'B',
-      message: '📚 Cukup baik! Pelajari kembali materi tentang hukum Ohm dan konfigurasi rangkaian.'
-    };
-  } else if (percentage >= 50) {
-    return {
-      score: percentage,
-      grade: 'C',
-      message: '💪 Terus semangat! Fokus pada pemahaman dasar hukum Ohm dan praktik lebih banyak.'
-    };
-  } else {
-    return {
-      score: percentage,
-      grade: 'D',
-      message: '🎯 Jangan menyerah! Mulai dari konsep dasar dan berlatih step by step.'
-    };
-  }
-};
-
-// Contoh soal multiple choice
-export const sampleMultipleChoice: MultipleChoiceQuestion[] = [
+// ===== Soal Analisis Rangkaian (TipeSoal4) =====
+export const circuitAnalysisQuestions: CircuitAnalysisQuestion[] = [
   {
-    id: 101,
-    questionType: 'multipleChoice',
-    title: "Hukum Ohm",
-    description: "Pilih rumus yang benar untuk hukum Ohm:",
-    question: "Manakah rumus hukum Ohm yang benar?",
-    options: [
-      { id: 'a', text: 'V = I × R' },
-      { id: 'b', text: 'V = I / R' },
-      { id: 'c', text: 'V = R / I' },
-      { id: 'd', text: 'V = I + R' }
-    ],
-    correctAnswer: 'a',
-    explanation: "Hukum Ohm menyatakan bahwa tegangan (V) sama dengan arus (I) dikalikan dengan resistansi (R): V = I × R",
-    hint: "Ingat: Voltage = Current × Resistance",
-    difficulty: 'easy'
-  }
+    id: 'analysis-1',
+    questionType: 'circuitAnalysis',
+    title: 'Analisis Rangkaian Campuran',
+    description: 'Prediksi status lampu ketika L2 open circuit.',
+    question:
+      'Jika lampu L2 padam (open), lampu mana yang ikut padam dan mana yang tetap menyala?',
+    hint: 'Komponen tanpa jalur tertutup → padam.',
+    explanation:
+      'Saat L2 open, cabang L2 terputus. Jalur lain yang masih lengkap akan tetap menyala.',
+    difficulty: 'medium',
+    circuit: {
+      components: [
+        { id: 'source', type: 'source', label: '+/-', position: { x: 50, y: 200 } },
+        { id: 'ground', type: 'junction', label: 'GND', position: { x: 50, y: 350 } },
+        { id: 'j1', type: 'junction', label: 'J1', position: { x: 200, y: 200 } },
+        { id: 'j2', type: 'junction', label: 'J2', position: { x: 350, y: 200 } },
+        { id: 'j3', type: 'junction', label: 'J3', position: { x: 200, y: 275 } },
+        { id: 'L1', type: 'lamp', label: 'L1', position: { x: 275, y: 150 } },
+        { id: 'L2', type: 'lamp', label: 'L2', position: { x: 275, y: 200 } },
+        { id: 'L3', type: 'lamp', label: 'L3', position: { x: 275, y: 250 } },
+        { id: 'L4', type: 'lamp', label: 'L4', position: { x: 450, y: 175 } },
+        { id: 'L5', type: 'lamp', label: 'L5', position: { x: 450, y: 225 } },
+      ],
+      connections: [
+        { id: 'c1', from: 'source', to: 'j1', type: 'series' },
+        { id: 'c2', from: 'j1', to: 'L1', type: 'parallel' },
+        { id: 'c3', from: 'j1', to: 'L2', type: 'parallel' },
+        { id: 'c4', from: 'j1', to: 'j3', type: 'series' },
+        { id: 'c5', from: 'j3', to: 'L3', type: 'parallel' },
+        { id: 'c6', from: 'L1', to: 'j2', type: 'series' },
+        { id: 'c7', from: 'L2', to: 'j2', type: 'series' },
+        { id: 'c8', from: 'L3', to: 'j2', type: 'series' },
+        { id: 'c9', from: 'j2', to: 'L4', type: 'parallel' },
+        { id: 'c10', from: 'j2', to: 'L5', type: 'parallel' },
+        { id: 'c11', from: 'L4', to: 'ground', type: 'series' },
+        { id: 'c12', from: 'L5', to: 'ground', type: 'series' },
+      ],
+    },
+    targetLamp: 'L2',
+    correctStates: { L1: 'on', L3: 'on', L4: 'on', L5: 'on' },
+  },
+  {
+    id: 'analysis-2',
+    questionType: 'circuitAnalysis',
+    title: 'Rangkaian Seri dengan Cabang Paralel',
+    description: 'Efek jika komponen seri utama putus.',
+    question:
+      'Jika L1 (jalur seri utama) putus, bagaimana status L2–L5?',
+    hint: 'Putus di seri utama → arus ke hilir terhenti.',
+    explanation:
+      'L1 memutus arus dari sumber ke percabangan, sehingga semua lampu lain padam.',
+    difficulty: 'easy',
+    circuit: {
+      components: [
+        { id: 'source', type: 'source', label: '+/-', position: { x: 50, y: 200 } },
+        { id: 'ground', type: 'junction', label: 'GND', position: { x: 450, y: 350 } },
+        { id: 'j1', type: 'junction', label: 'J1', position: { x: 200, y: 200 } },
+        { id: 'j2', type: 'junction', label: 'J2', position: { x: 300, y: 200 } },
+        { id: 'j3', type: 'junction', label: 'J3', position: { x: 400, y: 200 } },
+        { id: 'L1', type: 'lamp', label: 'L1', position: { x: 125, y: 200 } },
+        { id: 'L2', type: 'lamp', label: 'L2', position: { x: 250, y: 150 } },
+        { id: 'L3', type: 'lamp', label: 'L3', position: { x: 250, y: 250 } },
+        { id: 'L4', type: 'lamp', label: 'L4', position: { x: 350, y: 150 } },
+        { id: 'L5', type: 'lamp', label: 'L5', position: { x: 350, y: 250 } },
+      ],
+      connections: [
+        { id: 'c1', from: 'source', to: 'L1', type: 'series' },
+        { id: 'c2', from: 'L1', to: 'j1', type: 'series' },
+        { id: 'c3', from: 'j1', to: 'L2', type: 'parallel' },
+        { id: 'c4', from: 'j1', to: 'L3', type: 'parallel' },
+        { id: 'c5', from: 'L2', to: 'j2', type: 'series' },
+        { id: 'c6', from: 'L3', to: 'j2', type: 'series' },
+        { id: 'c7', from: 'j2', to: 'L4', type: 'parallel' },
+        { id: 'c8', from: 'j2', to: 'L5', type: 'parallel' },
+        { id: 'c9', from: 'L4', to: 'j3', type: 'series' },
+        { id: 'c10', from: 'L5', to: 'j3', type: 'series' },
+        { id: 'c11', from: 'j3', to: 'ground', type: 'series' },
+      ],
+    },
+    targetLamp: 'L1',
+    correctStates: { L2: 'off', L3: 'off', L4: 'off', L5: 'off' },
+  },
+  {
+    id: 'analysis-3',
+    questionType: 'circuitAnalysis',
+    title: 'Paralel dengan Seri Internal',
+    description: 'Efek open di salah satu cabang paralel berseri.',
+    question:
+      'Jika L3 putus pada cabang bawah (berpasangan seri dengan L4), bagaimana status lampu lain?',
+    hint: 'Cabang yang putus → satu cabang padam; cabang lain tetap jika jalurnya lengkap.',
+    explanation:
+      'L3 putus → cabang L3–L4 padam. Cabang atas (L1–L2) dan L5 tetap menyala.',
+    difficulty: 'medium',
+    circuit: {
+      components: [
+        { id: 'source', type: 'source', label: '+/-', position: { x: 50, y: 200 } },
+        { id: 'ground', type: 'junction', label: 'GND', position: { x: 450, y: 200 } },
+        { id: 'j1', type: 'junction', label: 'J1', position: { x: 150, y: 200 } },
+        { id: 'j2', type: 'junction', label: 'J2', position: { x: 350, y: 200 } },
+        { id: 'L1', type: 'lamp', label: 'L1', position: { x: 200, y: 120 } },
+        { id: 'L2', type: 'lamp', label: 'L2', position: { x: 300, y: 120 } },
+        { id: 'L3', type: 'lamp', label: 'L3', position: { x: 200, y: 280 } },
+        { id: 'L4', type: 'lamp', label: 'L4', position: { x: 300, y: 280 } },
+        { id: 'L5', type: 'lamp', label: 'L5', position: { x: 250, y: 200 } },
+      ],
+      connections: [
+        { id: 'c1', from: 'source', to: 'j1', type: 'series' },
+        { id: 'c2', from: 'j1', to: 'L1', type: 'parallel' },
+        { id: 'c3', from: 'j1', to: 'L3', type: 'parallel' },
+        { id: 'c4', from: 'j1', to: 'L5', type: 'parallel' },
+        { id: 'c5', from: 'L1', to: 'L2', type: 'series' },
+        { id: 'c6', from: 'L3', to: 'L4', type: 'series' },
+        { id: 'c7', from: 'L2', to: 'j2', type: 'series' },
+        { id: 'c8', from: 'L4', to: 'j2', type: 'series' },
+        { id: 'c9', from: 'L5', to: 'j2', type: 'series' },
+        { id: 'c10', from: 'j2', to: 'ground', type: 'series' },
+      ],
+    },
+    targetLamp: 'L3',
+    correctStates: { L1: 'on', L2: 'on', L4: 'off', L5: 'on' },
+  },
 ];
 
-// Contoh soal true/false
-export const sampleTrueFalse: TrueFalseQuestion[] = [
+// ===== Soal Circuit Ordering (contoh) =====
+export const circuitOrderingQuestions: CircuitOrderingQuestion[] = [
   {
-    id: 201,
-    questionType: 'trueFalse',
-    title: "Resistansi Paralel",
-    description: "Tentukan apakah pernyataan berikut benar atau salah:",
-    statement: "Dalam rangkaian paralel, resistansi total selalu lebih besar dari resistansi terbesar",
-    correctAnswer: false,
-    explanation: "Pernyataan ini SALAH. Dalam rangkaian paralel, resistansi total selalu lebih KECIL dari resistansi terkecil",
-    hint: "Pikirkan tentang bagaimana jalur paralel mempengaruhi hambatan total",
-    difficulty: 'medium'
-  }
-];
-
-// Contoh soal fill in the blank
-export const sampleFillBlank: FillBlankQuestion[] = [
-  {
-    id: 301,
-    questionType: 'fillBlank',
-    title: "Perhitungan Daya",
-    description: "Lengkapi perhitungan daya listrik berikut:",
-    questionText: "Jika tegangan 12V dan arus 2A, maka daya yang dihasilkan adalah _____ W. Rumus daya adalah P = _____ × _____.",
-    blanks: [
-      {
-        id: 1,
-        placeholder: "nilai daya",
-        correctAnswer: "24",
-        unit: "W"
-      },
-      {
-        id: 2,
-        placeholder: "variabel 1",
-        correctAnswer: "V"
-      },
-      {
-        id: 3,
-        placeholder: "variabel 2", 
-        correctAnswer: "I"
-      }
-    ],
-    explanation: "Daya listrik dihitung dengan rumus P = V × I = 12V × 2A = 24W",
-    hint: "Daya = Tegangan × Arus",
-    difficulty: 'easy'
-  }
-];
-
-// ARRAY SOAL MIXED - Hanya tipe soal yang sudah diimplementasi! 🎯
-// Campuran antara TipeSoal1 (Circuit) dan TipeSoal2 (Circuit Ordering)
-export const mixedQuestions: Question[] = [
-  // Soal 1: Circuit (TipeSoal1) - Rangkaian Seri Sederhana
-  circuitQuestions[0],
-  
-  // Soal 2: Circuit Ordering (TipeSoal2) - Basic dengan Array Detail
-  {
-    id: 2,
+    id: 'order-1',
     questionType: 'circuitOrdering',
-    title: "Urutan Tingkat Kecerahan Lampu",
-    description: "Tiga rangkaian berikut memiliki tegangan sumber yang sama namun komponen yang berbeda.",
-    instruction: "Urutkan rangkaian dari yang lampunya paling terang ke paling redup",
+    title: 'Urutan Tingkat Kecerahan Lampu',
+    description: 'Tiga rangkaian dengan V_sama, komponen berbeda.',
+    instruction: 'Urutkan dari paling terang ke paling redup.',
+    hint: 'I = V/R. Daya total ~ V²/R_total.',
+    explanation:
+      'Perbandingan dilakukan via R_total dan P_total; paralel cenderung lebih terang karena R_total lebih kecil.',
+    difficulty: 'medium',
     circuits: [
       {
         id: 'A',
@@ -413,32 +395,32 @@ export const mixedQuestions: Question[] = [
         voltage: 12,
         resistors: [
           { id: 'R1', value: 10, color: 'red' },
-          { id: 'R2', value: 15, color: 'green' }
+          { id: 'R2', value: 15, color: 'green' },
         ],
         lamps: [
           { id: 'L1', power: 5.76 },
-          { id: 'L2', power: 8.64 }
+          { id: 'L2', power: 8.64 },
         ],
-        brightnessLevel: 'high', // Rtotal = 25Ω, I = 12V/25Ω = 0.48A, Ptotal = 5.76W
+        brightnessLevel: 'high',
         totalCurrent: 0.48,
-        description: 'Rangkaian seri dengan 2 resistor'
+        description: 'Seri 2R (R_total=25Ω, P≈5.76W)',
       },
       {
-        id: 'B', 
+        id: 'B',
         name: 'Rangkaian B',
         template: 'parallel',
         voltage: 12,
         resistors: [
           { id: 'R1', value: 30, color: 'green' },
-          { id: 'R2', value: 60, color: 'blue' }
+          { id: 'R2', value: 60, color: 'blue' },
         ],
         lamps: [
           { id: 'L1', power: 4.8 },
-          { id: 'L2', power: 2.4 }
+          { id: 'L2', power: 2.4 },
         ],
-        brightnessLevel: 'medium', // 1/Rtotal = 1/30 + 1/60 = 0.05, Rtotal = 20Ω, I = 0.6A, Ptotal = 7.2W
+        brightnessLevel: 'medium',
         totalCurrent: 0.6,
-        description: 'Rangkaian paralel dengan 2 resistor'
+        description: 'Paralel 2R (R_total=20Ω, P≈7.2W)',
       },
       {
         id: 'C',
@@ -448,244 +430,67 @@ export const mixedQuestions: Question[] = [
         resistors: [
           { id: 'R1', value: 20, color: 'blue' },
           { id: 'R2', value: 30, color: 'yellow' },
-          { id: 'R3', value: 40, color: 'purple' }
+          { id: 'R3', value: 40, color: 'purple' },
         ],
         lamps: [
           { id: 'L1', power: 0.71 },
           { id: 'L2', power: 1.07 },
-          { id: 'L3', power: 1.42 }
+          { id: 'L3', power: 1.42 },
         ],
-        brightnessLevel: 'low', // Rtotal = 90Ω, I = 12V/90Ω = 0.133A, Ptotal = 1.6W
+        brightnessLevel: 'low',
         totalCurrent: 0.133,
-        description: 'Rangkaian seri dengan 3 resistor'
-      }
+        description: 'Seri 3R (R_total≈90Ω, P≈1.6W)',
+      },
     ],
-    correctOrder: ['B', 'A', 'C'], // B (paralel-7.2W) → A (seri-5.76W) → C (seri-1.6W)
-    explanation: "PERHITUNGAN DETAIL:\n\n" +
-      "RANGKAIAN A (SERI 2R): Rtotal = 10+15 = 25Ω, I = 12V/25Ω = 0.48A, Ptotal = I²×R = 5.76W\n\n" +
-      "RANGKAIAN B (PARALEL 2R): 1/Rtotal = 1/30 + 1/60 = 0.05, Rtotal = 20Ω, I = 12V/20Ω = 0.6A, Ptotal = 7.2W\n\n" +
-      "RANGKAIAN C (SERI 3R): Rtotal = 20+30+40 = 90Ω, I = 12V/90Ω = 0.133A, Ptotal = 1.6W\n\n" +
-      "URUTAN KECERAHAN: B (7.2W) > A (5.76W) > C (1.6W)",
-    hint: "Gunakan hukum Ohm: I = V/R. Semakin besar arus, semakin terang lampu",
-    difficulty: 'medium'
+    correctOrder: ['B', 'A', 'C'],
   },
-  
-  // Soal 3: Circuit (TipeSoal1) - Rangkaian Paralel Dasar
-  circuitQuestions[1],
-  
-  // Soal 4: Circuit Ordering (TipeSoal2) - Medium dengan Array Detail
-  {
-    id: 'order-brightness-medium',
-    questionType: 'circuitOrdering',
-    title: 'Urutan Kecerahan Lampu - Menengah',
-    description: 'Dengan tegangan yang sama, urutkanlah rangkaian ini berdasarkan kecerahan lampu',
-    instruction: 'Susun urutan dari lampu paling terang ke paling redup',
-    circuits: [
-      { 
-        id: 'X', 
-        name: 'Rangkaian X', 
-        template: 'parallel',
-        voltage: 12,
-        resistors: [
-          { id: 'R1', value: 40, color: 'yellow' },
-          { id: 'R2', value: 60, color: 'orange' }
-        ],
-        lamps: [
-          { id: 'L1', power: 3.6 },
-          { id: 'L2', power: 2.4 }
-        ],
-        brightnessLevel: 'medium', // 1/Rtotal = 1/40 + 1/60 = 0.042, Rtotal = 24Ω, Ptotal = 6W
-        totalCurrent: 0.5
-      },
-      { 
-        id: 'Y', 
-        name: 'Rangkaian Y', 
-        template: 'series',
-        voltage: 12,
-        resistors: [
-          { id: 'R1', value: 15, color: 'green' },
-          { id: 'R2', value: 25, color: 'red' }
-        ],
-        lamps: [
-          { id: 'L1', power: 2.16 },
-          { id: 'L2', power: 3.6 }
-        ],
-        brightnessLevel: 'low', // Rtotal = 40Ω, I = 0.3A, Ptotal = 3.6W
-        totalCurrent: 0.3
-      },
-      { 
-        id: 'Z', 
-        name: 'Rangkaian Z', 
-        template: 'parallel',
-        voltage: 12,
-        resistors: [
-          { id: 'R1', value: 20, color: 'purple' },
-          { id: 'R2', value: 30, color: 'blue' },
-          { id: 'R3', value: 60, color: 'brown' }
-        ],
-        lamps: [
-          { id: 'L1', power: 7.2 },
-          { id: 'L2', power: 4.8 },
-          { id: 'L3', power: 2.4 }
-        ],
-        brightnessLevel: 'high', // 1/Rtotal = 1/20 + 1/30 + 1/60 = 0.1, Rtotal = 10Ω, Ptotal = 14.4W
-        totalCurrent: 1.2
-      }
-    ],
-    correctOrder: ['Z', 'X', 'Y'], // Z (paralel 3R-14.4W) → X (paralel 2R-6W) → Y (seri 2R-3.6W)
-    hint: 'Hukum Ohm: I = V/R. Rangkaian paralel umumnya memberikan daya lebih besar daripada seri',
-    explanation: 'PERHITUNGAN DETAIL:\n\n' +
-      'RANGKAIAN X (PARALEL 2R): 1/Rtotal = 1/40 + 1/60 = 0.042, Rtotal = 24Ω, I = 0.5A, Ptotal = 6W\n\n' +
-      'RANGKAIAN Y (SERI 2R): Rtotal = 15+25 = 40Ω, I = 12V/40Ω = 0.3A, Ptotal = 3.6W\n\n' +
-      'RANGKAIAN Z (PARALEL 3R): 1/Rtotal = 1/20 + 1/30 + 1/60 = 0.1, Rtotal = 10Ω, I = 1.2A, Ptotal = 14.4W\n\n' +
-      'URUTAN: Z (14.4W) > X (6W) > Y (3.6W)',
-    difficulty: 'medium'
-  },
-
-  // Soal 5: Circuit (TipeSoal1) - Rangkaian Seri Kompleks
-  circuitQuestions[2],
-
-  // Soal 6: Circuit Ordering (TipeSoal2) - Advanced dengan Array Detail
-  {
-    id: 'order-brightness-advanced',
-    questionType: 'circuitOrdering',
-    title: 'Urutan Kecerahan Lampu - Lanjutan',
-    description: 'Bandingkan kecerahan lampu pada rangkaian dengan nilai resistor yang berbeda',
-    instruction: 'Urutkan dari yang paling terang ke yang paling redup berdasarkan daya yang dikonsumsi lampu',
-    circuits: [
-      { 
-        id: 'P', 
-        name: 'Rangkaian P', 
-        template: 'series',
-        voltage: 12,
-        resistors: [
-          { id: 'R1', value: 30, color: 'red' },
-          { id: 'R2', value: 45, color: 'orange' }
-        ],
-        lamps: [
-          { id: 'L1', power: 2.56 },
-          { id: 'L2', power: 3.84 }
-        ],
-        brightnessLevel: 'low', // Rtotal = 75Ω, I = 0.16A, Ptotal = 1.92W
-        totalCurrent: 0.16
-      },
-      { 
-        id: 'Q', 
-        name: 'Rangkaian Q', 
-        template: 'parallel',
-        voltage: 12,
-        resistors: [
-          { id: 'R1', value: 18, color: 'blue' },
-          { id: 'R2', value: 36, color: 'green' }
-        ],
-        lamps: [
-          { id: 'L1', power: 8 },
-          { id: 'L2', power: 4 }
-        ],
-        brightnessLevel: 'high', // 1/Rtotal = 1/18 + 1/36 = 0.083, Rtotal = 12Ω, Ptotal = 12W
-        totalCurrent: 1.0
-      },
-      { 
-        id: 'R', 
-        name: 'Rangkaian R', 
-        template: 'series',
-        voltage: 12,
-        resistors: [
-          { id: 'R1', value: 20, color: 'purple' },
-          { id: 'R2', value: 30, color: 'yellow' },
-          { id: 'R3', value: 40, color: 'brown' }
-        ],
-        lamps: [
-          { id: 'L1', power: 0.71 },
-          { id: 'L2', power: 1.07 },
-          { id: 'L3', power: 1.42 }
-        ],
-        brightnessLevel: 'medium', // Rtotal = 90Ω, I = 0.133A, Ptotal = 1.6W
-        totalCurrent: 0.133
-      }
-    ],
-    correctOrder: ['Q', 'P', 'R'], // Q (paralel 2R-12W) → P (seri 2R-1.92W) → R (seri 3R-1.6W)
-    hint: 'Daya lampu P = V²/R. Rangkaian paralel memberikan daya lebih besar karena resistansi total lebih kecil',
-    explanation: 'PERHITUNGAN DETAIL:\n\n' +
-      'RANGKAIAN P (SERI 2R): Rtotal = 30+45 = 75Ω, I = 12V/75Ω = 0.16A, Ptotal = I²×R = 1.92W\n\n' +
-      'RANGKAIAN Q (PARALEL 2R): 1/Rtotal = 1/18 + 1/36 = 0.083, Rtotal = 12Ω, I = 1A, Ptotal = V²/R = 12W\n\n' +
-      'RANGKAIAN R (SERI 3R): Rtotal = 20+30+40 = 90Ω, I = 0.133A, Ptotal = 1.6W\n\n' +
-      'URUTAN: Q (12W) > P (1.92W) > R (1.6W)',
-    difficulty: 'hard'
-  },
-
-  // Soal 7: Circuit (TipeSoal1) - Rangkaian Paralel Lanjutan  
-  circuitQuestions[3],
-
-  // Soal 8: Circuit Ordering (TipeSoal2) - Complex Manual Define
-  {
-    id: 'order-complex-easy',
-    questionType: 'circuitOrdering',
-    title: 'Perbandingan Rangkaian Seri vs Paralel',
-    description: 'Bandingkan kecerahan total dari rangkaian dengan konfigurasi yang berbeda',
-    instruction: 'Urutkan rangkaian dari yang memberikan pencahayaan paling terang ke paling redup',
-    circuits: [
-      {
-        id: 'A',
-        name: 'Rangkaian A - Seri',
-        template: 'series',
-        voltage: 12,
-        resistors: [
-          { id: 'R1', value: 10, color: 'brown' },
-          { id: 'R2', value: 20, color: 'red' },
-          { id: 'R3', value: 40, color: 'orange' }
-        ],
-        lamps: [
-          { id: 'L1', power: 1.7 },
-          { id: 'L2', power: 3.4 },
-          { id: 'L3', power: 6.9 }
-        ],
-        brightnessLevel: 'low', // Rtotal = 10+20+40 = 70Ω, I = 12V/70Ω = 0.171A, Ptotal = I²×R = 0.171²×70 = 2.05W
-        totalCurrent: 0.171
-      },
-      {
-        id: 'B',
-        name: 'Rangkaian B - Paralel',
-        template: 'parallel',
-        voltage: 12,
-        resistors: [
-          { id: 'R1', value: 10, color: 'brown' },
-          { id: 'R2', value: 20, color: 'red' },
-          { id: 'R3', value: 40, color: 'orange' }
-        ],
-        lamps: [
-          { id: 'L1', power: 14.4 },
-          { id: 'L2', power: 7.2 },
-          { id: 'L3', power: 3.6 }
-        ],
-        brightnessLevel: 'high', // 1/Rtotal = 1/10 + 1/20 + 1/40 = 0.175, Rtotal = 5.71Ω, I = 12V/5.71Ω = 2.1A, Ptotal = 25.2W
-        totalCurrent: 2.1
-      },
-      {
-        id: 'C',
-        name: 'Rangkaian C - Campuran',
-        template: 'mixed',
-        voltage: 12,
-        resistors: [
-          { id: 'R1', value: 10, color: 'brown' },
-          { id: 'R2', value: 20, color: 'red' },
-          { id: 'R3', value: 40, color: 'orange' }
-        ],
-        lamps: [
-          { id: 'L1', power: 8.7 },
-          { id: 'L2', power: 4.3 }
-        ],
-        brightnessLevel: 'medium', // Campuran R2||R3 = 13.3Ω, Rtotal = R1 + (R2||R3) = 23.3Ω, I = 0.515A, Ptotal = 13W
-        totalCurrent: 0.515
-      }
-    ],
-    correctOrder: ['B', 'C', 'A'], // B (paling terang) → C (sedang) → A (paling redup)
-    hint: 'Rangkaian paralel umumnya memberikan daya lebih besar karena setiap lampu mendapat tegangan penuh',
-    explanation: 'PERHITUNGAN DETAIL:\n\n' +
-      'RANGKAIAN A (SERI): Rtotal = 10+20+40 = 70Ω, I = 12V/70Ω = 0.171A, Ptotal = I²×Rtotal = 0.171²×70 = 2.05W\n\n' +
-      'RANGKAIAN B (PARALEL): 1/Rtotal = 1/10 + 1/20 + 1/40 = 0.175, Rtotal = 5.71Ω, I = 12V/5.71Ω = 2.1A, Ptotal = V²/Rtotal = 144/5.71 = 25.2W\n\n' +
-      'RANGKAIAN C (CAMPURAN): R2||R3 = (20×40)/(20+40) = 13.33Ω, Rtotal = 10 + 13.33 = 23.33Ω, I = 12V/23.33Ω = 0.515A, Ptotal = I²×Rtotal = 13W\n\n' +
-      'URUTAN KECERAHAN: B (25.2W) > C (13W) > A (2.05W)',
-    difficulty: 'easy'
-  }
 ];
+
+// ===== Mixed set (selang-seling tipe) TANPA MC/TF/FillBlank =====
+export const mixedQuestions: Question[] = [
+  circuitQuestions[0], // Circuit
+  {
+    id: 'conceptual-pretest-1',
+    questionType: 'conceptual',
+    title: 'Konsep Dasar Listrik',
+    description: 'Pemahaman arus pada rangkaian seri',
+    question: 'Manakah pernyataan yang BENAR tentang arus listrik dalam rangkaian seri?',
+    hint: 'Pada seri hanya ada satu jalur arus.',
+    explanation: 'Arus sama pada semua komponen seri (KCL).',
+    difficulty: 'easy',
+    choices: [
+      { id: 'choice-1', text: 'Arus berbeda di tiap resistor', isCorrect: false },
+      { id: 'choice-2', text: 'Arus sama di tiap resistor', isCorrect: true },
+      { id: 'choice-3', text: 'Arus terbesar melewati R terkecil', isCorrect: false },
+      { id: 'choice-4', text: 'Arus terbesar melewati R terbesar', isCorrect: false },
+      { id: 'choice-5', text: 'Tidak ada arus di rangkaian seri', isCorrect: false },
+    ],
+    correctAnswers: ['choice-2'],
+  },
+  circuitOrderingQuestions[0], // Ordering
+  circuitQuestions[1], // Circuit paralel
+  circuitAnalysisQuestions[0], // Analysis L2 open
+  circuitQuestions[2], // Circuit seri 3R
+  circuitAnalysisQuestions[1], // Analysis L1 putus
+  circuitQuestions[3], // Circuit paralel 3R
+  circuitAnalysisQuestions[2], // Analysis L3 putus cabang
+];
+
+// (Opsional) Helper skor tetap dibiarkan karena tidak tergantung tipe yang dihapus
+export const calculateQuizScore = (
+  correctAnswers: number,
+  totalQuestions: number,
+): { score: number; grade: string; message: string } => {
+  const percentage = (correctAnswers / totalQuestions) * 100;
+  if (percentage >= 90)
+    return { score: percentage, grade: 'A+', message: '🎉 Luar biasa! Anda menguasai konsep rangkaian listrik dengan sempurna!' };
+  if (percentage >= 80)
+    return { score: percentage, grade: 'A', message: '⭐ Sangat baik! Pemahaman Anda tentang rangkaian listrik sangat solid!' };
+  if (percentage >= 70)
+    return { score: percentage, grade: 'B+', message: '👍 Bagus! Anda memahami konsep dasar dengan baik, terus berlatih!' };
+  if (percentage >= 60)
+    return { score: percentage, grade: 'B', message: '📚 Cukup baik! Tinjau kembali hukum Ohm & konfigurasi rangkaian.' };
+  if (percentage >= 50)
+    return { score: percentage, grade: 'C', message: '💪 Terus semangat! Fokus pada dasar hukum Ohm dan latihan lebih banyak.' };
+  return { score: percentage, grade: 'D', message: '🎯 Jangan menyerah! Mulai dari konsep dasar dan berlatih bertahap.' };
+};

@@ -3,9 +3,8 @@
 import React from 'react';
 import TipeSoal1 from './TipeSoal1';
 import TipeSoal2 from './TipeSoal2';
-// Import komponen tipe soal lain ketika sudah dibuat
-// import TipeSoal3 from './TipeSoal3';  
-// import TipeSoal4 from './TipeSoal4';
+import TipeSoal3 from './TipeSoal3';
+import TipeSoal4 from './TipeSoal4';
 import { Question } from '@/lib/questions';
 
 interface QuestionRendererProps {
@@ -51,78 +50,53 @@ const QuestionRenderer: React.FC<QuestionRendererProps> = ({
         />
       );
     
-    case 'multipleChoice':
-      // TODO: Buat TipeSoal3 untuk multiple choice
+    case 'conceptual':
       return (
-        <div className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl rounded-2xl p-8 border border-white/20">
-          <h2 className="text-2xl font-bold text-white mb-4">{question.title}</h2>
-          <p className="text-blue-200/90 text-lg mb-6">{question.description}</p>
-          <p className="text-yellow-300 text-lg">🚧 TipeSoal3 (Multiple Choice) belum tersedia</p>
-          <p className="text-white/70 mt-2">Question: {question.question}</p>
-          <div className="mt-4">
-            {question.options.map(option => (
-              <div key={option.id} className="text-white/60 mb-2">
-                {option.id.toUpperCase()}. {option.text}
-              </div>
-            ))}
-          </div>
+        <div className="space-y-6">
+          <TipeSoal3
+            question={question}
+            onAnswer={(selectedChoices, isCorrect) => {
+              onAnswer(isCorrect);
+            }}
+          />
           {showResult && (
-            <button
-              onClick={onNextQuestion}
-              className="mt-6 flex items-center px-8 py-4 bg-gradient-to-r from-blue-500 to-cyan-600 text-white rounded-2xl font-bold text-lg hover:from-blue-600 hover:to-cyan-700 transition-all transform hover:scale-105 shadow-2xl"
-            >
-              {isLastQuestion ? 'Selesai Test' : 'Soal Berikutnya'}
-            </button>
+            <div className="flex justify-center">
+              <button
+                onClick={onNextQuestion}
+                disabled={disabled}
+                className="flex items-center px-8 py-4 bg-gradient-to-r from-blue-500 to-cyan-600 text-white rounded-2xl font-bold text-lg hover:from-blue-600 hover:to-cyan-700 transition-all transform hover:scale-105 shadow-2xl disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+              >
+                {isLastQuestion ? 'Selesai Test' : 'Soal Berikutnya'}
+              </button>
+            </div>
           )}
         </div>
       );
-      
-    case 'trueFalse':
-      // TODO: Buat TipeSoal3 untuk true/false
+    
+    case 'circuitAnalysis':
       return (
-        <div className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl rounded-2xl p-8 border border-white/20">
-          <h2 className="text-2xl font-bold text-white mb-4">{question.title}</h2>
-          <p className="text-blue-200/90 text-lg mb-6">{question.description}</p>
-          <p className="text-yellow-300 text-lg">🚧 TipeSoal3 (True/False) belum tersedia</p>
-          <p className="text-white/70 mt-2">Statement: {question.statement}</p>
-          <p className="text-white/60 mt-2">Correct Answer: {question.correctAnswer ? 'True' : 'False'}</p>
+        <div className="space-y-6">
+          <TipeSoal4
+            question={question}
+            onAnswer={(isCorrect) => {
+              onAnswer(isCorrect);
+            }}
+          />
           {showResult && (
-            <button
-              onClick={onNextQuestion}
-              className="mt-6 flex items-center px-8 py-4 bg-gradient-to-r from-blue-500 to-cyan-600 text-white rounded-2xl font-bold text-lg hover:from-blue-600 hover:to-cyan-700 transition-all transform hover:scale-105 shadow-2xl"
-            >
-              {isLastQuestion ? 'Selesai Test' : 'Soal Berikutnya'}
-            </button>
+            <div className="flex justify-center">
+              <button
+                onClick={onNextQuestion}
+                disabled={disabled}
+                className="flex items-center px-8 py-4 bg-gradient-to-r from-blue-500 to-cyan-600 text-white rounded-2xl font-bold text-lg hover:from-blue-600 hover:to-cyan-700 transition-all transform hover:scale-105 shadow-2xl disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+              >
+                {isLastQuestion ? 'Selesai Test' : 'Soal Berikutnya'}
+              </button>
+            </div>
           )}
         </div>
       );
-      
-    case 'fillBlank':
-      // TODO: Buat TipeSoal4 untuk fill in the blank
-      return (
-        <div className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl rounded-2xl p-8 border border-white/20">
-          <h2 className="text-2xl font-bold text-white mb-4">{question.title}</h2>
-          <p className="text-blue-200/90 text-lg mb-6">{question.description}</p>
-          <p className="text-yellow-300 text-lg">🚧 TipeSoal4 (Fill in the Blank) belum tersedia</p>
-          <p className="text-white/70 mt-2">Question: {question.questionText}</p>
-          <div className="mt-4">
-            {question.blanks.map(blank => (
-              <div key={blank.id} className="text-white/60 mb-2">
-                Blank {blank.id}: {blank.correctAnswer} {blank.unit || ''}
-              </div>
-            ))}
-          </div>
-          {showResult && (
-            <button
-              onClick={onNextQuestion}
-              className="mt-6 flex items-center px-8 py-4 bg-gradient-to-r from-blue-500 to-cyan-600 text-white rounded-2xl font-bold text-lg hover:from-blue-600 hover:to-cyan-700 transition-all transform hover:scale-105 shadow-2xl"
-            >
-              {isLastQuestion ? 'Selesai Test' : 'Soal Berikutnya'}
-            </button>
-          )}
-        </div>
-      );
-      
+    
+
     default:
       return (
         <div className="bg-gradient-to-br from-red-500/10 to-pink-500/10 backdrop-blur-xl rounded-2xl p-8 border border-red-400/30">
