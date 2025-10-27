@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
 import ExcelImport from '@/components/ExcelImport';
@@ -48,15 +48,7 @@ const TeacherDashboard = () => {
 
   const teacher = user as Teacher;
 
-  useEffect(() => {
-    if (!isTeacher()) {
-      router.push('/login');
-      return;
-    }
-    loadData();
-  }, [isTeacher, router]);
-
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     if (teacher) {
       const teacherStudents = await SupabaseAuthService.getStudentsByTeacher(teacher.id);
       const teacherClasses = await SupabaseAuthService.getClassesByTeacher(teacher.id);
@@ -84,7 +76,15 @@ const TeacherDashboard = () => {
       setLearningStyleStats(stats);
       setIsLoading(false);
     }
-  };
+  }, [teacher]);
+
+  useEffect(() => {
+    if (!isTeacher()) {
+      router.push('/login');
+      return;
+    }
+    loadData();
+  }, [isTeacher, router, loadData]);
 
   const filteredStudents = students.filter(student => {
     const matchesSearch = student.name.toLowerCase().includes(searchTerm.toLowerCase()) ||

@@ -127,7 +127,7 @@ const TipeSoal2: React.FC<TipeSoal2Props> = ({
         slotAssignments: new Array(currentCircuits.length).fill(null)
       }));
     }
-  }, [currentCircuits.length]);
+  }, [currentCircuits.length, state.slotAssignments.length]);
 
   // Reset state when question changes
   useEffect(() => {

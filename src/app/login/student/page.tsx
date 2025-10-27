@@ -1,12 +1,12 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { User, Lock, AlertCircle, CheckCircle, ArrowLeft, Lightbulb, Star, Target } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 
-const StudentLoginPage: React.FC = () => {
+const StudentLoginContent: React.FC = () => {
   const searchParams = useSearchParams();
   const redirectTo = searchParams.get('redirect') || '/';
   const testType = searchParams.get('testType') as 'pretest' | 'posttest' | 'learning-style' | null;
@@ -317,6 +317,18 @@ const StudentLoginPage: React.FC = () => {
         </div>
       </div>
     </div>
+  );
+};
+
+const StudentLoginPage: React.FC = () => {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gradient-to-br from-blue-900 via-purple-900 to-indigo-900 flex items-center justify-center">
+        <div className="text-white text-xl">Loading...</div>
+      </div>
+    }>
+      <StudentLoginContent />
+    </Suspense>
   );
 };
 
