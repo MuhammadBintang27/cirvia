@@ -8,7 +8,6 @@ import UnifiedCircuitCard, {
   ResistorComponent,
   LampComponent 
 } from './UnifiedCircuitCard';
-import { CircuitConfigurationBuilder } from '@/lib/unifiedCircuitGenerator';
 
 interface CircuitBuilderProps {
   onSave: (circuit: CircuitConfiguration) => void;

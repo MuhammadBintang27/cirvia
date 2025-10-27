@@ -102,7 +102,7 @@ const QuestionRenderer: React.FC<QuestionRendererProps> = ({
         <div className="bg-gradient-to-br from-red-500/10 to-pink-500/10 backdrop-blur-xl rounded-2xl p-8 border border-red-400/30">
           <h2 className="text-2xl font-bold text-red-400 mb-4">Error: Unknown Question Type</h2>
           <p className="text-red-200/90">
-            Question type "{(question as any).questionType}" is not supported.
+            Question type &quot;{(question as any).questionType}&quot; is not supported.
           </p>
         </div>
       );
