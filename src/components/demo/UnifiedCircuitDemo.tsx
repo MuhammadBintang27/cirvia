@@ -2,34 +2,57 @@
 
 import React from 'react';
 import UnifiedCircuitCard from '@/components/componentSoal/UnifiedCircuitCard';
-import { UnifiedCircuitGenerator, UNIFIED_CIRCUIT_TEMPLATES } from '@/lib/unifiedCircuitGenerator';
+// Generator removed - now using manual circuit definitions
 
 const UnifiedCircuitDemo = () => {
-  // Generate sample circuits
-  const simpleCircuit = UnifiedCircuitGenerator.generateRandomCircuit('simple');
-  const seriesCircuit = UnifiedCircuitGenerator.generateRandomCircuit('series');
-  const parallelCircuit = UnifiedCircuitGenerator.generateRandomCircuit('parallel');
-  const mixedCircuit = UnifiedCircuitGenerator.generateRandomCircuit('mixed');
-  const complexSeriesCircuit = UnifiedCircuitGenerator.generateRandomCircuit('complex-series');
-  const complexParallelCircuit = UnifiedCircuitGenerator.generateRandomCircuit('complex-parallel');
-  const advancedMixedCircuit = UnifiedCircuitGenerator.generateRandomCircuit('mixed-advanced');
-
-  // Custom circuits
-  const householdCircuit = UNIFIED_CIRCUIT_TEMPLATES.custom.householdCircuit();
-  const carCircuit = UNIFIED_CIRCUIT_TEMPLATES.custom.carCircuit();
-  const labCircuit = UNIFIED_CIRCUIT_TEMPLATES.custom.laboratoryCircuit();
-
+  // Manual circuit definitions
   const circuits = [
-    simpleCircuit,
-    seriesCircuit,
-    parallelCircuit,
-    mixedCircuit,
-    complexSeriesCircuit,
-    complexParallelCircuit,
-    advancedMixedCircuit,
-    householdCircuit,
-    carCircuit,
-    labCircuit
+    {
+      id: 'demo1',
+      name: 'Rangkaian Seri Sederhana',
+      template: 'series' as const,
+      battery: { type: 'battery' as const, voltage: 12 },
+      resistors: [
+        { type: 'resistor' as const, id: 'R1', value: 10, color: 'red' as const },
+        { type: 'resistor' as const, id: 'R2', value: 20, color: 'green' as const }
+      ],
+      lamps: [
+        { type: 'lamp' as const, id: 'L1', power: 5 },
+        { type: 'lamp' as const, id: 'L2', power: 8 }
+      ],
+      brightnessLevel: 'medium' as const
+    },
+    {
+      id: 'demo2',
+      name: 'Rangkaian Paralel',
+      template: 'parallel' as const,
+      battery: { type: 'battery' as const, voltage: 12 },
+      resistors: [
+        { type: 'resistor' as const, id: 'R1', value: 30, color: 'blue' as const },
+        { type: 'resistor' as const, id: 'R2', value: 60, color: 'yellow' as const }
+      ],
+      lamps: [
+        { type: 'lamp' as const, id: 'L1', power: 12 },
+        { type: 'lamp' as const, id: 'L2', power: 6 }
+      ],
+      brightnessLevel: 'high' as const
+    },
+    {
+      id: 'demo3',
+      name: 'Rangkaian Campuran',
+      template: 'mixed' as const,
+      battery: { type: 'battery' as const, voltage: 15 },
+      resistors: [
+        { type: 'resistor' as const, id: 'R1', value: 25, color: 'purple' as const },
+        { type: 'resistor' as const, id: 'R2', value: 40, color: 'orange' as const },
+        { type: 'resistor' as const, id: 'R3', value: 60, color: 'brown' as const }
+      ],
+      lamps: [
+        { type: 'lamp' as const, id: 'L1', power: 10 },
+        { type: 'lamp' as const, id: 'L2', power: 15 }
+      ],
+      brightnessLevel: 'medium' as const
+    }
   ];
 
   return (

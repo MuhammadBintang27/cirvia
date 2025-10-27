@@ -8,7 +8,7 @@ export interface ResistorComponent {
   type: 'resistor';
   id: string;
   value: number; // ohms
-  color?: 'red' | 'green' | 'blue' | 'yellow' | 'purple';
+  color?: 'red' | 'green' | 'blue' | 'yellow' | 'purple' | 'brown' | 'orange';
 }
 
 export interface LampComponent {
@@ -77,6 +77,85 @@ const UnifiedCircuitCard: React.FC<UnifiedCircuitCardProps> = ({
         glow: 'shadow-red-400/50',
         fillColor: '#EF4444'
       };
+    }
+  };
+
+  // Brightness visual helper functions
+  const getBrightnessGlow = () => {
+    switch (circuit.brightnessLevel) {
+      case 'high':
+        return 'bg-yellow-400/20 shadow-[0_0_25px_rgba(255,255,0,0.4)]';
+      case 'medium':
+        return 'bg-orange-400/15 shadow-[0_0_20px_rgba(255,165,0,0.3)]';
+      case 'low':
+        return 'bg-red-400/10 shadow-[0_0_15px_rgba(255,0,0,0.2)]';
+      default:
+        return 'bg-gray-400/10';
+    }
+  };
+
+  const getBrightnessBorder = () => {
+    switch (circuit.brightnessLevel) {
+      case 'high':
+        return 'border-2 border-yellow-400/60';
+      case 'medium':
+        return 'border-2 border-orange-400/60';
+      case 'low':
+        return 'border-2 border-red-400/60';
+      default:
+        return 'border border-gray-400/30';
+    }
+  };
+
+  const getBrightnessBackground = () => {
+    switch (circuit.brightnessLevel) {
+      case 'high':
+        return 'bg-gradient-to-br from-yellow-400/30 to-yellow-600/10';
+      case 'medium':
+        return 'bg-gradient-to-br from-orange-400/30 to-orange-600/10';
+      case 'low':
+        return 'bg-gradient-to-br from-red-400/30 to-red-600/10';
+      default:
+        return 'bg-gradient-to-br from-gray-400/20 to-gray-600/10';
+    }
+  };
+
+  const getBrightnessTextColor = () => {
+    switch (circuit.brightnessLevel) {
+      case 'high':
+        return 'text-yellow-200 font-bold';
+      case 'medium':
+        return 'text-orange-200 font-semibold';
+      case 'low':
+        return 'text-red-200';
+      default:
+        return 'text-gray-200';
+    }
+  };
+
+  const getBrightnessLabel = () => {
+    switch (circuit.brightnessLevel) {
+      case 'high':
+        return 'TERANG';
+      case 'medium':
+        return 'SEDANG';
+      case 'low':
+        return 'REDUP';
+      default:
+        return 'UNKNOWN';
+    }
+  };
+
+  const getBrightnessIcon = () => {
+    switch (circuit.brightnessLevel) {
+      case 'high':
+        return <span className="text-yellow-300 text-lg">🔆</span>;
+      case 'medium':
+        return <span className="text-orange-300 text-lg">💡</span>;
+      case 'low':
+        return <span className="text-red-300 text-lg">🌑</span>;
+      default:
+        return <span className="text-gray-300 text-lg">❓</span>;
     }
   };
 
@@ -258,7 +337,7 @@ const UnifiedCircuitCard: React.FC<UnifiedCircuitCardProps> = ({
         )}
         
         <text x={x} y={y+radius+15} fill="white" fontSize="7" textAnchor="middle" fontWeight="bold">{lamp.id}</text>
-        <text x={x} y={y+radius+24} fill="#34d399" fontSize="6" textAnchor="middle">{lamp.power}W</text>
+
       </g>
     );
   };
@@ -300,7 +379,7 @@ const UnifiedCircuitCard: React.FC<UnifiedCircuitCardProps> = ({
       
       {/* Circuit info */}
       <text x="15" y="15" fill="#60a5fa" fontSize="8" fontWeight="bold">I = {values.current.toFixed(2)}A</text>
-      <text x="15" y="25" fill="#34d399" fontSize="8" fontWeight="bold">P = {values.power.toFixed(2)}W</text>
+
       
       <defs>
         <marker id="current-arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
@@ -310,54 +389,69 @@ const UnifiedCircuitCard: React.FC<UnifiedCircuitCardProps> = ({
     </svg>
   );
 
-  const renderSeriesTemplate = () => (
-    <svg viewBox="0 0 380 140" className="w-full h-24">
-      <rect x="0" y="0" width="380" height="140" fill="#1e3a8a" rx="8" className="opacity-20"/>
-      
-      {renderBattery(15, 62, circuit.battery.voltage)}
-      {renderWire(43, 70, 70, 70)}
-      
-      {/* Multiple resistors in series */}
-      {circuit.resistors.map((resistor, index) => (
-        <g key={resistor.id}>
-          {renderResistor(70 + index * 60, 64, resistor)}
-          {index < circuit.resistors.length - 1 && renderWire(110 + index * 60, 70, 130 + index * 60, 70)}
-        </g>
-      ))}
-      
-      {renderWire(70 + circuit.resistors.length * 60, 70, 100 + circuit.resistors.length * 60, 70)}
-      
-      {/* Multiple lamps in series */}
-      {circuit.lamps.map((lamp, index) => (
-        <g key={lamp.id}>
-          {renderLamp(130 + circuit.resistors.length * 60 + index * 50, 70, lamp, 12)}
-          {index < circuit.lamps.length - 1 && renderWire(142 + circuit.resistors.length * 60 + index * 50, 70, 168 + circuit.resistors.length * 60 + index * 50, 70)}
-        </g>
-      ))}
-      
-      {/* Return path */}
-      {renderWire(142 + circuit.resistors.length * 60 + circuit.lamps.length * 50, 70, 350, 70)}
-      {renderWire(350, 70, 350, 110)}
-      {renderWire(350, 110, 15, 110)}
-      {renderWire(15, 110, 15, 78)}
-      
-      {renderCurrentArrow(55, 67)}
-      
-      {/* Circuit info */}
-      <text x="10" y="20" fill="#60a5fa" fontSize="9" fontWeight="bold">Seri: R₁+R₂+...+Rₙ</text>
-      <text x="10" y="32" fill="#34d399" fontSize="7">Rtotal = {circuit.resistors.reduce((sum, r) => sum + r.value, 0)}Ω</text>
-      <text x="10" y="42" fill="#fbbf24" fontSize="7">I = {values.current.toFixed(2)}A</text>
-      
-      <defs>
-        <marker id="current-arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
-          <polygon points="0 0, 10 3, 0 6" fill="#10b981"/>
-        </marker>
-      </defs>
-    </svg>
-  );
+  const renderSeriesTemplate = () => {
+    let currentX = 70;
+    const componentSpacing = 55;
+    
+    return (
+      <svg viewBox="0 0 380 140" className="w-full h-24">
+        <rect x="0" y="0" width="380" height="140" fill="#1e3a8a" rx="8" className="opacity-20"/>
+        
+        {/* Battery */}
+        {renderBattery(15, 62, circuit.battery.voltage)}
+        {renderWire(43, 70, currentX, 70)}
+        
+        {/* Resistors in series - properly connected */}
+        {circuit.resistors.map((resistor, index) => {
+          const resistorX = currentX;
+          currentX += componentSpacing;
+          
+          return (
+            <g key={resistor.id}>
+              {renderResistor(resistorX, 64, resistor)}
+              {/* Wire from resistor to next component */}
+              {renderWire(resistorX + 40, 70, currentX, 70)}
+            </g>
+          );
+        })}
+        
+        {/* Lamps in series - properly connected */}
+        {circuit.lamps.map((lamp, index) => {
+          const lampX = currentX;
+          currentX += componentSpacing;
+          
+          return (
+            <g key={lamp.id}>
+              {renderLamp(lampX, 70, lamp, 12)}
+              {/* Wire from lamp to next component or end */}
+              {renderWire(lampX + 12, 70, currentX, 70)}
+            </g>
+          );
+        })}
+        
+        {/* Complete the circuit - return path */}
+        {renderWire(currentX - componentSpacing + 12, 70, 350, 70)}
+        {renderWire(350, 70, 350, 110)}
+        {renderWire(350, 110, 15, 110)}
+        {renderWire(15, 110, 15, 78)}
+        
+        {renderCurrentArrow(55, 67)}
+        
+        {/* Circuit info */}
+        <text x="10" y="20" fill="#60a5fa" fontSize="10" fontWeight="bold">Rangkaian Seri</text>
+        <text x="10" y="32" fill="#34d399" fontSize="8">I = {values.current.toFixed(2)}A</text>
+        
+        <defs>
+          <marker id="current-arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+            <polygon points="0 0, 10 3, 0 6" fill="#10b981"/>
+          </marker>
+        </defs>
+      </svg>
+    );
+  };
 
   const renderParallelTemplate = () => (
-    <svg viewBox="0 0 320 200" className="w-full h-32">
+    <svg viewBox="0 0 320 200" className="w-full h-40">
       <rect x="0" y="0" width="320" height="200" fill="#1e3a8a" rx="8" className="opacity-20"/>
       
       {renderBattery(15, 92, circuit.battery.voltage)}
@@ -389,10 +483,9 @@ const UnifiedCircuitCard: React.FC<UnifiedCircuitCardProps> = ({
       {renderCurrentArrow(90, 97)}
       {renderCurrentArrow(90, 137, 'down')}
       
-      {/* Circuit info */}
-      <text x="10" y="20" fill="#60a5fa" fontSize="9" fontWeight="bold">Paralel: 1/Rtotal = 1/R₁+1/R₂+...</text>
-      <text x="10" y="32" fill="#34d399" fontSize="7">Setiap cabang: {circuit.battery.voltage}V</text>
-      <text x="10" y="42" fill="#fbbf24" fontSize="7">Itotal = {values.current.toFixed(2)}A</text>
+      {/* Circuit info - simplified */}
+      <text x="10" y="20" fill="#60a5fa" fontSize="10" fontWeight="bold">Rangkaian Paralel</text>
+      <text x="10" y="32" fill="#34d399" fontSize="8">I = {values.current.toFixed(2)}A</text>
       
       <defs>
         <marker id="current-arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
@@ -402,58 +495,75 @@ const UnifiedCircuitCard: React.FC<UnifiedCircuitCardProps> = ({
     </svg>
   );
 
-  const renderComplexSeriesTemplate = () => (
-    <svg viewBox="0 0 420 160" className="w-full h-28">
-      <rect x="0" y="0" width="420" height="160" fill="#1e3a8a" rx="8" className="opacity-20"/>
-      
-      {renderBattery(15, 72, circuit.battery.voltage)}
-      {renderWire(43, 80, 70, 80)}
-      
-      {/* Complex series with multiple components */}
-      {(() => {
-        let currentX = 70;
-        const components = [...circuit.resistors, ...circuit.lamps];
-        return (
-          <g>
-            {components.map((component, index) => {
-              const element = (
-                <g key={`${component.type}-${component.id}`}>
-                  {component.type === 'resistor' ? (
-                    renderResistor(currentX, 74, component as ResistorComponent)
-                  ) : (
-                    renderLamp(currentX + 20, 80, component as LampComponent, 14)
-                  )}
-                  {index < components.length - 1 && 
-                    renderWire(currentX + (component.type === 'resistor' ? 40 : 40), 80, currentX + (component.type === 'resistor' ? 50 : 65), 80)}
-                </g>
-              );
-              currentX += component.type === 'resistor' ? 50 : 45;
-              return element;
-            })}
-            {/* Return path */}
-            {renderWire(currentX - 10, 80, 380, 80)}
-          </g>
-        );
-      })()}
-      {renderWire(380, 80, 380, 120)}
-      {renderWire(380, 120, 15, 120)}
-      {renderWire(15, 120, 15, 88)}
-      
-      {renderCurrentArrow(55, 77)}
-      
-      {/* Enhanced circuit info */}
-      <text x="10" y="20" fill="#60a5fa" fontSize="9" fontWeight="bold">Seri Kompleks</text>
-      <text x="10" y="32" fill="#34d399" fontSize="7">{circuit.resistors.length} Resistor + {circuit.lamps.length} Lampu</text>
-      <text x="10" y="42" fill="#fbbf24" fontSize="7">I = {values.current.toFixed(2)}A (sama semua)</text>
-      <text x="10" y="52" fill="#ec4899" fontSize="7">Ptotal = {values.power.toFixed(2)}W</text>
-      
-      <defs>
-        <marker id="current-arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
-          <polygon points="0 0, 10 3, 0 6" fill="#10b981"/>
-        </marker>
-      </defs>
-    </svg>
-  );
+  const renderComplexSeriesTemplate = () => {
+    let currentX = 70;
+    const components = [...circuit.resistors, ...circuit.lamps];
+    
+    return (
+      <svg viewBox="0 0 420 160" className="w-full h-40">
+        <rect x="0" y="0" width="420" height="160" fill="#1e3a8a" rx="8" className="opacity-20"/>
+        
+        {/* Battery */}
+        {renderBattery(15, 72, circuit.battery.voltage)}
+        {renderWire(43, 80, currentX, 80)}
+        
+        {/* Series components - properly connected */}
+        {components.map((component, index) => {
+          const componentX = currentX;
+          let nextX;
+          
+          if (component.type === 'resistor') {
+            nextX = componentX + 50;
+            return (
+              <g key={`${component.type}-${component.id}`}>
+                {renderResistor(componentX, 74, component as ResistorComponent)}
+                {/* Wire to next component */}
+                {renderWire(componentX + 40, 80, nextX, 80)}
+              </g>
+            );
+          } else {
+            nextX = componentX + 45;
+            return (
+              <g key={`${component.type}-${component.id}`}>
+                {renderLamp(componentX + 20, 80, component as LampComponent, 14)}
+                {/* Wire to next component */}
+                {renderWire(componentX + 32, 80, nextX, 80)}
+              </g>
+            );
+          }
+        })}
+        
+        {/* Complete the circuit - calculate final position */}
+        {(() => {
+          let finalX = 70;
+          components.forEach(comp => {
+            finalX += comp.type === 'resistor' ? 50 : 45;
+          });
+          
+          return (
+            <g>
+              {renderWire(finalX - 5, 80, 380, 80)}
+              {renderWire(380, 80, 380, 120)}
+              {renderWire(380, 120, 15, 120)}
+              {renderWire(15, 120, 15, 88)}
+            </g>
+          );
+        })()}
+        
+        {renderCurrentArrow(55, 77)}
+        
+        {/* Circuit info */}
+        <text x="10" y="20" fill="#60a5fa" fontSize="10" fontWeight="bold">Rangkaian Seri Kompleks</text>
+        <text x="10" y="32" fill="#34d399" fontSize="8">I = {values.current.toFixed(2)}A</text>
+        
+        <defs>
+          <marker id="current-arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+            <polygon points="0 0, 10 3, 0 6" fill="#10b981"/>
+          </marker>
+        </defs>
+      </svg>
+    );
+  };
 
   const renderComplexParallelTemplate = () => (
     <svg viewBox="0 0 360 220" className="w-full h-36">
@@ -515,7 +625,7 @@ const UnifiedCircuitCard: React.FC<UnifiedCircuitCardProps> = ({
   );
 
   const renderMixedTemplate = () => (
-    <svg viewBox="0 0 400 180" className="w-full h-32">
+    <svg viewBox="0 0 400 180" className="w-full h-40">
       <rect x="0" y="0" width="400" height="180" fill="#1e3a8a" rx="8" className="opacity-20"/>
       
       {renderBattery(15, 82, circuit.battery.voltage)}
@@ -557,11 +667,9 @@ const UnifiedCircuitCard: React.FC<UnifiedCircuitCardProps> = ({
       {renderCurrentArrow(175, 107)}
       {renderCurrentArrow(260, 87)}
       
-      {/* Circuit analysis */}
-      <text x="10" y="20" fill="#60a5fa" fontSize="9" fontWeight="bold">Rangkaian Campuran</text>
-      <text x="10" y="32" fill="#34d399" fontSize="7">Seri + Paralel + Seri</text>
-      <text x="10" y="42" fill="#fbbf24" fontSize="7">Analisis bertahap</text>
-      <text x="10" y="52" fill="#ec4899" fontSize="7">Tegangan terbagi</text>
+      {/* Circuit analysis - simplified */}
+      <text x="10" y="20" fill="#60a5fa" fontSize="10" fontWeight="bold">Rangkaian Campuran</text>
+      <text x="10" y="32" fill="#34d399" fontSize="8">I = {values.current.toFixed(2)}A</text>
       
       <defs>
         <marker id="current-arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
@@ -622,12 +730,9 @@ const UnifiedCircuitCard: React.FC<UnifiedCircuitCardProps> = ({
       {renderCurrentArrow(255, 157)}
       {renderCurrentArrow(360, 117)}
       
-      {/* Advanced circuit analysis */}
-      <text x="10" y="20" fill="#60a5fa" fontSize="9" fontWeight="bold">Rangkaian Campuran Lanjut</text>
-      <text x="10" y="32" fill="#34d399" fontSize="7">Multi-level paralel + seri</text>
-      <text x="10" y="42" fill="#fbbf24" fontSize="7">Analisis kompleks</text>
-      <text x="10" y="52" fill="#ec4899" fontSize="7">{circuit.resistors.length}R + {circuit.lamps.length}L</text>
-      <text x="10" y="62" fill="#06b6d4" fontSize="7">Reduksi bertahap</text>
+      {/* Circuit analysis - simplified */}
+      <text x="10" y="20" fill="#60a5fa" fontSize="10" fontWeight="bold">Rangkaian Campuran</text>
+      <text x="10" y="32" fill="#34d399" fontSize="8">I = {values.current.toFixed(2)}A</text>
       
       <defs>
         <marker id="current-arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
@@ -638,7 +743,7 @@ const UnifiedCircuitCard: React.FC<UnifiedCircuitCardProps> = ({
   );
 
   const renderCustomTemplate = () => (
-    <svg viewBox="0 0 400 200" className="w-full h-32">
+    <svg viewBox="0 0 400 200" className="w-full h-40">
       <rect x="0" y="0" width="400" height="200" fill="#1e3a8a" rx="8" className="opacity-20"/>
       
       {/* Custom layout - adaptive positioning */}
@@ -674,11 +779,10 @@ const UnifiedCircuitCard: React.FC<UnifiedCircuitCardProps> = ({
   return (
     <div
       className={`
-        relative bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl 
-        rounded-2xl p-6 border border-white/20 cursor-grab active:cursor-grabbing
+        relative backdrop-blur-xl rounded-2xl p-6 cursor-grab active:cursor-grabbing
         transition-all duration-300 hover:scale-105 hover:shadow-2xl
         ${isDragging ? 'opacity-50 scale-95' : ''}
-        ${showBrightness ? `shadow-lg ${brightnessInfo.glow}` : ''}
+        ${showBrightness ? `${getBrightnessGlow()} ${getBrightnessBorder()} ${getBrightnessBackground()}` : 'bg-gradient-to-br from-white/10 to-white/5 border border-white/20'}
         ${className}
       `}
       draggable={onDragStart !== undefined}
@@ -719,9 +823,21 @@ const UnifiedCircuitCard: React.FC<UnifiedCircuitCardProps> = ({
         </div>
       </div>
 
-      {/* Circuit Diagram */}
-      <div className="bg-black/20 rounded-xl p-4 mb-4 border border-white/10">
+      {/* Circuit Diagram with Conditional Brightness Glow */}
+      <div className={`rounded-xl p-4 mb-4 border ${showBrightness ? `${getBrightnessGlow()} ${getBrightnessBorder()}` : 'border-white/20'}`}>
         {renderCircuitSVG()}
+        
+        {/* Brightness Indicator Overlay */}
+        {showBrightness && (
+          <div className="absolute top-2 right-2">
+            <div className={`flex items-center space-x-1 px-2 py-1 rounded-full backdrop-blur-sm border ${getBrightnessBackground()} ${getBrightnessBorder()}`}>
+              {getBrightnessIcon()}
+              <span className={`text-xs font-bold ${getBrightnessTextColor()}`}>
+                {getBrightnessLabel()}
+              </span>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Circuit Information */}
@@ -733,7 +849,7 @@ const UnifiedCircuitCard: React.FC<UnifiedCircuitCardProps> = ({
           <p className="text-blue-200/80 text-sm">{circuit.description}</p>
         )}
         
-        {/* Technical Specifications */}
+        {/* Technical Specifications - Simplified */}
         <div className="grid grid-cols-2 gap-4 text-xs">
           <div className="space-y-1">
             <div className="text-white/60">Tegangan Sumber:</div>
@@ -741,40 +857,15 @@ const UnifiedCircuitCard: React.FC<UnifiedCircuitCardProps> = ({
           </div>
           
           <div className="space-y-1">
-            <div className="text-white/60">Daya Total:</div>
-            <div className="text-yellow-400 font-bold">{values.power.toFixed(2)}W</div>
-          </div>
-          
-          <div className="space-y-1">
             <div className="text-white/60">Arus Utama:</div>
             <div className="text-blue-400 font-bold">{values.current.toFixed(2)}A</div>
           </div>
-          
-          <div className="space-y-1">
-            <div className="text-white/60">Kecerahan:</div>
-            {showBrightness && (
-              <div className={`flex items-center space-x-1 ${brightnessInfo.color}`}>
-                <Lightbulb className="w-3 h-3" />
-                <span className="font-medium">{brightnessInfo.label}</span>
-              </div>
-            )}
-          </div>
         </div>
 
-        {/* Component Details */}
-        <div className="mt-4 pt-3 border-t border-white/10">
-          <div className="text-xs text-white/60 mb-2">Komponen:</div>
-          <div className="flex flex-wrap gap-2">
-            {circuit.resistors.map(resistor => (
-              <span key={resistor.id} className="px-2 py-1 bg-purple-500/20 text-purple-300 rounded text-xs">
-                {resistor.id}: {resistor.value}Ω
-              </span>
-            ))}
-            {circuit.lamps.map(lamp => (
-              <span key={lamp.id} className="px-2 py-1 bg-yellow-500/20 text-yellow-300 rounded text-xs">
-                {lamp.id}: {lamp.power}W
-              </span>
-            ))}
+        {/* Component Count Only */}
+        <div className="mt-3 pt-2 border-t border-white/10">
+          <div className="text-xs text-white/60">
+            {circuit.resistors.length} Resistor • {circuit.lamps.length} Lampu
           </div>
         </div>
       </div>
