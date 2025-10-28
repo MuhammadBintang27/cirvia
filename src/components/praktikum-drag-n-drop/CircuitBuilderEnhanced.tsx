@@ -589,6 +589,13 @@ export default function CircuitBuilderEnhanced() {
   const [dragOffset, setDragOffset] = useState<Pos>({ x: 0, y: 0 });
   const [showStats, setShowStats] = useState(!isMobile);
   const [flowAnimation, setFlowAnimation] = useState(0);
+  
+  // 🔄 State untuk rotation drag
+  const [rotationDrag, setRotationDrag] = useState<{
+    elementId: string;
+    startAngle: number;
+    centerPos: Pos;
+  } | null>(null);
 
   const canvasRef = useRef<HTMLDivElement | null>(null);
 
@@ -645,32 +652,92 @@ export default function CircuitBuilderEnhanced() {
     setSelectedId(id);
   };
 
-  const onMouseMove = (e: React.MouseEvent) => {
-    if (!dragId) return;
+  // 🔄 Handler untuk klik di terminal (untuk rotasi)
+  const onMouseDownTerminal = (e: React.MouseEvent, elementId: string) => {
+    if (connectMode) return; // Jika mode koneksi, biarkan onClick terminal yang handle
+    e.stopPropagation();
+    
     const rect = canvasRef.current!.getBoundingClientRect();
-    const x = snapToGrid(e.clientX - rect.left - dragOffset.x);
-    const y = snapToGrid(e.clientY - rect.top - dragOffset.y);
+    const el = elements.find((el) => el.id === elementId)!;
+    const mouseX = e.clientX - rect.left;
+    const mouseY = e.clientY - rect.top;
+    
+    setRotationDrag({
+      elementId: elementId,
+      startAngle: calculateAngle(el.position, { x: mouseX, y: mouseY }),
+      centerPos: el.position,
+    });
+    setSelectedId(elementId);
+    playSound(600, 30);
+  };
 
-    setElements((prev) =>
-      prev.map((el) =>
-        el.id === dragId
-          ? {
-              ...el,
-              position: {
-                x: Math.max(60, Math.min(canvasSize.width - 60, x)),
-                y: Math.max(60, Math.min(canvasSize.height - 60, y)),
-              },
-            }
-          : el
-      )
-    );
+  const onMouseMove = (e: React.MouseEvent) => {
+    if (!dragId && !rotationDrag) return;
+    
+    const rect = canvasRef.current!.getBoundingClientRect();
+    const mouseX = e.clientX - rect.left;
+    const mouseY = e.clientY - rect.top;
+
+    if (rotationDrag) {
+      // 🔄 ROTATION MODE
+      const currentAngle = calculateAngle(rotationDrag.centerPos, { x: mouseX, y: mouseY });
+      const newRotation = snapToRotation(currentAngle);
+
+      setElements((prev) =>
+        prev.map((el) =>
+          el.id === rotationDrag.elementId
+            ? { ...el, rotation: newRotation }
+            : el
+        )
+      );
+    } else if (dragId) {
+      // 📍 POSITION DRAG MODE
+      const x = snapToGrid(mouseX - dragOffset.x);
+      const y = snapToGrid(mouseY - dragOffset.y);
+
+      setElements((prev) =>
+        prev.map((el) =>
+          el.id === dragId
+            ? {
+                ...el,
+                position: {
+                  x: Math.max(60, Math.min(canvasSize.width - 60, x)),
+                  y: Math.max(60, Math.min(canvasSize.height - 60, y)),
+                },
+              }
+            : el
+        )
+      );
+    }
   };
 
   const onMouseUp = () => {
     if (dragId) {
       playSound(700, 30);
     }
+    if (rotationDrag) {
+      playSound(650, 40);
+    }
     setDragId(null);
+    setRotationDrag(null);
+  };
+
+  // 🔄 Helper functions untuk rotation
+  const calculateAngle = (center: Pos, mouse: Pos): number => {
+    const dx = mouse.x - center.x;
+    const dy = mouse.y - center.y;
+    let angle = Math.atan2(dy, dx) * (180 / Math.PI);
+    // Normalize to 0-360
+    if (angle < 0) angle += 360;
+    return angle;
+  };
+
+  const snapToRotation = (angle: number): 0 | 90 | 180 | 270 => {
+    // Snap ke 0, 90, 180, 270
+    if (angle >= 315 || angle < 45) return 0;
+    if (angle >= 45 && angle < 135) return 90;
+    if (angle >= 135 && angle < 225) return 180;
+    return 270;
   };
 
   const rotateSelected = () => {
@@ -870,6 +937,45 @@ export default function CircuitBuilderEnhanced() {
     };
   }, [elements, wires]);
 
+  // 🔋 Fungsi untuk menentukan arah aliran elektron
+  // Arus mengalir dari kutub POSITIF (+) ke NEGATIF (-)
+  const determineFlowDirection = (w: Wire): boolean => {
+    const fromEl = elements.find((e) => e.id === w.from.elementId);
+    const toEl = elements.find((e) => e.id === w.to.elementId);
+    
+    if (!fromEl || !toEl) return false;
+
+    // Untuk baterai, tentukan kutub positif dan negatif berdasarkan rotasi
+    const getPositiveTerminal = (battery: CircuitElement): 'a' | 'b' => {
+      // Rotasi 0°: positif di kanan (terminal b)
+      // Rotasi 90°: positif di bawah (terminal b)
+      // Rotasi 180°: positif di kiri (terminal a)
+      // Rotasi 270°: positif di atas (terminal a)
+      if (battery.rotation === 0 || battery.rotation === 90) {
+        return 'b';
+      } else {
+        return 'a';
+      }
+    };
+
+    // Jika from adalah baterai
+    if (fromEl.type === 'battery') {
+      const posTerminal = getPositiveTerminal(fromEl);
+      // Jika wire dimulai dari terminal positif, aliran normal (forward)
+      return w.from.terminalId === posTerminal;
+    }
+
+    // Jika to adalah baterai
+    if (toEl.type === 'battery') {
+      const posTerminal = getPositiveTerminal(toEl);
+      // Jika wire menuju terminal negatif, aliran normal (forward)
+      return w.to.terminalId !== posTerminal;
+    }
+
+    // Default: aliran forward
+    return false;
+  };
+
   // Render Bezier Wire
   const renderWire = (w: Wire) => {
     const fromEl = elements.find((e) => e.id === w.from.elementId);
@@ -878,6 +984,9 @@ export default function CircuitBuilderEnhanced() {
 
     const a = terminalAbsPos(fromEl, w.from.terminalId);
     const b = terminalAbsPos(toEl, w.to.terminalId);
+
+    // 🔋 Tentukan arah aliran
+    const flowForward = determineFlowDirection(w);
 
     const dx = b.x - a.x;
     const dy = b.y - a.y;
@@ -933,7 +1042,10 @@ export default function CircuitBuilderEnhanced() {
             />
             {/* Electron particles */}
             {[0, 33, 66].map((offset) => {
-              const progress = ((flowAnimation + offset) % 100) / 100;
+              // 🔋 Balik arah jika flowForward = false (dari negatif ke positif)
+              const rawProgress = ((flowAnimation + offset) % 100) / 100;
+              const progress = flowForward ? rawProgress : 1 - rawProgress;
+              
               const point = getPointOnBezier(
                 a,
                 { x: cx1, y: cy1 },
@@ -1008,6 +1120,20 @@ export default function CircuitBuilderEnhanced() {
         const hasCurrent =
           calc.current > 0 && !calc.hasOpenSwitch && calc.isClosed;
 
+        // 🔋 Tentukan arah aliran untuk setiap koneksi
+        const flowDirectionA = determineWireElementFlowDirection(
+          fromEl,
+          connA.terminalId,
+          wireEl,
+          "a"
+        );
+        const flowDirectionB = determineWireElementFlowDirection(
+          toEl,
+          connB.terminalId,
+          wireEl,
+          "b"
+        );
+
         // Render two connections: wireA -> compA and wireB -> compB
         return (
           <g key={`wire-conn-${wireEl.id}`}>
@@ -1016,18 +1142,45 @@ export default function CircuitBuilderEnhanced() {
               wireTermA,
               compTermA,
               hasCurrent,
-              `${wireEl.id}-a`
+              `${wireEl.id}-a`,
+              flowDirectionA
             )}
             {/* Connection from wire terminal B to component B */}
             {renderSingleConnection(
               wireTermB,
               compTermB,
               hasCurrent,
-              `${wireEl.id}-b`
+              `${wireEl.id}-b`,
+              flowDirectionB
             )}
           </g>
         );
       });
+  };
+
+  // 🔋 Fungsi untuk menentukan arah aliran pada wire element connections
+  const determineWireElementFlowDirection = (
+    component: CircuitElement,
+    compTerminal: 'a' | 'b',
+    wireEl: CircuitElement,
+    wireTerminal: 'a' | 'b'
+  ): boolean => {
+    if (component.type === 'battery') {
+      const getPositiveTerminal = (battery: CircuitElement): 'a' | 'b' => {
+        if (battery.rotation === 0 || battery.rotation === 90) {
+          return 'b';
+        } else {
+          return 'a';
+        }
+      };
+      
+      const posTerminal = getPositiveTerminal(component);
+      // Jika komponen terminal adalah positif, aliran keluar dari baterai (forward dari wire ke component)
+      return compTerminal === posTerminal;
+    }
+    
+    // Default: aliran forward
+    return false;
   };
 
   // Helper to render single connection line
@@ -1035,7 +1188,8 @@ export default function CircuitBuilderEnhanced() {
     from: Pos,
     to: Pos,
     hasCurrent: boolean,
-    key: string
+    key: string,
+    flowForward: boolean = false
   ) => {
     const dx = to.x - from.x;
     const dy = to.y - from.y;
@@ -1084,7 +1238,10 @@ export default function CircuitBuilderEnhanced() {
             />
             {/* Electron particles */}
             {[0, 50].map((offset) => {
-              const progress = ((flowAnimation + offset) % 100) / 100;
+              // 🔋 Balik arah jika flowForward = false
+              const rawProgress = ((flowAnimation + offset) % 100) / 100;
+              const progress = flowForward ? rawProgress : 1 - rawProgress;
+              
               const point = getPointOnBezier(
                 from,
                 { x: cx1, y: cy1 },
@@ -1581,27 +1738,69 @@ export default function CircuitBuilderEnhanced() {
           cx={-terminalOffset}
           cy={0}
           r={terminalRadius}
-          fill={connectMode || isSel ? "#3b82f6" : "#6b7280"}
-          stroke={connectMode || isSel ? "#1e40af" : "#374151"}
+          fill={
+            rotationDrag?.elementId === el.id
+              ? "#a855f7"
+              : connectMode || isSel
+              ? "#3b82f6"
+              : "#6b7280"
+          }
+          stroke={
+            rotationDrag?.elementId === el.id
+              ? "#7c3aed"
+              : connectMode || isSel
+              ? "#1e40af"
+              : "#374151"
+          }
           strokeWidth={2}
+          onMouseDown={(e) => {
+            if (!connectMode) {
+              onMouseDownTerminal(e, el.id);
+            }
+          }}
           onClick={(e) => {
             e.stopPropagation();
-            onClickTerminal(el.id, "a");
+            if (connectMode) {
+              onClickTerminal(el.id, "a");
+            }
           }}
-          className="cursor-pointer transition-all duration-150 hover:scale-125"
+          className={`cursor-pointer transition-all duration-150 hover:scale-125 ${
+            rotationDrag?.elementId === el.id ? "animate-pulse" : ""
+          }`}
         />
         <circle
           cx={terminalOffset}
           cy={0}
           r={terminalRadius}
-          fill={connectMode || isSel ? "#3b82f6" : "#6b7280"}
-          stroke={connectMode || isSel ? "#1e40af" : "#374151"}
+          fill={
+            rotationDrag?.elementId === el.id
+              ? "#a855f7"
+              : connectMode || isSel
+              ? "#3b82f6"
+              : "#6b7280"
+          }
+          stroke={
+            rotationDrag?.elementId === el.id
+              ? "#7c3aed"
+              : connectMode || isSel
+              ? "#1e40af"
+              : "#374151"
+          }
           strokeWidth={2}
+          onMouseDown={(e) => {
+            if (!connectMode) {
+              onMouseDownTerminal(e, el.id);
+            }
+          }}
           onClick={(e) => {
             e.stopPropagation();
-            onClickTerminal(el.id, "b");
+            if (connectMode) {
+              onClickTerminal(el.id, "b");
+            }
           }}
-          className="cursor-pointer transition-all duration-150 hover:scale-125"
+          className={`cursor-pointer transition-all duration-150 hover:scale-125 ${
+            rotationDrag?.elementId === el.id ? "animate-pulse" : ""
+          }`}
         />
 
         {/* Terminal indicators when in connect mode */}
@@ -1922,6 +2121,43 @@ export default function CircuitBuilderEnhanced() {
             {/* Render components */}
             {elements.map(renderElement)}
 
+            {/* 🔄 Rotation Guide Circle (when rotating) */}
+            {rotationDrag && elements.find((el) => el.id === rotationDrag.elementId) && (
+              <g>
+                {(() => {
+                  const el = elements.find((e) => e.id === rotationDrag.elementId)!;
+                  return (
+                    <>
+                      <circle
+                        cx={el.position.x}
+                        cy={el.position.y}
+                        r={70}
+                        className="fill-none stroke-purple-400 stroke-dashed"
+                        strokeWidth={2}
+                        opacity={0.6}
+                      />
+                      <circle
+                        cx={el.position.x}
+                        cy={el.position.y}
+                        r={4}
+                        className="fill-purple-400"
+                        opacity={0.8}
+                      />
+                      <text
+                        x={el.position.x}
+                        y={el.position.y - 80}
+                        textAnchor="middle"
+                        className="fill-purple-600 text-sm font-bold"
+                        style={{ textShadow: "0 0 3px white" }}
+                      >
+                        🔄 {el.rotation}°
+                      </text>
+                    </>
+                  );
+                })()}
+              </g>
+            )}
+
             {/* Pending connection line */}
             {connectMode && pending && dragId === null && (
               <g>
@@ -1953,7 +2189,8 @@ export default function CircuitBuilderEnhanced() {
             <div className="space-y-2 text-xs text-cyan-800">
               <div className="font-semibold text-cyan-900">📦 Komponen:</div>
               <div>• Tambahkan Baterai, Lampu, Resistor, Saklar, dan Kabel</div>
-              <div>• Drag komponen untuk memindahkan posisi</div>
+              <div>• <strong>Drag body komponen</strong> untuk memindahkan posisi</div>
+              <div>• <strong>Drag terminal (bulatan)</strong> untuk merotasi komponen 🔄</div>
 
               <div className="font-semibold text-cyan-900 mt-2">
                 🔗 Koneksi dengan Kabel:
