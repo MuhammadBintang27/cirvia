@@ -330,81 +330,83 @@ const TipeSoal2: React.FC<TipeSoal2Props> = ({
 
       {/* Main Content */}
       {currentCircuits.length > 0 ? (
-        <div className="grid lg:grid-cols-2 gap-8">
-        {/* Left Panel - Available Circuits */}
-        <div className="space-y-6">
-          <h3 className="text-xl font-bold text-white flex items-center">
-            <Zap className="w-5 h-5 mr-2 text-cyan-400" />
-            Rangkaian Tersedia
-          </h3>
-          
-          <div className="space-y-4">
-            {getAvailableCircuits().map((circuit) => (
-              <UnifiedCircuitCard
-                key={circuit.id}
-                circuit={circuit}
-                isDragging={state.draggedCircuit === circuit.id}
-                showBrightness={showResult}
-                onDragStart={handleDragStart}
-                onKeyDown={handleCircuitKeyDown}
-              />
-            ))}
-          </div>
-        </div>
-
-        {/* Right Panel - Drop Slots */}
-        <div className="space-y-6">
-          <div className="flex items-center justify-between">
+        <div className="grid grid-cols-3 gap-8 min-h-[600px]">
+          {/* Left Panel - Circuit Display (2/3 width) */}
+          <div className="col-span-2 space-y-6">
             <h3 className="text-xl font-bold text-white flex items-center">
-              <Target className="w-5 h-5 mr-2 text-purple-400" />
-              Urutan Jawaban
+              <Zap className="w-5 h-5 mr-2 text-cyan-400" />
+              Rangkaian Tersedia
             </h3>
             
-            {state.slotAssignments.some(slot => slot !== null) && !showResult && (
-              <button
-                onClick={handleReset}
-                className="flex items-center px-3 py-1 bg-red-500/20 hover:bg-red-500/30 rounded-lg border border-red-400/30 text-red-300 text-sm transition-all"
-              >
-                <RotateCcw className="w-4 h-4 mr-1" />
-                Reset
-              </button>
-            )}
+            <div className="space-y-6">
+              {getAvailableCircuits().map((circuit) => (
+                <UnifiedCircuitCard
+                  key={circuit.id}
+                  circuit={circuit}
+                  isDragging={state.draggedCircuit === circuit.id}
+                  showBrightness={showResult}
+                  onDragStart={handleDragStart}
+                  onKeyDown={handleCircuitKeyDown}
+                  className="full-size transform-gpu"
+                />
+              ))}
+            </div>
           </div>
-          
-          <div className="space-y-4">
-            {currentCircuits.length > 0 && state.slotAssignments.length === currentCircuits.length && 
-             state.slotAssignments.map((assignedCircuitId, slotIndex) => {
-              const assignedCircuit = getCircuitById(assignedCircuitId);
+
+          {/* Right Panel - Drop Slots (1/3 width) */}
+          <div className="col-span-1 space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-bold text-white flex items-center">
+                <Target className="w-4 h-4 mr-2 text-purple-400" />
+                Urutan
+              </h3>
               
-              return (
-                <DropSlot
-                  key={slotIndex}
-                  slotNumber={slotIndex + 1}
-                  circuitId={assignedCircuitId}
-                  isDragOver={state.dragOverSlot === slotIndex}
-                  onDrop={handleDrop}
-                  onDragOver={(e) => handleDragOver(e, slotIndex)}
-                  onDragLeave={handleDragLeave}
-                  onRemove={handleRemoveFromSlot}
-                  onKeyDown={handleSlotKeyDown}
+              {state.slotAssignments.some(slot => slot !== null) && !showResult && (
+                <button
+                  onClick={handleReset}
+                  className="flex items-center px-2 py-1 bg-red-500/20 hover:bg-red-500/30 rounded-lg border border-red-400/30 text-red-300 text-xs transition-all"
                 >
-                  {assignedCircuit && (
-                    <div className="w-full">
-                      <UnifiedCircuitCard
-                        circuit={assignedCircuit}
-                        showBrightness={showResult}
-                        onDragStart={handleDragStart}
-                        onKeyDown={handleCircuitKeyDown}
-                        className="h-full"
-                      />
-                    </div>
-                  )}
-                </DropSlot>
-              );
-            })}
+                  <RotateCcw className="w-3 h-3 mr-1" />
+                  Reset
+                </button>
+              )}
+            </div>
+            
+            <div className="space-y-3">
+              {currentCircuits.length > 0 && state.slotAssignments.length === currentCircuits.length && 
+               state.slotAssignments.map((assignedCircuitId, slotIndex) => {
+                const assignedCircuit = getCircuitById(assignedCircuitId);
+                
+                return (
+                  <DropSlot
+                    key={slotIndex}
+                    slotNumber={slotIndex + 1}
+                    circuitId={assignedCircuitId}
+                    isDragOver={state.dragOverSlot === slotIndex}
+                    onDrop={handleDrop}
+                    onDragOver={(e) => handleDragOver(e, slotIndex)}
+                    onDragLeave={handleDragLeave}
+                    onRemove={handleRemoveFromSlot}
+                    onKeyDown={handleSlotKeyDown}
+                    className="min-h-[80px]"
+                  >
+                    {assignedCircuit && (
+                      <div className="w-full">
+                        <UnifiedCircuitCard
+                          circuit={assignedCircuit}
+                          showBrightness={showResult}
+                          onDragStart={handleDragStart}
+                          onKeyDown={handleCircuitKeyDown}
+                          className="compact-mode scale-75 transform-gpu"
+                        />
+                      </div>
+                    )}
+                  </DropSlot>
+                );
+              })}
+            </div>
           </div>
         </div>
-      </div>
       ) : (
         <div className="flex items-center justify-center py-12">
           <div className="text-center">
