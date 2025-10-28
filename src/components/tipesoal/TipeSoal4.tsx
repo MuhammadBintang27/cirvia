@@ -1,8 +1,8 @@
 'use client';
 
 import React, { useState, useCallback, useMemo } from 'react';
-import { CheckCircle, X, Lightbulb, LightbulbOff, Power, Target, AlertCircle } from 'lucide-react';
-import { CircuitAnalysisQuestion } from '@/lib/questions';
+import { CheckCircle, X, Lightbulb, LightbulbOff, Power, Target, AlertCircle, RotateCcw } from 'lucide-react';
+import { CircuitAnalysisQuestion, resolveCircuitTemplate } from '@/lib/questions';
 
 interface TipeSoal4Props {
   question: CircuitAnalysisQuestion;
@@ -24,22 +24,16 @@ interface CircuitNode {
   connections: string[];
 }
 
-interface CircuitPath {
-  nodes: string[];
-  isComplete: boolean;
-  containsOpenLamp: boolean;
-}
-
 // Utility untuk analisis konektivitas rangkaian
 class CircuitAnalyzer {
   private nodes: Map<string, CircuitNode> = new Map();
   private adjacencyList: Map<string, string[]> = new Map();
 
-  constructor(components: CircuitAnalysisQuestion['circuit']['components'], connections: CircuitAnalysisQuestion['circuit']['connections']) {
+  constructor(components: any[], connections: any[]) {
     this.buildGraph(components, connections);
   }
 
-  private buildGraph(components: CircuitAnalysisQuestion['circuit']['components'], connections: CircuitAnalysisQuestion['circuit']['connections']) {
+  private buildGraph(components: any[], connections: any[]) {
     // Initialize nodes
     components.forEach(comp => {
       this.nodes.set(comp.id, {
@@ -112,52 +106,16 @@ class CircuitAnalyzer {
   }
 }
 
-// Generator untuk membuat rangkaian campuran
-const generateMixedCircuit = (seed: number = 42): CircuitAnalysisQuestion['circuit'] => {
-  // Seeded random untuk hasil yang konsisten
-  const random = (min: number, max: number) => {
-    seed = (seed * 9301 + 49297) % 233280;
-    return min + (seed / 233280) * (max - min);
-  };
-
-  const components: CircuitAnalysisQuestion['circuit']['components'] = [
-    { id: 'source', type: 'source', label: '+/-', position: { x: 50, y: 200 } },
-    { id: 'ground', type: 'junction', label: 'GND', position: { x: 50, y: 350 } },
-    { id: 'j1', type: 'junction', label: 'J1', position: { x: 200, y: 200 } },
-    { id: 'j2', type: 'junction', label: 'J2', position: { x: 350, y: 200 } },
-    { id: 'j3', type: 'junction', label: 'J3', position: { x: 200, y: 275 } },
-    { id: 'L1', type: 'lamp', label: 'L1', position: { x: 275, y: 150 } },
-    { id: 'L2', type: 'lamp', label: 'L2', position: { x: 275, y: 200 } },
-    { id: 'L3', type: 'lamp', label: 'L3', position: { x: 275, y: 250 } },
-    { id: 'L4', type: 'lamp', label: 'L4', position: { x: 450, y: 175 } },
-    { id: 'L5', type: 'lamp', label: 'L5', position: { x: 450, y: 225 } },
-  ];
-
-  const connections: CircuitAnalysisQuestion['circuit']['connections'] = [
-    { id: 'c1', from: 'source', to: 'j1', type: 'series' },
-    { id: 'c2', from: 'j1', to: 'L1', type: 'parallel' },
-    { id: 'c3', from: 'j1', to: 'L2', type: 'parallel' },
-    { id: 'c4', from: 'j1', to: 'j3', type: 'series' },
-    { id: 'c5', from: 'j3', to: 'L3', type: 'parallel' },
-    { id: 'c6', from: 'L1', to: 'j2', type: 'series' },
-    { id: 'c7', from: 'L2', to: 'j2', type: 'series' },
-    { id: 'c8', from: 'L3', to: 'j2', type: 'series' },
-    { id: 'c9', from: 'j2', to: 'L4', type: 'parallel' },
-    { id: 'c10', from: 'j2', to: 'L5', type: 'parallel' },
-    { id: 'c11', from: 'L4', to: 'ground', type: 'series' },
-    { id: 'c12', from: 'L5', to: 'ground', type: 'series' },
-  ];
-
-  return { components, connections };
-};
-
 const TipeSoal4: React.FC<TipeSoal4Props> = ({ question, onAnswer }) => {
-  // Get lamp IDs from circuit
+  // Resolve circuit template to actual circuit structure
+  const resolvedCircuit = useMemo(() => resolveCircuitTemplate(question.circuit), [question.circuit]);
+  
+  // Get lamp IDs from resolved circuit
   const lampIds = useMemo(() => 
-    question.circuit.components
+    resolvedCircuit.components
       .filter(comp => comp.type === 'lamp')
       .map(comp => comp.id)
-  , [question.circuit.components]);
+  , [resolvedCircuit.components]);
 
   const [state, setState] = useState<TipeSoal4State>(() => {
     const initialStates: { [lampId: string]: 'on' | 'off' | 'unknown' } = {};
@@ -176,8 +134,8 @@ const TipeSoal4: React.FC<TipeSoal4Props> = ({ question, onAnswer }) => {
 
   // Circuit analyzer instance
   const analyzer = useMemo(() => 
-    new CircuitAnalyzer(question.circuit.components, question.circuit.connections)
-  , [question.circuit]);
+    new CircuitAnalyzer(resolvedCircuit.components, resolvedCircuit.connections)
+  , [resolvedCircuit]);
 
   // Toggle lamp state prediction
   const handleLampToggle = useCallback((lampId: string) => {
@@ -195,6 +153,23 @@ const TipeSoal4: React.FC<TipeSoal4Props> = ({ question, onAnswer }) => {
       }
     }));
   }, [state.showResult, question.targetLamp]);
+
+  // Reset predictions
+  const handleReset = useCallback(() => {
+    if (state.showResult) return;
+
+    const resetStates: { [lampId: string]: 'on' | 'off' | 'unknown' } = {};
+    lampIds.forEach(lampId => {
+      if (lampId !== question.targetLamp) {
+        resetStates[lampId] = 'unknown';
+      }
+    });
+
+    setState(prev => ({
+      ...prev,
+      lampStates: resetStates
+    }));
+  }, [state.showResult, lampIds, question.targetLamp]);
 
   // Submit answer
   const handleSubmit = useCallback(() => {
@@ -235,216 +210,507 @@ const TipeSoal4: React.FC<TipeSoal4Props> = ({ question, onAnswer }) => {
     onAnswer(isCorrect);
   }, [state, lampIds, question.targetLamp, question.correctStates, onAnswer]);
 
-  // Get lamp icon based on state
-  const getLampIcon = (lampId: string, size: string = 'w-8 h-8') => {
-    if (lampId === question.targetLamp) {
-      return <X className={`${size} text-red-400`} />;
-    }
+  // Render SVG lamp component - more realistic bulb shape
+  const renderLamp = (comp: any) => {
+    const isTargetLamp = comp.id === question.targetLamp;
+    const isClickable = comp.type === 'lamp' && !isTargetLamp && !state.showResult;
+    const userState = state.lampStates[comp.id];
+    const feedback = state.feedback[comp.id];
+    const correctState = question.correctStates[comp.id];
 
-    const userState = state.lampStates[lampId];
-    const feedback = state.feedback[lampId];
+    // Define lamp colors and states
+    let lampColor = '#94a3b8'; // gray-400 default
+    let glowEffect = '';
+    let lampFill = '#1e293b'; // slate-800 default
 
-    if (state.showResult) {
-      const correctState = question.correctStates[lampId];
-      const isCorrectPrediction = feedback === 'correct';
-      
+    if (isTargetLamp) {
+      // Target lamp - permanently off with red X
+      lampColor = '#ef4444'; // red-500
+      lampFill = '#7f1d1d'; // red-900
+    } else if (state.showResult) {
+      // Show ground truth in result mode
       if (correctState === 'on') {
-        return (
-          <div className="relative">
-            <Lightbulb className={`${size} ${isCorrectPrediction ? 'text-yellow-400' : 'text-yellow-600'}`} />
-            {feedback === 'incorrect' && <X className="absolute -top-1 -right-1 w-4 h-4 text-red-500" />}
-            {feedback === 'correct' && <CheckCircle className="absolute -top-1 -right-1 w-4 h-4 text-green-500" />}
-          </div>
-        );
+        lampColor = '#fbbf24'; // amber-400 (on)
+        lampFill = '#f59e0b'; // amber-500
+        glowEffect = 'drop-shadow-glow-yellow';
       } else {
-        return (
-          <div className="relative">
-            <LightbulbOff className={`${size} ${isCorrectPrediction ? 'text-gray-400' : 'text-gray-600'}`} />
-            {feedback === 'incorrect' && <X className="absolute -top-1 -right-1 w-4 h-4 text-red-500" />}
-            {feedback === 'correct' && <CheckCircle className="absolute -top-1 -right-1 w-4 h-4 text-green-500" />}
-          </div>
-        );
+        lampColor = '#6b7280'; // gray-500 (off)
+        lampFill = '#374151'; // gray-700
+      }
+    } else {
+      // Show user predictions
+      if (userState === 'on') {
+        lampColor = '#fbbf24'; // amber-400
+        lampFill = '#f59e0b'; // amber-500
+        glowEffect = 'drop-shadow-glow-yellow';
+      } else if (userState === 'off') {
+        lampColor = '#6b7280'; // gray-500
+        lampFill = '#374151'; // gray-700
+      } else {
+        lampColor = '#60a5fa'; // blue-400 (unknown)
+        lampFill = '#1e40af'; // blue-800
       }
     }
 
-    // User prediction state
-    switch (userState) {
-      case 'on':
-        return <Lightbulb className={`${size} text-yellow-400`} />;
-      case 'off':
-        return <LightbulbOff className={`${size} text-gray-400`} />;
-      default:
-        return <AlertCircle className={`${size} text-blue-400`} />;
-    }
-  };
-
-  // Render circuit diagram
-  const renderCircuit = () => {
-    const nodes = analyzer.getNodes();
-    
     return (
-      <div className="relative bg-gradient-to-br from-slate-800/50 to-slate-900/50 rounded-2xl p-8 border border-white/10">
-        <svg viewBox="0 0 500 400" className="w-full h-64">
-          {/* Render connections */}
-          {question.circuit.connections.map(conn => {
-            const fromComp = question.circuit.components.find(c => c.id === conn.from);
-            const toComp = question.circuit.components.find(c => c.id === conn.to);
-            
-            if (!fromComp || !toComp) return null;
+      <g key={comp.id}>
+        {/* Define SVG filters for glow effect */}
+        <defs>
+          <filter id={`glowYellow-${comp.id}`} x="-50%" y="-50%" width="200%" height="200%">
+            <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
+            <feMerge> 
+              <feMergeNode in="coloredBlur"/>
+              <feMergeNode in="SourceGraphic"/>
+            </feMerge>
+          </filter>
+        </defs>
 
-            return (
-              <line
-                key={conn.id}
-                x1={fromComp.position.x}
-                y1={fromComp.position.y}
-                x2={toComp.position.x}
-                y2={toComp.position.y}
-                stroke="currentColor"
+        {/* Clickable area for lamp */}
+        {isClickable && (
+          <circle
+            cx={comp.position.x}
+            cy={comp.position.y}
+            r="30"
+            fill="transparent"
+            className="cursor-pointer"
+            onClick={() => handleLampToggle(comp.id)}
+          />
+        )}
+        
+        {/* Lamp bulb shape - realistic bulb */}
+        <ellipse
+          cx={comp.position.x}
+          cy={comp.position.y - 2}
+          rx="16"
+          ry="20"
+          fill={lampFill}
+          stroke={lampColor}
+          strokeWidth="3"
+          filter={glowEffect === 'drop-shadow-glow-yellow' ? `url(#glowYellow-${comp.id})` : ""}
+          className={`transition-all duration-300 ${isClickable ? 'hover:stroke-4' : ''}`}
+        />
+
+        {/* Lamp screw base */}
+        <rect
+          x={comp.position.x - 8}
+          y={comp.position.y + 18}
+          width="16"
+          height="6"
+          fill="#64748b"
+          stroke="#ffffff"
+          strokeWidth="1"
+          rx="2"
+        />
+
+        {/* Lamp filament (when on) */}
+        {(userState === 'on' || (state.showResult && correctState === 'on')) && (
+          <>
+            <line
+              x1={comp.position.x - 8}
+              y1={comp.position.y - 8}
+              x2={comp.position.x + 8}
+              y2={comp.position.y + 8}
+              stroke="#fff59d"
+              strokeWidth="1.5"
+              className="opacity-80"
+            />
+            <line
+              x1={comp.position.x + 8}
+              y1={comp.position.y - 8}
+              x2={comp.position.x - 8}
+              y2={comp.position.y + 8}
+              stroke="#fff59d"
+              strokeWidth="1.5"
+              className="opacity-80"
+            />
+          </>
+        )}
+
+        {/* Lamp label - positioned consistently above all lamps */}
+        <text
+          x={comp.position.x}
+          y={comp.position.y - 10}
+          textAnchor="middle"
+          className="text-sm font-bold fill-white pointer-events-none"
+          style={{ textShadow: '2px 2px 4px rgba(0,0,0,0.9)' }}
+        >
+          {comp.label}
+        </text>
+
+        {/* Target lamp indicator (only X for target lamp) */}
+        {isTargetLamp && (
+          <text
+            x={comp.position.x}
+            y={comp.position.y + 5}
+            textAnchor="middle"
+            className="text-lg font-bold fill-red-300 pointer-events-none"
+          >
+            ❌
+          </text>
+        )}
+
+        {/* Feedback indicators in result mode */}
+        {state.showResult && !isTargetLamp && (
+          <>
+            {feedback === 'correct' && (
+              <circle
+                cx={comp.position.x + 18}
+                cy={comp.position.y - 18}
+                r="10"
+                fill="#22c55e"
+                stroke="#ffffff"
                 strokeWidth="2"
-                className="text-blue-300/60"
               />
-            );
-          })}
-
-          {/* Render components */}
-          {question.circuit.components.map(comp => {
-            const isClickable = comp.type === 'lamp' && comp.id !== question.targetLamp && !state.showResult;
-            
-            return (
-              <g key={comp.id} transform={`translate(${comp.position.x - 20}, ${comp.position.y - 20})`}>
-                <circle
-                  r="18"
-                  fill={isClickable ? "rgba(59, 130, 246, 0.2)" : "rgba(30, 41, 59, 0.6)"}
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  className={isClickable ? "text-blue-400 cursor-pointer hover:fill-blue-500/30" : "text-slate-400"}
-                  onClick={() => isClickable && handleLampToggle(comp.id)}
-                />
-                <text
-                  x="0"
-                  y="6"
-                  textAnchor="middle"
-                  className="text-xs font-semibold fill-white pointer-events-none"
-                >
-                  {comp.label}
-                </text>
-              </g>
-            );
-          })}
-        </svg>
-
-        {/* Lamp status indicators */}
-        <div className="mt-6 grid grid-cols-3 gap-4">
-          {lampIds.map(lampId => (
-            <button
-              key={lampId}
-              onClick={() => handleLampToggle(lampId)}
-              disabled={lampId === question.targetLamp || state.showResult}
-              className={`flex items-center space-x-3 p-3 rounded-xl border transition-all ${
-                lampId === question.targetLamp
-                  ? 'bg-red-500/10 border-red-400/30 cursor-not-allowed'
-                  : state.showResult
-                  ? 'bg-slate-700/30 border-slate-600/30 cursor-default'
-                  : 'bg-slate-700/50 border-slate-600/50 hover:bg-slate-600/50 cursor-pointer'
-              }`}
-            >
-              {getLampIcon(lampId)}
-              <span className="text-white font-medium">{lampId}</span>
-              {lampId === question.targetLamp && (
-                <span className="text-red-300 text-sm">(Padam)</span>
-              )}
-              {state.lampStates[lampId] === 'on' && <span className="text-yellow-300 text-sm">Nyala</span>}
-              {state.lampStates[lampId] === 'off' && <span className="text-gray-300 text-sm">Padam</span>}
-            </button>
-          ))}
-        </div>
-      </div>
+            )}
+            {feedback === 'incorrect' && (
+              <circle
+                cx={comp.position.x + 18}
+                cy={comp.position.y - 18}
+                r="10"
+                fill="#ef4444"
+                stroke="#ffffff"
+                strokeWidth="2"
+              />
+            )}
+            {feedback === 'correct' && (
+              <text
+                x={comp.position.x + 18}
+                y={comp.position.y - 13}
+                textAnchor="middle"
+                className="text-sm fill-white font-bold pointer-events-none"
+              >
+                ✓
+              </text>
+            )}
+            {feedback === 'incorrect' && (
+              <text
+                x={comp.position.x + 18}
+                y={comp.position.y - 13}
+                textAnchor="middle"
+                className="text-sm fill-white font-bold pointer-events-none"
+              >
+                ✗
+              </text>
+            )}
+          </>
+        )}
+      </g>
     );
   };
 
+  // Render battery component - more realistic
+  const renderBattery = (comp: any) => {
+    return (
+      <g key={comp.id}>
+        {/* Battery main body */}
+        <rect
+          x={comp.position.x - 20}
+          y={comp.position.y - 12}
+          width="40"
+          height="24"
+          fill="#22c55e"
+          stroke="#ffffff"
+          strokeWidth="2"
+          rx="4"
+        />
+        
+        {/* Positive terminal */}
+        <rect
+          x={comp.position.x + 20}
+          y={comp.position.y - 6}
+          width="6"
+          height="12"
+          fill="#22c55e"
+          rx="2"
+        />
+
+        {/* Negative terminal */}
+        <rect
+          x={comp.position.x - 26}
+          y={comp.position.y - 4}
+          width="6"
+          height="8"
+          fill="#22c55e"
+          rx="1"
+        />
+
+        {/* + and - symbols */}
+        <text
+          x={comp.position.x + 12}
+          y={comp.position.y + 4}
+          textAnchor="middle"
+          className="text-xs font-bold fill-white pointer-events-none"
+        >
+          +
+        </text>
+        <text
+          x={comp.position.x - 12}
+          y={comp.position.y + 4}
+          textAnchor="middle"
+          className="text-xs font-bold fill-white pointer-events-none"
+        >
+          −
+        </text>
+
+        {/* Voltage label */}
+        <text
+          x={comp.position.x}
+          y={comp.position.y - 25}
+          textAnchor="middle"
+          className="text-sm font-bold fill-green-400 pointer-events-none"
+        >
+          {comp.label}
+        </text>
+      </g>
+    );
+  };
+
+  // Render junction component - more visible connection points
+  const renderJunction = (comp: any) => {
+    return (
+      <g key={comp.id}>
+        {/* Junction main dot */}
+        <circle
+          cx={comp.position.x}
+          cy={comp.position.y}
+          r="6"
+          fill="#64748b"
+          stroke="#ffffff"
+          strokeWidth="2"
+        />
+        
+        {/* Junction inner highlight */}
+        <circle
+          cx={comp.position.x}
+          cy={comp.position.y}
+          r="3"
+          fill="#94a3b8"
+        />
+      </g>
+    );
+  };
+
+  // Render wire connections - uniform appearance for student analysis
+  const renderWires = () => {
+    return resolvedCircuit.connections.map(conn => {
+      const fromComp = resolvedCircuit.components.find(c => c.id === conn.from);
+      const toComp = resolvedCircuit.components.find(c => c.id === conn.to);
+      
+      if (!fromComp || !toComp) return null;
+
+      // All wires look the same - students must analyze the circuit structure
+      const wireColor = '#f59e0b'; // Uniform amber color
+      const wireWidth = 4; // Consistent width
+      
+      return (
+        <g key={conn.id}>
+          {/* Wire shadow for depth */}
+          <line
+            x1={fromComp.position.x}
+            y1={fromComp.position.y + 2}
+            x2={toComp.position.x}
+            y2={toComp.position.y + 2}
+            stroke="#000000"
+            strokeWidth={wireWidth + 1}
+            className="opacity-25"
+          />
+          
+          {/* Main wire - uniform appearance */}
+          <line
+            x1={fromComp.position.x}
+            y1={fromComp.position.y}
+            x2={toComp.position.x}
+            y2={toComp.position.y}
+            stroke={wireColor}
+            strokeWidth={wireWidth}
+            strokeLinecap="round"
+            className="transition-all duration-300"
+          />
+          
+          {/* Wire highlight for 3D effect */}
+          <line
+            x1={fromComp.position.x}
+            y1={fromComp.position.y - 1}
+            x2={toComp.position.x}
+            y2={toComp.position.y - 1}
+            stroke="#ffffff"
+            strokeWidth="1.5"
+            className="opacity-40"
+          />
+        </g>
+      );
+    });
+  };
+
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl rounded-2xl p-6 border border-white/20">
-        <div className="flex items-center space-x-3 mb-4">
-          <Target className="w-8 h-8 text-blue-400" />
-          <h2 className="text-2xl font-bold text-white">{question.title}</h2>
-        </div>
-        <p className="text-blue-200/90 text-lg mb-4">{question.description}</p>
-        <p className="text-white/80 leading-relaxed">{question.question}</p>
-      </div>
-
-      {/* Circuit */}
-      {renderCircuit()}
-
-      {/* Instructions */}
-      <div className="bg-blue-500/10 rounded-xl p-4 border border-blue-400/30">
-        <p className="text-blue-300 font-semibold mb-2">Instruksi:</p>
-        <p className="text-white/80">
-          Klik pada setiap lampu untuk memprediksi apakah lampu tersebut akan nyala atau padam 
-          ketika lampu <span className="text-red-300 font-bold">{question.targetLamp}</span> dipadamkan.
-        </p>
-      </div>
-
-      {/* Submit Button */}
-      {!state.showResult && (
-        <div className="flex justify-center">
-          <button
-            onClick={handleSubmit}
-            className="flex items-center px-8 py-4 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-2xl font-bold text-lg hover:from-green-600 hover:to-emerald-700 transition-all transform hover:scale-105 shadow-2xl"
-          >
-            <CheckCircle className="w-6 h-6 mr-2" />
-            Submit Jawaban
-          </button>
-        </div>
-      )}
-
-      {/* Result */}
-      {state.showResult && (
-        <div className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl rounded-2xl p-6 border border-white/20">
-          <div className="flex items-center space-x-3 mb-4">
-            {state.isCorrect ? (
-              <CheckCircle className="w-8 h-8 text-green-400" />
-            ) : (
-              <X className="w-8 h-8 text-red-400" />
-            )}
-            <h3 className="text-2xl font-bold text-white">
-              {state.isCorrect ? 'Jawaban Benar!' : 'Belum Tepat'}
+    <div className="bg-gradient-to-br from-slate-900/95 to-slate-800/95 backdrop-blur-sm rounded-2xl border border-white/10 shadow-2xl p-6">
+      <div className="grid grid-cols-2 gap-6 h-full">
+        {/* Interactive SVG Circuit Diagram */}
+        <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 rounded-xl border border-white/10 p-6">
+          <div className="mb-4">
+            <h3 className="text-xl font-bold text-white mb-2">
+              Rangkaian Listrik
             </h3>
+            <p className="text-gray-300 text-sm">
+              Klik lampu untuk memprediksi kondisi Nyala/Padam
+            </p>
           </div>
+          
+          <svg viewBox="0 0 520 360" className="w-full h-80 bg-slate-900/30 rounded-lg border border-white/5">
+            {/* Render wire connections first (behind components) */}
+            {renderWires()}
+            
+            {/* Render all circuit components */}
+            {resolvedCircuit.components.map(comp => {
+              switch (comp.type) {
+                case 'lamp':
+                  return renderLamp(comp);
+                case 'source':
+                  return renderBattery(comp);
+                case 'junction':
+                  return renderJunction(comp);
+                default:
+                  return null;
+              }
+            })}
+          </svg>
+        </div>
 
-          {/* Detailed feedback */}
-          <div className="space-y-3 mb-6">
-            {lampIds.filter(id => id !== question.targetLamp).map(lampId => (
-              <div key={lampId} className="flex items-center justify-between p-3 bg-slate-700/30 rounded-lg">
+        {/* Information and Controls Panel */}
+        <div className="flex flex-col justify-between">
+          {/* Question Info */}
+          <div className="bg-slate-800/40 rounded-xl border border-white/10 p-6 mb-6">
+            <h3 className="text-xl font-bold text-white mb-4">
+              Analisis Rangkaian
+            </h3>
+            
+            <div className="space-y-4">
+              <div className="p-4 bg-red-500/10 border border-red-400/30 rounded-lg">
                 <div className="flex items-center space-x-3">
-                  {getLampIcon(lampId, 'w-6 h-6')}
-                  <span className="text-white font-medium">{lampId}:</span>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <span className="text-white/80">
-                    {question.correctStates[lampId] === 'on' ? 'Nyala' : 'Padam'}
-                  </span>
-                  {state.feedback[lampId] === 'correct' && (
-                    <CheckCircle className="w-5 h-5 text-green-400" />
-                  )}
-                  {state.feedback[lampId] === 'incorrect' && (
-                    <X className="w-5 h-5 text-red-400" />
-                  )}
+                  <X className="w-6 h-6 text-red-400" />
+                  <div>
+                    <p className="text-red-300 font-semibold">
+                      Lampu {question.targetLamp} PADAM
+                    </p>
+                    <p className="text-red-200/80 text-sm">
+                      {question.description}
+                    </p>
+                  </div>
                 </div>
               </div>
-            ))}
+
+              <div className="p-4 bg-blue-500/10 border border-blue-400/30 rounded-lg">
+                <p className="text-blue-300 font-semibold mb-2">Instruksi:</p>
+                <ul className="text-blue-200/80 text-sm space-y-1">
+                  <li>• Analisis struktur rangkaian untuk menentukan jalur arus</li>
+                  <li>• Klik lampu pada diagram untuk memprediksi kondisinya</li>
+                  <li>• 💡 = Nyala/Padam, ? = Belum diprediksi</li>
+                  <li>• Perhatikan: lampu mana yang akan terpengaruh jika target lamp putus</li>
+                </ul>
+              </div>
+            </div>
           </div>
 
-          {/* Explanation */}
-          {question.explanation && (
-            <div className="bg-blue-500/10 rounded-lg p-4 border border-blue-400/30">
-              <h4 className="text-blue-300 font-semibold mb-2">Penjelasan:</h4>
-              <p className="text-white/80">{question.explanation}</p>
+          {/* Prediction Summary */}
+          <div className="bg-slate-800/40 rounded-xl border border-white/10 p-6 mb-6">
+            <h4 className="text-lg font-semibold text-white mb-3">
+              Status Prediksi
+            </h4>
+            
+            <div className="grid grid-cols-2 gap-3">
+              {lampIds
+                .filter(lampId => lampId !== question.targetLamp)
+                .map(lampId => {
+                  const userState = state.lampStates[lampId];
+                  const feedback = state.feedback[lampId];
+                  const correctState = question.correctStates[lampId];
+                  
+                  return (
+                    <div
+                      key={lampId}
+                      className={`p-3 rounded-lg border ${
+                        state.showResult
+                          ? feedback === 'correct'
+                            ? 'bg-green-500/10 border-green-400/30'
+                            : feedback === 'incorrect'
+                            ? 'bg-red-500/10 border-red-400/30'
+                            : 'bg-gray-500/10 border-gray-400/30'
+                          : 'bg-slate-700/30 border-slate-600/30'
+                      }`}
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="text-white font-medium">{lampId}</span>
+                        <div className="flex items-center space-x-2">
+                          {state.showResult ? (
+                            <>
+                              <span className="text-sm text-gray-300">
+                                {correctState === 'on' ? '🔆' : '❌'}
+                              </span>
+                              {feedback === 'correct' && (
+                                <CheckCircle className="w-4 h-4 text-green-400" />
+                              )}
+                              {feedback === 'incorrect' && (
+                                <X className="w-4 h-4 text-red-400" />
+                              )}
+                            </>
+                          ) : (
+                            <span className="text-sm">
+                              {userState === 'on' ? '🔆' : userState === 'off' ? '❌' : '?'}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
             </div>
-          )}
+          </div>
+
+          {/* Action Buttons */}
+          <div className="space-y-3">
+            {!state.showResult && (
+              <div className="flex space-x-3">
+                <button
+                  onClick={handleReset}
+                  className="flex-1 px-4 py-3 bg-slate-600/50 hover:bg-slate-600/70 text-white rounded-lg border border-slate-500/30 transition-all duration-200"
+                >
+                  Reset
+                </button>
+                <button
+                  onClick={handleSubmit}
+                  className="flex-1 px-4 py-3 bg-blue-600/80 hover:bg-blue-600 text-white rounded-lg border border-blue-500/30 transition-all duration-200"
+                >
+                  Submit
+                </button>
+              </div>
+            )}
+
+            {state.showResult && (
+              <div className={`p-4 rounded-lg border text-center ${
+                state.isCorrect
+                  ? 'bg-green-500/10 border-green-400/30 text-green-300'
+                  : 'bg-red-500/10 border-red-400/30 text-red-300'
+              }`}>
+                <div className="flex items-center justify-center space-x-2 mb-2">
+                  {state.isCorrect ? (
+                    <CheckCircle className="w-6 h-6" />
+                  ) : (
+                    <X className="w-6 h-6" />
+                  )}
+                  <span className="font-bold">
+                    {state.isCorrect ? 'Benar!' : 'Kurang Tepat'}
+                  </span>
+                </div>
+                <p className="text-sm opacity-80">
+                  {state.isCorrect
+                    ? 'Analisis rangkaian Anda sudah tepat!'
+                    : 'Coba analisis ulang jalur arus pada rangkaian.'}
+                </p>
+              </div>
+            )}
+          </div>
         </div>
-      )}
+      </div>
     </div>
   );
 };

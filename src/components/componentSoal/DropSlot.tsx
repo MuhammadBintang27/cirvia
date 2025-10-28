@@ -54,7 +54,7 @@ const DropSlot: React.FC<DropSlotProps> = ({
   return (
     <div
       className={`
-        relative w-full min-h-[140px] rounded-2xl border-2 border-dashed
+        relative w-full rounded-2xl border-2 border-dashed
         transition-all duration-300 flex items-center justify-center
         ${isDragOver 
           ? 'border-cyan-400 bg-cyan-400/10 scale-105' 
@@ -63,7 +63,7 @@ const DropSlot: React.FC<DropSlotProps> = ({
             : 'border-white/20 bg-white/5 hover:border-white/40'
         }
         ${isActive ? 'ring-2 ring-cyan-400 ring-opacity-50' : ''}
-        ${className}
+        ${className || 'min-h-[120px]'}
       `}
       onDrop={handleDrop}
       onDragOver={handleDragOver}
