@@ -295,7 +295,7 @@ function calculateCurrentFlow(elements: CircuitElement[], wires: Wire[]) {
   // 🧩 CIRVIA: Union-Find untuk mengelompokkan node yang terhubung
   // Semua node yang terhubung melalui wire dianggap sebagai satu "electrical node"
   const parent = new Map<string, string>();
-  
+
   const find = (node: string): string => {
     if (!parent.has(node)) {
       parent.set(node, node);
@@ -343,7 +343,7 @@ function calculateCurrentFlow(elements: CircuitElement[], wires: Wire[]) {
 
     const elNodeA = `${el.id}-a`;
     const elNodeB = `${el.id}-b`;
-    
+
     // Dapatkan electrical node (root dari union-find)
     const elElectricalA = find(elNodeA);
     const elElectricalB = find(elNodeB);
@@ -354,12 +354,15 @@ function calculateCurrentFlow(elements: CircuitElement[], wires: Wire[]) {
 
       const otherNodeA = `${other.id}-a`;
       const otherNodeB = `${other.id}-b`;
-      
+
       const otherElectricalA = find(otherNodeA);
       const otherElectricalB = find(otherNodeB);
 
       // Jika kedua ujung terhubung ke electrical node yang sama = PARALEL
-      if (elElectricalA === otherElectricalA && elElectricalB === otherElectricalB) {
+      if (
+        elElectricalA === otherElectricalA &&
+        elElectricalB === otherElectricalB
+      ) {
         group.push(other.id);
         processedElements.add(other.id);
       }
@@ -452,7 +455,7 @@ function calculateCurrentFlow(elements: CircuitElement[], wires: Wire[]) {
 
   // Build topology info
   const topologyGroups: {
-    type: 'series' | 'parallel';
+    type: "series" | "parallel";
     elements: Array<{
       id: string;
       type: string;
@@ -474,15 +477,16 @@ function calculateCurrentFlow(elements: CircuitElement[], wires: Wire[]) {
       }, 0);
 
     topologyGroups.push({
-      type: 'parallel',
+      type: "parallel",
       elements: group.map((id) => {
         const el = elements.find((e) => e.id === id)!;
         return {
           id: el.id,
           type: el.type,
-          resistance: el.type === 'resistor' || el.type === 'lamp' ? el.value : undefined,
-          voltage: el.type === 'battery' ? el.value : undefined,
-          closed: el.type === 'switch' ? el.state === 'closed' : undefined,
+          resistance:
+            el.type === "resistor" || el.type === "lamp" ? el.value : undefined,
+          voltage: el.type === "battery" ? el.value : undefined,
+          closed: el.type === "switch" ? el.state === "closed" : undefined,
         };
       }),
       current: totalVoltage / parallelResistance,
@@ -495,9 +499,12 @@ function calculateCurrentFlow(elements: CircuitElement[], wires: Wire[]) {
     (el) => !parallelGroups.flat().includes(el.id)
   );
   if (serialElements.length > 0) {
-    const seriesResistance = serialElements.reduce((sum, el) => sum + el.value, 0);
+    const seriesResistance = serialElements.reduce(
+      (sum, el) => sum + el.value,
+      0
+    );
     topologyGroups.push({
-      type: 'series',
+      type: "series",
       elements: serialElements.map((el) => ({
         id: el.id,
         type: el.type,
@@ -510,18 +517,18 @@ function calculateCurrentFlow(elements: CircuitElement[], wires: Wire[]) {
 
   // Determine overall topology type
   // 🎯 Gunakan informasi percabangan untuk deteksi lebih akurat
-  let topologyType: 'series' | 'parallel' | 'mixed';
-  
+  let topologyType: "series" | "parallel" | "mixed";
+
   if (hasParallelBranch || parallelGroups.length > 0) {
     // Ada percabangan atau grup paralel terdeteksi
     if (serialElements.length > 0) {
-      topologyType = 'mixed'; // Ada kombinasi seri dan paralel
+      topologyType = "mixed"; // Ada kombinasi seri dan paralel
     } else {
-      topologyType = 'parallel'; // Hanya paralel
+      topologyType = "parallel"; // Hanya paralel
     }
   } else {
     // Tidak ada percabangan, semua seri
-    topologyType = 'series';
+    topologyType = "series";
   }
 
   return {
@@ -1241,7 +1248,8 @@ export default function CircuitBuilderEnhanced() {
         }
 
         case "lamp": {
-          const lampPower = (calc.lampPowers as Record<string, number>)?.[el.id] || 0;
+          const lampPower =
+            (calc.lampPowers as Record<string, number>)?.[el.id] || 0;
           const isOn = lampPower > 0.1;
           const brightness = Math.min(1, lampPower / 2);
 
@@ -1786,26 +1794,28 @@ export default function CircuitBuilderEnhanced() {
             </div>
 
             {/* Branch Nodes Info */}
-            {calc.topology.branchNodes && calc.topology.branchNodes.length > 0 && (
-              <div className="mb-3 p-2 bg-blue-50 rounded-lg border border-blue-200">
-                <div className="text-xs text-blue-700 font-semibold mb-1">
-                  🔍 Node Percabangan (Degree &gt; 2):
+            {calc.topology.branchNodes &&
+              calc.topology.branchNodes.length > 0 && (
+                <div className="mb-3 p-2 bg-blue-50 rounded-lg border border-blue-200">
+                  <div className="text-xs text-blue-700 font-semibold mb-1">
+                    🔍 Node Percabangan (Degree &gt; 2):
+                  </div>
+                  <div className="flex flex-wrap gap-1">
+                    {calc.topology.branchNodes.map((node, idx) => (
+                      <span
+                        key={idx}
+                        className="inline-block px-2 py-0.5 bg-blue-100 text-blue-800 rounded text-xs font-mono"
+                      >
+                        {node}
+                      </span>
+                    ))}
+                  </div>
+                  <div className="text-xs text-blue-600 mt-1">
+                    💡 Node ini terhubung ke lebih dari 2 terminal (terjadi
+                    percabangan paralel)
+                  </div>
                 </div>
-                <div className="flex flex-wrap gap-1">
-                  {calc.topology.branchNodes.map((node, idx) => (
-                    <span
-                      key={idx}
-                      className="inline-block px-2 py-0.5 bg-blue-100 text-blue-800 rounded text-xs font-mono"
-                    >
-                      {node}
-                    </span>
-                  ))}
-                </div>
-                <div className="text-xs text-blue-600 mt-1">
-                  💡 Node ini terhubung ke lebih dari 2 terminal (terjadi percabangan paralel)
-                </div>
-              </div>
-            )}
+              )}
 
             {/* Groups Details */}
             {calc.topology.groups && calc.topology.groups.length > 0 && (
