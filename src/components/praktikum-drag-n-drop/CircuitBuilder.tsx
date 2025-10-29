@@ -1,4 +1,10 @@
-import React, { useMemo, useRef, useState, useCallback, useEffect } from "react";
+import React, {
+  useMemo,
+  useRef,
+  useState,
+  useCallback,
+  useEffect,
+} from "react";
 
 // Types
 export type ComponentType = "battery" | "resistor" | "lamp" | "switch";
@@ -21,6 +27,8 @@ interface CircuitElement {
   rotation: 0 | 90 | 180 | 270;
   state?: "open" | "closed";
   terminals: Terminal[];
+  current?: number; // Arus yang mengalir melalui komponen
+  voltage?: number; // Tegangan pada komponen
 }
 
 interface WireEnd {
@@ -32,6 +40,7 @@ interface Wire {
   id: string;
   from: WireEnd;
   to: WireEnd;
+  current?: number; // Arus yang mengalir pada kabel
 }
 
 // Responsive constants
@@ -50,7 +59,7 @@ function terminalAbsPos(el: CircuitElement, termId: Terminal["id"]): Pos {
   const t = el.terminals.find((t) => t.id === termId)!;
   let dx = t.offset.x;
   let dy = t.offset.y;
-  
+
   switch (el.rotation) {
     case 0:
       break;
@@ -86,7 +95,7 @@ function makeElement(
   const id = `${type}_${Date.now()}`;
   // Scale terminal offsets for mobile
   const terminalOffset = isMobile ? 30 : 40;
-  
+
   switch (type) {
     case "battery":
       return {
@@ -154,24 +163,146 @@ function useIsMobile() {
     const checkMobile = () => {
       setIsMobile(window.innerWidth < 768);
     };
-    
+
     checkMobile();
-    window.addEventListener('resize', checkMobile);
-    
-    return () => window.removeEventListener('resize', checkMobile);
+    window.addEventListener("resize", checkMobile);
+
+    return () => window.removeEventListener("resize", checkMobile);
   }, []);
 
   return isMobile;
 }
 
+// Graph-based circuit analysis untuk deteksi koneksi dan aliran arus
+function analyzeCircuit(elements: CircuitElement[], wires: Wire[]) {
+  // Build adjacency graph
+  const graph: Record<string, Set<string>> = {};
+
+  elements.forEach((el) => {
+    graph[el.id] = new Set();
+  });
+
+  wires.forEach((wire) => {
+    graph[wire.from.elementId]?.add(wire.to.elementId);
+    graph[wire.to.elementId]?.add(wire.from.elementId);
+  });
+
+  // Find batteries (voltage sources)
+  const batteries = elements.filter((e) => e.type === "battery");
+  if (batteries.length === 0) return { isConnected: false, isClosed: false };
+
+  // BFS to check if all components are connected
+  const visited = new Set<string>();
+  const queue = [batteries[0].id];
+  visited.add(batteries[0].id);
+
+  while (queue.length > 0) {
+    const current = queue.shift()!;
+    const neighbors = graph[current];
+
+    neighbors?.forEach((neighbor) => {
+      if (!visited.has(neighbor)) {
+        visited.add(neighbor);
+        queue.push(neighbor);
+      }
+    });
+  }
+
+  const isConnected = visited.size === elements.length;
+
+  // Check if circuit forms a closed loop
+  const isClosed = isConnected && wires.length >= elements.length;
+
+  // Check for open switches
+  const hasOpenSwitch = elements.some(
+    (e) => e.type === "switch" && e.state === "open"
+  );
+
+  return { isConnected, isClosed: isClosed && !hasOpenSwitch, hasOpenSwitch };
+}
+
+// Calculate current flow using Ohm's Law (simplified for series/parallel circuits)
+function calculateCurrentFlow(elements: CircuitElement[], wires: Wire[]) {
+  const batteries = elements.filter((e) => e.type === "battery");
+  const resistors = elements.filter((e) => e.type === "resistor");
+  const lamps = elements.filter((e) => e.type === "lamp");
+  const switches = elements.filter((e) => e.type === "switch");
+
+  const totalVoltage = batteries.reduce((sum, b) => sum + b.value, 0);
+  const hasOpenSwitch = switches.some((s) => s.state === "open");
+
+  if (hasOpenSwitch || totalVoltage === 0) {
+    return { current: 0, power: 0, componentCurrents: {} };
+  }
+
+  // Simplified: Calculate total resistance (series assumption)
+  const totalResistance = [...resistors, ...lamps].reduce(
+    (sum, r) => sum + r.value,
+    0
+  );
+
+  if (totalResistance === 0)
+    return { current: 0, power: 0, componentCurrents: {} };
+
+  const current = totalVoltage / totalResistance;
+  const power = totalVoltage * current;
+
+  // Assign current to each component
+  const componentCurrents: Record<string, number> = {};
+  elements.forEach((el) => {
+    componentCurrents[el.id] = current;
+  });
+
+  return { current, power, componentCurrents };
+}
+
+// Play sound effect (simple beep)
+function playSound(frequency: number = 800, duration: number = 100) {
+  if (typeof window === "undefined" || !window.AudioContext) return;
+
+  try {
+    const audioContext = new (window.AudioContext ||
+      (window as any).webkitAudioContext)();
+    const oscillator = audioContext.createOscillator();
+    const gainNode = audioContext.createGain();
+
+    oscillator.connect(gainNode);
+    gainNode.connect(audioContext.destination);
+
+    oscillator.frequency.value = frequency;
+    oscillator.type = "sine";
+
+    gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+    gainNode.gain.exponentialRampToValueAtTime(
+      0.01,
+      audioContext.currentTime + duration / 1000
+    );
+
+    oscillator.start(audioContext.currentTime);
+    oscillator.stop(audioContext.currentTime + duration / 1000);
+  } catch (e) {
+    // Silently fail if audio is not supported
+  }
+}
+
 export default function CircuitBuilder() {
   const isMobile = useIsMobile();
   const canvasSize = getCanvasSize(isMobile);
-  
+
   // State
   const [elements, setElements] = useState<CircuitElement[]>(() => [
-    makeElement("battery", "battery", { x: isMobile ? 120 : 200, y: isMobile ? 150 : 200 }, isMobile),
-    makeElement("resistor", "resistor", { x: isMobile ? 230 : 400, y: isMobile ? 150 : 200 }, isMobile),
+    makeElement(
+      "battery",
+      "battery",
+      { x: isMobile ? 120 : 200, y: isMobile ? 150 : 200 },
+      isMobile
+    ),
+    makeElement(
+      "resistor",
+      "resistor",
+      { x: isMobile ? 230 : 400, y: isMobile ? 150 : 200 },
+      isMobile
+    ),
   ]);
   const [wires, setWires] = useState<Wire[]>([]);
   const [connectMode, setConnectMode] = useState(false);
@@ -185,19 +316,21 @@ export default function CircuitBuilder() {
   // Update canvas size when mobile state changes
   useEffect(() => {
     const newCanvasSize = getCanvasSize(isMobile);
-    setElements(prev => prev.map(el => ({
-      ...el,
-      position: {
-        x: Math.max(40, Math.min(newCanvasSize.width - 40, el.position.x)),
-        y: Math.max(40, Math.min(newCanvasSize.height - 40, el.position.y))
-      }
-    })));
+    setElements((prev) =>
+      prev.map((el) => ({
+        ...el,
+        position: {
+          x: Math.max(40, Math.min(newCanvasSize.width - 40, el.position.x)),
+          y: Math.max(40, Math.min(newCanvasSize.height - 40, el.position.y)),
+        },
+      }))
+    );
   }, [isMobile]);
 
   const addComponent = (type: ComponentType) => {
-    const center = { 
-      x: canvasSize.width / 2, 
-      y: isMobile ? 80 : 120 
+    const center = {
+      x: canvasSize.width / 2,
+      y: isMobile ? 80 : 120,
     };
     setElements((prev) => [...prev, makeElement(type, type, center, isMobile)]);
   };
@@ -651,7 +784,7 @@ export default function CircuitBuilder() {
             x2={b.x}
             y2={b.y}
             stroke={active ? "#2563eb" : "#374151"}
-            strokeWidth={active ? (isMobile ? 3 : 4) : (isMobile ? 2 : 3)}
+            strokeWidth={active ? (isMobile ? 3 : 4) : isMobile ? 2 : 3}
             opacity={active ? 1 : 0.9}
           />
         );
@@ -664,7 +797,9 @@ export default function CircuitBuilder() {
       {/* Mobile-responsive Toolbar */}
       <div className="mb-4">
         <div className="flex flex-wrap items-center gap-1 sm:gap-2 mb-3">
-          <span className="font-semibold text-xs sm:text-sm mr-1">Komponen:</span>
+          <span className="font-semibold text-xs sm:text-sm mr-1">
+            Komponen:
+          </span>
           <button
             onClick={() => addComponent("battery")}
             className="px-2 py-1 sm:px-3 sm:py-1.5 rounded bg-amber-500 text-white hover:bg-amber-600 text-xs sm:text-sm"
@@ -690,7 +825,7 @@ export default function CircuitBuilder() {
             + Saklar
           </button>
         </div>
-        
+
         <div className="flex flex-wrap items-center gap-1 sm:gap-2">
           <button
             onClick={() => setConnectMode((c) => !c)}
@@ -762,7 +897,11 @@ export default function CircuitBuilder() {
         onTouchEnd={onMouseUp}
         onClick={() => setSelectedId(null)}
       >
-        <svg width={canvasSize.width} height={canvasSize.height} className="absolute inset-0">
+        <svg
+          width={canvasSize.width}
+          height={canvasSize.height}
+          className="absolute inset-0"
+        >
           {renderWires()}
           {elements.map(renderElement)}
         </svg>
@@ -773,14 +912,17 @@ export default function CircuitBuilder() {
         <div className="space-y-1">
           <div>• Mode Koneksi: klik terminal untuk menghubungkan kabel</div>
           <div>• Double-tap saklar untuk buka/tutup</div>
-          {!isMobile && <div>• Pilih komponen lalu klik &quot;↻ Rotasi&quot;</div>}
+          {!isMobile && (
+            <div>• Pilih komponen lalu klik &quot;↻ Rotasi&quot;</div>
+          )}
         </div>
       </div>
 
       {/* Status messages */}
       {!calc.looksLikeClosedLoop && (
         <div className="mt-3 p-2 rounded bg-yellow-50 text-yellow-800 border border-yellow-200 text-xs sm:text-sm">
-          Rangkaian belum tertutup. Hubungkan semua terminal untuk perhitungan otomatis.
+          Rangkaian belum tertutup. Hubungkan semua terminal untuk perhitungan
+          otomatis.
         </div>
       )}
       {calc.switchOpen && (
