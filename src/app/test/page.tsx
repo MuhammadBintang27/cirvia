@@ -6,9 +6,11 @@ import { ChevronRight, Trophy, Target, Brain, Zap, Star, ArrowRight, Sparkles, C
 import Navbar from '@/components/Navbar';
 import { useAuth } from '@/contexts/AuthContext';
 import { SupabaseTestService, TestResultWithAnswers, LearningStyleResult } from '@/lib/supabase-test-service';
+import { useToast } from '@/components/Toast';
 
 const TestPage = () => {
   const { user, isStudent } = useAuth();
+  const { addToast } = useToast();
   const [preTestResult, setPreTestResult] = useState<TestResultWithAnswers | null>(null);
   const [postTestResult, setPostTestResult] = useState<TestResultWithAnswers | null>(null);
   const [learningStyleResult, setLearningStyleResult] = useState<LearningStyleResult | null>(null);
@@ -257,17 +259,32 @@ const TestPage = () => {
                   </div>
                 )}
                 
-                <button 
-                  className={`w-full py-4 px-8 rounded-2xl font-bold text-lg transition-all transform hover:scale-105 shadow-2xl flex items-center justify-center group ${
-                    preTestResult 
-                      ? 'bg-gradient-to-r from-blue-600/50 to-indigo-600/50 text-blue-200 border border-blue-400/30' 
-                      : 'bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:from-blue-600 hover:to-blue-700 hover:shadow-blue-500/25'
-                  }`}
-                  onClick={() => window.location.href = '/pretest'}
-                >
-                  {preTestResult ? 'Lihat Hasil / Ulangi' : 'Mulai Tes Diagnostik'}
-                  <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
-                </button>
+                {preTestResult ? (
+                  // Pre-test sudah selesai - hanya tampilkan hasil, tidak bisa ulangi
+                  <button 
+                    className="w-full py-4 px-8 rounded-2xl font-bold text-lg bg-gradient-to-r from-blue-600/50 to-indigo-600/50 text-blue-200 border border-blue-400/30 cursor-default flex items-center justify-center group"
+                    onClick={() => {
+                      addToast({
+                        type: 'info',
+                        title: 'Pre-Test Sudah Selesai',
+                        message: 'Pre-test hanya bisa dikerjakan sekali. Hasil Anda sudah tercatat sebagai baseline untuk mengukur progress pembelajaran.',
+                        duration: 4000
+                      });
+                    }}
+                  >
+                    Sudah Selesai - Hasil Tercatat
+                    <CheckCircle className="w-5 h-5 ml-2 text-blue-400" />
+                  </button>
+                ) : (
+                  // Belum mengerjakan pre-test
+                  <button 
+                    className="w-full py-4 px-8 rounded-2xl font-bold text-lg transition-all transform hover:scale-105 shadow-2xl flex items-center justify-center group bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:from-blue-600 hover:to-blue-700 hover:shadow-blue-500/25"
+                    onClick={() => window.location.href = '/pretest'}
+                  >
+                    Mulai Tes Diagnostik
+                    <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
+                  </button>
+                )}
               </div>
             </div>
 

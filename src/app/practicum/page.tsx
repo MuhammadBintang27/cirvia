@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import CVPracticumLauncher from "../../components/CVPracticumLauncher";
-import CircuitBuilder from "../../components/CircuitBuilder";
 import Navbar from "@/components/Navbar";
 
 interface CircuitElement {
@@ -309,8 +308,13 @@ Hasil Perhitungan Rangkaian:
                     </div>
                   </div>
                   
-                  {/* Circuit Builder */}
-                  <CircuitBuilder />
+                  {/* Circuit Builder - Removed: Replaced with new components in TipeSoal1 */}
+                  <div className="bg-gradient-to-r from-yellow-500/10 to-orange-500/10 rounded-xl p-6 border border-yellow-400/30">
+                    <p className="text-yellow-400 text-center">
+                      <span className="text-xl mr-2">⚠️</span>
+                      Circuit Builder telah dipindahkan ke halaman Quiz sebagai TipeSoal1 dengan komponen yang lebih modern
+                    </p>
+                  </div>
 
                   {/* Enhanced Tips */}
                   <div className="mt-6 p-6 bg-gradient-to-r from-cyan-500/10 to-blue-500/10 rounded-xl border border-cyan-400/30">

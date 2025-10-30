@@ -14,7 +14,9 @@ import Navbar from '@/components/Navbar';
 import { useStudentAuth } from '@/hooks/useStudentAuth';
 import { useAuth } from '@/contexts/AuthContext';
 import { mixedQuestions, calculateQuizScore } from '@/lib/questions';
+import { useStudentQuestions } from '@/lib/student-question-service';
 import { SupabaseTestService, TestAnswerInput } from '@/lib/supabase-test-service';
+import { useToast } from '@/components/Toast';
 import QuestionRenderer from '@/components/tipesoal/QuestionRenderer';
 
 interface QuizState {
@@ -30,6 +32,16 @@ const PostTestPage = () => {
   const [testStarted, setTestStarted] = useState(false);
   const { requireStudentLogin, isLoggedInStudent } = useStudentAuth();
   const { user } = useAuth();
+  const { addToast } = useToast();
+  
+  // Get questions based on student's class assignment
+  const studentClass = user && user.role === 'student' ? String(user.class) : 'X-IPA-1';
+  const { questions, loading: questionsLoading, error: questionsError } = useStudentQuestions(
+    user?.id || null,
+    studentClass,
+    'posttest',
+    mixedQuestions // Fallback to default questions
+  );
   
   // Auto-start test jika sudah login sebagai student
   useEffect(() => {
@@ -47,7 +59,7 @@ const PostTestPage = () => {
     score: 0
   });
 
-  const currentQuestion = mixedQuestions[quizState.currentQuestionIndex];
+  const currentQuestion = questions[quizState.currentQuestionIndex];
   const [timeElapsed, setTimeElapsed] = useState(0);
 
   // Timer effect
@@ -75,7 +87,7 @@ const PostTestPage = () => {
   };
 
   const handleNextQuestion = () => {
-    if (quizState.currentQuestionIndex < mixedQuestions.length - 1) {
+    if (quizState.currentQuestionIndex < questions.length - 1) {
       setQuizState(prev => ({
         ...prev,
         currentQuestionIndex: prev.currentQuestionIndex + 1,
@@ -84,42 +96,85 @@ const PostTestPage = () => {
     } else {
       // Quiz completed
       const correctAnswers = quizState.answers.filter(Boolean).length;
-      const scoreData = calculateQuizScore(correctAnswers, mixedQuestions.length);
+      const scoreData = calculateQuizScore(correctAnswers, questions.length);
       
       // Save test result if user is logged in as student
       if (user && user.role === 'student') {
         const totalTimeSpent = Math.floor((Date.now() - quizState.startTime) / 1000);
         
         // Create test answers array for detailed tracking
-        const testAnswers: TestAnswerInput[] = mixedQuestions.map((question, index) => ({
-          questionId: question.id,
-          selectedAnswer: quizState.answers[index] ? 1 : 0, // 1 for correct, 0 for incorrect
-          correctAnswer: 1, // Always 1 for correct in circuit questions
-          isCorrect: quizState.answers[index],
-          questionText: question.title,
-          selectedText: quizState.answers[index] ? 'Benar' : 'Salah',
-          correctText: 'Benar',
-          explanation: question.explanation || question.hint
-        }));
+        console.log('Questions data for test answers:', questions.map(q => ({ id: q.id, type: typeof q.id, title: q.title })));
+        
+        const testAnswers: TestAnswerInput[] = questions.map((question, index) => {
+          // Convert question ID to string, support both integer and UUID
+          const questionId = String(question.id || (index + 1)); // Fallback to index-based ID
+          console.log(`Processing question ${index}: id=${question.id}, converted=${questionId}`);
+          
+          return {
+            questionId: questionId,
+            selectedAnswer: quizState.answers[index] ? 1 : 0, // 1 for correct, 0 for incorrect
+            correctAnswer: 1, // Always 1 for correct
+            isCorrect: quizState.answers[index],
+            questionText: question.title || (question as any).question || question.description || '',
+            selectedText: quizState.answers[index] ? 'Benar' : 'Salah',
+            correctText: 'Benar',
+            explanation: question.explanation || question.hint || ''
+          };
+        });
 
         const percentage = Math.round(scoreData.score);
         const grade = SupabaseTestService.calculateGrade(percentage);
 
-        // Save to Supabase
+        // Save to Supabase with detailed logging
+        console.log('Attempting to save posttest result:', {
+          studentId: user.id,
+          studentName: user.name,
+          studentNis: user.nis,
+          testType: 'posttest',
+          score: correctAnswers,
+          totalQuestions: questions.length,
+          percentage,
+          testAnswersCount: testAnswers.length
+        });
+
         SupabaseTestService.saveTestResult({
           studentId: user.id,
           studentName: user.name,
           studentNis: user.nis,
           testType: 'posttest',
           score: correctAnswers,
-          totalQuestions: mixedQuestions.length,
+          totalQuestions: questions.length,
           correctAnswers,
           percentage,
           timeSpent: totalTimeSpent,
           answers: testAnswers,
           grade
+        }).then(result => {
+          if (result) {
+            console.log('Posttest result saved successfully:', result.id);
+            addToast({
+              type: 'success',
+              title: 'Post-Test Tersimpan!',
+              message: 'Hasil post-test Anda berhasil disimpan. Lihat peningkatan dari pre-test!',
+              duration: 4000
+            });
+          } else {
+            console.error('Failed to save posttest result: No result returned');
+            addToast({
+              type: 'error',
+              title: 'Gagal Menyimpan',
+              message: 'Hasil post-test tidak berhasil disimpan. Silakan hubungi admin.',
+              duration: 5000
+            });
+          }
         }).catch(error => {
           console.error('Error saving posttest result:', error);
+          addToast({
+            type: 'error',
+            title: 'Kesalahan Sistem',
+            message: 'Terjadi kesalahan saat menyimpan hasil post-test. Silakan coba lagi atau hubungi admin.',
+            duration: 5000
+          });
         });
       }
       
@@ -149,9 +204,46 @@ const PostTestPage = () => {
     return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
 
+  // Show loading state while fetching questions
+  if (questionsLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-950 to-indigo-900 flex items-center justify-center">
+        <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-8 border border-white/20">
+          <div className="flex items-center space-x-3">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-400"></div>
+            <span className="text-white">Memuat soal post-test...</span>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Show error state if questions failed to load
+  if (questionsError) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-950 to-indigo-900 flex items-center justify-center">
+        <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-8 border border-white/20 text-center">
+          <div className="text-red-400 mb-4">
+            <svg className="w-16 h-16 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.962-.833-2.732 0L3.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
+            </svg>
+          </div>
+          <h3 className="text-lg font-semibold text-white mb-2">Gagal Memuat Soal</h3>
+          <p className="text-gray-300 mb-4">Terjadi kesalahan saat memuat soal post-test. Silakan coba lagi.</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-6 py-2 rounded-lg hover:from-purple-600 hover:to-pink-600 transition-all duration-300"
+          >
+            Coba Lagi
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   if (quizState.quizCompleted) {
     const correctAnswers = quizState.answers.filter(Boolean).length;
-    const scoreData = calculateQuizScore(correctAnswers, mixedQuestions.length);
+    const scoreData = calculateQuizScore(correctAnswers, questions.length);
     
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-950 to-indigo-900 relative overflow-hidden">
@@ -191,7 +283,7 @@ const PostTestPage = () => {
             {/* Statistics */}
             <div className="grid md:grid-cols-4 gap-6 mb-12">
               <div className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl rounded-2xl p-6 border border-white/20">
-                <div className="text-2xl font-bold text-white mb-2">{correctAnswers}/{mixedQuestions.length}</div>
+                <div className="text-2xl font-bold text-white mb-2">{correctAnswers}/{questions.length}</div>
                 <div className="text-purple-300">Jawaban Benar</div>
               </div>
               <div className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl rounded-2xl p-6 border border-white/20">
@@ -199,7 +291,7 @@ const PostTestPage = () => {
                 <div className="text-purple-300">Waktu Total</div>
               </div>
               <div className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl rounded-2xl p-6 border border-white/20">
-                <div className="text-2xl font-bold text-white mb-2">{Math.round(timeElapsed / mixedQuestions.length)}s</div>
+                <div className="text-2xl font-bold text-white mb-2">{Math.round(timeElapsed / questions.length)}s</div>
                 <div className="text-purple-300">Rata-rata/Soal</div>
               </div>
               <div className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl rounded-2xl p-6 border border-white/20">
@@ -376,7 +468,7 @@ const PostTestPage = () => {
             <div className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl rounded-2xl p-6 border border-white/20">
               <div className="flex justify-between items-center mb-4">
                 <div className="text-white font-bold">
-                  Soal {quizState.currentQuestionIndex + 1} dari {mixedQuestions.length}
+                  Soal {quizState.currentQuestionIndex + 1} dari {questions.length}
                 </div>
                 <div className="flex items-center space-x-4">
                   <div className="text-cyan-300 font-bold">{formatTime(timeElapsed)}</div>
@@ -388,7 +480,7 @@ const PostTestPage = () => {
               <div className="w-full bg-white/10 rounded-full h-3">
                 <div 
                   className="bg-gradient-to-r from-purple-500 to-pink-500 h-3 rounded-full transition-all duration-500"
-                  style={{ width: `${((quizState.currentQuestionIndex + 1) / mixedQuestions.length) * 100}%` }}
+                  style={{ width: `${((quizState.currentQuestionIndex + 1) / questions.length) * 100}%` }}
                 ></div>
               </div>
             </div>
@@ -400,7 +492,7 @@ const PostTestPage = () => {
             onAnswer={handleAnswerSubmit}
             onNextQuestion={handleNextQuestion}
             showResult={quizState.showResult}
-            isLastQuestion={quizState.currentQuestionIndex >= mixedQuestions.length - 1}
+            isLastQuestion={quizState.currentQuestionIndex >= questions.length - 1}
           />
 
 
