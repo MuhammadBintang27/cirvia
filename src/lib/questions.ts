@@ -212,14 +212,15 @@ export const circuitQuestions: CircuitQuestion[] = [
   {
     id: 1,
     questionType: 'circuit',
-    title: 'Rangkaian Seri Sederhana',
-    description: 'Susun dua resistor seri untuk arus ≈ 0.1 A (V=12V).',
-    explanation: 'R_total ≈ 120Ω diperlukan. Contoh solusi: 47Ω + 100Ω = 147Ω → I ≈ 0.082A (mendekati).',
-    hint: 'Pada seri: R_total = R1 + R2. Targetkan R_total ≈ V/I.',
+    title: 'Rangkaian Seri',
+    description:
+      'Rangkaian di samping memiliki dua slot resistor yang tersusun seri. Kamu diminta memilih dua resistor dari daftar yang tersedia dan menempatkannya pada rangkaian agar arus yang mengalir tepat 0.08 A ketika sumber 12V digunakan. Karena susunannya seri, kombinasi hambatan yang kamu pilih akan langsung menentukan besarnya arus. Analisislah kombinasi yang tepat dari pilihan yang ada.',
+    explanation: 'R_total = V/I = 12V/0.08A = 150Ω. Solusi: 100Ω + 47Ω + 3Ω, tapi yang tersedia adalah 47Ω + 100Ω = 147Ω → I = 12V/147Ω ≈ 0.0816A (sangat mendekati).',
+    hint: 'Pada susunan seri, hambatan saling dijumlahkan dan memengaruhi besar arus.',
     difficulty: 'easy',
     circuitType: 'series',
     voltage: 12,
-    targetCurrent: 0.1,
+    targetCurrent: 0.08,
     resistorSlots: 2,
     availableResistors: availableResistors.slice(0, 6),
     correctSolution: [47, 100],
@@ -227,14 +228,15 @@ export const circuitQuestions: CircuitQuestion[] = [
   {
     id: 2,
     questionType: 'circuit',
-    title: 'Rangkaian Paralel Dasar',
-    description: 'Buat dua resistor paralel untuk I_total ≈ 0.2 A (V=9V).',
-    explanation: 'R_target = V/I ≈ 45Ω. 100Ω || 100Ω → R_eq = 50Ω → I ≈ 0.18A (mendekati).',
-    hint: 'Paralel: 1/R_eq = 1/R1 + 1/R2.',
+    title: 'Rangkaian Paralel',
+    description:
+      'Rangkaian ini memiliki dua cabang resistor paralel. Kamu harus memilih dua resistor dari daftar yang tersedia dan menempatkannya pada rangkaian agar arus total tepat 0.18 A saat sumber 9V digunakan. Pada susunan paralel, penambahan cabang memengaruhi hambatan total sehingga arus berubah. Pertimbangkan kombinasi yang tepat dari resistor yang tersedia.',
+    explanation: 'R_target = V/I = 9V/0.18A = 50Ω. Solusi: 100Ω || 100Ω → R_eq = (100×100)/(100+100) = 50Ω → I = 9V/50Ω = 0.18A (tepat).',
+    hint: 'Pada susunan paralel, penambahan cabang membuat hambatan total semakin kecil.',
     difficulty: 'easy',
     circuitType: 'parallel',
     voltage: 9,
-    targetCurrent: 0.2,
+    targetCurrent: 0.18,
     resistorSlots: 2,
     availableResistors: availableResistors.slice(2, 8),
     correctSolution: [100, 100],
@@ -243,9 +245,11 @@ export const circuitQuestions: CircuitQuestion[] = [
     id: 3,
     questionType: 'circuit',
     title: 'Rangkaian Seri — Tegangan Target',
-    description: 'Tiga resistor seri, capai V_R2 ≈ 4V (V_s=15V).',
-    explanation: 'R_total = 220+100+330 = 650Ω → I ≈ 0.023A → V_R2 ≈ 2.3V (contoh tidak persis, untuk latihan pemahaman).',
-    hint: 'Pada seri, V_i = I × R_i.',
+    description:
+      'Rangkaian ini memiliki tiga resistor seri yang harus diisi dari daftar pilihan. Kamu diminta memilih kombinasi resistor agar tegangan pada resistor kedua mendekati target saat sumber 15V diberikan. Karena arus pada seri sama di semua resistor, tegangan terbagi sesuai rasio hambatan masing-masing. Analisis dan pilih kombinasi yang memengaruhi pembagian tegangan dengan tepat.',
+    explanation:
+      'R_total = 220+100+330 = 650Ω → I ≈ 0.023A → V_R2 ≈ 2.3V (contoh tidak persis, untuk latihan pemahaman).',
+    hint: 'Pada rangkaian seri, tegangan terbagi sesuai porsi hambatan masing-masing resistor.',
     difficulty: 'medium',
     circuitType: 'series',
     voltage: 15,
@@ -258,9 +262,10 @@ export const circuitQuestions: CircuitQuestion[] = [
     id: 4,
     questionType: 'circuit',
     title: 'Rangkaian Paralel Lanjutan',
-    description: 'Tiga resistor paralel, target R_eq ≈ 25Ω (V=6V).',
+    description:
+      'Rangkaian ini memiliki tiga cabang paralel yang harus diisi dengan resistor dari daftar pilihan. Tujuan kamu adalah menempatkan resistor agar arus total mendekati target saat sumber 6V digunakan. Perhatikan bahwa setiap cabang memengaruhi hambatan total sehingga arus keseluruhan berubah. Pilih kombinasi yang optimal dari resistor yang tersedia.',
     explanation: '100Ω||100Ω||100Ω → R_eq = 33.3Ω → I ≈ 0.18A (latihan pendekatan).',
-    hint: 'Tambah cabang paralel menurunkan R_eq.',
+    hint: 'Pada susunan paralel, penambahan cabang membuat hambatan total semakin kecil.',
     difficulty: 'medium',
     circuitType: 'parallel',
     voltage: 6,
@@ -273,9 +278,10 @@ export const circuitQuestions: CircuitQuestion[] = [
     id: 5,
     questionType: 'circuit',
     title: 'Tantangan Seri — R_target ≈ 400Ω',
-    description: 'Dua resistor seri untuk I ≈ 0.05A (V=20V).',
+    description:
+      'Rangkaian ini memiliki dua slot resistor seri. Kamu harus memilih dua resistor dari daftar yang tersedia agar arus yang mengalir mendekati 0.05 A dengan sumber 20V. Susunan seri membuat arus tergantung pada total hambatan kombinasi yang kamu pilih. Analisis dan pilih kombinasi yang memberikan arus paling sesuai.',
     explanation: 'R_target = 400Ω. 220Ω + 220Ω = 440Ω → I ≈ 0.045A (mendekati).',
-    hint: 'Gunakan R = V/I untuk estimasi.',
+    hint: 'Pada susunan seri, hambatan saling dijumlahkan dan memengaruhi besar arus.',
     difficulty: 'hard',
     circuitType: 'series',
     voltage: 20,
@@ -288,9 +294,11 @@ export const circuitQuestions: CircuitQuestion[] = [
     id: 6,
     questionType: 'circuit',
     title: 'Master Paralel — I_total ≈ 0.5A',
-    description: 'Tiga resistor paralel untuk R_eq ≈ 24Ω (V=12V).',
-    explanation: 'Target R_eq = 24Ω. 100Ω || 47Ω || 47Ω ≈ 18.6Ω (lebih besar arus, contoh eksplorasi).',
-    hint: '1/R_eq = Σ(1/R). Mainkan kombinasi mendekati target.',
+    description:
+      'Rangkaian paralel ini memiliki tiga cabang yang harus diisi dengan resistor dari daftar pilihan. Tujuan kamu adalah menempatkan resistor agar arus total mendekati 0.5A saat sumber 12V digunakan. Konfigurasi paralel membuat setiap penambahan cabang memengaruhi hambatan total dan arus keseluruhan. Pertimbangkan kombinasi yang memengaruhi arus sesuai target.',
+    explanation:
+      'Target R_eq = 24Ω. 100Ω || 47Ω || 47Ω ≈ 18.6Ω (lebih besar arus, contoh eksplorasi).',
+    hint: 'Pada susunan paralel, penambahan cabang membuat hambatan total semakin kecil.',
     difficulty: 'hard',
     circuitType: 'parallel',
     voltage: 12,
@@ -302,14 +310,15 @@ export const circuitQuestions: CircuitQuestion[] = [
   {
     id: 7,
     questionType: 'circuit',
-    title: 'Seri 2R — V=10V, I≈0.1A',
-    description: 'Cari kombinasi dua resistor seri mendekati 100Ω.',
-    explanation: '47Ω + 47Ω = 94Ω → I ≈ 0.106A (mendekati 0.1A).',
-    hint: 'Jumlahkan nilai R untuk seri.',
+    title: 'Seri 2R — V=10V, I=0.106A',
+    description:
+      'Rangkaian ini memiliki dua slot resistor seri. Kamu harus memilih dua resistor dari daftar pilihan agar arus yang mengalir tepat 0.106A ketika sumber 10V digunakan. Kombinasi resistor yang kamu pilih menentukan total hambatan dan besarnya arus. Analisis kombinasi yang tepat dari pilihan yang ada.',
+    explanation: 'R_target = V/I = 10V/0.106A ≈ 94Ω. Solusi: 47Ω + 47Ω = 94Ω → I = 10V/94Ω = 0.106A (tepat).',
+    hint: 'Pada susunan seri, hambatan saling dijumlahkan dan memengaruhi besar arus.',
     difficulty: 'easy',
     circuitType: 'series',
     voltage: 10,
-    targetCurrent: 0.1,
+    targetCurrent: 0.106,
     resistorSlots: 2,
     availableResistors: availableResistors.slice(0, 6),
     correctSolution: [47, 47],
@@ -317,19 +326,21 @@ export const circuitQuestions: CircuitQuestion[] = [
   {
     id: 8,
     questionType: 'circuit',
-    title: 'Paralel 2R — R_eq ≈ 15Ω',
-    description: 'Dua resistor paralel untuk R_eq ~15Ω (V=6V).',
-    explanation: '47Ω || 22Ω → R_eq ≈ 15.2Ω → I ≈ 0.39A.',
-    hint: 'Gunakan 1/R_eq = 1/R1 + 1/R2.',
+    title: 'Paralel 2R — R_eq = 15.2Ω',
+    description:
+      'Rangkaian ini memiliki dua cabang paralel yang harus diisi dari daftar resistor yang tersedia. Kamu diminta menempatkan resistor agar arus total tepat 0.395A saat sumber 6V diberikan. Susunan paralel membuat arus dipengaruhi oleh tiap resistor yang dipasang. Analisis kombinasi yang tepat dari pilihan yang tersedia.',
+    explanation: 'R_target = V/I = 6V/0.395A ≈ 15.2Ω. Solusi: 47Ω || 22Ω → R_eq = (47×22)/(47+22) = 1034/69 ≈ 15.0Ω → I = 6V/15.0Ω = 0.395A.',
+    hint: 'Pada susunan paralel, penambahan cabang membuat hambatan total semakin kecil.',
     difficulty: 'medium',
     circuitType: 'parallel',
     voltage: 6,
-    targetCurrent: 0.4,
+    targetCurrent: 0.395,
     resistorSlots: 2,
     availableResistors: availableResistors.slice(2, 7),
     correctSolution: [47, 22],
   },
 ];
+
 
 // ===== Soal Analisis Rangkaian (TipeSoal4) =====
 export const circuitAnalysisQuestions: CircuitAnalysisQuestion[] = [
@@ -517,13 +528,13 @@ export const mixedQuestions: Question[] = [
     ],
     correctAnswers: ['choice-2'],
   },
-  circuitOrderingQuestions[0], // Ordering
+  // circuitOrderingQuestions[0], // Ordering
   circuitQuestions[1], // Circuit paralel
-  circuitAnalysisQuestions[0], // Analysis L3 putus
+  // circuitAnalysisQuestions[0], // Analysis L3 putus
   circuitQuestions[2], // Circuit seri 3R
-  circuitAnalysisQuestions[1], // Analysis L2 putus
+  // circuitAnalysisQuestions[1], // Analysis L2 putus
   circuitQuestions[3], // Circuit paralel 3R
-  circuitAnalysisQuestions[2], // Analysis L4 putus
+  // circuitAnalysisQuestions[2], // Analysis L4 putus
 ];
 
 // ===== Helper skor =====

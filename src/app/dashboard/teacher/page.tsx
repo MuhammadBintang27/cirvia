@@ -31,10 +31,17 @@ import { SupabaseAuthService } from '@/lib/supabase-auth-service';
 import { SupabaseTestService } from '@/lib/supabase-test-service';
 import { Student, Teacher } from '@/types/auth';
 import { TeacherRoute } from '@/components/ProtectedRoute';
+import { Question } from '@/lib/questions';
+import TeacherQuestionForm from '@/components/componentSoal/TeacherQuestionForm';
+import { useSupabaseQuestions } from '@/lib/supabase-question-service';
+import { useToast } from '@/components/Toast';
+import QuestionPackageManager from '@/components/componentSoal/QuestionPackageManager';
+import ClassPackageAssignment from '@/components/componentSoal/ClassPackageAssignment';
 
 const TeacherDashboard = () => {
   const { user, logout, isTeacher } = useAuth();
   const router = useRouter();
+  const { addToast } = useToast();
   const [activeTab, setActiveTab] = useState('overview');
   const [students, setStudents] = useState<Student[]>([]);
   const [classes, setClasses] = useState<string[]>([]);
@@ -45,6 +52,26 @@ const TeacherDashboard = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [learningStyleStats, setLearningStyleStats] = useState<{visual: number, auditory: number, kinesthetic: number} | null>(null);
   const [studentsLearningStyle, setStudentsLearningStyle] = useState<{[key: string]: any}>({});
+  
+  // Question management states
+  const [questions, setQuestions] = useState<Question[]>([]);
+  const [questionView, setQuestionView] = useState<'list' | 'create' | 'edit'>('list');
+  const [editingQuestion, setEditingQuestion] = useState<Question | null>(null);
+  
+  // Question storage hook
+  const teacherId = user?.id || ''; // Get teacher ID from user context
+  const {
+    questions: loadedQuestions,
+    loading: questionsLoading,
+    error: questionsError,
+    loadQuestions,
+    addQuestion,
+    updateQuestion,
+    deleteQuestion,
+    exportQuestions,
+    importQuestions,
+    getStats
+  } = useSupabaseQuestions(teacherId);
 
   const teacher = user as Teacher;
 
@@ -70,13 +97,17 @@ const TeacherDashboard = () => {
         else if (style.primaryStyle === 'kinesthetic') stats.kinesthetic++;
       });
       
+      // Questions are loaded automatically by useSupabaseQuestions hook
+      // Set questions from the hook
+      setQuestions(loadedQuestions);
+      
       setStudents(teacherStudents);
-      setClasses(teacherClasses);
+      setClasses(teacherClasses);  
       setStudentsLearningStyle(learningStyleData);
       setLearningStyleStats(stats);
       setIsLoading(false);
     }
-  }, [teacher]);
+  }, [teacher, loadedQuestions]);
 
   useEffect(() => {
     if (!isTeacher()) {
@@ -85,6 +116,11 @@ const TeacherDashboard = () => {
     }
     loadData();
   }, [isTeacher, router, loadData]);
+
+  // Sync questions from Supabase hook
+  useEffect(() => {
+    setQuestions(loadedQuestions);
+  }, [loadedQuestions]);
 
   const filteredStudents = students.filter(student => {
     const matchesSearch = student.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -107,8 +143,14 @@ const TeacherDashboard = () => {
   };
 
   const handleLogout = () => {
-    logout();
-    router.push('/');
+    addToast({
+      type: 'success',
+      title: 'Logout berhasil!',
+      message: 'Anda telah keluar dari sistem. Sampai jumpa!'
+    });
+    setTimeout(() => {
+      logout(); // This will trigger loading state in AuthContext
+    }, 1000);
   };
 
   const handleImportComplete = async (importedCount: number) => {
@@ -116,7 +158,149 @@ const TeacherDashboard = () => {
     setShowExcelImport(false);
     
     if (importedCount > 0) {
-      alert(`Berhasil mengimpor ${importedCount} siswa!`);
+      addToast({
+        type: 'success',
+        title: 'Impor siswa berhasil!',
+        message: `${importedCount} data siswa berhasil diimpor.`
+      });
+    } else {
+      addToast({
+        type: 'info',
+        title: 'Tidak ada data baru',
+        message: 'Tidak ada data siswa baru yang diimpor.'
+      });
+    }
+  };
+
+  // Question management functions
+  const handleCreateQuestion = () => {
+    setEditingQuestion(null);
+    setQuestionView('create');
+  };
+
+  const handleEditQuestion = (question: Question) => {
+    setEditingQuestion(question);
+    setQuestionView('edit');    
+  };
+
+  const handleSubmitQuestion = async (question: Question) => {
+    try {
+      if (editingQuestion) {
+        await updateQuestion(String(question.id), question);
+        addToast({
+          type: 'success',
+          title: 'Soal berhasil diperbarui!',
+          message: `Soal telah diperbarui.`
+        });
+      } else {
+        await addQuestion(question);
+        addToast({
+          type: 'success',
+          title: 'Soal berhasil ditambahkan!',
+          message: `Soal telah ditambahkan ke bank soal.`
+        });
+      }
+      setQuestionView('list');
+      setEditingQuestion(null);
+    } catch (error) {
+      addToast({
+        type: 'error',
+        title: 'Gagal menyimpan soal',
+        message: 'Terjadi kesalahan saat menyimpan soal. Silakan coba lagi.'
+      });
+    }
+  };
+
+  const handleDeleteQuestion = async (questionId: string | number) => {
+    if (confirm('Yakin ingin menghapus soal ini?')) {
+      try {
+        await deleteQuestion(String(questionId));
+        addToast({
+          type: 'success',
+          title: 'Soal berhasil dihapus!',
+          message: 'Soal telah dihapus dari bank soal.'
+        });
+      } catch (error) {
+        addToast({
+          type: 'error',
+          title: 'Gagal menghapus soal',
+          message: 'Terjadi kesalahan saat menghapus soal. Silakan coba lagi.'
+        });
+      }
+    }
+  };
+
+  const handleExportQuestions = () => {
+    try {
+      exportQuestions();
+      addToast({
+        type: 'success',
+        title: 'Ekspor berhasil!',
+        message: 'File bank soal telah berhasil diunduh.'
+      });
+    } catch (error) {
+      addToast({
+        type: 'error',
+        title: 'Gagal mengekspor soal',
+        message: 'Terjadi kesalahan saat mengekspor bank soal. Silakan coba lagi.'
+      });
+    }
+  };
+
+  const handleImportQuestions = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      try {
+        const result = await importQuestions(file);
+        if (result.success) {
+          // Questions will be automatically updated by the hook
+          addToast({
+            type: 'success',
+            title: 'Impor berhasil!',
+            message: `${result.count} soal berhasil diimpor ke bank soal.`
+          });
+          if (result.error) {
+            addToast({
+              type: 'warning',
+              title: 'Catatan',
+              message: result.error
+            });
+          }
+        } else {
+          addToast({
+            type: 'error',
+            title: 'Gagal mengimpor soal',
+            message: result.error || 'Terjadi kesalahan saat mengimpor file.'
+          });
+        }
+      } catch (error) {
+        addToast({
+          type: 'error',
+          title: 'Gagal mengimpor soal',
+          message: 'Terjadi kesalahan saat memproses file. Pastikan format file benar.'
+        });
+      }
+      // Reset file input
+      event.target.value = '';
+    }
+  };
+
+  const getQuestionTypeLabel = (type: string) => {
+    switch (type) {
+      case 'circuit': return 'Konstruksi Rangkaian';
+      case 'conceptual': return 'Konseptual';
+      case 'circuitAnalysis': return 'Analisis Rangkaian';
+      case 'circuitOrdering': return 'Pengurutan Rangkaian';
+      default: return type;
+    }
+  };
+
+  const getDifficultyColor = (difficulty: string) => {
+    switch (difficulty) {
+      case 'easy': return 'bg-green-500/20 text-green-300 border border-green-400/30';
+      case 'medium': return 'bg-yellow-500/20 text-yellow-300 border border-yellow-400/30';
+      case 'hard': return 'bg-red-500/20 text-red-300 border border-red-400/30';
+      default: return 'bg-gray-500/20 text-gray-300 border border-gray-400/30';
     }
   };
 
@@ -167,6 +351,9 @@ const TeacherDashboard = () => {
                 {[
                   { id: 'overview', label: 'Overview', icon: BarChart3 },
                   { id: 'students', label: 'Kelola Siswa', icon: Users },
+                  { id: 'questions', label: 'Kelola Soal', icon: FileSpreadsheet },
+                  { id: 'packages', label: 'Paket Soal', icon: BookOpen },
+                  { id: 'assignments', label: 'Assignment Kelas', icon: Settings },
                   { id: 'materials', label: 'Materi', icon: BookOpen },
                   { id: 'settings', label: 'Pengaturan', icon: Settings },
                 ].map((tab) => {
@@ -562,6 +749,179 @@ const TeacherDashboard = () => {
               </div>
             )}
 
+            {activeTab === 'questions' && (
+              <div className="space-y-6">
+                {questionView === 'create' || questionView === 'edit' ? (
+                  <div className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl rounded-2xl p-6 border border-white/20">
+                    <TeacherQuestionForm
+                      onSubmit={handleSubmitQuestion}
+                      onCancel={() => setQuestionView('list')}
+                      initialData={editingQuestion || undefined}
+                    />
+                  </div>
+                ) : (
+                  <>
+                    {/* Header Actions */}
+                    <div className="flex flex-col md:flex-row md:items-center justify-between space-y-4 md:space-y-0">
+                      <h2 className="text-2xl font-bold text-white">Kelola Soal</h2>
+                      <div className="flex space-x-3">
+                        <label className="flex items-center px-4 py-2 bg-blue-500/20 hover:bg-blue-500/30 border border-blue-400/30 rounded-xl text-blue-300 hover:text-white transition-all cursor-pointer">
+                          <Upload className="w-4 h-4 mr-2" />
+                          Import Soal
+                          <input
+                            type="file"
+                            accept=".json"
+                            onChange={handleImportQuestions}
+                            className="hidden"
+                          />
+                        </label>
+                        <button
+                          onClick={handleExportQuestions}
+                          disabled={questions.length === 0}
+                          className="flex items-center px-4 py-2 bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-400/30 rounded-xl text-emerald-300 hover:text-white transition-all disabled:opacity-50"
+                        >
+                          <Download className="w-4 h-4 mr-2" />
+                          Export ({questions.length})
+                        </button>
+                        <button
+                          onClick={handleCreateQuestion}
+                          className="flex items-center px-4 py-2 bg-purple-500/20 hover:bg-purple-500/30 border border-purple-400/30 rounded-xl text-purple-300 hover:text-white transition-all"
+                        >
+                          <Plus className="w-4 h-4 mr-2" />
+                          Buat Soal Baru
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Statistics */}
+                    <div className="grid md:grid-cols-4 gap-6">
+                      <div className="bg-gradient-to-br from-blue-500/20 to-blue-600/20 backdrop-blur-xl rounded-2xl p-6 border border-blue-400/30">
+                        <div className="flex items-center justify-between mb-4">
+                          <FileSpreadsheet className="w-8 h-8 text-blue-400" />
+                          <span className="text-2xl font-bold text-white">{questions.length}</span>
+                        </div>
+                        <p className="text-blue-200 font-medium">Total Soal</p>
+                      </div>
+                      
+                      <div className="bg-gradient-to-br from-emerald-500/20 to-emerald-600/20 backdrop-blur-xl rounded-2xl p-6 border border-emerald-400/30">
+                        <div className="flex items-center justify-between mb-4">
+                          <Settings className="w-8 h-8 text-emerald-400" />
+                          <span className="text-2xl font-bold text-white">
+                            {questions.filter(q => q.questionType === 'circuit').length}
+                          </span>
+                        </div>
+                        <p className="text-emerald-200 font-medium">Konstruksi Rangkaian</p>
+                      </div>
+                      
+                      <div className="bg-gradient-to-br from-yellow-500/20 to-yellow-600/20 backdrop-blur-xl rounded-2xl p-6 border border-yellow-400/30">
+                        <div className="flex items-center justify-between mb-4">
+                          <Brain className="w-8 h-8 text-yellow-400" />
+                          <span className="text-2xl font-bold text-white">
+                            {questions.filter(q => q.questionType === 'conceptual').length}
+                          </span>
+                        </div>
+                        <p className="text-yellow-200 font-medium">Konseptual</p>
+                      </div>
+                      
+                      <div className="bg-gradient-to-br from-purple-500/20 to-purple-600/20 backdrop-blur-xl rounded-2xl p-6 border border-purple-400/30">
+                        <div className="flex items-center justify-between mb-4">
+                          <Search className="w-8 h-8 text-purple-400" />
+                          <span className="text-2xl font-bold text-white">
+                            {questions.filter(q => q.questionType === 'circuitAnalysis').length}
+                          </span>
+                        </div>
+                        <p className="text-purple-200 font-medium">Analisis Rangkaian</p>
+                      </div>
+                    </div>
+
+                    {/* Questions List */}
+                    <div className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl rounded-2xl border border-white/20">
+                      {questions.length === 0 ? (
+                        <div className="p-12 text-center">
+                          <div className="text-blue-400/50 text-6xl mb-4">📝</div>
+                          <h3 className="text-lg font-medium text-white mb-2">Belum ada soal</h3>
+                          <p className="text-blue-200/70 mb-4">
+                            Mulai membuat soal pertama untuk pembelajaran rangkaian listrik
+                          </p>
+                          <button
+                            onClick={handleCreateQuestion}
+                            className="px-6 py-3 bg-purple-500/20 hover:bg-purple-500/30 border border-purple-400/30 rounded-xl text-purple-300 hover:text-white transition-all"
+                          >
+                            Buat Soal Pertama
+                          </button>
+                        </div>
+                      ) : (
+                        <div className="divide-y divide-white/10">
+                          {questions.map((question) => (
+                            <div key={question.id} className="p-6 hover:bg-white/5 transition-colors">
+                              <div className="flex items-start justify-between">
+                                <div className="flex-1">
+                                  <div className="flex items-center space-x-3 mb-2">
+                                    <h3 className="text-lg font-medium text-white">
+                                      {question.title}
+                                    </h3>
+                                    <span className="text-xs bg-blue-500/20 text-blue-300 px-2 py-1 rounded-full border border-blue-400/30">
+                                      {getQuestionTypeLabel(question.questionType)}
+                                    </span>
+                                    <span className={`text-xs px-2 py-1 rounded-full ${getDifficultyColor(question.difficulty)}`}>
+                                      {question.difficulty.toUpperCase()}
+                                    </span>
+                                  </div>
+                                  <p className="text-blue-200/70 text-sm mb-3 line-clamp-3">
+                                    {question.description}
+                                  </p>
+                                  
+                                  {/* Question-specific details */}
+                                  <div className="text-xs text-blue-200/50 space-x-4">
+                                    {question.questionType === 'circuit' && (
+                                      <>
+                                        <span>🔧 {(question as any).circuitType}</span>
+                                        <span>⚡ {(question as any).voltage}V</span>
+                                        {(question as any).targetCurrent && (
+                                          <span>🎯 {(question as any).targetCurrent}A</span>
+                                        )}
+                                      </>
+                                    )}
+                                    
+                                    {question.questionType === 'conceptual' && (
+                                      <span>💡 {(question as any).choices?.length || 0} pilihan jawaban</span>
+                                    )}
+                                    
+                                    {question.questionType === 'circuitAnalysis' && (
+                                      <span>🔍 Target: {(question as any).targetLamp}</span>
+                                    )}
+                                    
+                                    {question.questionType === 'circuitOrdering' && (
+                                      <span>📊 {(question as any).circuits?.length || 0} rangkaian</span>
+                                    )}
+                                  </div>
+                                </div>
+                                
+                                <div className="flex space-x-2 ml-4">
+                                  <button
+                                    onClick={() => handleEditQuestion(question)}
+                                    className="p-1.5 bg-blue-500/20 hover:bg-blue-500/30 border border-blue-400/30 rounded-lg text-blue-300 hover:text-white transition-all"
+                                  >
+                                    <Edit className="w-4 h-4" />
+                                  </button>
+                                  <button
+                                    onClick={() => handleDeleteQuestion(question.id)}
+                                    className="p-1.5 bg-red-500/20 hover:bg-red-500/30 border border-red-400/30 rounded-lg text-red-300 hover:text-white transition-all"
+                                  >
+                                    <Trash2 className="w-4 h-4" />
+                                  </button>
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </>
+                )}
+              </div>
+            )}
+
             {/* Other tabs content can be added here */}
             {activeTab === 'materials' && (
               <div className="text-center py-12">
@@ -569,6 +929,20 @@ const TeacherDashboard = () => {
                 <h3 className="text-xl font-bold text-white mb-2">Kelola Materi</h3>
                 <p className="text-blue-200/70">Fitur ini akan segera hadir</p>
               </div>
+            )}
+
+            {activeTab === 'packages' && (
+              <QuestionPackageManager
+                teacherId={teacherId}
+                questions={questions}
+              />
+            )}
+
+            {activeTab === 'assignments' && (
+              <ClassPackageAssignment
+                teacherId={teacherId}
+                classes={classes}
+              />
             )}
 
             {activeTab === 'settings' && (

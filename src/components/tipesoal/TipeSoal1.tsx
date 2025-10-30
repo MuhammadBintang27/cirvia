@@ -10,8 +10,8 @@ import {
   Target,
   Zap
 } from 'lucide-react';
-import CircuitDiagram from '@/components/componentSoal/CircuitDiagram';
-import ResistorSelector from '@/components/componentSoal/ResistorSelector';
+import ImprovedCircuitDiagram from '@/components/componentSoal/ImprovedCircuitDiagram';
+import DragDropResistorSelector from '@/components/componentSoal/DragDropResistorSelector';
 import { Resistor, CircuitQuestion } from '@/lib/questions';
 import { calculateCircuit, checkAnswer, generateSolutionSteps } from '@/lib/circuitCalculations';
 
@@ -90,6 +90,27 @@ const TipeSoal1: React.FC<TipeSoal1Props> = ({
     }
   };
 
+  const handleSlotDrop = (slotIndex: number, resistor: Resistor) => {
+    if (disabled || showResult) return;
+
+    const newSelectedResistors = [...quizState.selectedResistors];
+    newSelectedResistors[slotIndex] = resistor.value;
+    
+    setQuizState(prev => ({
+      ...prev,
+      selectedResistors: newSelectedResistors,
+      selectedResistor: resistor,
+      activeSlot: null
+    }));
+  };
+
+  const handleResistorDrag = (resistor: Resistor) => {
+    setQuizState(prev => ({
+      ...prev,
+      selectedResistor: resistor
+    }));
+  };
+
   const handleSubmitAnswer = () => {
     if (disabled || showResult) return;
 
@@ -131,32 +152,12 @@ const TipeSoal1: React.FC<TipeSoal1Props> = ({
         {/* Question Info */}
         <div className="space-y-6">
           <div className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl rounded-2xl p-8 border border-white/20">
-            <div className="flex items-center mb-4">
-              <div className={`w-3 h-3 rounded-full mr-3 ${question.difficulty === 'easy' ? 'bg-green-400' : question.difficulty === 'medium' ? 'bg-yellow-400' : 'bg-red-400'}`}></div>
-              <span className="text-white/70 text-sm font-medium uppercase">
-                {question.difficulty === 'easy' ? 'Mudah' : question.difficulty === 'medium' ? 'Sedang' : 'Sulit'}
-              </span>
-            </div>
+            
             
             <h2 className="text-2xl font-bold text-white mb-4">{question.title}</h2>
             <p className="text-blue-200/90 text-lg mb-6">{question.description}</p>
             
-            {/* Target Info */}
-            <div className="bg-gradient-to-r from-cyan-500/10 to-blue-500/10 rounded-xl p-4 border border-cyan-400/30 mb-6">
-              <div className="flex items-center mb-2">
-                <Target className="w-5 h-5 text-cyan-400 mr-2" />
-                <span className="text-cyan-300 font-bold">Target:</span>
-              </div>
-              <div className="text-white">
-                {question.targetCurrent && (
-                  <div>Arus: <span className="font-bold text-cyan-300">{question.targetCurrent}A</span></div>
-                )}
-                {question.targetVoltage && (
-                  <div>Tegangan: <span className="font-bold text-cyan-300">{question.targetVoltage}V</span></div>
-                )}
-                <div>Sumber tegangan: <span className="font-bold text-yellow-300">{question.voltage}V</span></div>
-              </div>
-            </div>
+    
 
             {/* Hint Button */}
             <button
@@ -175,23 +176,23 @@ const TipeSoal1: React.FC<TipeSoal1Props> = ({
             )}
           </div>
 
-          {/* Resistor Selector */}
-          <ResistorSelector
+          {/* Drag & Drop Resistor Selector */}
+          <DragDropResistorSelector
             availableResistors={question.availableResistors}
-            onResistorSelect={handleResistorSelect}
-            selectedResistor={quizState.selectedResistor}
+            onResistorDrag={handleResistorDrag}
             disabled={disabled || showResult}
           />
         </div>
 
-        {/* Circuit Diagram */}
+        {/* Improved Circuit Diagram */}
         <div className="space-y-6">
-          <CircuitDiagram
+          <ImprovedCircuitDiagram
             circuitType={question.circuitType}
             voltage={question.voltage}
             resistorValues={quizState.selectedResistors}
             resistorSlots={question.resistorSlots}
             onSlotClick={handleSlotClick}
+            onSlotDrop={handleSlotDrop}
             activeSlot={quizState.activeSlot ?? undefined}
             showValues={true}
           />

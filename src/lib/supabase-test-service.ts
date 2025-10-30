@@ -23,7 +23,7 @@ export interface StudentProgressComplete extends StudentProgress {
 }
 
 export interface TestAnswerInput {
-  questionId: number | string
+  questionId: string // Now accepts both integer (as string) and UUID
   selectedAnswer: number
   correctAnswer: number
   isCorrect: boolean
@@ -72,29 +72,42 @@ export class SupabaseTestService {
   // Simpan hasil test ke database
   static async saveTestResult(result: TestResultInput): Promise<TestResult | null> {
     try {
+      console.log('Starting saveTestResult process for:', result.testType, result.studentName);
+      
       // 1. Save test result
+      const testResultData = {
+        student_id: result.studentId,
+        student_name: result.studentName,
+        student_nis: result.studentNis,
+        test_type: result.testType,
+        score: result.score,
+        total_questions: result.totalQuestions,
+        correct_answers: result.correctAnswers,
+        percentage: result.percentage,
+        time_spent: result.timeSpent,
+        grade: result.grade,
+        completed_at: new Date().toISOString()
+      };
+
+      console.log('Inserting test result data:', testResultData);
+
+      // Use upsert to handle potential duplicate test attempts
       const { data: testResult, error: testError } = await supabase
         .from('test_results')
-        .insert({
-          student_id: result.studentId,
-          student_name: result.studentName,
-          student_nis: result.studentNis,
-          test_type: result.testType,
-          score: result.score,
-          total_questions: result.totalQuestions,
-          correct_answers: result.correctAnswers,
-          percentage: result.percentage,
-          time_spent: result.timeSpent,
-          grade: result.grade,
-          completed_at: new Date().toISOString()
+        .upsert(testResultData, {
+          onConflict: 'student_id,test_type',
+          ignoreDuplicates: false
         })
         .select()
         .single()
 
       if (testError) {
         console.error('Error saving test result:', testError)
+        console.error('Error details:', testError.message, testError.details, testError.hint)
         return null
       }
+
+      console.log('Test result saved successfully:', testResult.id);
 
       // 2. Save test answers
       const answersToInsert = result.answers.map(answer => ({
@@ -109,27 +122,42 @@ export class SupabaseTestService {
         explanation: answer.explanation
       }))
 
+      console.log('Inserting test answers:', answersToInsert.length, 'answers');
+
+      // Delete existing test answers if this is an update
+      await supabase
+        .from('test_answers')
+        .delete()
+        .eq('test_result_id', testResult.id);
+
       const { error: answersError } = await supabase
         .from('test_answers')
         .insert(answersToInsert)
 
       if (answersError) {
         console.error('Error saving test answers:', answersError)
+        console.error('Error details:', answersError.message, answersError.details, answersError.hint)
         // Rollback test result if answers fail
         await supabase.from('test_results').delete().eq('id', testResult.id)
         return null
       }
 
+      console.log('Test answers saved successfully');
+
       // 3. Update student progress
+      console.log('Updating student progress...');
       await this.updateStudentProgress(result.studentId, testResult.id, result.testType)
 
       // 4. Update student record
+      console.log('Updating student record...');
       await this.updateStudentRecord(result.studentId, result.testType, result.percentage)
 
+      console.log('saveTestResult completed successfully');
       return testResult
 
     } catch (error) {
       console.error('Error in saveTestResult:', error)
+      console.error('Error stack:', error instanceof Error ? error.stack : 'No stack trace')
       return null
     }
   }
@@ -141,14 +169,22 @@ export class SupabaseTestService {
     testType: 'pretest' | 'posttest'
   ) {
     try {
+      console.log('Updating student progress for:', studentId, testType);
+      
       // Get existing progress
-      const { data: existingProgress } = await supabase
+      const { data: existingProgress, error: fetchError } = await supabase
         .from('student_progress')
         .select('*')
         .eq('student_id', studentId)
         .single()
 
+      if (fetchError && fetchError.code !== 'PGRST116') {
+        console.error('Error fetching existing progress:', fetchError);
+        throw fetchError;
+      }
+
       if (existingProgress) {
+        console.log('Found existing progress, updating...');
         // Update existing progress
         const updateData = testType === 'pretest' 
           ? { pre_test_result_id: testResultId }
@@ -162,12 +198,16 @@ export class SupabaseTestService {
           })
           .eq('student_id', studentId)
 
-        if (error) throw error
+        if (error) {
+          console.error('Error updating existing progress:', error);
+          throw error;
+        }
 
         // Calculate improvement if both tests completed
         await this.calculateImprovement(studentId)
 
       } else {
+        console.log('No existing progress found, creating new...');
         // Create new progress
         const insertData = {
           student_id: studentId,
@@ -183,11 +223,17 @@ export class SupabaseTestService {
           .from('student_progress')
           .insert(insertData)
 
-        if (error) throw error
+        if (error) {
+          console.error('Error creating new progress:', error);
+          throw error;
+        }
       }
+
+      console.log('Student progress updated successfully');
 
     } catch (error) {
       console.error('Error updating student progress:', error)
+      console.error('Error details:', error instanceof Error ? error.message : 'Unknown error')
     }
   }
 
@@ -237,6 +283,8 @@ export class SupabaseTestService {
     percentage: number
   ) {
     try {
+      console.log('Updating student record:', studentId, testType, percentage);
+      
       const updateField = testType === 'pretest' ? 'pre_test_score' : 'post_test_score'
       
       const { error } = await supabase
@@ -247,10 +295,16 @@ export class SupabaseTestService {
         })
         .eq('id', studentId)
 
-      if (error) throw error
+      if (error) {
+        console.error('Error updating student record:', error);
+        throw error;
+      }
+
+      console.log('Student record updated successfully');
 
     } catch (error) {
       console.error('Error updating student record:', error)
+      console.error('Error details:', error instanceof Error ? error.message : 'Unknown error')
     }
   }
 

@@ -3,6 +3,9 @@ import { Inter } from 'next/font/google'
 import FloatingChatButton from '@/components/FloatingChatButton'
 import Footer from '@/components/Footer'
 import { AuthProvider } from '@/contexts/AuthContext'
+import { ToastProvider } from '@/components/Toast'
+import ConditionalFooter from '@/components/ConditionalFooter'
+import AuthLoader from '@/components/AuthLoader'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -20,13 +23,17 @@ export default function RootLayout({
     <html lang="id">
       <body className={inter.className}>
         <AuthProvider>
-          <div className="min-h-screen flex flex-col">
-            <main className="flex-grow">
-              {children}
-            </main>
-            <Footer />
-          </div>
-          <FloatingChatButton />
+          <ToastProvider>
+            <AuthLoader>
+              <div className="min-h-screen flex flex-col">
+                <main className="flex-grow">
+                  {children}
+                </main>
+                <ConditionalFooter />
+              </div>
+              <FloatingChatButton />
+            </AuthLoader>
+          </ToastProvider>
         </AuthProvider>
       </body>
     </html>

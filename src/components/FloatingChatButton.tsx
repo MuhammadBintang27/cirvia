@@ -1,10 +1,24 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import ChatBot from './ChatBot'
 
 const FloatingChatButton = () => {
   const [isOpen, setIsOpen] = useState(false)
+  const [isClient, setIsClient] = useState(false)
+  const [particles, setParticles] = useState<Array<{left: string, top: string, delay: string, duration: string}>>([])
+
+  useEffect(() => {
+    setIsClient(true)
+    // Generate particles only on client side
+    const newParticles = [...Array(3)].map(() => ({
+      left: `${20 + Math.random() * 40}%`,
+      top: `${20 + Math.random() * 40}%`,
+      delay: `${Math.random() * 2}s`,
+      duration: `${2 + Math.random()}s`
+    }))
+    setParticles(newParticles)
+  }, [])
 
   const toggleChat = () => {
     setIsOpen(!isOpen)
@@ -32,15 +46,15 @@ const FloatingChatButton = () => {
           <div className="absolute inset-0 bg-white/10 rounded-full"></div>
           
           {/* Floating particles inside button */}
-          {!isOpen && [...Array(3)].map((_, i) => (
+          {!isOpen && isClient && particles.map((particle, i) => (
             <div
               key={i}
               className="absolute w-1 h-1 bg-white/40 rounded-full animate-ping"
               style={{
-                left: `${20 + Math.random() * 40}%`,
-                top: `${20 + Math.random() * 40}%`,
-                animationDelay: `${Math.random() * 2}s`,
-                animationDuration: `${2 + Math.random()}s`
+                left: particle.left,
+                top: particle.top,
+                animationDelay: particle.delay,
+                animationDuration: particle.duration
               }}
             ></div>
           ))}

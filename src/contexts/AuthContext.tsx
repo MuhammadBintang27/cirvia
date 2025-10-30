@@ -119,12 +119,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const logout = () => {
+    setIsLoading(true); // Show loading during logout
+    
     const sessionId = localStorage.getItem('cirvia_session');
     if (sessionId) {
       SupabaseAuthService.destroySession(sessionId);
       localStorage.removeItem('cirvia_session');
     }
     setUser(null);
+    
+    // Add small delay to show loading, then redirect
+    setTimeout(() => {
+      if (typeof window !== 'undefined') {
+        window.location.href = '/';
+      }
+    }, 500);
   };
 
   const isTeacher = (): boolean => {

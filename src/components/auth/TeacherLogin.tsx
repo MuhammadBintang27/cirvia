@@ -60,14 +60,7 @@ const TeacherLogin: React.FC<TeacherLoginProps> = ({ onSwitchToRegister }) => {
         <p className="text-blue-200/80">Masuk ke dashboard guru untuk mengelola siswa</p>
       </div>
 
-      {/* Demo Account Info */}
-      <div className="bg-gradient-to-r from-blue-500/10 to-indigo-500/10 rounded-xl p-4 border border-blue-400/30 mb-6">
-        <h4 className="text-blue-300 font-medium mb-2">📚 Akun Demo Guru:</h4>
-        <div className="text-sm text-blue-200/80 space-y-1">
-          <div>Email: <span className="font-mono text-blue-300">guru@cirvia.com</span></div>
-          <div>Password: <span className="font-mono text-blue-300">password123</span></div>
-        </div>
-      </div>
+     
 
       {/* Form */}
       <form onSubmit={handleSubmit} className="space-y-6">
