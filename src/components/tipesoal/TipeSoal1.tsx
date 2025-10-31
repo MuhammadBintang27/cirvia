@@ -49,6 +49,13 @@ const TipeSoal1: React.FC<TipeSoal1Props> = ({
   // Initialize resistor slots when question changes
   useEffect(() => {
     if (question) {
+      console.log('🔍 [DEBUG] TipeSoal1 received question:', {
+        id: question.id,
+        title: question.title,
+        availableResistors: (question as any).availableResistors,
+        resistorSlots: question.resistorSlots
+      });
+      
       setQuizState(prev => ({
         ...prev,
         selectedResistors: new Array(question.resistorSlots).fill(null),
@@ -178,7 +185,7 @@ const TipeSoal1: React.FC<TipeSoal1Props> = ({
 
           {/* Drag & Drop Resistor Selector */}
           <DragDropResistorSelector
-            availableResistors={question.availableResistors}
+            availableResistors={(question as any).availableResistors || []}
             onResistorDrag={handleResistorDrag}
             disabled={disabled || showResult}
           />
