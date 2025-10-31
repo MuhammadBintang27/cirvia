@@ -7,9 +7,14 @@ const nextConfig = {
         hostname: 'randomuser.me',
         pathname: '/**',
       },
+      {
+        protocol: 'https',
+        hostname: 'images.unsplash.com',
+        pathname: '/**',
+      },
     ],
     // OR (older syntax)
-    // domains: ['randomuser.me'],
+    // domains: ['randomuser.me', 'images.unsplash.com'],
   },
 };
 

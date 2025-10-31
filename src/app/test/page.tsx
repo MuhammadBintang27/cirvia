@@ -59,12 +59,6 @@ const TestPage = () => {
         <div className="max-w-7xl mx-auto">
           {/* Hero Section */}
           <div className="text-center mb-20">
-            {/* Premium Badge */}
-            <div className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-yellow-400/20 to-amber-400/20 rounded-full border border-yellow-400/30 backdrop-blur-sm mb-8">
-              <Star className="w-4 h-4 text-yellow-400 mr-2" />
-              <span className="text-yellow-400 text-sm font-medium">Premium Assessment Suite</span>
-              <Sparkles className="w-4 h-4 text-yellow-400 ml-2" />
-            </div>
 
             {/* Main Icon */}
             <div className="relative mb-8">
@@ -110,9 +104,9 @@ const TestPage = () => {
           {/* Premium Test Cards */}
           <div className="grid lg:grid-cols-3 gap-8 mb-16">
             {/* Learning Style Test */}
-            <div className="group relative">
+            <div className="group relative h-full">
               <div className="absolute -inset-1 bg-gradient-to-r from-purple-500/50 to-pink-600/50 rounded-3xl blur opacity-25 group-hover:opacity-100 transition duration-1000 group-hover:duration-200"></div>
-              <div className="relative bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl rounded-3xl p-10 border border-white/20 hover:border-white/30 transition-all duration-500 transform hover:scale-[1.02] hover:-translate-y-2">
+              <div className="relative bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl rounded-3xl p-10 border border-white/20 hover:border-white/30 transition-all duration-500 transform hover:scale-[1.02] hover:-translate-y-2 h-full flex flex-col">
                 <div className="absolute top-6 right-6">
                   {learningStyleResult ? (
                     <div className="flex items-center space-x-2 px-3 py-1 bg-gradient-to-r from-green-500/20 to-emerald-500/20 rounded-full border border-green-400/30">
@@ -136,47 +130,49 @@ const TestPage = () => {
                 </p>
 
                 {/* Show results if completed */}
-                {learningStyleResult ? (
-                  <div className="space-y-4 mb-8">
-                    <div className="bg-gradient-to-r from-purple-500/10 to-pink-500/10 rounded-xl p-4 border border-purple-400/30">
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="text-purple-300 font-medium">Gaya Belajar Anda:</span>
-                        <span className="text-2xl font-bold text-white capitalize">{learningStyleResult.primaryStyle}</span>
-                      </div>
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="text-purple-200/70 text-sm">Visual:</span>
-                        <span className="text-white">{learningStyleResult.percentages.visual}%</span>
-                      </div>
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="text-purple-200/70 text-sm">Auditory:</span>
-                        <span className="text-white">{learningStyleResult.percentages.auditory}%</span>
-                      </div>
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="text-purple-200/70 text-sm">Kinesthetic:</span>
-                        <span className="text-white">{learningStyleResult.percentages.kinesthetic}%</span>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <span className="text-purple-200/70 text-sm">Tanggal:</span>
-                        <span className="text-white text-sm">{learningStyleResult.createdAt ? new Date(learningStyleResult.createdAt).toLocaleDateString('id-ID') : '-'}</span>
+                <div className="flex-grow">
+                  {learningStyleResult ? (
+                    <div className="space-y-4 mb-8">
+                      <div className="bg-gradient-to-r from-purple-500/10 to-pink-500/10 rounded-xl p-4 border border-purple-400/30">
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-purple-300 font-medium">Gaya Belajar Anda:</span>
+                          <span className="text-2xl font-bold text-white capitalize">{learningStyleResult.primaryStyle}</span>
+                        </div>
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-purple-200/70 text-sm">Visual:</span>
+                          <span className="text-white">{learningStyleResult.percentages.visual}%</span>
+                        </div>
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-purple-200/70 text-sm">Auditory:</span>
+                          <span className="text-white">{learningStyleResult.percentages.auditory}%</span>
+                        </div>
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-purple-200/70 text-sm">Kinesthetic:</span>
+                          <span className="text-white">{learningStyleResult.percentages.kinesthetic}%</span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-purple-200/70 text-sm">Tanggal:</span>
+                          <span className="text-white text-sm">{learningStyleResult.createdAt ? new Date(learningStyleResult.createdAt).toLocaleDateString('id-ID') : '-'}</span>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ) : (
-                  <div className="space-y-3 mb-8">
-                    <div className="flex items-center text-purple-300">
-                      <div className="w-2 h-2 bg-purple-400 rounded-full mr-3"></div>
-                      <span>20 Pertanyaan Psikologi</span>
+                  ) : (
+                    <div className="space-y-3 mb-8">
+                      <div className="flex items-center text-purple-300">
+                        <div className="w-2 h-2 bg-purple-400 rounded-full mr-3"></div>
+                        <span>20 Pertanyaan Psikologi</span>
+                      </div>
+                      <div className="flex items-center text-purple-300">
+                        <div className="w-2 h-2 bg-purple-400 rounded-full mr-3"></div>
+                        <span>Analisis Kepribadian Mendalam</span>
+                      </div>
+                      <div className="flex items-center text-purple-300">
+                        <div className="w-2 h-2 bg-purple-400 rounded-full mr-3"></div>
+                        <span>Rekomendasi Strategi Belajar</span>
+                      </div>
                     </div>
-                    <div className="flex items-center text-purple-300">
-                      <div className="w-2 h-2 bg-purple-400 rounded-full mr-3"></div>
-                      <span>Analisis Kepribadian Mendalam</span>
-                    </div>
-                    <div className="flex items-center text-purple-300">
-                      <div className="w-2 h-2 bg-purple-400 rounded-full mr-3"></div>
-                      <span>Rekomendasi Strategi Belajar</span>
-                    </div>
-                  </div>
-                )}
+                  )}
+                </div>
                 
                 <button 
                   className={`w-full py-4 px-8 rounded-2xl font-bold text-lg transition-all transform hover:scale-105 shadow-2xl flex items-center justify-center group ${
@@ -193,9 +189,9 @@ const TestPage = () => {
             </div>
 
             {/* Pre-test */}
-            <div className="group relative">
+            <div className="group relative h-full">
               <div className="absolute -inset-1 bg-gradient-to-r from-blue-500/50 to-indigo-600/50 rounded-3xl blur opacity-25 group-hover:opacity-100 transition duration-1000 group-hover:duration-200"></div>
-              <div className="relative bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl rounded-3xl p-10 border border-white/20 hover:border-white/30 transition-all duration-500 transform hover:scale-[1.02] hover:-translate-y-2">
+              <div className="relative bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl rounded-3xl p-10 border border-white/20 hover:border-white/30 transition-all duration-500 transform hover:scale-[1.02] hover:-translate-y-2 h-full flex flex-col">
                 <div className="absolute top-6 right-6">
                   {preTestResult ? (
                     <div className="flex items-center space-x-2 px-3 py-1 bg-gradient-to-r from-green-500/20 to-emerald-500/20 rounded-full border border-green-400/30">
@@ -221,43 +217,45 @@ const TestPage = () => {
                 </p>
 
                 {/* Show results if completed */}
-                {preTestResult ? (
-                  <div className="space-y-4 mb-8">
-                    <div className="bg-gradient-to-r from-green-500/10 to-emerald-500/10 rounded-xl p-4 border border-green-400/30">
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="text-green-300 font-medium">Skor Anda:</span>
-                        <span className="text-2xl font-bold text-white">{preTestResult.percentage}%</span>
-                      </div>
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="text-green-200/70 text-sm">Grade:</span>
-                        <span className="text-green-400 font-bold">{preTestResult.grade}</span>
-                      </div>
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="text-green-200/70 text-sm">Benar:</span>
-                        <span className="text-white">{preTestResult.correct_answers}/{preTestResult.total_questions}</span>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <span className="text-green-200/70 text-sm">Tanggal:</span>
-                        <span className="text-white text-sm">{new Date(preTestResult.completed_at).toLocaleDateString('id-ID')}</span>
+                <div className="flex-grow">
+                  {preTestResult ? (
+                    <div className="space-y-4 mb-8">
+                      <div className="bg-gradient-to-r from-green-500/10 to-emerald-500/10 rounded-xl p-4 border border-green-400/30">
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-green-300 font-medium">Skor Anda:</span>
+                          <span className="text-2xl font-bold text-white">{preTestResult.percentage}%</span>
+                        </div>
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-green-200/70 text-sm">Grade:</span>
+                          <span className="text-green-400 font-bold">{preTestResult.grade}</span>
+                        </div>
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-green-200/70 text-sm">Benar:</span>
+                          <span className="text-white">{preTestResult.correct_answers}/{preTestResult.total_questions}</span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-green-200/70 text-sm">Tanggal:</span>
+                          <span className="text-white text-sm">{new Date(preTestResult.completed_at).toLocaleDateString('id-ID')}</span>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ) : (
-                  <div className="space-y-3 mb-8">
-                    <div className="flex items-center text-blue-300">
-                      <div className="w-2 h-2 bg-blue-400 rounded-full mr-3"></div>
-                      <span>5 Pertanyaan Pilihan Ganda</span>
+                  ) : (
+                    <div className="space-y-3 mb-8">
+                      <div className="flex items-center text-blue-300">
+                        <div className="w-2 h-2 bg-blue-400 rounded-full mr-3"></div>
+                        <span>5 Pertanyaan Pilihan Ganda</span>
+                      </div>
+                      <div className="flex items-center text-blue-300">
+                        <div className="w-2 h-2 bg-blue-400 rounded-full mr-3"></div>
+                        <span>Durasi Fleksibel ~10 Menit</span>
+                      </div>
+                      <div className="flex items-center text-blue-300">
+                        <div className="w-2 h-2 bg-blue-400 rounded-full mr-3"></div>
+                        <span>Analisis Detail Realtime</span>
+                      </div>
                     </div>
-                    <div className="flex items-center text-blue-300">
-                      <div className="w-2 h-2 bg-blue-400 rounded-full mr-3"></div>
-                      <span>Durasi Fleksibel ~10 Menit</span>
-                    </div>
-                    <div className="flex items-center text-blue-300">
-                      <div className="w-2 h-2 bg-blue-400 rounded-full mr-3"></div>
-                      <span>Analisis Detail Realtime</span>
-                    </div>
-                  </div>
-                )}
+                  )}
+                </div>
                 
                 {preTestResult ? (
                   // Pre-test sudah selesai - hanya tampilkan hasil, tidak bisa ulangi
@@ -289,9 +287,9 @@ const TestPage = () => {
             </div>
 
             {/* Post-test */}
-            <div className="group relative">
+            <div className="group relative h-full">
               <div className="absolute -inset-1 bg-gradient-to-r from-emerald-500/50 to-teal-600/50 rounded-3xl blur opacity-25 group-hover:opacity-100 transition duration-1000 group-hover:duration-200"></div>
-              <div className="relative bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl rounded-3xl p-10 border border-white/20 hover:border-white/30 transition-all duration-500 transform hover:scale-[1.02] hover:-translate-y-2">
+              <div className="relative bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl rounded-3xl p-10 border border-white/20 hover:border-white/30 transition-all duration-500 transform hover:scale-[1.02] hover:-translate-y-2 h-full flex flex-col">
                 <div className="absolute top-6 right-6">
                   {postTestResult ? (
                     <div className="flex items-center space-x-2 px-3 py-1 bg-gradient-to-r from-purple-500/20 to-pink-500/20 rounded-full border border-purple-400/30">
@@ -315,57 +313,60 @@ const TestPage = () => {
                 </p>
 
                 {/* Show results if completed */}
-                {postTestResult ? (
-                  <div className="space-y-4 mb-8">
-                    <div className="bg-gradient-to-r from-purple-500/10 to-pink-500/10 rounded-xl p-4 border border-purple-400/30">
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="text-purple-300 font-medium">Skor Anda:</span>
-                        <span className="text-2xl font-bold text-white">{postTestResult.percentage}%</span>
-                      </div>
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="text-purple-200/70 text-sm">Grade:</span>
-                        <span className="text-purple-400 font-bold">{postTestResult.grade}</span>
-                      </div>
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="text-purple-200/70 text-sm">Benar:</span>
-                        <span className="text-white">{postTestResult.correct_answers}/{postTestResult.total_questions}</span>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <span className="text-purple-200/70 text-sm">Tanggal:</span>
-                        <span className="text-white text-sm">{new Date(postTestResult.completed_at).toLocaleDateString('id-ID')}</span>
-                      </div>
-                    </div>
-                    
-                    {/* Show improvement if both tests completed */}
-                    {preTestResult && (
-                      <div className="bg-gradient-to-r from-yellow-500/10 to-amber-500/10 rounded-xl p-4 border border-yellow-400/30">
-                        <div className="text-center">
-                          <div className="text-yellow-300 text-sm mb-1">Peningkatan:</div>
-                          <div className={`text-xl font-bold ${
-                            postTestResult.percentage >= preTestResult.percentage ? 'text-green-400' : 'text-red-400'
-                          }`}>
-                            {postTestResult.percentage >= preTestResult.percentage ? '+' : ''}{(postTestResult.percentage - preTestResult.percentage).toFixed(1)}%
-                          </div>
+                <div className="flex-grow">
+                  {postTestResult ? (
+                    <div className="space-y-4 mb-8">
+                      <div className="bg-gradient-to-r from-purple-500/10 to-pink-500/10 rounded-xl p-4 border border-purple-400/30">
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-purple-300 font-medium">Skor Anda:</span>
+                          <span className="text-2xl font-bold text-white">{postTestResult.percentage}%</span>
+                        </div>
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-purple-200/70 text-sm">Grade:</span>
+                          <span className="text-purple-400 font-bold">{postTestResult.grade}</span>
+                        </div>
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-purple-200/70 text-sm">Benar:</span>
+                          <span className="text-white">{postTestResult.correct_answers}/{postTestResult.total_questions}</span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-purple-200/70 text-sm">Tanggal:</span>
+                          <span className="text-white text-sm">{new Date(postTestResult.completed_at).toLocaleDateString('id-ID')}</span>
                         </div>
                       </div>
-                    )}
-                  </div>
-                ) : (
-                  <div className="space-y-3 mb-8">
-                    <div className="flex items-center text-emerald-300">
-                      <div className="w-2 h-2 bg-emerald-400 rounded-full mr-3"></div>
-                      <span>Analisis Rangkaian Interaktif</span>
+                      
+                      {/* Show improvement if both tests completed */}
+                      {preTestResult && (
+                        <div className="bg-gradient-to-r from-yellow-500/10 to-amber-500/10 rounded-xl p-3 border border-yellow-400/30 mt-4">
+                          <div className="flex items-center justify-between">
+                            <span className="text-yellow-300 text-sm font-medium">Peningkatan:</span>
+                            <span className={`text-lg font-bold ${
+                              postTestResult.percentage >= preTestResult.percentage ? 'text-green-400' : 'text-red-400'
+                            }`}>
+                              {postTestResult.percentage >= preTestResult.percentage ? '+' : ''}{(postTestResult.percentage - preTestResult.percentage).toFixed(1)}%
+                            </span>
+                          </div>
+                        </div>
+                      )}
+                
                     </div>
-                    <div className="flex items-center text-emerald-300">
-                      <div className="w-2 h-2 bg-emerald-400 rounded-full mr-3"></div>
-                      <span>Perhitungan I, V, R Real-time</span>
+                  ) : (
+                    <div className="space-y-3 mb-8">
+                      <div className="flex items-center text-emerald-300">
+                        <div className="w-2 h-2 bg-emerald-400 rounded-full mr-3"></div>
+                        <span>Analisis Rangkaian Interaktif</span>
+                      </div>
+                      <div className="flex items-center text-emerald-300">
+                        <div className="w-2 h-2 bg-emerald-400 rounded-full mr-3"></div>
+                        <span>Perhitungan I, V, R Real-time</span>
+                      </div>
+                      <div className="flex items-center text-emerald-300">
+                        <div className="w-2 h-2 bg-emerald-400 rounded-full mr-3"></div>
+                        <span>Progress Analytics</span>
+                      </div>
                     </div>
-                    <div className="flex items-center text-emerald-300">
-                      <div className="w-2 h-2 bg-emerald-400 rounded-full mr-3"></div>
-                      <span>Progress Analytics</span>
-                    </div>
-                  </div>
-                )}
+                  )}
+                </div>
                 
                 <button 
                   className={`w-full py-4 px-8 rounded-2xl font-bold text-lg transition-all transform hover:scale-105 shadow-2xl flex items-center justify-center group ${
