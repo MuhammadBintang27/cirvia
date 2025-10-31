@@ -234,6 +234,9 @@ const InteractiveCircuitDemo = ({ voltage, resistance, title }: InteractiveCircu
 };
 
 import { useParams } from 'next/navigation';
+import ModuleIntroductionPageNew from '@/components/modules/ModuleIntroductionPageNew';
+import ModuleSeriesPageNew from '@/components/modules/ModuleSeriesPageNew';
+import ModuleParallelPageNew from '@/components/modules/ModuleParallelPageNew';
 
 const ModuleDetailPage = () => {
   const [isCompleted, setIsCompleted] = useState(false);
@@ -245,6 +248,35 @@ const ModuleDetailPage = () => {
   };
   const slugParam = typeof params?.slug === 'string' ? params.slug : Array.isArray(params?.slug) ? params.slug[0] : '';
   const key = slugMap[slugParam] || 'konsep-dasar-listrik';
+
+  // Load completion status from localStorage
+  React.useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const completed = localStorage.getItem(`module-${slugParam}-completed`) === 'true';
+      setIsCompleted(completed);
+    }
+  }, [slugParam]);
+
+  // Handle marking module as complete
+  const handleMarkComplete = () => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem(`module-${slugParam}-completed`, 'true');
+      setIsCompleted(true);
+      // Trigger storage event untuk update di halaman lain
+      window.dispatchEvent(new Event('progress-updated'));
+    }
+  };
+
+  // Routing untuk modul-modul interaktif
+  if (slugParam === 'module-1') {
+    return <ModuleIntroductionPageNew isCompleted={isCompleted} onMarkComplete={handleMarkComplete} />;
+  }
+  if (slugParam === 'module-2') {
+    return <ModuleSeriesPageNew isCompleted={isCompleted} onMarkComplete={handleMarkComplete} />;
+  }
+  if (slugParam === 'module-3') {
+    return <ModuleParallelPageNew isCompleted={isCompleted} onMarkComplete={handleMarkComplete} />;
+  }
   // Data modul
   const modulesData: Record<string, {
     id: string;
@@ -417,11 +449,6 @@ const ModuleDetailPage = () => {
     gradientColors: 'from-purple-500 to-pink-500'
   }
 };
-
-
-  const handleMarkComplete = () => {
-    setIsCompleted(true);
-  };
 
   // slug di url: module-1, module-2, module-3
   // mapping ke key modulesData
