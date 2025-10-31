@@ -215,10 +215,14 @@ export class StudentQuestionService {
    * Get questions with fallback to default questions if no assignment found
    */
   static async getQuestionsWithFallback(context: StudentContext, fallbackQuestions: Question[]): Promise<Question[]> {
+    console.log('[getQuestionsWithFallback] Received fallback questions:', fallbackQuestions?.length);
+    console.log('[getQuestionsWithFallback] Fallback questions sample:', fallbackQuestions?.slice(0, 2).map(q => ({ id: q.id, title: q.title })));
+    
     const { data: questions, error } = await this.getQuestionsForStudent(context);
     
     if (error || !questions || questions.length === 0) {
       console.log('Using fallback questions:', error);
+      console.log('Returning fallback questions count:', fallbackQuestions?.length);
       return fallbackQuestions;
     }
     
@@ -239,10 +243,15 @@ export function useStudentQuestions(
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // Debug log for fallback questions
+  console.log(`[useStudentQuestions] Received fallback questions: ${fallbackQuestions?.length} questions`);
+  console.log('[useStudentQuestions] Fallback questions preview:', fallbackQuestions?.slice(0, 2).map(q => ({ id: q.id, title: q.title })));
+
   useEffect(() => {
     const loadQuestions = async () => {
       if (!studentId || !className) {
         console.log('Missing student context, using fallback questions');
+        console.log('Final fallback questions count:', fallbackQuestions?.length);
         setQuestions(fallbackQuestions);
         setLoading(false);
         return;
@@ -263,6 +272,8 @@ export function useStudentQuestions(
           fallbackQuestions
         );
 
+        console.log('[useStudentQuestions] Final loaded questions count:', loadedQuestions?.length);
+        console.log('[useStudentQuestions] Final questions preview:', loadedQuestions?.slice(0, 2).map(q => ({ id: q.id, title: q.title })));
         setQuestions(loadedQuestions);
       } catch (err) {
         console.error('Error loading student questions:', err);

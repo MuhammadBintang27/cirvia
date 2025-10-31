@@ -1,15 +1,16 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { Trophy, Star, Sparkles, ArrowRight, CheckCircle, RotateCcw } from 'lucide-react'
 import Navbar from '@/components/Navbar'
 import { useStudentAuth } from '@/hooks/useStudentAuth'
 import { useAuth } from '@/contexts/AuthContext'
 import { SupabaseTestService, TestAnswerInput } from '@/lib/supabase-test-service'
-import { mixedQuestions, calculateQuizScore } from '@/lib/questions'
+import { DEFAULT_PRETEST_PACKAGE, calculateQuizScore } from '@/lib/questions'
 import { useStudentQuestions } from '@/lib/student-question-service'
 import { useToast } from '@/components/Toast'
 import QuestionRenderer from '@/components/tipesoal/QuestionRenderer'
+
 
 interface QuizState {
   currentQuestionIndex: number;
@@ -30,11 +31,18 @@ export default function PretestPage() {
   
   // Get questions based on student's class assignment
   const studentClass = user && user.role === 'student' ? String(user.class) : 'X-IPA-1';
+  
+  // Memoize the fallback questions to prevent unnecessary re-renders
+  const memoizedFallbackQuestions = useMemo(() => {
+    console.log('[PreTest] Memoizing fallback questions, length:', DEFAULT_PRETEST_PACKAGE?.length);
+    return DEFAULT_PRETEST_PACKAGE;
+  }, []);
+  
   const { questions, loading: questionsLoading, error: questionsError } = useStudentQuestions(
     user?.id || null,
     studentClass,
     'pretest',
-    mixedQuestions // Fallback to default questions
+    memoizedFallbackQuestions // Use memoized default pretest package as fallback
   );
   
   // Check if student has already completed pretest
@@ -502,6 +510,7 @@ export default function PretestPage() {
               <div className="flex justify-between items-center mb-4">
                 <div className="text-white font-bold">
                   Soal {quizState.currentQuestionIndex + 1} dari {questions.length}
+                  {/* Debug: {JSON.stringify({ questionsLength: questions.length, questionIds: questions.slice(0, 3).map(q => q.id) })} */}
                 </div>
                 <div className="flex items-center space-x-4">
                   <div className="text-cyan-300 font-bold">{formatTime(timeElapsed)}</div>

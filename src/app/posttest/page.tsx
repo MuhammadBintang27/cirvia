@@ -13,7 +13,7 @@ import {
 import Navbar from '@/components/Navbar';
 import { useStudentAuth } from '@/hooks/useStudentAuth';
 import { useAuth } from '@/contexts/AuthContext';
-import { mixedQuestions, calculateQuizScore } from '@/lib/questions';
+import { DEFAULT_POSTTEST_PACKAGE, calculateQuizScore } from '@/lib/questions';
 import { useStudentQuestions } from '@/lib/student-question-service';
 import { SupabaseTestService, TestAnswerInput } from '@/lib/supabase-test-service';
 import { useToast } from '@/components/Toast';
@@ -40,7 +40,7 @@ const PostTestPage = () => {
     user?.id || null,
     studentClass,
     'posttest',
-    mixedQuestions // Fallback to default questions
+    DEFAULT_POSTTEST_PACKAGE // Use default posttest package as fallback
   );
   
   // Auto-start test jika sudah login sebagai student
