@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import CVPracticumLauncher from "../../components/CVPracticumLauncher";
+import CircuitBuilderEnhanced from "../../components/praktikum-drag-n-drop/CircuitBuilderEnhanced";
 import Navbar from "@/components/Navbar";
 
 interface CircuitElement {
@@ -195,7 +196,7 @@ Hasil Perhitungan Rangkaian:
         <div className="absolute top-20 left-10 w-72 h-72 bg-orange-500/10 rounded-full blur-3xl animate-pulse"></div>
         <div className="absolute top-40 right-20 w-96 h-96 bg-red-500/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
         <div className="absolute bottom-20 left-1/3 w-80 h-80 bg-cyan-500/10 rounded-full blur-3xl animate-pulse delay-2000"></div>
-        
+
         {/* Floating particles */}
         {[...Array(20)].map((_, i) => (
           <div
@@ -205,7 +206,7 @@ Hasil Perhitungan Rangkaian:
               left: `${Math.random() * 100}%`,
               top: `${Math.random() * 100}%`,
               animationDelay: `${Math.random() * 3}s`,
-              animationDuration: `${3 + Math.random() * 2}s`
+              animationDuration: `${3 + Math.random() * 2}s`,
             }}
           ></div>
         ))}
@@ -221,7 +222,9 @@ Hasil Perhitungan Rangkaian:
             {/* Premium Badge */}
             <div className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-orange-400/20 to-red-400/20 rounded-full border border-orange-400/30 backdrop-blur-sm mb-8">
               <span className="text-2xl mr-2">🔬</span>
-              <span className="text-orange-400 text-sm font-medium">Interactive Laboratory</span>
+              <span className="text-orange-400 text-sm font-medium">
+                Interactive Laboratory
+              </span>
               <span className="text-2xl ml-2">⚡</span>
             </div>
 
@@ -244,9 +247,11 @@ Hasil Perhitungan Rangkaian:
                 Rangkaian Listrik
               </span>
             </h1>
-            
+
             <p className="text-xl text-blue-200/90 max-w-4xl mx-auto leading-relaxed mb-8">
-              Laboratorium virtual interaktif dengan teknologi computer vision dan simulasi real-time untuk eksplorasi mendalam konsep rangkaian listrik
+              Laboratorium virtual interaktif dengan teknologi computer vision
+              dan simulasi real-time untuk eksplorasi mendalam konsep rangkaian
+              listrik
             </p>
 
             {/* Stats */}
@@ -303,18 +308,17 @@ Hasil Perhitungan Rangkaian:
                       <span className="text-2xl">🌐</span>
                     </div>
                     <div>
-                      <h3 className="text-2xl font-bold text-white">Interactive Web Laboratory</h3>
-                      <p className="text-blue-200/80">Simulasi rangkaian listrik dengan interface drag & drop</p>
+                      <h3 className="text-2xl font-bold text-white">
+                        Interactive Web Laboratory
+                      </h3>
+                      <p className="text-blue-200/80">
+                        Simulasi rangkaian listrik dengan interface drag & drop
+                      </p>
                     </div>
                   </div>
-                  
-                  {/* Circuit Builder - Removed: Replaced with new components in TipeSoal1 */}
-                  <div className="bg-gradient-to-r from-yellow-500/10 to-orange-500/10 rounded-xl p-6 border border-yellow-400/30">
-                    <p className="text-yellow-400 text-center">
-                      <span className="text-xl mr-2">⚠️</span>
-                      Circuit Builder telah dipindahkan ke halaman Quiz sebagai TipeSoal1 dengan komponen yang lebih modern
-                    </p>
-                  </div>
+
+                  {/* Circuit Builder */}
+                  <CircuitBuilderEnhanced />
 
                   {/* Enhanced Tips */}
                   <div className="mt-6 p-6 bg-gradient-to-r from-cyan-500/10 to-blue-500/10 rounded-xl border border-cyan-400/30">
@@ -326,21 +330,32 @@ Hasil Perhitungan Rangkaian:
                       <ul className="space-y-2">
                         <li className="flex items-start">
                           <span className="text-cyan-400 mr-2">•</span>
-                          <span>Gunakan toolbar untuk menambah komponen baru ke canvas</span>
+                          <span>
+                            Gunakan toolbar untuk menambah komponen baru ke
+                            canvas
+                          </span>
                         </li>
                         <li className="flex items-start">
                           <span className="text-cyan-400 mr-2">•</span>
-                          <span>Aktifkan &quot;Mode Koneksi&quot; untuk menarik kabel antar terminal</span>
+                          <span>
+                            Aktifkan &quot;Mode Koneksi&quot; untuk menarik
+                            kabel antar terminal
+                          </span>
                         </li>
                       </ul>
                       <ul className="space-y-2">
                         <li className="flex items-start">
                           <span className="text-cyan-400 mr-2">•</span>
-                          <span>Double-click saklar untuk membuka/menutup rangkaian</span>
+                          <span>
+                            Double-click saklar untuk membuka/menutup rangkaian
+                          </span>
                         </li>
                         <li className="flex items-start">
                           <span className="text-cyan-400 mr-2">•</span>
-                          <span>Pilih komponen lalu gunakan rotasi untuk mengatur posisi</span>
+                          <span>
+                            Pilih komponen lalu gunakan rotasi untuk mengatur
+                            posisi
+                          </span>
                         </li>
                       </ul>
                     </div>
@@ -361,8 +376,13 @@ Hasil Perhitungan Rangkaian:
                       <span className="text-2xl">🤖</span>
                     </div>
                     <div>
-                      <h3 className="text-2xl font-bold text-white">AI-Powered Computer Vision Lab</h3>
-                      <p className="text-blue-200/80">Kontrol rangkaian menggunakan gesture tangan dengan teknologi AI</p>
+                      <h3 className="text-2xl font-bold text-white">
+                        AI-Powered Computer Vision Lab
+                      </h3>
+                      <p className="text-blue-200/80">
+                        Kontrol rangkaian menggunakan gesture tangan dengan
+                        teknologi AI
+                      </p>
                     </div>
                   </div>
 
@@ -370,18 +390,30 @@ Hasil Perhitungan Rangkaian:
                   <div className="grid md:grid-cols-3 gap-6 mb-8">
                     <div className="bg-gradient-to-br from-blue-500/20 to-cyan-500/10 rounded-xl p-4 border border-blue-400/30">
                       <div className="text-2xl mb-2">👆</div>
-                      <h4 className="text-white font-bold mb-2">Gesture Detection</h4>
-                      <p className="text-blue-200/80 text-sm">Deteksi real-time gerakan tangan untuk kontrol intuitif</p>
+                      <h4 className="text-white font-bold mb-2">
+                        Gesture Detection
+                      </h4>
+                      <p className="text-blue-200/80 text-sm">
+                        Deteksi real-time gerakan tangan untuk kontrol intuitif
+                      </p>
                     </div>
                     <div className="bg-gradient-to-br from-purple-500/20 to-blue-500/10 rounded-xl p-4 border border-purple-400/30">
                       <div className="text-2xl mb-2">⚡</div>
-                      <h4 className="text-white font-bold mb-2">Real-time Calculation</h4>
-                      <p className="text-blue-200/80 text-sm">Perhitungan otomatis nilai rangkaian secara instant</p>
+                      <h4 className="text-white font-bold mb-2">
+                        Real-time Calculation
+                      </h4>
+                      <p className="text-blue-200/80 text-sm">
+                        Perhitungan otomatis nilai rangkaian secara instant
+                      </p>
                     </div>
                     <div className="bg-gradient-to-br from-blue-700/20 to-purple-700/10 rounded-xl p-4 border border-blue-400/30">
                       <div className="text-2xl mb-2">🔬</div>
-                      <h4 className="text-white font-bold mb-2">Interactive Components</h4>
-                      <p className="text-blue-200/80 text-sm">Komponen virtual yang responsif terhadap gesture</p>
+                      <h4 className="text-white font-bold mb-2">
+                        Interactive Components
+                      </h4>
+                      <p className="text-blue-200/80 text-sm">
+                        Komponen virtual yang responsif terhadap gesture
+                      </p>
                     </div>
                   </div>
 
@@ -396,15 +428,23 @@ Hasil Perhitungan Rangkaian:
                         <div className="flex items-center">
                           <span className="text-2xl mr-3">👆</span>
                           <div>
-                            <div className="text-blue-300 font-medium">Point Gesture</div>
-                            <div className="text-blue-200/70">Pilih dan seleksi komponen</div>
+                            <div className="text-blue-300 font-medium">
+                              Point Gesture
+                            </div>
+                            <div className="text-blue-200/70">
+                              Pilih dan seleksi komponen
+                            </div>
                           </div>
                         </div>
                         <div className="flex items-center">
                           <span className="text-2xl mr-3">✋</span>
                           <div>
-                            <div className="text-blue-300 font-medium">Open Palm</div>
-                            <div className="text-blue-200/70">Tambah resistor baru</div>
+                            <div className="text-blue-300 font-medium">
+                              Open Palm
+                            </div>
+                            <div className="text-blue-200/70">
+                              Tambah resistor baru
+                            </div>
                           </div>
                         </div>
                       </div>
@@ -412,15 +452,23 @@ Hasil Perhitungan Rangkaian:
                         <div className="flex items-center">
                           <span className="text-2xl mr-3">✊</span>
                           <div>
-                            <div className="text-blue-300 font-medium">Fist Gesture</div>
-                            <div className="text-blue-200/70">Hapus komponen terpilih</div>
+                            <div className="text-blue-300 font-medium">
+                              Fist Gesture
+                            </div>
+                            <div className="text-blue-200/70">
+                              Hapus komponen terpilih
+                            </div>
                           </div>
                         </div>
                         <div className="flex items-center">
                           <span className="text-2xl mr-3">👋</span>
                           <div>
-                            <div className="text-blue-300 font-medium">Wave Gesture</div>
-                            <div className="text-blue-200/70">Reset rangkaian ke default</div>
+                            <div className="text-blue-300 font-medium">
+                              Wave Gesture
+                            </div>
+                            <div className="text-blue-200/70">
+                              Reset rangkaian ke default
+                            </div>
                           </div>
                         </div>
                       </div>
@@ -437,12 +485,15 @@ Hasil Perhitungan Rangkaian:
                     <div className="flex items-center justify-center w-20 h-20 bg-gradient-to-br from-blue-500/30 to-purple-600/30 rounded-2xl mb-6 mx-auto group-hover:scale-110 transition-transform duration-300">
                       <span className="text-3xl">💻</span>
                     </div>
-                    
-                    <h3 className="text-3xl font-bold text-white mb-4 text-center">Desktop Computer Vision App</h3>
+
+                    <h3 className="text-3xl font-bold text-white mb-4 text-center">
+                      Desktop Computer Vision App
+                    </h3>
                     <p className="text-blue-200/80 mb-8 text-lg text-center leading-relaxed">
-                      Aplikasi desktop Python dengan teknologi computer vision canggih untuk pengalaman praktikum yang immersive
+                      Aplikasi desktop Python dengan teknologi computer vision
+                      canggih untuk pengalaman praktikum yang immersive
                     </p>
-                    
+
                     <div className="space-y-3 mb-8">
                       <div className="flex items-center justify-center text-blue-300">
                         <div className="w-2 h-2 bg-blue-400 rounded-full mr-3"></div>
@@ -457,7 +508,7 @@ Hasil Perhitungan Rangkaian:
                         <span>Interactive Visual Interface with OpenCV</span>
                       </div>
                     </div>
-                    
+
                     <div className="flex justify-center">
                       <CVPracticumLauncher />
                     </div>
@@ -481,7 +532,9 @@ Hasil Perhitungan Rangkaian:
                     </ul>
                   </div>
                   <div>
-                    <div className="text-blue-300 font-medium mb-2">Software</div>
+                    <div className="text-blue-300 font-medium mb-2">
+                      Software
+                    </div>
                     <ul className="space-y-1 text-xs">
                       <li>• Python 3.8+</li>
                       <li>• OpenCV, MediaPipe</li>
@@ -489,7 +542,9 @@ Hasil Perhitungan Rangkaian:
                     </ul>
                   </div>
                   <div>
-                    <div className="text-blue-300 font-medium mb-2">Hardware</div>
+                    <div className="text-blue-300 font-medium mb-2">
+                      Hardware
+                    </div>
                     <ul className="space-y-1 text-xs">
                       <li>• CPU: Intel i3+ atau setara</li>
                       <li>• RAM: 4GB minimum</li>
