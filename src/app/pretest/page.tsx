@@ -11,6 +11,9 @@ import { useStudentQuestions } from '@/lib/student-question-service'
 import { useToast } from '@/components/Toast'
 import QuestionRenderer from '@/components/tipesoal/QuestionRenderer'
 
+// Debug: Log package lengths
+console.log('DEFAULT_PRETEST_PACKAGE length:', DEFAULT_PRETEST_PACKAGE?.length)
+console.log('DEFAULT_PRETEST_PACKAGE preview:', DEFAULT_PRETEST_PACKAGE?.slice(0, 3).map(q => ({ id: q.id, title: q.title, type: q.questionType })))
 
 interface QuizState {
   currentQuestionIndex: number;
@@ -32,6 +35,9 @@ export default function PretestPage() {
   // Get questions based on student's class assignment
   const studentClass = user && user.role === 'student' ? String(user.class) : 'X-IPA-1';
   
+  // Debug log to see what class the student belongs to
+  console.log('🔍 [DEBUG] Student:', user?.name, 'Class:', studentClass, 'Teacher ID:', (user as any)?.teacherId, 'Role:', user?.role);
+  
   // Memoize the fallback questions to prevent unnecessary re-renders
   const memoizedFallbackQuestions = useMemo(() => {
     console.log('[PreTest] Memoizing fallback questions, length:', DEFAULT_PRETEST_PACKAGE?.length);
@@ -41,6 +47,7 @@ export default function PretestPage() {
   const { questions, loading: questionsLoading, error: questionsError } = useStudentQuestions(
     user?.id || null,
     studentClass,
+    (user?.role === 'student' ? (user as any).teacherId : null),
     'pretest',
     memoizedFallbackQuestions // Use memoized default pretest package as fallback
   );

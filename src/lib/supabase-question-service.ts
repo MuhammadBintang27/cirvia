@@ -133,7 +133,8 @@ export class SupabaseQuestionService {
 
       switch (question.questionType) {
         case 'circuit':
-          const circuitQ = question as CircuitQuestion;
+          const circuitQ = question as CircuitQuestion & { teacherSettings?: any };
+          const teacherSettings = circuitQ.teacherSettings;
           const { data: circuitData, error: circuitError } = await supabase
             .from('circuit_questions')
             .insert([{
@@ -143,8 +144,8 @@ export class SupabaseQuestionService {
               target_current: circuitQ.targetCurrent,
               target_voltage: circuitQ.targetVoltage,
               resistor_slots: circuitQ.resistorSlots,
-              available_resistors: circuitQ.availableResistors.map(r => r.value),
-              correct_solution: circuitQ.correctSolution,
+              available_resistors: teacherSettings?.resistorOptions?.map((r: any) => r.value) || [],
+              correct_solution: teacherSettings?.correctSolution || [],
               description: circuitQ.description,
               explanation: circuitQ.explanation,
               hint: circuitQ.hint
@@ -292,7 +293,7 @@ export class SupabaseQuestionService {
             return { data: null, error: circuitError };
           }
 
-          fullQuestion = {
+          const circuitQuestion = {
             id: baseQuestion.id,
             questionType: 'circuit',
             title: baseQuestion.title,
@@ -304,10 +305,19 @@ export class SupabaseQuestionService {
             voltage: circuitData.voltage,
             targetCurrent: circuitData.target_current,
             targetVoltage: circuitData.target_voltage,
-            resistorSlots: circuitData.resistor_slots,
-            availableResistors: circuitData.available_resistors.map((value: number) => ({ value })),
-            correctSolution: circuitData.correct_solution
+            resistorSlots: circuitData.resistor_slots
           } as CircuitQuestion;
+          
+          // Add teacher settings for backwards compatibility
+          (circuitQuestion as any).teacherSettings = {
+            resistorOptions: circuitData.available_resistors.map((value: number, index: number) => ({
+              value,
+              label: `R${index + 1} (${value}Ω)`
+            })),
+            correctSolution: circuitData.correct_solution
+          };
+          
+          fullQuestion = circuitQuestion;
           break;
 
         case 'conceptual':
