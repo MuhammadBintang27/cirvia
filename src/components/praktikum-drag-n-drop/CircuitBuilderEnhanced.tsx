@@ -634,7 +634,7 @@ function calculateCurrentFlow(elements: CircuitElement[], wires: Wire[]) {
         console.log(
           `     - ${elementId}: ${el.type} (${
             el.type === "resistor" || el.type === "lamp"
-              ? `${el.resistance}Ω`
+              ? `${el.value}Ω`
               : "non-resistive"
           })`
         );
