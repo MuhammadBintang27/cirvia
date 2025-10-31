@@ -39,6 +39,7 @@ const PostTestPage = () => {
   const { questions, loading: questionsLoading, error: questionsError } = useStudentQuestions(
     user?.id || null,
     studentClass,
+    (user?.role === 'student' ? (user as any).teacherId : null),
     'posttest',
     DEFAULT_POSTTEST_PACKAGE // Use default posttest package as fallback
   );

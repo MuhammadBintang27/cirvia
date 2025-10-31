@@ -8,6 +8,7 @@ import { Question } from '@/lib/questions';
 export interface StudentContext {
   studentId: string;
   className: string;
+  teacherId: string;
   testType: 'pretest' | 'posttest';
 }
 
@@ -18,10 +19,22 @@ export class StudentQuestionService {
    */
   static async getQuestionsForStudent(context: StudentContext): Promise<{ data: Question[] | null; error: any }> {
     try {
-      console.log('Getting questions for student:', context);
+      console.log('🔍 [DEBUG] Getting questions for student:', {
+        studentId: context.studentId,
+        className: context.className, 
+        teacherId: context.teacherId,
+        testType: context.testType
+      });
 
-      // First, get the class package assignment
-      const { data: classPackage, error: classError } = await supabase
+      // First, let's check what class packages exist in the database (debug only)
+      const { data: allClassPackages, error: allClassError } = await supabase
+        .from('class_packages')
+        .select('class_name, teacher_id, pretest_package_id, posttest_package_id');
+      
+      console.log('🔍 [DEBUG] All class packages in DB:', allClassPackages?.length, 'assignments');
+
+      // First, get the class package assignment (match both class and teacher)
+      const { data: classPackages, error: classError } = await supabase
         .from('class_packages')
         .select(`
           *,
@@ -29,18 +42,36 @@ export class StudentQuestionService {
           posttest_package:posttest_package_id(id, name, question_ids, time_limit)
         `)
         .eq('class_name', context.className)
-        .single();
+        .eq('teacher_id', context.teacherId)
+        .order('updated_at', { ascending: false });
+
+      console.log('🔍 [DEBUG] Query result for class:', context.className);
+      console.log('🔍 [DEBUG] Class packages found:', classPackages);
+      console.log('🔍 [DEBUG] Class package error:', classError);
+
+      // Get the most recent assignment
+      const classPackage = classPackages && classPackages.length > 0 ? classPackages[0] : null;
 
       if (classError) {
-        console.error('Class package error:', classError);
+        console.error('🔍 [DEBUG] Class package error:', classError);
+        console.log('🔍 [DEBUG] Error code:', classError.code);
+        console.log('🔍 [DEBUG] Error message:', classError.message);
         // If no class package found, return empty array (will use default questions)
-        return { data: [], error: `No package assigned for class ${context.className}` };
+        return { data: [], error: `No package assigned for class ${context.className} by teacher ${context.teacherId} - Error: ${classError.message}` };
       }
 
       if (!classPackage) {
-        console.log('No class package found for class:', context.className);
-        return { data: [], error: `No package assigned for class ${context.className}` };
+        console.log('🔍 [DEBUG] No class package found for class:', context.className);
+        console.log('🔍 [DEBUG] This will trigger fallback to default questions');
+        return { data: [], error: `No package assigned for class ${context.className} by teacher ${context.teacherId}` };
       }
+
+      console.log('🔍 [DEBUG] Using class package assignment:', {
+        id: classPackage.id,
+        teacher_id: classPackage.teacher_id,
+        assigned_at: classPackage.assigned_at,
+        updated_at: classPackage.updated_at
+      });
 
       // Get the appropriate package based on test type
       const targetPackage = context.testType === 'pretest' 
@@ -83,9 +114,9 @@ export class StudentQuestionService {
               .single();
 
             if (!circuitError && circuitData) {
-              fullQuestion = {
+              const circuitQuestion = {
                 id: baseQuestion.id,
-                questionType: 'circuit',
+                questionType: 'circuit' as const,
                 title: baseQuestion.title,
                 description: circuitData.description,
                 explanation: circuitData.explanation,
@@ -95,10 +126,54 @@ export class StudentQuestionService {
                 voltage: circuitData.voltage,
                 targetCurrent: circuitData.target_current,
                 targetVoltage: circuitData.target_voltage,
-                resistorSlots: circuitData.resistor_slots,
-                availableResistors: circuitData.available_resistors.map((value: number) => ({ value })),
-                correctSolution: circuitData.correct_solution
+                resistorSlots: circuitData.resistor_slots
               };
+
+              // Convert database resistor values to Resistor objects for component compatibility
+              console.log('🔍 [DEBUG] Circuit data from DB:', circuitData.available_resistors, circuitData.correct_solution);
+              
+              // Parse JSON string from database
+              let availableResistorValues: string[] = [];
+              if (circuitData.available_resistors) {
+                try {
+                  availableResistorValues = typeof circuitData.available_resistors === 'string' 
+                    ? JSON.parse(circuitData.available_resistors)
+                    : circuitData.available_resistors;
+                } catch (e) {
+                  console.error('Error parsing available_resistors:', e);
+                }
+              }
+
+              if (availableResistorValues && Array.isArray(availableResistorValues) && availableResistorValues.length > 0) {
+                (circuitQuestion as any).availableResistors = availableResistorValues.map((value: string, index: number) => ({
+                  id: index + 1,
+                  value: parseInt(value),
+                  label: `R${index + 1}`,
+                  color: ['red', 'orange', 'yellow', 'green', 'blue', 'purple'][index % 6]
+                }));
+                console.log('🔍 [DEBUG] Converted availableResistors:', (circuitQuestion as any).availableResistors);
+              } else {
+                console.log('🔍 [DEBUG] No valid available_resistors found');
+              }
+
+              // Convert correct solution for component compatibility
+              let correctSolutionValues: string[] = [];
+              if (circuitData.correct_solution) {
+                try {
+                  correctSolutionValues = typeof circuitData.correct_solution === 'string'
+                    ? JSON.parse(circuitData.correct_solution)
+                    : circuitData.correct_solution;
+                } catch (e) {
+                  console.error('Error parsing correct_solution:', e);
+                }
+              }
+
+              if (correctSolutionValues && Array.isArray(correctSolutionValues)) {
+                (circuitQuestion as any).correctSolution = correctSolutionValues.map((value: string) => parseInt(value));
+                console.log('🔍 [DEBUG] Converted correctSolution:', (circuitQuestion as any).correctSolution);
+              }
+
+              fullQuestion = circuitQuestion;
             }
             break;
 
@@ -215,17 +290,22 @@ export class StudentQuestionService {
    * Get questions with fallback to default questions if no assignment found
    */
   static async getQuestionsWithFallback(context: StudentContext, fallbackQuestions: Question[]): Promise<Question[]> {
-    console.log('[getQuestionsWithFallback] Received fallback questions:', fallbackQuestions?.length);
-    console.log('[getQuestionsWithFallback] Fallback questions sample:', fallbackQuestions?.slice(0, 2).map(q => ({ id: q.id, title: q.title })));
+    console.log('🔍 [DEBUG] [getQuestionsWithFallback] Called with context:', context);
+    console.log('🔍 [DEBUG] [getQuestionsWithFallback] Received fallback questions:', fallbackQuestions?.length);
+    console.log('🔍 [DEBUG] [getQuestionsWithFallback] Fallback questions sample:', fallbackQuestions?.slice(0, 2).map(q => ({ id: q.id, title: q.title })));
     
     const { data: questions, error } = await this.getQuestionsForStudent(context);
     
     if (error || !questions || questions.length === 0) {
-      console.log('Using fallback questions:', error);
-      console.log('Returning fallback questions count:', fallbackQuestions?.length);
+      console.log('🔍 [DEBUG] [getQuestionsWithFallback] Using fallback questions because:');
+      console.log('🔍 [DEBUG] - Error:', error);
+      console.log('🔍 [DEBUG] - Questions data:', questions);
+      console.log('🔍 [DEBUG] - Questions length:', questions?.length);
+      console.log('🔍 [DEBUG] [getQuestionsWithFallback] Returning fallback questions count:', fallbackQuestions?.length);
       return fallbackQuestions;
     }
     
+    console.log('🔍 [DEBUG] [getQuestionsWithFallback] Using assigned questions from teacher:', questions.length);
     return questions;
   }
 }
@@ -236,6 +316,7 @@ import { useState, useEffect } from 'react';
 export function useStudentQuestions(
   studentId: string | null, 
   className: string | null, 
+  teacherId: string | null,
   testType: 'pretest' | 'posttest',
   fallbackQuestions: Question[]
 ) {
@@ -249,7 +330,7 @@ export function useStudentQuestions(
 
   useEffect(() => {
     const loadQuestions = async () => {
-      if (!studentId || !className) {
+      if (!studentId || !className || !teacherId) {
         console.log('Missing student context, using fallback questions');
         console.log('Final fallback questions count:', fallbackQuestions?.length);
         setQuestions(fallbackQuestions);
@@ -264,6 +345,7 @@ export function useStudentQuestions(
         const context: StudentContext = {
           studentId,
           className,
+          teacherId,
           testType
         };
 
@@ -285,7 +367,7 @@ export function useStudentQuestions(
     };
 
     loadQuestions();
-  }, [studentId, className, testType, fallbackQuestions]);
+  }, [studentId, className, teacherId, testType, fallbackQuestions]);
 
   return { questions, loading, error };
 }
