@@ -10,16 +10,16 @@ interface ModuleCardProps {
   description: string;
   gradientColors: string;
   isCompleted: boolean;
-  onMarkComplete: (id: string) => void;
 }
-const ModuleCard = ({ id, title, subtitle, description, gradientColors, isCompleted, onMarkComplete }: ModuleCardProps) => {
+
+const ModuleCard = ({ id, title, subtitle, description, gradientColors, isCompleted }: ModuleCardProps) => {
   return (
     <div className="group relative">
       {/* Glow Effect */}
-      <div className={`absolute -inset-1 bg-gradient-to-r ${gradientColors} rounded-3xl blur opacity-20 group-hover:opacity-40 transition duration-1000`}></div>
+      <div className={`absolute -inset-1 bg-gradient-to-r ${gradientColors} rounded-3xl blur opacity-20 group-hover:opacity-40 transition duration-1000 pointer-events-none`}></div>
       
       {/* Main Card */}
-      <div className="relative bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl rounded-3xl p-8 border border-white/20 hover:border-white/30 transition-all duration-500 transform hover:scale-[1.02] hover:-translate-y-2 shadow-2xl h-full flex flex-col">
+      <div className="relative bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl rounded-3xl p-8 border border-white/20 hover:border-white/30 transition-all duration-500 transform hover:scale-[1.02] hover:-translate-y-2 shadow-2xl h-full flex flex-col z-10">
         {/* Status Badge */}
         <div className={`absolute top-4 right-4 flex items-center space-x-2 px-3 py-1 rounded-full text-sm font-semibold ${
           isCompleted 
@@ -39,9 +39,9 @@ const ModuleCard = ({ id, title, subtitle, description, gradientColors, isComple
           )}
         </div>
 
-        {/* Content - Fixed Height for Consistency */}
+        {/* Content */}
         <div className="mb-6 flex-grow">
-          <div className="h-32 mb-4">
+          <div className="mb-4">
             <h3 className="text-2xl font-bold text-white mb-2 line-clamp-2">{title}</h3>
             <p className="text-lg text-blue-200 font-medium mb-3 line-clamp-1">{subtitle}</p>
             <p className="text-blue-200/80 leading-relaxed line-clamp-2">{description}</p>
@@ -52,15 +52,12 @@ const ModuleCard = ({ id, title, subtitle, description, gradientColors, isComple
         <div className="flex items-center justify-between mb-6 text-sm">
           <div className="flex items-center space-x-1 text-blue-300 flex-1 justify-center">
             <BookOpen className="w-4 h-4" />
-            <span>Materi</span>
+            <span>{id === 'module-1' ? '4 Section' : '7 Section'}</span>
           </div>
+          <div className="border-l border-white/20"></div>
           <div className="flex items-center space-x-1 text-purple-300 flex-1 justify-center">
-            <Play className="w-4 h-4" />
-            <span>Audio</span>
-          </div>
-          <div className="flex items-center space-x-1 text-orange-300 flex-1 justify-center">
             <Zap className="w-4 h-4" />
-            <span>Demo</span>
+            <span>Interaktif</span>
           </div>
         </div>
 
@@ -84,6 +81,7 @@ interface OverallProgressProps {
   completedModules: number;
   totalModules: number;
 }
+
 const OverallProgress = ({ totalProgress, completedModules, totalModules }: OverallProgressProps) => {
   const isComplete = completedModules === totalModules;
   const progressColor = isComplete 
@@ -92,12 +90,12 @@ const OverallProgress = ({ totalProgress, completedModules, totalModules }: Over
 
   return (
     <div className="relative group">
-      <div className="absolute -inset-1 bg-gradient-to-r from-blue-500/30 to-cyan-500/30 rounded-3xl blur opacity-50 group-hover:opacity-75 transition duration-1000"></div>
+      <div className="absolute -inset-1 bg-gradient-to-r from-blue-500/30 to-cyan-500/30 rounded-3xl blur opacity-50 group-hover:opacity-75 transition duration-1000 pointer-events-none"></div>
       
-      <div className="relative bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl rounded-3xl shadow-2xl p-8 border border-white/20">
+      <div className="relative z-10 bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl rounded-3xl shadow-2xl p-8 border border-white/20">
         <div className="flex items-center justify-between mb-8">
-          <div className="flex items-center space-x-3">
-            <div className="w-12 h-12 bg-gradient-to-br from-blue-500/20 to-cyan-500/20 rounded-full flex items-center justify-center border border-white/20">
+          <div className="flex items-center space-x-4">
+            <div className="w-14 h-14 bg-gradient-to-br from-blue-500/20 to-cyan-500/20 rounded-full flex items-center justify-center border border-white/20">
               {isComplete ? (
                 <Trophy className="w-7 h-7 text-yellow-400" />
               ) : (
@@ -106,80 +104,49 @@ const OverallProgress = ({ totalProgress, completedModules, totalModules }: Over
             </div>
             <div>
               <h3 className="text-2xl font-bold text-white">Progress Belajar</h3>
-              <p className="text-blue-200/80">Perjalanan pembelajaran Anda</p>
+              <p className="text-blue-200/70 text-sm">Perjalanan pembelajaran Anda</p>
             </div>
           </div>
           
           {isComplete && (
             <div className="flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-yellow-400/20 to-amber-400/20 rounded-full border border-yellow-400/30">
               <Star className="w-5 h-5 text-yellow-400 fill-current" />
-              <span className="text-yellow-400 font-semibold">Selesai!</span>
-              <Sparkles className="w-5 h-5 text-yellow-400" />
+              <span className="text-yellow-300 font-semibold text-sm">Selesai!</span>
             </div>
           )}
         </div>
 
         <div className="mb-8">
-          <div className="flex justify-between items-end mb-4">
-            <span className="text-lg font-semibold text-blue-200">Kemajuan Keseluruhan</span>
+          <div className="flex justify-between items-end mb-3">
+            <span className="text-sm font-semibold text-blue-300">Kemajuan</span>
             <div className="text-right">
-              <div className="text-3xl font-black text-white">{Math.round(totalProgress)}%</div>
-              <div className="text-sm text-blue-300">dari target 100%</div>
+              <div className="text-2xl font-black text-white">{Math.round(totalProgress)}%</div>
             </div>
           </div>
           
-          <div className="relative w-full bg-blue-900/30 rounded-full h-6 overflow-hidden shadow-inner">
+          <div className="relative w-full bg-blue-900/30 rounded-full h-4 overflow-hidden shadow-inner">
             <div 
-              className={`bg-gradient-to-r ${progressColor} h-6 rounded-full transition-all duration-2000 ease-out relative overflow-hidden`}
+              className={`bg-gradient-to-r ${progressColor} h-4 rounded-full transition-all duration-2000 ease-out`}
               style={{ width: `${totalProgress}%` }}
-            >
-              <div className="absolute inset-0 bg-white/20 rounded-full animate-pulse"></div>
-            </div>
-          </div>
-          
-          <div className="text-center mt-3">
-            <p className="text-blue-200 font-medium">
-              {isComplete 
-                ? "Selamat! Semua modul telah diselesaikan! 🎉" 
-                : `${totalModules - completedModules} modul tersisa - tetap semangat! 💪`
-              }
-            </p>
+            />
           </div>
         </div>
 
-        <div className="grid grid-cols-3 gap-4 mb-6">
-          <div className="text-center p-6 bg-gradient-to-br from-emerald-500/10 to-green-500/10 rounded-xl border border-emerald-400/20 backdrop-blur-sm">
-            <div className="text-3xl font-bold text-emerald-300 mb-1">{completedModules}</div>
-            <div className="text-sm text-emerald-200/80 font-medium">Selesai</div>
+        <div className="grid grid-cols-3 gap-3">
+          <div className="text-center p-4 bg-gradient-to-br from-emerald-500/10 to-green-500/10 rounded-lg border border-emerald-400/20">
+            <div className="text-2xl font-bold text-emerald-300 mb-1">{completedModules}</div>
+            <div className="text-xs text-emerald-200/70 font-medium">Selesai</div>
           </div>
           
-          <div className="text-center p-6 bg-gradient-to-br from-blue-500/10 to-cyan-500/10 rounded-xl border border-blue-400/20 backdrop-blur-sm">
-            <div className="text-3xl font-bold text-blue-300 mb-1">{totalModules - completedModules}</div>
-            <div className="text-sm text-blue-200/80 font-medium">Tersisa</div>
+          <div className="text-center p-4 bg-gradient-to-br from-blue-500/10 to-cyan-500/10 rounded-lg border border-blue-400/20">
+            <div className="text-2xl font-bold text-blue-300 mb-1">{totalModules - completedModules}</div>
+            <div className="text-xs text-blue-200/70 font-medium">Tersisa</div>
           </div>
           
-          <div className="text-center p-6 bg-gradient-to-br from-purple-500/10 to-pink-500/10 rounded-xl border border-purple-400/20 backdrop-blur-sm">
-            <div className="text-3xl font-bold text-purple-300 mb-1">{Math.round(totalProgress)}%</div>
-            <div className="text-sm text-purple-200/80 font-medium">Total</div>
+          <div className="text-center p-4 bg-gradient-to-br from-purple-500/10 to-pink-500/10 rounded-lg border border-purple-400/20">
+            <div className="text-2xl font-bold text-purple-300 mb-1">{Math.round(totalProgress)}%</div>
+            <div className="text-xs text-purple-200/70 font-medium">Total</div>
           </div>
-        </div>
-
-        <div className="flex items-center justify-center space-x-3">
-          <span className="text-sm text-blue-200 font-medium">Modul:</span>
-          {Array.from({ length: totalModules }).map((_, index) => (
-            <div key={index} className="relative">
-              <div
-                className={`w-4 h-4 rounded-full transition-all duration-500 ${
-                  index < completedModules
-                    ? 'bg-gradient-to-br from-emerald-400 to-green-500 shadow-lg transform scale-125'
-                    : 'bg-blue-900/40 border border-blue-400/30'
-                }`}
-              />
-              {index < completedModules && (
-                <div className="absolute inset-0 rounded-full bg-emerald-400/30 animate-ping"></div>
-              )}
-            </div>
-          ))}
         </div>
       </div>
     </div>
@@ -195,63 +162,83 @@ const MaterialsPage = () => {
     totalProgress: 0
   });
 
+  // Load progress from localStorage on mount
+  React.useEffect(() => {
+    const loadProgress = () => {
+      if (typeof window !== 'undefined') {
+        const completed: string[] = [];
+        if (localStorage.getItem('module-module-1-completed') === 'true') {
+          completed.push('module-1');
+        }
+        if (localStorage.getItem('module-module-2-completed') === 'true') {
+          completed.push('module-2');
+        }
+        if (localStorage.getItem('module-module-3-completed') === 'true') {
+          completed.push('module-3');
+        }
+        
+        const totalModules = 3;
+        const newTotalProgress = (completed.length / totalModules) * 100;
+        
+        setProgress({
+          completedModules: completed,
+          totalProgress: newTotalProgress
+        });
+      }
+    };
+
+    loadProgress();
+
+    // Listen for progress updates from other tabs/modules
+    window.addEventListener('progress-updated', loadProgress);
+    window.addEventListener('storage', loadProgress);
+
+    return () => {
+      window.removeEventListener('progress-updated', loadProgress);
+      window.removeEventListener('storage', loadProgress);
+    };
+  }, []);
+
   const modulesData = [
     {
       id: 'module-1',
-      title: 'Konsep Dasar Listrik',
-      subtitle: 'Memahami arus, tegangan, dan resistansi',
-      description: 'Pelajari dasar-dasar listrik dengan cara yang mudah dipahami',
+      title: 'Modul Pengantar',
+      subtitle: 'Konsep Dasar Listrik',
+      description: 'Cari tahu apa itu rangkaian listrik dengan visualisasi interaktif',
       gradientColors: 'from-blue-500 to-cyan-500'
     },
     {
       id: 'module-2', 
       title: 'Rangkaian Seri',
-      subtitle: 'Komponen tersusun berurutan',
-      description: 'Pelajari bagaimana komponen listrik disusun berurutan',
-      gradientColors: 'from-green-500 to-blue-500'
+      subtitle: 'Komponen Berurutan',
+      description: 'Pahami cara kerja rangkaian seri dengan demonstrasi interaktif lengkap',
+      gradientColors: 'from-purple-500 to-pink-500'
     },
     {
       id: 'module-3',
       title: 'Rangkaian Paralel',
-      subtitle: 'Komponen tersusun bercabang',
-      description: 'Pelajari konsep rangkaian listrik paralel dan cara menghitungnya',
-      gradientColors: 'from-purple-500 to-pink-500'
+      subtitle: 'Komponen Bercabang',
+      description: 'Kuasai rangkaian paralel dengan soal-soal kontekstual dan simulator',
+      gradientColors: 'from-emerald-500 to-teal-500'
     }
   ];
-
-  const markModuleComplete = (moduleId: string) => {
-    setProgress(prev => {
-      const newCompleted = [...prev.completedModules];
-      if (!newCompleted.includes(moduleId)) {
-        newCompleted.push(moduleId);
-      }
-      
-      const totalModules = 3;
-      const newTotalProgress = (newCompleted.length / totalModules) * 100;
-      
-      return {
-        completedModules: newCompleted,
-        totalProgress: newTotalProgress
-      };
-    });
-  };
 
   const isModuleCompleted = (moduleId: string) => {
     return progress.completedModules.includes(moduleId);
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-950 to-indigo-900 relative overflow-hidden">
-      {/* Animated Background Elements */}
-      <div className="absolute inset-0">
+    <div className="bg-gradient-to-br from-slate-900 via-blue-950 to-indigo-900 relative min-h-screen">
+      {/* Animated Background */}
+      <div className="fixed inset-0 -z-10 overflow-hidden pointer-events-none">
         <div className="absolute top-20 left-10 w-72 h-72 bg-blue-500/10 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute top-40 right-20 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
-        <div className="absolute bottom-20 left-1/3 w-80 h-80 bg-cyan-500/10 rounded-full blur-3xl animate-pulse delay-2000"></div>
+        <div className="absolute top-40 right-20 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: "1s" }}></div>
+        <div className="absolute bottom-20 left-1/3 w-80 h-80 bg-cyan-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: "2s" }}></div>
         
-        {[...Array(20)].map((_, i) => (
+        {[...Array(15)].map((_, i) => (
           <div
             key={i}
-            className="absolute w-1 h-1 bg-blue-400/30 rounded-full animate-ping"
+            className="absolute w-1 h-1 bg-blue-400/20 rounded-full animate-ping"
             style={{
               left: `${Math.random() * 100}%`,
               top: `${Math.random() * 100}%`,
@@ -262,107 +249,162 @@ const MaterialsPage = () => {
         ))}
       </div>
 
-      {/* Glassmorphism Navbar */}
-      <Navbar />
+      {/* Sticky Navbar */}
+      <div className="sticky top-0 z-50">
+        <Navbar />
+      </div>
 
-      <div className="container mx-auto px-6 py-16 relative z-10">
-        <div className="max-w-7xl mx-auto">
-          {/* Hero Section */}
-          <div className="text-center mb-20">
-            <div className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-blue-400/20 to-cyan-400/20 rounded-full border border-blue-400/30 backdrop-blur-sm mb-8">
-              <BookOpen className="w-4 h-4 text-blue-400 mr-2" />
-              <span className="text-blue-400 text-sm font-medium">Learning Materials</span>
-              <Sparkles className="w-4 h-4 text-blue-400 ml-2" />
-            </div>
-
-            <div className="relative mb-8">
-              <div className="inline-flex items-center justify-center w-32 h-32 rounded-full bg-gradient-to-br from-blue-500/20 to-indigo-600/20 backdrop-blur-xl border border-white/20 shadow-2xl">
-                <div className="absolute inset-0 rounded-full bg-gradient-to-br from-blue-400/10 to-purple-600/10 animate-pulse"></div>
-                <span className="text-6xl relative z-10">📚</span>
-              </div>
-              <div className="absolute -inset-4 bg-gradient-to-r from-blue-500/20 to-indigo-500/20 rounded-full blur-xl"></div>
-            </div>
-
-            <h1 className="text-7xl font-black mb-6 leading-tight">
-              <span className="bg-gradient-to-r from-white via-blue-200 to-cyan-300 bg-clip-text text-transparent drop-shadow-2xl">
-                Rangkaian
-              </span>
-              <br />
-              <span className="bg-gradient-to-r from-cyan-300 via-blue-400 to-indigo-400 bg-clip-text text-transparent">
-                Listrik
-              </span>
-            </h1>
-            
-            <p className="text-xl text-blue-200/90 max-w-3xl mx-auto leading-relaxed mb-8">
-              Pelajari konsep dasar rangkaian listrik dengan penjelasan yang mudah dipahami, dilengkapi audio pembelajaran dan demo interaktif
-            </p>
-
-            <div className="flex justify-center space-x-8 mb-12">
-              <div className="text-center">
-                <div className="text-3xl font-bold text-white">3</div>
-                <div className="text-blue-300 text-sm">Modul Lengkap</div>
-              </div>
-              <div className="text-center">
-                <div className="text-3xl font-bold text-white">100%</div>
-                <div className="text-blue-300 text-sm">Audio & Visual</div>
-              </div>
-              <div className="text-center">
-                <div className="text-3xl font-bold text-white">24/7</div>
-                <div className="text-blue-300 text-sm">Akses Gratis</div>
-              </div>
-            </div>
-          </div>
-
-          {/* Progress Tracking */}
-          <div className="mb-12">
-            <OverallProgress 
-              totalProgress={progress.totalProgress}
-              completedModules={progress.completedModules.length}
-              totalModules={3}
-            />
-          </div>
-
-          {/* Learning Modules Cards */}
-          <div className="grid md:grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-8 mb-12">
-            {modulesData.map((module, index) => (
-              <div key={module.id} className="animate-fade-in" style={{ animationDelay: `${index * 0.1}s` }}>
-                <ModuleCard
-                  id={module.id}
-                  title={module.title}
-                  subtitle={module.subtitle}
-                  description={module.description}
-                  gradientColors={module.gradientColors}
-                  isCompleted={isModuleCompleted(module.id)}
-                  onMarkComplete={() => markModuleComplete(module.id)}
-                />
-              </div>
-            ))}
-          </div>
-
-          {/* Call to Action */}
-          <div className="relative">
-            <div className="absolute -inset-1 bg-gradient-to-r from-cyan-500/30 to-blue-600/30 rounded-3xl blur"></div>
-            <div className="relative bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl rounded-3xl p-12 border border-white/20 text-center">
-              <div className="flex items-center justify-center w-24 h-24 bg-gradient-to-br from-cyan-500/20 to-blue-600/20 rounded-full mb-8 mx-auto">
-                <Zap className="w-12 h-12 text-cyan-400" />
+      <div className="relative z-10">
+        {/* ====== COMPACT HERO SECTION ====== */}
+        <section className="py-12 px-6 md:px-12 border-b border-white/10">
+          <div className="max-w-6xl mx-auto">
+            <div className="space-y-2">
+              <div className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-blue-400/20 to-cyan-400/20 rounded-full border border-blue-400/30 backdrop-blur-sm">
+                <BookOpen className="w-4 h-4 text-blue-400 mr-2" />
+                <span className="text-blue-300 text-sm font-semibold">Materi Pembelajaran Interaktif</span>
               </div>
               
-              <h3 className="text-4xl font-bold text-white mb-4">Siap untuk Praktik Langsung?</h3>
-              <p className="text-blue-200/90 text-xl max-w-3xl mx-auto mb-8">
-                Setelah mempelajari teori, saatnya mencoba simulator rangkaian listrik dengan teknologi interaktif terdepan
+              <div className="flex items-center justify-between gap-8">
+                <div className="flex-1">
+                  <h1 className="text-4xl md:text-5xl font-black">
+                    <span className="bg-gradient-to-r from-white via-blue-200 to-cyan-300 bg-clip-text text-transparent drop-shadow-lg">
+                      Rangkaian Listrik
+                    </span>
+                  </h1>
+                </div>
+                
+                {/* Progress Circle */}
+                <div className="relative w-32 h-32 flex-shrink-0">
+                  <div className="relative w-full h-full bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl rounded-full border-2 border-blue-400/50 shadow-2xl flex items-center justify-center group hover:border-blue-300/80 transition-all">
+                    {/* Glow Effect */}
+                    <div className="absolute -inset-2 bg-gradient-to-r from-blue-500/20 to-cyan-500/20 rounded-full blur opacity-0 group-hover:opacity-50 transition duration-1000"></div>
+                    
+                    {/* Content */}
+                    <div className="relative text-center">
+                      <div className="text-3xl font-black text-transparent bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text">
+                        {Math.round(progress.totalProgress)}%
+                      </div>
+                      <p className="text-xs text-blue-200/70 font-medium mt-1">Progress</p>
+                    </div>
+
+                    {/* Progress Ring Background */}
+                    <svg className="absolute inset-0 transform -rotate-90" width="128" height="128" viewBox="0 0 128 128">
+                      <circle cx="64" cy="64" r="58" fill="none" stroke="rgba(59, 130, 246, 0.1)" strokeWidth="2" />
+                      <circle
+                        cx="64"
+                        cy="64"
+                        r="58"
+                        fill="none"
+                        stroke="url(#progressGradient)"
+                        strokeWidth="2"
+                        strokeDasharray={`${(progress.totalProgress / 100) * 364.42} 364.42`}
+                        strokeLinecap="round"
+                        className="transition-all duration-2000"
+                      />
+                      <defs>
+                        <linearGradient id="progressGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                          <stop offset="0%" stopColor="rgba(59, 130, 246, 0.8)" />
+                          <stop offset="100%" stopColor="rgba(34, 211, 238, 0.8)" />
+                        </linearGradient>
+                      </defs>
+                    </svg>
+                  </div>
+                </div>
+              </div>
+              
+              <p className="text-blue-200/90 max-w-2xl text-sm md:text-base">
+                Pelajari konsep dasar dengan penjelasan interaktif, animasi visual, dan simulasi real-time
               </p>
-              
-              <button
-                className="inline-flex items-center space-x-3 bg-gradient-to-r from-cyan-500 to-blue-600 text-white px-8 py-4 rounded-xl font-bold text-lg hover:from-cyan-600 hover:to-blue-700 transition-all transform hover:scale-105 shadow-2xl"
-                onClick={() => window.location.href = '/practicum'}
-              >
-                <Zap className="w-6 h-6" />
-                <span>Mulai Praktikum</span>
-                <ArrowRight className="w-6 h-6" />
-              </button>
             </div>
           </div>
-        </div>
+        </section>
+
+        {/* ====== MODULES SECTION (FIRST) ====== */}
+        <section id="modules-section" className="py-16 px-6 md:px-12">
+          <div className="max-w-6xl mx-auto">
+            <div className="text-center mb-12">
+              <h2 className="text-4xl md:text-5xl font-black text-white mb-3">Pilih Modul Belajarmu</h2>
+              <p className="text-blue-200/80">Mulai dari modul dasar hingga modul khusus seri dan paralel</p>
+            </div>
+
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {modulesData.map((module, index) => (
+                <div key={module.id} className="opacity-0 animate-fade-in" style={{ animationDelay: `${index * 0.1}s` }}>
+                  <ModuleCard
+                    id={module.id}
+                    title={module.title}
+                    subtitle={module.subtitle}
+                    description={module.description}
+                    gradientColors={module.gradientColors}
+                    isCompleted={isModuleCompleted(module.id)}
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ====== INFO SECTION ====== */}
+        <section className="py-12 px-6 md:px-12 border-t border-white/10">
+          <div className="max-w-6xl mx-auto">
+            <div className="grid md:grid-cols-3 gap-6">
+              <div className="group relative">
+                <div className="absolute -inset-1 bg-gradient-to-r from-blue-500/20 to-cyan-500/20 rounded-2xl blur opacity-0 group-hover:opacity-50 transition duration-1000"></div>
+                <div className="relative bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl rounded-2xl p-6 border border-white/20 text-center">
+                  <BookOpen className="w-10 h-10 text-blue-400 mx-auto mb-3" />
+                  <h3 className="text-lg font-bold text-white mb-2">Materi Lengkap</h3>
+                  <p className="text-blue-200/70 text-sm">Teori + konsep + praktik dalam satu platform</p>
+                </div>
+              </div>
+
+              <div className="group relative">
+                <div className="absolute -inset-1 bg-gradient-to-r from-purple-500/20 to-pink-500/20 rounded-2xl blur opacity-0 group-hover:opacity-50 transition duration-1000"></div>
+                <div className="relative bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl rounded-2xl p-6 border border-white/20 text-center">
+                  <Zap className="w-10 h-10 text-purple-400 mx-auto mb-3" />
+                  <h3 className="text-lg font-bold text-white mb-2">Demo Interaktif</h3>
+                  <p className="text-blue-200/70 text-sm">Simulasi real-time untuk pemahaman lebih baik</p>
+                </div>
+              </div>
+
+              <div className="group relative">
+                <div className="absolute -inset-1 bg-gradient-to-r from-emerald-500/20 to-teal-500/20 rounded-2xl blur opacity-0 group-hover:opacity-50 transition duration-1000"></div>
+                <div className="relative bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl rounded-2xl p-6 border border-white/20 text-center">
+                  <CheckCircle className="w-10 h-10 text-emerald-400 mx-auto mb-3" />
+                  <h3 className="text-lg font-bold text-white mb-2">Progress Tracking</h3>
+                  <p className="text-blue-200/70 text-sm">Pantau kemajuan belajar Anda secara real-time</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+
+        {/* ====== CTA SECTION (AKHIR) ====== */}
+        <section className="py-16 px-6 md:px-12 border-t border-white/10">
+          <div className="max-w-4xl mx-auto">
+            <div className="relative group">
+              <div className="absolute -inset-1 bg-gradient-to-r from-emerald-500/30 to-teal-500/30 rounded-2xl blur-lg opacity-50 group-hover:opacity-75 transition duration-1000"></div>
+              
+              <div className="relative bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl rounded-2xl p-8 border border-white/20 text-center">
+                <h3 className="text-3xl font-black text-white mb-3">Siap untuk Praktikum?</h3>
+                <p className="text-blue-200/80 mb-6 max-w-lg mx-auto">
+                  Setelah mempelajari teori, uji pemahaman Anda dengan simulator rangkaian listrik interaktif
+                </p>
+                
+                <button
+                  className="inline-flex items-center gap-2 bg-gradient-to-r from-emerald-500 to-teal-500 text-white px-8 py-3 rounded-lg font-bold hover:from-emerald-600 hover:to-teal-600 transition-all transform hover:scale-105 shadow-lg"
+                  onClick={() => window.location.href = '/practicum'}
+                >
+                  <Zap className="w-5 h-5" />
+                  <span>Mulai Praktikum</span>
+                  <ArrowRight className="w-5 h-5" />
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <div className="h-6"></div>
       </div>
     </div>
   );
