@@ -437,7 +437,7 @@ export default function HomePage() {
                           
                           {/* Testimonial Content */}
                           <blockquote className="text-blue-200 text-base md:text-lg italic leading-relaxed flex-grow mb-4">
-                            "{testimonial.content}"
+                            &ldquo;{testimonial.content}&rdquo;
                           </blockquote>
                           
                           {/* Footer */}
