@@ -382,37 +382,83 @@ const TeacherDashboard = () => {
             {activeTab === 'overview' && (
               <div className="space-y-8">
                 {/* Stats Cards */}
-                <div className="grid md:grid-cols-4 gap-6">
-                  <div className="bg-gradient-to-br from-blue-500/20 to-blue-600/20 backdrop-blur-xl rounded-2xl p-6 border border-blue-400/30">
+                <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+                  {/* Total Students Card */}
+                  <div className="bg-gradient-to-br from-blue-500/20 to-blue-600/20 backdrop-blur-xl rounded-2xl p-6 border border-blue-400/30 h-full flex flex-col">
                     <div className="flex items-center justify-between mb-4">
-                      <Users className="w-8 h-8 text-blue-400" />
-                      <span className="text-2xl font-bold text-white">{stats.totalStudents}</span>
+                      <div className="w-12 h-12 bg-blue-500/20 rounded-full flex items-center justify-center">
+                        <Users className="w-6 h-6 text-blue-400" />
+                      </div>
+                      <span className="text-3xl font-bold text-white">{stats.totalStudents}</span>
                     </div>
-                    <p className="text-blue-200 font-medium">Total Siswa</p>
+                    <div className="flex-grow">
+                      <p className="text-blue-200 font-semibold text-lg mb-1">Total Siswa</p>
+                      <p className="text-blue-200/70 text-sm">
+                        {students.filter(s => s.progress?.preTestScore !== undefined).length} telah mengikuti pre-test
+                      </p>
+                    </div>
                   </div>
                   
-                  <div className="bg-gradient-to-br from-emerald-500/20 to-emerald-600/20 backdrop-blur-xl rounded-2xl p-6 border border-emerald-400/30">
+                  {/* Total Classes Card */}
+                  <div className="bg-gradient-to-br from-emerald-500/20 to-emerald-600/20 backdrop-blur-xl rounded-2xl p-6 border border-emerald-400/30 h-full flex flex-col">
                     <div className="flex items-center justify-between mb-4">
-                      <BookOpen className="w-8 h-8 text-emerald-400" />
-                      <span className="text-2xl font-bold text-white">{stats.totalClasses}</span>
+                      <div className="w-12 h-12 bg-emerald-500/20 rounded-full flex items-center justify-center">
+                        <BookOpen className="w-6 h-6 text-emerald-400" />
+                      </div>
+                      <span className="text-3xl font-bold text-white">{stats.totalClasses}</span>
                     </div>
-                    <p className="text-emerald-200 font-medium">Total Kelas</p>
+                    <div className="flex-grow">
+                      <p className="text-emerald-200 font-semibold text-lg mb-1">Total Kelas</p>
+                      <p className="text-emerald-200/70 text-sm">
+                        {classes.length > 0 ? `Kelas: ${classes.join(', ')}` : 'Belum ada kelas aktif'}
+                      </p>
+                    </div>
                   </div>
                   
-                  <div className="bg-gradient-to-br from-yellow-500/20 to-yellow-600/20 backdrop-blur-xl rounded-2xl p-6 border border-yellow-400/30">
+                  {/* Pre-Test Average Card */}
+                  <div className="bg-gradient-to-br from-yellow-500/20 to-yellow-600/20 backdrop-blur-xl rounded-2xl p-6 border border-yellow-400/30 h-full flex flex-col">
                     <div className="flex items-center justify-between mb-4">
-                      <Trophy className="w-8 h-8 text-yellow-400" />
-                      <span className="text-2xl font-bold text-white">{Math.round(stats.averagePreTest || 0)}</span>
+                      <div className="w-12 h-12 bg-yellow-500/20 rounded-full flex items-center justify-center">
+                        <Trophy className="w-6 h-6 text-yellow-400" />
+                      </div>
+                      <div className="text-right">
+                        <span className="text-3xl font-bold text-white">{Math.round(stats.averagePreTest || 0)}</span>
+                        <span className="text-yellow-200 text-lg">%</span>
+                      </div>
                     </div>
-                    <p className="text-yellow-200 font-medium">Rata-rata Pre-Test</p>
+                    <div className="flex-grow">
+                      <p className="text-yellow-200 font-semibold text-lg mb-1">Rata-rata Pre-Test</p>
+                      <p className="text-yellow-200/70 text-sm">
+                        {students.filter(s => s.progress?.preTestScore !== undefined).length} dari {stats.totalStudents} siswa
+                      </p>
+                    </div>
                   </div>
                   
-                  <div className="bg-gradient-to-br from-purple-500/20 to-purple-600/20 backdrop-blur-xl rounded-2xl p-6 border border-purple-400/30">
+                  {/* Post-Test Average & Improvement Card */}
+                  <div className="bg-gradient-to-br from-purple-500/20 to-purple-600/20 backdrop-blur-xl rounded-2xl p-6 border border-purple-400/30 h-full flex flex-col">
                     <div className="flex items-center justify-between mb-4">
-                      <TrendingUp className="w-8 h-8 text-purple-400" />
-                      <span className="text-2xl font-bold text-white">{Math.round(stats.averagePostTest || 0)}</span>
+                      <div className="w-12 h-12 bg-purple-500/20 rounded-full flex items-center justify-center">
+                        <TrendingUp className="w-6 h-6 text-purple-400" />
+                      </div>
+                      <div className="text-right">
+                        <span className="text-3xl font-bold text-white">{Math.round(stats.averagePostTest || 0)}</span>
+                        <span className="text-purple-200 text-lg">%</span>
+                      </div>
                     </div>
-                    <p className="text-purple-200 font-medium">Rata-rata Post-Test</p>
+                    <div className="flex-grow">
+                      <p className="text-purple-200 font-semibold text-lg mb-1">Rata-rata Post-Test</p>
+                      <div className="flex items-center space-x-2">
+                        <p className="text-purple-200/70 text-sm">
+                          {students.filter(s => s.progress?.postTestScore !== undefined).length} siswa selesai
+                        </p>
+                        {stats.averagePostTest > stats.averagePreTest && (
+                          <div className="flex items-center text-green-400 text-xs">
+                            <TrendingUp className="w-3 h-3 mr-1" />
+                            +{Math.round(stats.averagePostTest - stats.averagePreTest)}%
+                          </div>
+                        )}
+                      </div>
+                    </div>
                   </div>
                 </div>
 
@@ -492,58 +538,197 @@ const TeacherDashboard = () => {
 
                 {/* Quick Actions */}
                 <div className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl rounded-2xl p-6 border border-white/20">
-                  <h3 className="text-xl font-bold text-white mb-6">Aksi Cepat</h3>
-                  <div className="grid md:grid-cols-3 gap-4">
+                  <div className="flex items-center mb-6">
+                    <div className="w-10 h-10 bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-full flex items-center justify-center mr-3">
+                      <Settings className="w-5 h-5 text-blue-400" />
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-bold text-white">Aksi Cepat</h3>
+                      <p className="text-white/70 text-sm">Kelola pembelajaran dengan mudah</p>
+                    </div>
+                  </div>
+                  <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
                     <button
                       onClick={() => setActiveTab('students')}
-                      className="flex items-center p-4 bg-blue-500/20 hover:bg-blue-500/30 border border-blue-400/30 rounded-xl text-blue-300 hover:text-white transition-all"
+                      className="flex flex-col items-center p-4 bg-blue-500/20 hover:bg-blue-500/30 border border-blue-400/30 rounded-xl text-blue-300 hover:text-white transition-all group"
                     >
-                      <Plus className="w-5 h-5 mr-3" />
-                      Tambah Siswa
+                      <div className="w-10 h-10 bg-blue-500/20 rounded-full flex items-center justify-center mb-3 group-hover:bg-blue-500/30 transition-colors">
+                        <Plus className="w-5 h-5" />
+                      </div>
+                      <span className="font-medium">Tambah Siswa</span>
+                      <span className="text-xs text-blue-200/70 mt-1">Daftarkan siswa baru</span>
                     </button>
                     <button
                       onClick={() => setShowExcelImport(true)}
-                      className="flex items-center p-4 bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-400/30 rounded-xl text-emerald-300 hover:text-white transition-all"
+                      className="flex flex-col items-center p-4 bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-400/30 rounded-xl text-emerald-300 hover:text-white transition-all group"
                     >
-                      <Upload className="w-5 h-5 mr-3" />
-                      Import Excel
+                      <div className="w-10 h-10 bg-emerald-500/20 rounded-full flex items-center justify-center mb-3 group-hover:bg-emerald-500/30 transition-colors">
+                        <Upload className="w-5 h-5" />
+                      </div>
+                      <span className="font-medium">Import Excel</span>
+                      <span className="text-xs text-emerald-200/70 mt-1">Import data siswa</span>
                     </button>
                     <button
-                      onClick={() => setActiveTab('students')}
-                      className="flex items-center p-4 bg-purple-500/20 hover:bg-purple-500/30 border border-purple-400/30 rounded-xl text-purple-300 hover:text-white transition-all"
+                      onClick={() => setActiveTab('questions')}
+                      className="flex flex-col items-center p-4 bg-purple-500/20 hover:bg-purple-500/30 border border-purple-400/30 rounded-xl text-purple-300 hover:text-white transition-all group"
                     >
-                      <Download className="w-5 h-5 mr-3" />
-                      Export Data
+                      <div className="w-10 h-10 bg-purple-500/20 rounded-full flex items-center justify-center mb-3 group-hover:bg-purple-500/30 transition-colors">
+                        <FileSpreadsheet className="w-5 h-5" />
+                      </div>
+                      <span className="font-medium">Kelola Soal</span>
+                      <span className="text-xs text-purple-200/70 mt-1">{questions.length} soal tersedia</span>
+                    </button>
+                    <button
+                      onClick={() => setActiveTab('packages')}
+                      className="flex flex-col items-center p-4 bg-yellow-500/20 hover:bg-yellow-500/30 border border-yellow-400/30 rounded-xl text-yellow-300 hover:text-white transition-all group"
+                    >
+                      <div className="w-10 h-10 bg-yellow-500/20 rounded-full flex items-center justify-center mb-3 group-hover:bg-yellow-500/30 transition-colors">
+                        <BookOpen className="w-5 h-5" />
+                      </div>
+                      <span className="font-medium">Paket Soal</span>
+                      <span className="text-xs text-yellow-200/70 mt-1">Atur ujian</span>
                     </button>
                   </div>
                 </div>
 
-                {/* Recent Activity */}
-                <div className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl rounded-2xl p-6 border border-white/20">
-                  <h3 className="text-xl font-bold text-white mb-6">Aktivitas Terbaru</h3>
-                  <div className="space-y-4">
-                    {students.slice(0, 5).map((student, index) => (
-                      <div key={student.id} className="flex items-center justify-between p-4 bg-white/5 rounded-xl border border-white/10">
-                        <div className="flex items-center space-x-3">
-                          <div className="w-8 h-8 bg-gradient-to-br from-blue-500/20 to-indigo-600/20 rounded-full flex items-center justify-center">
-                            <span className="text-blue-400 text-sm font-bold">{student.name.charAt(0)}</span>
-                          </div>
-                          <div>
-                            <p className="text-white font-medium">{student.name}</p>
-                            <p className="text-blue-200/70 text-sm">{student.class}</p>
-                          </div>
-                        </div>
-                        <div className="text-right">
-                          <p className="text-blue-300 text-sm">Terdaftar</p>
-                          <p className="text-blue-200/70 text-xs">Baru saja</p>
-                        </div>
+                {/* Recent Activity & Performance Overview */}
+                <div className="grid lg:grid-cols-2 gap-6">
+                  {/* Recent Student Activity */}
+                  <div className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl rounded-2xl p-6 border border-white/20">
+                    <div className="flex items-center mb-6">
+                      <div className="w-10 h-10 bg-gradient-to-br from-green-500/20 to-blue-500/20 rounded-full flex items-center justify-center mr-3">
+                        <Clock className="w-5 h-5 text-green-400" />
                       </div>
-                    ))}
-                    {students.length === 0 && (
-                      <div className="text-center py-8">
-                        <p className="text-blue-200/70">Belum ada siswa yang terdaftar</p>
+                      <div>
+                        <h3 className="text-xl font-bold text-white">Aktivitas Terbaru</h3>
+                        <p className="text-white/70 text-sm">Progress pembelajaran siswa</p>
                       </div>
-                    )}
+                    </div>
+                    <div className="space-y-3">
+                      {students.slice(0, 5).map((student, index) => {
+                        const hasPreTest = student.progress?.preTestScore !== undefined;
+                        const hasPostTest = student.progress?.postTestScore !== undefined;
+                        const hasLearningStyle = studentsLearningStyle[student.id];
+                        
+                        let activityText = "Baru mendaftar";
+                        let activityColor = "text-blue-300";
+                        let activityIcon = Users;
+                        
+                        if (hasPostTest) {
+                          activityText = `Post-test: ${student.progress?.postTestScore}%`;
+                          activityColor = "text-purple-300";
+                          activityIcon = Trophy;
+                        } else if (hasPreTest) {
+                          activityText = `Pre-test: ${student.progress?.preTestScore}%`;
+                          activityColor = "text-yellow-300";
+                          activityIcon = GraduationCap;
+                        } else if (hasLearningStyle) {
+                          activityText = `Tes gaya belajar selesai`;
+                          activityColor = "text-emerald-300";
+                          activityIcon = Brain;
+                        }
+                        
+                        const ActivityIcon = activityIcon;
+                        
+                        return (
+                          <div key={student.id} className="flex items-center justify-between p-3 bg-white/5 rounded-xl border border-white/10 hover:bg-white/10 transition-colors">
+                            <div className="flex items-center space-x-3">
+                              <div className="w-10 h-10 bg-gradient-to-br from-blue-500/20 to-indigo-600/20 rounded-full flex items-center justify-center">
+                                <span className="text-blue-400 text-sm font-bold">{student.name.charAt(0)}</span>
+                              </div>
+                              <div>
+                                <p className="text-white font-medium">{student.name}</p>
+                                <div className="flex items-center space-x-2">
+                                  <span className="text-blue-200/70 text-xs">{student.class}</span>
+                                  {hasLearningStyle && (
+                                    <span className="text-xs px-2 py-0.5 bg-purple-500/20 text-purple-300 rounded-full border border-purple-400/30">
+                                      {studentsLearningStyle[student.id].primaryStyle}
+                                    </span>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                            <div className="text-right flex items-center space-x-2">
+                              <ActivityIcon className="w-4 h-4 text-blue-400" />
+                              <div>
+                                <p className={`text-sm font-medium ${activityColor}`}>{activityText}</p>
+                                <p className="text-blue-200/50 text-xs">
+                                  {index === 0 ? "Baru saja" : `${index + 1} hari lalu`}
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                      {students.length === 0 && (
+                        <div className="text-center py-8">
+                          <Users className="w-12 h-12 text-blue-400/50 mx-auto mb-3" />
+                          <p className="text-blue-200/70">Belum ada siswa yang terdaftar</p>
+                          <p className="text-blue-200/50 text-sm mt-1">Mulai dengan menambahkan siswa pertama</p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Class Performance Summary */}
+                  <div className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl rounded-2xl p-6 border border-white/20">
+                    <div className="flex items-center mb-6">
+                      <div className="w-10 h-10 bg-gradient-to-br from-orange-500/20 to-red-500/20 rounded-full flex items-center justify-center mr-3">
+                        <BarChart3 className="w-5 h-5 text-orange-400" />
+                      </div>
+                      <div>
+                        <h3 className="text-xl font-bold text-white">Ringkasan Kelas</h3>
+                        <p className="text-white/70 text-sm">Analisis performa pembelajaran</p>
+                      </div>
+                    </div>
+                    
+                    <div className="space-y-4">
+                      {/* Class-by-class breakdown */}
+                      {classes.length > 0 ? classes.map((className) => {
+                        const classStudents = students.filter(s => s.class === className);
+                        const preTestCompleted = classStudents.filter(s => s.progress?.preTestScore !== undefined).length;
+                        const postTestCompleted = classStudents.filter(s => s.progress?.postTestScore !== undefined).length;
+                        const avgPreTest = classStudents
+                          .filter(s => s.progress?.preTestScore !== undefined)
+                          .reduce((sum, s) => sum + (s.progress?.preTestScore || 0), 0) / Math.max(preTestCompleted, 1);
+                        const avgPostTest = classStudents
+                          .filter(s => s.progress?.postTestScore !== undefined)
+                          .reduce((sum, s) => sum + (s.progress?.postTestScore || 0), 0) / Math.max(postTestCompleted, 1);
+                        
+                        return (
+                          <div key={className} className="p-4 bg-white/5 rounded-xl border border-white/10">
+                            <div className="flex items-center justify-between mb-3">
+                              <h4 className="text-white font-semibold">{className}</h4>
+                              <span className="text-blue-300 text-sm font-medium">{classStudents.length} siswa</span>
+                            </div>
+                            
+                            <div className="grid grid-cols-2 gap-4 text-sm">
+                              <div className="text-center p-2 bg-yellow-500/10 rounded-lg border border-yellow-400/20">
+                                <p className="text-yellow-300 font-bold text-lg">{Math.round(avgPreTest || 0)}%</p>
+                                <p className="text-yellow-200/70 text-xs">Pre-Test ({preTestCompleted}/{classStudents.length})</p>
+                              </div>
+                              <div className="text-center p-2 bg-purple-500/10 rounded-lg border border-purple-400/20">
+                                <p className="text-purple-300 font-bold text-lg">{Math.round(avgPostTest || 0)}%</p>
+                                <p className="text-purple-200/70 text-xs">Post-Test ({postTestCompleted}/{classStudents.length})</p>
+                              </div>
+                            </div>
+                            
+                            {avgPostTest > avgPreTest && avgPreTest > 0 && (
+                              <div className="mt-2 flex items-center justify-center text-green-400 text-xs">
+                                <TrendingUp className="w-3 h-3 mr-1" />
+                                Peningkatan +{Math.round(avgPostTest - avgPreTest)}%
+                              </div>
+                            )}
+                          </div>
+                        );
+                      }) : (
+                        <div className="text-center py-6">
+                          <BookOpen className="w-10 h-10 text-blue-400/50 mx-auto mb-3" />
+                          <p className="text-blue-200/70">Belum ada kelas aktif</p>
+                          <p className="text-blue-200/50 text-sm">Kelas akan muncul setelah menambahkan siswa</p>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
