@@ -242,21 +242,72 @@ function analyzeCircuit(elements: CircuitElement[], wires: Wire[]) {
 }
 
 function calculateCurrentFlow(elements: CircuitElement[], wires: Wire[]) {
+  console.log("🔵 ===== MULAI calculateCurrentFlow =====");
+
   const batteries = elements.filter((e) => e.type === "battery");
   const resistiveElements = elements.filter(
     (e) => e.type === "resistor" || e.type === "lamp"
   );
   const switches = elements.filter((e) => e.type === "switch");
 
-  const totalVoltage = batteries.reduce((sum, b) => sum + b.value, 0);
-  const hasOpenSwitch = switches.some((s) => s.state === "open");
+  console.log("📊 Komponen dalam rangkaian:", {
+    batteries: batteries.length,
+    resistiveElements: resistiveElements.length,
+    switches: switches.length,
+    switchStates: switches.map((sw) => ({ id: sw.id, state: sw.state })),
+  });
 
-  if (hasOpenSwitch || totalVoltage === 0) {
-    return { current: 0, power: 0, componentCurrents: {}, lampPowers: {} };
+  // 🔘 LOGGING STATUS SAKLAR (untuk debugging)
+  const closedSwitches = switches.filter((sw) => sw.state === "closed");
+  const openSwitches = switches.filter((sw) => sw.state === "open");
+
+  console.log("🔘 [SWITCH STATUS] Status Semua Saklar:", {
+    totalSwitches: switches.length,
+    closedCount: closedSwitches.length,
+    openCount: openSwitches.length,
+    closedSwitches: closedSwitches.map((sw) => ({
+      id: sw.id,
+      state: "✅ CLOSED",
+      terminals: { a: `${sw.id}-a`, b: `${sw.id}-b` },
+    })),
+    openSwitches: openSwitches.map((sw) => ({
+      id: sw.id,
+      state: "❌ OPEN",
+      terminals: { a: `${sw.id}-a`, b: `${sw.id}-b` },
+    })),
+    summary:
+      switches.length === 0
+        ? "Tidak ada saklar dalam rangkaian"
+        : closedSwitches.length === switches.length
+        ? "✅ Semua saklar tertutup"
+        : openSwitches.length === switches.length
+        ? "❌ Semua saklar terbuka"
+        : `⚠️ ${closedSwitches.length} tertutup, ${openSwitches.length} terbuka`,
+  });
+
+  const totalVoltage = batteries.reduce((sum, b) => sum + b.value, 0);
+  console.log("⚡ Total Voltage:", totalVoltage, "V");
+
+  // PERBAIKAN: Jangan langsung return jika ada saklar terbuka
+  // Kita akan handle per-cabang untuk rangkaian paralel
+  if (totalVoltage === 0) {
+    return {
+      current: 0,
+      power: 0,
+      componentCurrents: {},
+      lampPowers: {},
+      topology: undefined,
+    };
   }
 
   if (resistiveElements.length === 0) {
-    return { current: 0, power: 0, componentCurrents: {}, lampPowers: {} };
+    return {
+      current: 0,
+      power: 0,
+      componentCurrents: {},
+      lampPowers: {},
+      topology: undefined,
+    };
   }
 
   // Build connection graph untuk deteksi paralel
@@ -292,6 +343,26 @@ function calculateCurrentFlow(elements: CircuitElement[], wires: Wire[]) {
       }
     });
 
+  // 🔧 PERBAIKAN 1: Tambahkan koneksi antar terminal SEMUA saklar untuk deteksi topologi
+  // ✅ Saklar ditambahkan ke graf APAPUN statusnya (untuk deteksi struktur paralel/seri)
+  // Status saklar hanya mempengaruhi perhitungan arus, bukan topologi
+  switches.forEach((sw) => {
+    const nodeA = `${sw.id}-a`;
+    const nodeB = `${sw.id}-b`;
+    connectionGraph.get(nodeA)?.add(nodeB);
+    connectionGraph.get(nodeB)?.add(nodeA);
+  });
+
+  console.log(
+    "🌐 [CONNECTION GRAPH] Graf koneksi struktural (semua saklar included):",
+    {
+      totalNodes: connectionGraph.size,
+      switchesInGraph: switches.length,
+      switchStates: switches.map((sw) => ({ id: sw.id, state: sw.state })),
+      note: "⚠️ Graf ini untuk TOPOLOGI, bukan listrik - saklar terbuka tetap dihitung!",
+    }
+  );
+
   // 🧩 CIRVIA: Union-Find untuk mengelompokkan node yang terhubung
   // Semua node yang terhubung melalui wire dianggap sebagai satu "electrical node"
   const parent = new Map<string, string>();
@@ -322,6 +393,14 @@ function calculateCurrentFlow(elements: CircuitElement[], wires: Wire[]) {
     });
   });
 
+  console.log(
+    "🔗 [UNION-FIND] Node elektrik yang terkelompok (untuk topologi):",
+    {
+      totalGroups: new Set(Array.from(parent.keys()).map(find)).size,
+      note: "✅ Termasuk jalur melalui saklar terbuka - ini untuk struktur, bukan listrik!",
+    }
+  );
+
   // 🔍 Deteksi percabangan (node dengan degree > 2)
   const branchNodes: string[] = [];
   connectionGraph.forEach((connections, node) => {
@@ -331,11 +410,29 @@ function calculateCurrentFlow(elements: CircuitElement[], wires: Wire[]) {
   });
   const hasParallelBranch = branchNodes.length > 0;
 
-  // 🔀 Deteksi komponen paralel menggunakan electrical nodes
+  console.log("🌿 Deteksi Percabangan:", {
+    branchNodes,
+    hasParallelBranch,
+    totalNodes: connectionGraph.size,
+  });
+
+  // � Helper: Cek apakah node adalah branch node (degree > 2)
+  const isBranchNode = (nodeId: string): boolean => {
+    const connections = connectionGraph.get(nodeId);
+    return connections ? connections.size > 2 : false;
+  };
+
+  // �🔀 PERBAIKAN 2: Deteksi komponen paralel dengan logika yang lebih fleksibel
+  // Elemen dianggap paralel jika:
+  // 1. Mereka berbagi setidaknya satu node percabangan (degree > 2), ATAU
+  // 2. Kedua terminal mereka terhubung ke electrical node yang sama
   const parallelGroups: string[][] = [];
   const processedElements = new Set<string>();
 
-  resistiveElements.forEach((el) => {
+  // 🔧 Masukkan SEMUA elemen (termasuk saklar) ke analisis paralel
+  const analyzedElements = [...resistiveElements, ...switches];
+
+  analyzedElements.forEach((el) => {
     if (processedElements.has(el.id)) return;
 
     const group: string[] = [el.id];
@@ -348,8 +445,8 @@ function calculateCurrentFlow(elements: CircuitElement[], wires: Wire[]) {
     const elElectricalA = find(elNodeA);
     const elElectricalB = find(elNodeB);
 
-    // Cari komponen lain yang terhubung ke electrical node yang sama
-    resistiveElements.forEach((other) => {
+    // Cari komponen lain yang paralel dengan elemen ini
+    analyzedElements.forEach((other) => {
       if (other.id === el.id || processedElements.has(other.id)) return;
 
       const otherNodeA = `${other.id}-a`;
@@ -358,10 +455,33 @@ function calculateCurrentFlow(elements: CircuitElement[], wires: Wire[]) {
       const otherElectricalA = find(otherNodeA);
       const otherElectricalB = find(otherNodeB);
 
-      // Jika kedua ujung terhubung ke electrical node yang sama = PARALEL
-      if (
+      // 🔧 LOGIKA BARU: Elemen paralel jika salah satu kondisi terpenuhi:
+
+      // Kondisi 1: Kedua ujung terhubung ke electrical node yang sama (logika lama)
+      const bothNodesSame =
         elElectricalA === otherElectricalA &&
-        elElectricalB === otherElectricalB
+        elElectricalB === otherElectricalB;
+
+      // Kondisi 2: Berbagi setidaknya satu node percabangan (degree > 2)
+      const sharesStartBranch =
+        elElectricalA === otherElectricalA &&
+        (isBranchNode(elElectricalA) || isBranchNode(otherElectricalA));
+
+      const sharesEndBranch =
+        elElectricalB === otherElectricalB &&
+        (isBranchNode(elElectricalB) || isBranchNode(otherElectricalB));
+
+      // Kondisi 3: Cross-connection (node A el ke node B other, atau sebaliknya)
+      // Ini handle kasus: Lamp1-a → Switch1 → Lamp2-b
+      const crossConnected =
+        (elElectricalA === otherElectricalB && isBranchNode(elElectricalA)) ||
+        (elElectricalB === otherElectricalA && isBranchNode(elElectricalB));
+
+      if (
+        bothNodesSame ||
+        sharesStartBranch ||
+        sharesEndBranch ||
+        crossConnected
       ) {
         group.push(other.id);
         processedElements.add(other.id);
@@ -373,30 +493,217 @@ function calculateCurrentFlow(elements: CircuitElement[], wires: Wire[]) {
     }
   });
 
-  // Hitung total resistansi dengan mempertimbangkan paralel
+  console.log("🔀 Deteksi Parallel Groups:", {
+    parallelGroups,
+    totalGroups: parallelGroups.length,
+    elementsInParallel: parallelGroups.flat(),
+  });
+
+  // 🎯 HITUNG TOPOLOGI LEBIH AWAL (sebelum early return)
+  // Topologi ditentukan oleh STRUKTUR, bukan status saklar
+  const serialElements = resistiveElements.filter(
+    (el) => !parallelGroups.flat().includes(el.id)
+  );
+
+  let topologyType: "series" | "parallel" | "mixed";
+  if (hasParallelBranch) {
+    if (serialElements.length > 0) {
+      topologyType = "mixed";
+    } else {
+      topologyType = "parallel";
+    }
+  } else if (parallelGroups.length > 0) {
+    if (serialElements.length > 0) {
+      topologyType = "mixed";
+    } else {
+      topologyType = "parallel";
+    }
+  } else {
+    topologyType = "series";
+  }
+
+  const detectedTopology = {
+    type: topologyType,
+    hasParallelBranch,
+    branchNodes,
+  };
+
+  console.log(
+    "🎯 [TOPOLOGY DETERMINATION] Jenis Rangkaian Terdeteksi (EARLY):",
+    {
+      topologyType,
+      hasParallelBranch,
+      branchNodes,
+      serialElements: serialElements.map((e) => e.id),
+      reasoning:
+        topologyType === "mixed"
+          ? "Ada paralel DAN ada seri → Campuran"
+          : topologyType === "parallel"
+          ? "Ada paralel, tidak ada seri → Paralel"
+          : "Tidak ada percabangan → Seri",
+    }
+  );
+
+  // 🔄 Helper: Cek apakah ada saklar terbuka pada jalur elemen tertentu
+  // Improved version: trace through circuit graph to find switches in the path
+  const hasOpenSwitchInPath = (elementIds: string[]): boolean => {
+    // First check if any element in the list is itself a switch
+    const switchesInGroup = switches.filter((sw) => elementIds.includes(sw.id));
+    if (switchesInGroup.some((sw) => sw.state === "open")) {
+      const openSwitchInGroup = switchesInGroup.find(
+        (sw) => sw.state === "open"
+      );
+      console.log("🔴 [SWITCH CHECK] Saklar terbuka ditemukan di grup:", {
+        elementIds,
+        openSwitch: openSwitchInGroup?.id,
+        result: "BLOCKED (ada saklar terbuka)",
+      });
+      return true;
+    }
+
+    // For parallel branches, we need to check if there's a switch in series with the branch
+    // Build a simple path from battery through this element
+    for (const elemId of elementIds) {
+      const elem = elements.find((e) => e.id === elemId);
+      if (!elem) continue;
+
+      // Get the electrical nodes this element connects to
+      const nodeA = find(`${elemId}-a`);
+      const nodeB = find(`${elemId}-b`);
+
+      // Check if there are switches connected in series (sharing one node but not parallel)
+      for (const sw of switches) {
+        if (sw.state === "closed") continue;
+
+        const swNodeA = find(`${sw.id}-a`);
+        const swNodeB = find(`${sw.id}-b`);
+
+        // If switch shares exactly one node with this element, it's in series
+        const sharesA = swNodeA === nodeA || swNodeB === nodeA;
+        const sharesB = swNodeA === nodeB || swNodeB === nodeB;
+
+        // In series: shares one node but not both (parallel would share both)
+        if ((sharesA && !sharesB) || (!sharesA && sharesB)) {
+          console.log(
+            "🔴 [SWITCH CHECK] Saklar terbuka ditemukan dalam seri:",
+            {
+              elementIds,
+              openSwitch: sw.id,
+              elementNode: { a: nodeA, b: nodeB },
+              switchNode: { a: swNodeA, b: swNodeB },
+              result: "BLOCKED (saklar terbuka di jalur seri)",
+            }
+          );
+          return true;
+        }
+      }
+    }
+
+    console.log("✅ [SWITCH CHECK] Jalur bebas dari saklar terbuka:", {
+      elementIds,
+      result: "PASS (tidak ada saklar terbuka)",
+    });
+    return false;
+  };
+
+  // 🔄 Filter parallel groups untuk menghapus cabang dengan saklar terbuka
+  // Each parallel branch is evaluated independently
+  const activeParallelGroups = parallelGroups
+    .map((group) => {
+      // Filter out elements in branches that have open switches
+      return group.filter((id) => {
+        const element = elements.find((e) => e.id === id);
+        if (!element) return false;
+
+        // Check if this specific element has an open switch in its path
+        // This includes switches that are part of this branch or in series with it
+        return !hasOpenSwitchInPath([id]);
+      });
+    })
+    .filter((group) => group.length > 0); // Hapus grup kosong
+
+  // 🔘 LOG: Active parallel groups after filtering
+  console.log("🟢 === ACTIVE PARALLEL GROUPS (After Switch Filter) ===");
+  console.log(`📊 Total Active Groups: ${activeParallelGroups.length}`);
+  activeParallelGroups.forEach((group, index) => {
+    console.log(`\n  🔹 Active Group ${index + 1}:`);
+    console.log(`     Elements: [${group.join(", ")}]`);
+    group.forEach((elementId) => {
+      const el = elements.find((e) => e.id === elementId);
+      if (el) {
+        console.log(
+          `     - ${elementId}: ${el.type} (${
+            el.type === "resistor" || el.type === "lamp"
+              ? `${el.value}Ω`
+              : "non-resistive"
+          })`
+        );
+      }
+    });
+  });
+
+  if (activeParallelGroups.length === 0) {
+    console.log(
+      "⚠️ No active parallel groups - all branches blocked by open switches"
+    );
+  }
+  console.log("🟢 =========================================\n");
+
+  // Hitung total resistansi dengan mempertimbangkan paralel (hanya cabang aktif)
   let totalResistance = 0;
 
-  if (parallelGroups.length > 0) {
-    // Ada komponen paralel
-    parallelGroups.forEach((group) => {
+  if (activeParallelGroups.length > 0) {
+    // Ada komponen paralel (hanya hitung yang aktif)
+    activeParallelGroups.forEach((group) => {
+      if (group.length === 0) return;
+
+      // 🔧 Filter hanya elemen resistif (resistor & lamp), skip saklar
+      const resistiveInGroup = group.filter((id) => {
+        const el = elements.find((e) => e.id === id);
+        return el && (el.type === "resistor" || el.type === "lamp");
+      });
+
+      if (resistiveInGroup.length === 0) return;
+
       // Untuk paralel: 1/R_total = 1/R1 + 1/R2 + ...
       const parallelResistance =
         1 /
-        group.reduce((sum, id) => {
+        resistiveInGroup.reduce((sum, id) => {
           const el = resistiveElements.find((e) => e.id === id)!;
           return sum + 1 / el.value;
         }, 0);
       totalResistance += parallelResistance;
     });
 
-    // Tambahkan resistor yang tidak paralel (seri)
+    // Tambahkan resistor yang tidak paralel (seri) dan tidak memiliki saklar terbuka
     const serialElements = resistiveElements.filter(
-      (el) => !parallelGroups.flat().includes(el.id)
+      (el) =>
+        !parallelGroups.flat().includes(el.id) && !hasOpenSwitchInPath([el.id])
     );
     totalResistance += serialElements.reduce((sum, el) => sum + el.value, 0);
   } else {
-    // Semua seri
-    totalResistance = resistiveElements.reduce((sum, r) => sum + r.value, 0);
+    // Semua seri - hanya hitung yang tidak memiliki saklar terbuka
+    const activeSerialElements = resistiveElements.filter(
+      (el) => !hasOpenSwitchInPath([el.id])
+    );
+
+    // Jika semua elemen seri memiliki saklar terbuka, tidak ada arus
+    if (activeSerialElements.length === 0) {
+      return {
+        current: 0,
+        power: 0,
+        componentCurrents: {},
+        lampPowers: {},
+        topology: {
+          type: detectedTopology.type,
+          groups: [],
+          hasParallelBranch: detectedTopology.hasParallelBranch,
+          branchNodes: detectedTopology.branchNodes,
+        },
+      };
+    }
+
+    totalResistance = activeSerialElements.reduce((sum, r) => sum + r.value, 0);
   }
 
   if (totalResistance === 0) {
@@ -406,42 +713,131 @@ function calculateCurrentFlow(elements: CircuitElement[], wires: Wire[]) {
   const totalCurrent = totalVoltage / totalResistance;
   const totalPower = totalVoltage * totalCurrent;
 
-  // Hitung arus untuk setiap komponen
+  // Hitung arus untuk setiap komponen (hanya cabang aktif)
   const componentCurrents: Record<string, number> = {};
   const lampPowers: Record<string, number> = {};
 
-  if (parallelGroups.length > 0) {
-    // Ada komponen paralel - distribusi arus berbeda
-    parallelGroups.forEach((group) => {
+  // Initialize all lamps with 0 power first (will be overridden for active branches)
+  elements.forEach((el) => {
+    if (el.type === "lamp") {
+      lampPowers[el.id] = 0;
+    }
+  });
+
+  console.log("💡 [LAMP POWER] Mulai Perhitungan Daya Lampu:", {
+    totalCurrent,
+    totalPower,
+    totalResistance,
+    activeParallelGroups,
+    hasParallelTopology: activeParallelGroups.length > 0,
+  });
+
+  if (activeParallelGroups.length > 0) {
+    // Ada komponen paralel - distribusi arus berbeda (hanya cabang aktif)
+    console.log("⚡ [PARALLEL CALC] Menghitung arus untuk cabang paralel...");
+
+    activeParallelGroups.forEach((group, idx) => {
+      console.log(`  📍 Parallel Group ${idx + 1}:`, group);
+
       // Dalam paralel: V sama untuk semua branch
       // I = V/R untuk masing-masing komponen
       group.forEach((id) => {
-        const el = resistiveElements.find((e) => e.id === id)!;
+        // 🔧 Cari di elements, bukan resistiveElements (karena group bisa berisi saklar)
+        const el = elements.find((e) => e.id === id);
+        if (!el) return;
+
+        // Skip saklar - saklar tidak punya arus tersendiri dalam konteks ini
+        if (el.type === "switch") {
+          return;
+        }
+
+        // Pastikan elemen adalah resistif
+        if (el.type !== "resistor" && el.type !== "lamp") {
+          return;
+        }
+
+        // Jika elemen ini memiliki saklar terbuka di jalurnya, arus = 0
+        if (hasOpenSwitchInPath([id])) {
+          componentCurrents[id] = 0;
+          if (el.type === "lamp") {
+            lampPowers[id] = 0;
+            console.log(
+              `    💡 Lampu ${id}: MATI (saklar terbuka di jalurnya)`
+            );
+          }
+          return;
+        }
+
         const componentCurrent = totalVoltage / el.value;
         componentCurrents[id] = componentCurrent;
 
         if (el.type === "lamp") {
           lampPowers[id] = componentCurrent * componentCurrent * el.value;
+          console.log(
+            `    💡 Lampu ${id}: NYALA - Current=${componentCurrent.toFixed(
+              3
+            )}A, Power=${lampPowers[id].toFixed(3)}W`
+          );
         }
       });
     });
 
-    // Komponen seri mendapat total current
+    // Komponen seri mendapat total current (hanya yang aktif)
+    console.log("📏 [SERIES CALC] Menghitung arus untuk elemen seri...");
     const serialElements = resistiveElements.filter(
       (el) => !parallelGroups.flat().includes(el.id)
     );
+    console.log(
+      "  Serial Elements:",
+      serialElements.map((e) => e.id)
+    );
+
     serialElements.forEach((el) => {
+      if (hasOpenSwitchInPath([el.id])) {
+        componentCurrents[el.id] = 0;
+        if (el.type === "lamp") {
+          lampPowers[el.id] = 0;
+          console.log(
+            `    💡 Lampu ${el.id}: MATI (saklar terbuka di jalurnya)`
+          );
+        }
+        return;
+      }
+
       componentCurrents[el.id] = totalCurrent;
       if (el.type === "lamp") {
         lampPowers[el.id] = totalCurrent * totalCurrent * el.value;
+        console.log(
+          `    💡 Lampu ${el.id}: NYALA - Current=${totalCurrent.toFixed(
+            3
+          )}A, Power=${lampPowers[el.id].toFixed(3)}W`
+        );
       }
     });
   } else {
-    // Semua seri - arus sama untuk semua
+    // Semua seri - arus sama untuk semua (hanya yang aktif)
+    console.log("📏 [SERIES ONLY] Semua elemen dalam rangkaian seri...");
+
     resistiveElements.forEach((el) => {
+      if (hasOpenSwitchInPath([el.id])) {
+        componentCurrents[el.id] = 0;
+        if (el.type === "lamp") {
+          lampPowers[el.id] = 0;
+          console.log(
+            `    💡 Lampu ${el.id}: MATI (saklar terbuka di jalurnya)`
+          );
+        }
+        return;
+      }
+
       componentCurrents[el.id] = totalCurrent;
       if (el.type === "lamp") {
         lampPowers[el.id] = totalCurrent * totalCurrent * el.value;
+        console.log(
+          `    💡 Lampu ${el.id}: NYALA - Current=${totalCurrent.toFixed(
+            3
+          )}A, Power=${lampPowers[el.id].toFixed(3)}W`
+        );
       }
     });
   }
@@ -453,7 +849,20 @@ function calculateCurrentFlow(elements: CircuitElement[], wires: Wire[]) {
     }
   });
 
-  // Build topology info
+  console.log("✅ [SUMMARY] Hasil Perhitungan Akhir:", {
+    lampPowers,
+    componentCurrents,
+    totalCurrent,
+    totalPower,
+    activeLamps: Object.entries(lampPowers)
+      .filter(([_, power]) => power > 0)
+      .map(([id]) => id),
+    inactiveLamps: Object.entries(lampPowers)
+      .filter(([_, power]) => power === 0)
+      .map(([id]) => id),
+  });
+
+  // Build topology info (gunakan activeParallelGroups)
   const topologyGroups: {
     type: "series" | "parallel";
     elements: Array<{
@@ -462,16 +871,27 @@ function calculateCurrentFlow(elements: CircuitElement[], wires: Wire[]) {
       voltage?: number;
       resistance?: number;
       closed?: boolean;
+      isActive?: boolean; // Flag untuk menandai cabang aktif
     }>;
     current: number;
     equivalentResistance: number;
   }[] = [];
 
-  // Add parallel groups
-  parallelGroups.forEach((group) => {
+  // Add parallel groups (hanya yang aktif)
+  activeParallelGroups.forEach((group) => {
+    if (group.length === 0) return;
+
+    // 🔧 Filter hanya elemen resistif untuk perhitungan resistansi
+    const resistiveInGroup = group.filter((id) => {
+      const el = elements.find((e) => e.id === id);
+      return el && (el.type === "resistor" || el.type === "lamp");
+    });
+
+    if (resistiveInGroup.length === 0) return;
+
     const parallelResistance =
       1 /
-      group.reduce((sum, id) => {
+      resistiveInGroup.reduce((sum, id) => {
         const el = resistiveElements.find((e) => e.id === id)!;
         return sum + 1 / el.value;
       }, 0);
@@ -480,6 +900,7 @@ function calculateCurrentFlow(elements: CircuitElement[], wires: Wire[]) {
       type: "parallel",
       elements: group.map((id) => {
         const el = elements.find((e) => e.id === id)!;
+        const isActive = !hasOpenSwitchInPath([id]);
         return {
           id: el.id,
           type: el.type,
@@ -487,6 +908,7 @@ function calculateCurrentFlow(elements: CircuitElement[], wires: Wire[]) {
             el.type === "resistor" || el.type === "lamp" ? el.value : undefined,
           voltage: el.type === "battery" ? el.value : undefined,
           closed: el.type === "switch" ? el.state === "closed" : undefined,
+          isActive, // Tambahkan flag isActive
         };
       }),
       current: totalVoltage / parallelResistance,
@@ -494,42 +916,40 @@ function calculateCurrentFlow(elements: CircuitElement[], wires: Wire[]) {
     });
   });
 
-  // Add series elements
-  const serialElements = resistiveElements.filter(
-    (el) => !parallelGroups.flat().includes(el.id)
+  // Add series elements (hanya yang aktif)
+  // serialElements sudah dihitung di atas (line ~476)
+  const activeSerialElements = serialElements.filter(
+    (el) => !hasOpenSwitchInPath([el.id])
   );
-  if (serialElements.length > 0) {
-    const seriesResistance = serialElements.reduce(
+
+  if (activeSerialElements.length > 0) {
+    const seriesResistance = activeSerialElements.reduce(
       (sum, el) => sum + el.value,
       0
     );
     topologyGroups.push({
       type: "series",
-      elements: serialElements.map((el) => ({
+      elements: activeSerialElements.map((el) => ({
         id: el.id,
         type: el.type,
         resistance: el.value,
+        isActive: true,
       })),
       current: totalCurrent,
       equivalentResistance: seriesResistance,
     });
   }
 
-  // Determine overall topology type
-  // 🎯 Gunakan informasi percabangan untuk deteksi lebih akurat
-  let topologyType: "series" | "parallel" | "mixed";
-
-  if (hasParallelBranch || parallelGroups.length > 0) {
-    // Ada percabangan atau grup paralel terdeteksi
-    if (serialElements.length > 0) {
-      topologyType = "mixed"; // Ada kombinasi seri dan paralel
-    } else {
-      topologyType = "parallel"; // Hanya paralel
+  // Topology type sudah dihitung di awal (detectedTopology)
+  // Gunakan nilai yang sudah ada
+  console.log(
+    "✅ [FINAL TOPOLOGY] Menggunakan topologi yang sudah terdeteksi:",
+    {
+      topologyType: detectedTopology.type,
+      hasParallelBranch: detectedTopology.hasParallelBranch,
+      branchNodes: detectedTopology.branchNodes,
     }
-  } else {
-    // Tidak ada percabangan, semua seri
-    topologyType = "series";
-  }
+  );
 
   return {
     current: totalCurrent,
@@ -537,10 +957,10 @@ function calculateCurrentFlow(elements: CircuitElement[], wires: Wire[]) {
     componentCurrents,
     lampPowers,
     topology: {
-      type: topologyType,
+      type: detectedTopology.type,
       groups: topologyGroups,
-      hasParallelBranch, // ✅ Flag percabangan
-      branchNodes, // ✅ Daftar node yang bercabang
+      hasParallelBranch: detectedTopology.hasParallelBranch,
+      branchNodes: detectedTopology.branchNodes,
     },
   };
 }
@@ -589,7 +1009,7 @@ export default function CircuitBuilderEnhanced() {
   const [dragOffset, setDragOffset] = useState<Pos>({ x: 0, y: 0 });
   const [showStats, setShowStats] = useState(!isMobile);
   const [flowAnimation, setFlowAnimation] = useState(0);
-  
+
   // 🔄 State untuk rotation drag
   const [rotationDrag, setRotationDrag] = useState<{
     elementId: string;
@@ -656,12 +1076,12 @@ export default function CircuitBuilderEnhanced() {
   const onMouseDownTerminal = (e: React.MouseEvent, elementId: string) => {
     if (connectMode) return; // Jika mode koneksi, biarkan onClick terminal yang handle
     e.stopPropagation();
-    
+
     const rect = canvasRef.current!.getBoundingClientRect();
     const el = elements.find((el) => el.id === elementId)!;
     const mouseX = e.clientX - rect.left;
     const mouseY = e.clientY - rect.top;
-    
+
     setRotationDrag({
       elementId: elementId,
       startAngle: calculateAngle(el.position, { x: mouseX, y: mouseY }),
@@ -673,14 +1093,17 @@ export default function CircuitBuilderEnhanced() {
 
   const onMouseMove = (e: React.MouseEvent) => {
     if (!dragId && !rotationDrag) return;
-    
+
     const rect = canvasRef.current!.getBoundingClientRect();
     const mouseX = e.clientX - rect.left;
     const mouseY = e.clientY - rect.top;
 
     if (rotationDrag) {
       // 🔄 ROTATION MODE
-      const currentAngle = calculateAngle(rotationDrag.centerPos, { x: mouseX, y: mouseY });
+      const currentAngle = calculateAngle(rotationDrag.centerPos, {
+        x: mouseX,
+        y: mouseY,
+      });
       const newRotation = snapToRotation(currentAngle);
 
       setElements((prev) =>
@@ -916,7 +1339,7 @@ export default function CircuitBuilderEnhanced() {
     );
 
     let calculatedTotalR = 0;
-    if (flow.current > 0 && circuitAnalysis.isClosed) {
+    if (flow && flow.current > 0 && circuitAnalysis.isClosed) {
       const totalV = elements
         .filter((e) => e.type === "battery")
         .reduce((s, b) => s + b.value, 0);
@@ -933,7 +1356,7 @@ export default function CircuitBuilderEnhanced() {
         .filter((e) => e.type === "battery")
         .reduce((s, b) => s + b.value, 0),
       totalR: calculatedTotalR, // Gunakan hasil perhitungan yang benar
-      topology: flow.topology, // Tambahkan topology info
+      topology: flow?.topology, // Tambahkan topology info
     };
   }, [elements, wires]);
 
@@ -942,31 +1365,31 @@ export default function CircuitBuilderEnhanced() {
   const determineFlowDirection = (w: Wire): boolean => {
     const fromEl = elements.find((e) => e.id === w.from.elementId);
     const toEl = elements.find((e) => e.id === w.to.elementId);
-    
+
     if (!fromEl || !toEl) return false;
 
     // Untuk baterai, tentukan kutub positif dan negatif berdasarkan rotasi
-    const getPositiveTerminal = (battery: CircuitElement): 'a' | 'b' => {
+    const getPositiveTerminal = (battery: CircuitElement): "a" | "b" => {
       // Rotasi 0°: positif di kanan (terminal b)
       // Rotasi 90°: positif di bawah (terminal b)
       // Rotasi 180°: positif di kiri (terminal a)
       // Rotasi 270°: positif di atas (terminal a)
       if (battery.rotation === 0 || battery.rotation === 90) {
-        return 'b';
+        return "b";
       } else {
-        return 'a';
+        return "a";
       }
     };
 
     // Jika from adalah baterai
-    if (fromEl.type === 'battery') {
+    if (fromEl.type === "battery") {
       const posTerminal = getPositiveTerminal(fromEl);
       // Jika wire dimulai dari terminal positif, aliran normal (forward)
       return w.from.terminalId === posTerminal;
     }
 
     // Jika to adalah baterai
-    if (toEl.type === 'battery') {
+    if (toEl.type === "battery") {
       const posTerminal = getPositiveTerminal(toEl);
       // Jika wire menuju terminal negatif, aliran normal (forward)
       return w.to.terminalId !== posTerminal;
@@ -1045,7 +1468,7 @@ export default function CircuitBuilderEnhanced() {
               // 🔋 Balik arah jika flowForward = false (dari negatif ke positif)
               const rawProgress = ((flowAnimation + offset) % 100) / 100;
               const progress = flowForward ? rawProgress : 1 - rawProgress;
-              
+
               const point = getPointOnBezier(
                 a,
                 { x: cx1, y: cy1 },
@@ -1161,24 +1584,24 @@ export default function CircuitBuilderEnhanced() {
   // 🔋 Fungsi untuk menentukan arah aliran pada wire element connections
   const determineWireElementFlowDirection = (
     component: CircuitElement,
-    compTerminal: 'a' | 'b',
+    compTerminal: "a" | "b",
     wireEl: CircuitElement,
-    wireTerminal: 'a' | 'b'
+    wireTerminal: "a" | "b"
   ): boolean => {
-    if (component.type === 'battery') {
-      const getPositiveTerminal = (battery: CircuitElement): 'a' | 'b' => {
+    if (component.type === "battery") {
+      const getPositiveTerminal = (battery: CircuitElement): "a" | "b" => {
         if (battery.rotation === 0 || battery.rotation === 90) {
-          return 'b';
+          return "b";
         } else {
-          return 'a';
+          return "a";
         }
       };
-      
+
       const posTerminal = getPositiveTerminal(component);
       // Jika komponen terminal adalah positif, aliran keluar dari baterai (forward dari wire ke component)
       return compTerminal === posTerminal;
     }
-    
+
     // Default: aliran forward
     return false;
   };
@@ -1241,7 +1664,7 @@ export default function CircuitBuilderEnhanced() {
               // 🔋 Balik arah jika flowForward = false
               const rawProgress = ((flowAnimation + offset) % 100) / 100;
               const progress = flowForward ? rawProgress : 1 - rawProgress;
-              
+
               const point = getPointOnBezier(
                 from,
                 { x: cx1, y: cy1 },
@@ -1407,7 +1830,8 @@ export default function CircuitBuilderEnhanced() {
         case "lamp": {
           const lampPower =
             (calc.lampPowers as Record<string, number>)?.[el.id] || 0;
-          const isOn = lampPower > 0.1;
+          // Lampu hanya menyala jika rangkaian tertutup DAN ada arus yang mengalir
+          const isOn = calc.isClosed && calc.current > 0 && lampPower > 0.1;
           const brightness = Math.min(1, lampPower / 2);
 
           return (
@@ -1925,8 +2349,29 @@ export default function CircuitBuilderEnhanced() {
           </div>
         </div>
 
-        {/* Circuit Stats */}
-        {showStats && (
+        {/* Notifikasi Status Rangkaian - Hanya tampil jika belum terhubung */}
+        {showStats && !calc.isConnected && (
+          <div className="mb-6 p-4 bg-yellow-50 rounded-xl border-2 border-yellow-300 shadow-md">
+            <div className="flex items-center gap-2">
+              <span className="text-2xl">⚠️</span>
+              <div>
+                <div className="text-sm font-bold text-yellow-900">
+                  Rangkaian Belum Terhubung
+                </div>
+                <div className="text-xs text-yellow-700 mt-1">
+                  • Komponen belum terhubung dengan benar
+                </div>
+                <div className="text-xs text-yellow-600 mt-2">
+                  💡 Hubungkan semua komponen menggunakan kabel untuk mendeteksi
+                  topologi rangkaian
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Circuit Stats - Hanya tampil jika rangkaian tertutup */}
+        {showStats && calc.isClosed && calc.isConnected && (
           <div className="mb-6 grid grid-cols-2 sm:grid-cols-4 gap-3">
             <div className="bg-gradient-to-br from-amber-50 to-orange-50 rounded-xl p-3 border-2 border-amber-200 shadow-md">
               <div className="text-xs text-amber-700 font-medium mb-1">
@@ -1961,9 +2406,44 @@ export default function CircuitBuilderEnhanced() {
           </div>
         )}
 
-        {/* Topology Detection Display */}
-        {showStats && calc.topology && (
+        {/* Topology Detection Display - Tampil jika rangkaian terhubung (terlepas dari saklar) */}
+        {showStats && calc.isConnected && calc.topology && (
           <div className="mb-6 bg-gradient-to-br from-emerald-50 to-teal-50 rounded-2xl p-4 border-2 border-emerald-200 shadow-lg">
+            {/* Status Badge - Rangkaian Aktif (tertutup & arus mengalir) */}
+            {calc.isClosed && calc.current > 0 && (
+              <div className="mb-3 p-2 bg-green-100 border-2 border-green-300 rounded-lg">
+                <div className="flex items-center gap-2">
+                  <span className="text-lg">✅</span>
+                  <div className="flex-1">
+                    <div className="text-xs font-bold text-green-900">
+                      Rangkaian Aktif - Arus Mengalir
+                    </div>
+                    <div className="text-xs text-green-700 mt-0.5">
+                      Topologi terdeteksi dan semua saklar tertutup
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Status Badge - Terhubung tapi saklar terbuka */}
+            {!calc.isClosed && (
+              <div className="mb-3 p-2 bg-orange-100 border-2 border-orange-300 rounded-lg">
+                <div className="flex items-center gap-2">
+                  <span className="text-lg">⚠️</span>
+                  <div className="flex-1">
+                    <div className="text-xs font-bold text-orange-900">
+                      Topologi Terdeteksi - Rangkaian Terbuka
+                    </div>
+                    <div className="text-xs text-orange-700 mt-0.5">
+                      Struktur rangkaian sudah teridentifikasi, tapi arus tidak
+                      mengalir karena saklar terbuka
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
             <div className="flex items-center gap-2 mb-3">
               <div className="text-2xl">
                 {calc.topology.type === "series" && "📏"}
@@ -2122,41 +2602,44 @@ export default function CircuitBuilderEnhanced() {
             {elements.map(renderElement)}
 
             {/* 🔄 Rotation Guide Circle (when rotating) */}
-            {rotationDrag && elements.find((el) => el.id === rotationDrag.elementId) && (
-              <g>
-                {(() => {
-                  const el = elements.find((e) => e.id === rotationDrag.elementId)!;
-                  return (
-                    <>
-                      <circle
-                        cx={el.position.x}
-                        cy={el.position.y}
-                        r={70}
-                        className="fill-none stroke-purple-400 stroke-dashed"
-                        strokeWidth={2}
-                        opacity={0.6}
-                      />
-                      <circle
-                        cx={el.position.x}
-                        cy={el.position.y}
-                        r={4}
-                        className="fill-purple-400"
-                        opacity={0.8}
-                      />
-                      <text
-                        x={el.position.x}
-                        y={el.position.y - 80}
-                        textAnchor="middle"
-                        className="fill-purple-600 text-sm font-bold"
-                        style={{ textShadow: "0 0 3px white" }}
-                      >
-                        🔄 {el.rotation}°
-                      </text>
-                    </>
-                  );
-                })()}
-              </g>
-            )}
+            {rotationDrag &&
+              elements.find((el) => el.id === rotationDrag.elementId) && (
+                <g>
+                  {(() => {
+                    const el = elements.find(
+                      (e) => e.id === rotationDrag.elementId
+                    )!;
+                    return (
+                      <>
+                        <circle
+                          cx={el.position.x}
+                          cy={el.position.y}
+                          r={70}
+                          className="fill-none stroke-purple-400 stroke-dashed"
+                          strokeWidth={2}
+                          opacity={0.6}
+                        />
+                        <circle
+                          cx={el.position.x}
+                          cy={el.position.y}
+                          r={4}
+                          className="fill-purple-400"
+                          opacity={0.8}
+                        />
+                        <text
+                          x={el.position.x}
+                          y={el.position.y - 80}
+                          textAnchor="middle"
+                          className="fill-purple-600 text-sm font-bold"
+                          style={{ textShadow: "0 0 3px white" }}
+                        >
+                          🔄 {el.rotation}°
+                        </text>
+                      </>
+                    );
+                  })()}
+                </g>
+              )}
 
             {/* Pending connection line */}
             {connectMode && pending && dragId === null && (
@@ -2189,8 +2672,13 @@ export default function CircuitBuilderEnhanced() {
             <div className="space-y-2 text-xs text-cyan-800">
               <div className="font-semibold text-cyan-900">📦 Komponen:</div>
               <div>• Tambahkan Baterai, Lampu, Resistor, Saklar, dan Kabel</div>
-              <div>• <strong>Drag body komponen</strong> untuk memindahkan posisi</div>
-              <div>• <strong>Drag terminal (bulatan)</strong> untuk merotasi komponen 🔄</div>
+              <div>
+                • <strong>Drag body komponen</strong> untuk memindahkan posisi
+              </div>
+              <div>
+                • <strong>Drag terminal (bulatan)</strong> untuk merotasi
+                komponen 🔄
+              </div>
 
               <div className="font-semibold text-cyan-900 mt-2">
                 🔗 Koneksi dengan Kabel:
@@ -2222,7 +2710,7 @@ export default function CircuitBuilderEnhanced() {
             </div>
           )}
 
-          {!calc.isClosed &&
+          {!calc.isConnected &&
             elements.length > 0 &&
             elements.filter((e) => e.type === "wire").length === 0 && (
               <div className="bg-gradient-to-r from-yellow-50 to-amber-50 rounded-xl p-4 border-2 border-yellow-300">
@@ -2233,14 +2721,17 @@ export default function CircuitBuilderEnhanced() {
               </div>
             )}
 
-          {!calc.isClosed && wires.length > 0 && (
-            <div className="bg-gradient-to-r from-yellow-50 to-amber-50 rounded-xl p-4 border-2 border-yellow-300">
-              <p className="text-sm font-medium text-yellow-900">
-                ⚠️ Rangkaian belum tertutup. Pastikan semua komponen terhubung
-                dalam satu loop!
-              </p>
-            </div>
-          )}
+          {calc.isConnected &&
+            !calc.isClosed &&
+            !calc.hasOpenSwitch &&
+            wires.length > 0 && (
+              <div className="bg-gradient-to-r from-yellow-50 to-amber-50 rounded-xl p-4 border-2 border-yellow-300">
+                <p className="text-sm font-medium text-yellow-900">
+                  ⚠️ Rangkaian belum tertutup. Pastikan semua komponen terhubung
+                  dalam satu loop!
+                </p>
+              </div>
+            )}
 
           {calc.hasOpenSwitch && (
             <div className="bg-gradient-to-r from-red-50 to-pink-50 rounded-xl p-4 border-2 border-red-300">
