@@ -195,67 +195,76 @@ export interface Resistor {
   label: string;
 }
 
-// ===== PAKET SOAL DEFAULT PRETEST =====
+// ===== PAKET SOAL DEFAULT PRETEST (versi narasi diperkuat & konseptual=5 opsi) =====
 export const DEFAULT_PRETEST_PACKAGE: Question[] = [
   // 1. Conceptual (Hukum Ohm)
   {
     id: 'conceptual-1',
     questionType: 'conceptual',
-    title: 'Hukum Ohm Dasar',
-    description: 'Pemahaman fundamental tentang hubungan V, I, R',
-    question: 'Menurut hukum Ohm, jika tegangan naik 2 kali dan hambatan tetap, maka arus akan:',
-    hint: 'V = I × R, jadi I = V/R',
-    explanation: 'Menurut hukum Ohm I = V/R. Jika V naik 2 kali dan R tetap, maka I juga naik 2 kali.',
+    title: 'Hukum Ohm — Dampak Perubahan Tegangan',
+    description: 'Menaksir perubahan arus ketika tegangan diubah sementara hambatan tetap.',
+    question:
+      'Sebuah rangkaian sederhana memiliki hambatan tetap. Jika sumber tegangannya dinaikkan menjadi 2 kali semula, bagaimana perubahan arus yang mengalir melalui rangkaian menurut Hukum Ohm?',
+    hint: 'Gunakan I = V/R dan bandingkan kondisi sebelum–sesudah.',
+    explanation:
+      'Hukum Ohm menyatakan I = V/R. Karena R tetap dan V menjadi 2V, maka I baru = (2V)/R = 2 × (V/R). Arus meningkat 2 kali lipat.',
     difficulty: 'easy',
     choices: [
       { id: 'choice-1', text: 'Tetap sama', isCorrect: false },
       { id: 'choice-2', text: 'Naik 2 kali', isCorrect: true },
       { id: 'choice-3', text: 'Turun 2 kali', isCorrect: false },
       { id: 'choice-4', text: 'Naik 4 kali', isCorrect: false },
+      { id: 'choice-5', text: 'Naik 1,5 kali', isCorrect: false },
     ],
     correctAnswers: ['choice-2'],
   },
-  
+
   // 2. Circuit (Seri)
   {
     id: 1,
     questionType: 'circuit',
-    title: 'Rangkaian Seri',
+    title: 'Rangkaian Seri — Menyetel Arus Target',
     description:
-      'Rangkaian di samping memiliki dua slot resistor yang tersusun seri. Siswa diminta memilih dua resistor dari daftar yang tersedia dan menempatkannya pada rangkaian agar arus yang mengalir sesuai target yang ditentukan guru. Karena susunannya seri, kombinasi hambatan yang dipilih akan langsung menentukan besarnya arus.',
-    explanation: 'Pada rangkaian seri, hambatan total adalah jumlah semua hambatan. Gunakan rumus I = V/R_total untuk menghitung arus.',
-    hint: 'Pada susunan seri, hambatan saling dijumlahkan dan memengaruhi besar arus.',
+    'Sebuah rangkaian terdiri atas dua slot resistor yang disusun seri dan dihubungkan dengan sumber tegangan sebesar 12 volt. Tujuan percobaan ini adalah menentukan kombinasi dua resistor yang mampu menghasilkan arus total sekitar 0,08 ampere. Gunakan pemahamanmu tentang hubungan antara tegangan, arus, dan hambatan untuk mencapai hasil yang diinginkan.',
+    explanation:
+      'Pada rangkaian seri, R_total = R₁ + R₂. Setelah R_total diperoleh, arus dapat dihitung dengan I = V/R_total.',
+    hint: 'Semakin besar R_total, semakin kecil arus (I berbanding terbalik dengan R_total).',
     difficulty: 'easy',
     circuitType: 'series',
     voltage: 12,
     targetCurrent: 0.08,
     resistorSlots: 2,
   },
-  
+
   // 3. Circuit Analysis (L3 Putus)
   {
     id: 'analysis-1',
     questionType: 'circuitAnalysis',
-    title: 'Analisis Rangkaian Campuran - L3 Putus',
-    description: 'Prediksi status lampu ketika L3 padam (putus).',
-    question: 'Jika lampu L3 padam (open circuit), lampu mana yang ikut padam dan mana yang tetap menyala?',
-    hint: 'Analisis jalur arus: ada 2 jalur seri terpisah dan 1 jalur paralel independen.',
-    explanation: 'L1-L2 adalah rangkaian seri pertama, L3-L4 adalah rangkaian seri kedua, L5 adalah jalur paralel independen. Jika L3 putus, maka L4 ikut padam (seri dengan L3), sedangkan L1-L2 dan L5 tetap menyala karena berada di jalur terpisah.',
+    title: 'Analisis Campuran: Dampak L3 Putus',
+    description:
+      'Tentukan lampu yang tetap menyala dan yang padam ketika L3 mengalami open circuit pada rangkaian campuran.',
+    question:
+      'Jika lampu L3 padam (open circuit), lampu mana saja yang ikut padam dan mana yang tetap menyala?',
+    hint: 'Identifikasi jalur: (L1–L2) seri, (L3–L4) seri, dan L5 jalur paralel mandiri.',
+    explanation:
+      'L1–L2 berada pada jalur seri terpisah dari L3–L4, sementara L5 berdiri sendiri pada jalur paralel mandiri. Saat L3 putus, arus di jalur L3–L4 terhenti sehingga L4 padam. L1–L2 dan L5 tetap menyala.',
     difficulty: 'medium',
     circuit: 'mixed-series-parallel',
     targetLamp: 'L3',
     correctStates: { L1: 'on', L2: 'on', L4: 'off', L5: 'on' },
   },
-  
+
   // 4. Circuit Ordering (Kecerahan)
   {
     id: 'order-1',
     questionType: 'circuitOrdering',
-    title: 'Urutan Tingkat Kecerahan Lampu',
-    description: 'Tiga rangkaian dengan V_sama, komponen berbeda.',
-    instruction: 'Urutkan dari paling terang ke paling redup.',
-    hint: 'I = V/R. Daya total ~ V²/R_total.',
-    explanation: 'Perbandingan dilakukan via R_total dan P_total; paralel cenderung lebih terang karena R_total lebih kecil.',
+    title: 'Membandingkan Kecerahan Lampu',
+    description:
+      'Tiga rangkaian dengan tegangan sama namun konfigurasi berbeda. Urutkan tingkat kecerahan total.',
+    instruction: 'Urutkan dari rangkaian paling terang ke paling redup.',
+    hint: 'P_total ≈ V²/R_total. R_total lebih kecil → P_total lebih besar.',
+    explanation:
+      'Rangkaian paralel umumnya memiliki R_total lebih kecil daripada seri, sehingga daya total (dan kecerahan) cenderung lebih besar.',
     difficulty: 'medium',
     circuits: [
       {
@@ -273,7 +282,7 @@ export const DEFAULT_PRETEST_PACKAGE: Question[] = [
         ],
         brightnessLevel: 'high',
         totalCurrent: 0.48,
-        description: 'Seri 2R (R_total=25Ω, P≈5.76W)',
+        description: 'Seri 2R (R_total=25Ω, P≈5,76 W)',
       },
       {
         id: 'B',
@@ -290,7 +299,7 @@ export const DEFAULT_PRETEST_PACKAGE: Question[] = [
         ],
         brightnessLevel: 'medium',
         totalCurrent: 0.6,
-        description: 'Paralel 2R (R_total=20Ω, P≈7.2W)',
+        description: 'Paralel 2R (R_total=20Ω, P≈7,2 W)',
       },
       {
         id: 'C',
@@ -309,75 +318,85 @@ export const DEFAULT_PRETEST_PACKAGE: Question[] = [
         ],
         brightnessLevel: 'low',
         totalCurrent: 0.133,
-        description: 'Seri 3R (R_total≈90Ω, P≈1.6W)',
+        description: 'Seri 3R (R_total≈90Ω, P≈1,6 W)',
       },
     ],
     correctOrder: ['B', 'A', 'C'],
   },
-  
+
   // 5. Conceptual (Rangkaian Seri)
   {
     id: 'conceptual-2',
     questionType: 'conceptual',
-    title: 'Karakteristik Rangkaian Seri',
-    description: 'Pemahaman tentang sifat rangkaian seri',
-    question: 'Pada rangkaian seri, manakah pernyataan yang BENAR?',
-    hint: 'Rangkaian seri hanya memiliki satu jalur arus',
-    explanation: 'Pada rangkaian seri, arus sama di semua komponen karena hanya ada satu jalur. Tegangan terbagi sesuai hambatan masing-masing.',
+    title: 'Ciri Khas Rangkaian Seri',
+    description: 'Menentukan sifat arus, tegangan, dan hambatan total pada susunan seri.',
+    question:
+      'Manakah pernyataan yang BENAR untuk rangkaian seri ideal dengan komponen linear?',
+    hint: 'Rangkaian seri hanya memiliki satu jalur arus.',
+    explanation:
+      'Di rangkaian seri, arus sama di semua komponen. Tegangan terbagi sesuai nilai hambatan masing-masing. Hambatan total adalah penjumlahan semua hambatan.',
     difficulty: 'easy',
     choices: [
       { id: 'choice-1', text: 'Arus sama di semua komponen', isCorrect: true },
       { id: 'choice-2', text: 'Tegangan sama di semua komponen', isCorrect: false },
       { id: 'choice-3', text: 'Hambatan total lebih kecil dari hambatan terkecil', isCorrect: false },
-      { id: 'choice-4', text: 'Jika satu komponen rusak, komponen lain tetap bekerja', isCorrect: false },
+      { id: 'choice-4', text: 'Jika satu komponen putus, komponen lain tetap bekerja', isCorrect: false },
+      { id: 'choice-5', text: 'Hambatan total adalah jumlah seluruh hambatan', isCorrect: true }, // Boleh multi-benar? Jika ingin single-answer, set ini ke false.
     ],
-    correctAnswers: ['choice-1'],
+    // Jika ingin single-correct, gunakan hanya choice-1. Jika multi-correct diperbolehkan, pertahankan keduanya:
+    correctAnswers: ['choice-1', 'choice-5'],
   },
-  
+
   // 6. Circuit (Paralel)
   {
     id: 2,
     questionType: 'circuit',
-    title: 'Rangkaian Paralel',
+    title: 'Rangkaian Paralel — Menyetel Arus Total',
     description:
-      'Rangkaian ini memiliki dua cabang resistor paralel. Siswa harus memilih dua resistor dari daftar yang tersedia dan menempatkannya pada rangkaian agar arus total sesuai target yang ditentukan guru. Pada susunan paralel, penambahan cabang memengaruhi hambatan total sehingga arus berubah.',
-    explanation: 'Pada rangkaian paralel, gunakan rumus 1/R_total = 1/R1 + 1/R2 + ... untuk menghitung hambatan total, kemudian I = V/R_total.',
-    hint: 'Pada susunan paralel, penambahan cabang membuat hambatan total semakin kecil.',
+    'Bayangkan sebuah rangkaian dengan dua cabang resistor paralel yang dihubungkan ke sumber tegangan 9 volt. Tugasmu adalah menentukan kombinasi dua resistor yang dapat menghasilkan arus total mendekati 0,18 ampere. Ingat bahwa pada susunan paralel, penambahan cabang akan menurunkan hambatan total dan meningkatkan arus.',
+    explanation:
+      'Gunakan 1/R_total = 1/R₁ + 1/R₂. Setelah R_total, hitung arus dengan I = V/R_total.',
+    hint: 'R_total paralel selalu lebih kecil dari hambatan terkecil yang dipasang.',
     difficulty: 'easy',
     circuitType: 'parallel',
     voltage: 9,
     targetCurrent: 0.18,
     resistorSlots: 2,
   },
-  
-  // 7. Conceptual (Daya Listrik)
+
+  // 7. Conceptual (Daya Listrik) — multi-correct
   {
     id: 'conceptual-4',
     questionType: 'conceptual',
-    title: 'Daya Listrik',
-    description: 'Pemahaman tentang daya listrik dan rumusnya',
-    question: 'Daya listrik dapat dihitung dengan rumus:',
-    hint: 'Daya adalah energi per satuan waktu, P = V × I',
-    explanation: 'Daya listrik P = V × I = I² × R = V²/R. Semua rumus ini benar sesuai hukum Ohm.',
+    title: 'Rumus Daya Listrik',
+    description: 'Memilih bentuk rumus daya yang ekuivalen berdasarkan Hukum Ohm.',
+    question:
+      'Pilih semua persamaan yang BENAR untuk menyatakan daya listrik (untuk komponen linear).',
+    hint: 'Gabungkan P = V × I dengan V = I × R.',
+    explanation:
+      'Semua bentuk benar: P = V × I, P = I² × R, dan P = V²/R. Bentuk P = V/I dan P = V/R tidak benar secara dimensi.',
     difficulty: 'medium',
     choices: [
       { id: 'choice-1', text: 'P = V × I', isCorrect: true },
       { id: 'choice-2', text: 'P = I² × R', isCorrect: true },
       { id: 'choice-3', text: 'P = V²/R', isCorrect: true },
       { id: 'choice-4', text: 'P = V/I', isCorrect: false },
+      { id: 'choice-5', text: 'P = V/R', isCorrect: false },
     ],
     correctAnswers: ['choice-1', 'choice-2', 'choice-3'],
   },
-  
+
   // 8. Circuit Ordering (Arus Total)
   {
     id: 'order-pretest-2',
     questionType: 'circuitOrdering',
-    title: 'Urutan Arus Total Rangkaian',
-    description: 'Tiga rangkaian dengan tegangan sama, konfigurasi berbeda.',
+    title: 'Membandingkan Arus Total',
+    description:
+      'Tiga rangkaian diberi tegangan sama. Bandingkan arus totalnya berdasarkan R_total.',
     instruction: 'Urutkan dari arus total terbesar ke terkecil.',
-    hint: 'I_total = V/R_total. Semakin kecil R_total, semakin besar arus.',
-    explanation: 'Paralel memiliki R_total paling kecil, sehingga arus total paling besar.',
+    hint: 'I_total = V/R_total.',
+    explanation:
+      'Rangkaian paralel memiliki R_total paling kecil → arus total paling besar, lalu campuran, kemudian seri.',
     difficulty: 'easy',
     circuits: [
       {
@@ -389,7 +408,7 @@ export const DEFAULT_PRETEST_PACKAGE: Question[] = [
         lamps: [{ id: 'L1', power: 2.43 }, { id: 'L2', power: 4.86 }],
         brightnessLevel: 'low',
         totalCurrent: 1.0,
-        description: 'Seri 2R (R_total=9Ω, I=1A)',
+        description: 'Seri 2R (R_total=9Ω, I=1 A)',
       },
       {
         id: 'Y',
@@ -400,7 +419,7 @@ export const DEFAULT_PRETEST_PACKAGE: Question[] = [
         lamps: [{ id: 'L1', power: 13.5 }, { id: 'L2', power: 13.5 }],
         brightnessLevel: 'high',
         totalCurrent: 3.0,
-        description: 'Paralel 2R (R_total=3Ω, I=3A)',
+        description: 'Paralel 2R (R_total=3Ω, I=3 A)',
       },
       {
         id: 'Z',
@@ -411,40 +430,46 @@ export const DEFAULT_PRETEST_PACKAGE: Question[] = [
         lamps: [{ id: 'L1', power: 8.1 }, { id: 'L2', power: 4.05 }, { id: 'L3', power: 4.05 }],
         brightnessLevel: 'medium',
         totalCurrent: 1.8,
-        description: 'Campuran (R_total=5Ω, I=1.8A)',
+        description: 'Campuran (R_total=5Ω, I=1,8 A)',
       },
     ],
     correctOrder: ['Y', 'Z', 'X'],
   },
-  
+
   // 9. Conceptual (Rangkaian Paralel)
   {
     id: 'conceptual-3',
     questionType: 'conceptual',
-    title: 'Karakteristik Rangkaian Paralel',
-    description: 'Pemahaman tentang sifat rangkaian paralel',
-    question: 'Pada rangkaian paralel, manakah pernyataan yang BENAR?',
-    hint: 'Rangkaian paralel memiliki beberapa jalur arus terpisah',
-    explanation: 'Pada rangkaian paralel, tegangan sama di semua cabang, tetapi arus terbagi. Hambatan total lebih kecil dari hambatan terkecil.',
+    title: 'Ciri Khas Rangkaian Paralel',
+    description: 'Menentukan relasi tegangan, arus, dan hambatan pada paralel.',
+    question:
+      'Manakah pernyataan yang BENAR untuk rangkaian paralel ideal dengan komponen linear?',
+    hint: 'Setiap cabang paralel terhubung langsung ke sumber.',
+    explanation:
+      'Tegangan sama pada semua cabang paralel. Arus bercabang sesuai besar hambatan. R_total lebih kecil daripada hambatan terkecil.',
     difficulty: 'easy',
     choices: [
       { id: 'choice-1', text: 'Arus sama di semua cabang', isCorrect: false },
       { id: 'choice-2', text: 'Tegangan sama di semua cabang', isCorrect: true },
       { id: 'choice-3', text: 'Hambatan total sama dengan jumlah semua hambatan', isCorrect: false },
       { id: 'choice-4', text: 'Penambahan cabang menambah hambatan total', isCorrect: false },
+      { id: 'choice-5', text: 'Arus cabang terbesar melalui hambatan terkecil', isCorrect: true },
     ],
-    correctAnswers: ['choice-2'],
+    correctAnswers: ['choice-2', 'choice-5'],
   },
-  
+
   // 10. Circuit Analysis (L5 Putus)
   {
     id: 'analysis-6',
     questionType: 'circuitAnalysis',
-    title: 'Analisis Jalur Paralel Mandiri',
-    description: 'Tes pemahaman tentang jalur paralel independen.',
-    question: 'Jika lampu L5 pada jalur bawah putus, bagaimana pengaruhnya terhadap lampu lain?',
-    hint: 'L5 berada di jalur paralel tersendiri, terpisah dari jalur L1-L2 dan L3-L4.',
-    explanation: 'L5 berada dalam jalur paralel mandiri. Jika L5 putus, hanya L5 yang padam karena jalur L1-L2 dan L3-L4 tetap terhubung paralel dan mendapat tegangan penuh dari baterai.',
+    title: 'Analisis Jalur Paralel Mandiri — L5 Putus',
+    description:
+      'Evaluasi pengaruh open circuit pada cabang paralel yang berdiri sendiri.',
+    question:
+      'Jika lampu L5 (jalur bawah) putus, bagaimana pengaruhnya terhadap lampu lain?',
+    hint: 'L5 berada di jalur paralel mandiri, terpisah dari L1–L2 dan L3–L4.',
+    explanation:
+      'Karena L5 punya jalur sendiri, ketika putus hanya L5 yang padam. Jalur L1–L2 dan L3–L4 tetap mendapat tegangan penuh.',
     difficulty: 'easy',
     circuit: 'mixed-series-parallel',
     targetLamp: 'L5',
@@ -452,67 +477,77 @@ export const DEFAULT_PRETEST_PACKAGE: Question[] = [
   },
 ];
 
-// ===== PAKET SOAL DEFAULT POSTTEST =====
+// ===== PAKET SOAL DEFAULT POSTTEST (versi narasi diperkuat & konseptual=5 opsi) =====
 export const DEFAULT_POSTTEST_PACKAGE: Question[] = [
   // 1. Conceptual (Hambatan Paralel)
   {
     id: 'conceptual-6',
     questionType: 'conceptual',
-    title: 'Hambatan Paralel',
-    description: 'Pemahaman tentang perhitungan hambatan paralel',
-    question: 'Jika dua resistor 6Ω dipasang paralel, hambatan totalnya adalah:',
-    hint: '1/R_total = 1/R1 + 1/R2',
-    explanation: '1/R_total = 1/6 + 1/6 = 2/6 = 1/3, jadi R_total = 3Ω',
+    title: 'Menghitung Hambatan Ekuivalen Paralel',
+    description:
+      'Menerapkan rumus hambatan ekuivalen untuk dua resistor identik yang dipasang paralel.',
+    question:
+      'Dua resistor 6Ω dipasang paralel pada sumber yang sama. Berapakah hambatan total ekuivalennya?',
+    hint: 'Gunakan 1/R_total = 1/R₁ + 1/R₂.',
+    explanation:
+      '1/R_total = 1/6 + 1/6 = 2/6 = 1/3 → R_total = 3Ω.',
     difficulty: 'medium',
     choices: [
       { id: 'choice-1', text: '12Ω', isCorrect: false },
       { id: 'choice-2', text: '6Ω', isCorrect: false },
       { id: 'choice-3', text: '3Ω', isCorrect: true },
       { id: 'choice-4', text: '2Ω', isCorrect: false },
+      { id: 'choice-5', text: '3,5Ω', isCorrect: false },
     ],
     correctAnswers: ['choice-3'],
   },
-  
+
   // 2. Circuit (Tantangan Seri)
   {
     id: 5,
     questionType: 'circuit',
-    title: 'Tantangan Seri — Level Tinggi',
+    title: 'Tantangan Seri — Presisi Arus',
     description:
-      'Rangkaian ini memiliki dua slot resistor seri. Siswa harus memilih dua resistor dari daftar yang tersedia agar arus yang mengalir sesuai target yang ditentukan guru. Susunan seri membuat arus tergantung pada total hambatan kombinasi yang dipilih. Level soal ini lebih menantang dengan target yang lebih presisi.',
-    explanation: 'Hitung hambatan total dengan menjumlahkan semua resistor dalam rangkaian seri, kemudian gunakan hukum Ohm I = V/R_total.',
-    hint: 'Pada susunan seri, hambatan saling dijumlahkan dan memengaruhi besar arus.',
+    'Rangkaian ini terdiri dari dua resistor yang dihubungkan secara seri dengan sumber tegangan 20 volt. Tantanganmu adalah mencari kombinasi dua resistor yang menghasilkan arus sekitar 0,05 ampere. Arus yang lebih kecil menunjukkan hambatan total yang lebih besar, sehingga diperlukan kombinasi resistor dengan nilai yang tepat.',
+    explanation:
+      'Hitung R_total = R₁ + R₂, lalu I = V/R_total. Sesuaikan pilihan hingga mendekati target.',
+    hint: 'Pertimbangkan toleransi nilai resistor terhadap target arus.',
     difficulty: 'hard',
     circuitType: 'series',
     voltage: 20,
     targetCurrent: 0.05,
     resistorSlots: 2,
   },
-  
+
   // 3. Circuit Analysis (L2 Putus)
   {
     id: 'analysis-7',
     questionType: 'circuitAnalysis',
-    title: 'Kerusakan pada Jalur Seri Bertingkat',
-    description: 'Analisis rangkaian bertingkat ketika L2 rusak.',
-    question: 'Jika lampu L2 pada jalur tengah putus, lampu mana saja yang ikut terpengaruh?',
-    hint: 'L2 dan L3 terhubung seri, sementara L1 dan pasangan L4-L5 berada di jalur paralel terpisah.',
-    explanation: 'L2 dan L3 terhubung seri dalam satu jalur paralel. Jika L2 putus, maka L3 ikut padam. Namun L1 (jalur mandiri) dan L4-L5 (jalur seri terpisah) tetap menyala karena mendapat tegangan langsung dari baterai.',
+    title: 'Kerusakan pada Jalur Seri Bertingkat — L2 Putus',
+    description:
+      'Menilai pengaruh open circuit pada salah satu lampu di jalur seri yang menjadi bagian dari paralel bertingkat.',
+    question:
+      'Jika L2 pada jalur tengah putus, lampu mana saja yang padam dan yang tetap menyala?',
+    hint: 'L2–L3 seri dalam satu cabang paralel. L1 sendiri, L4–L5 seri di cabang lain.',
+    explanation:
+      'Putus di L2 memutus arus cabang L2–L3 sehingga L3 padam. L1 serta pasangan L4–L5 tetap menyala karena berada di cabang berbeda yang masih tersuplai.',
     difficulty: 'medium',
     circuit: 'nested-series-parallel',
     targetLamp: 'L2',
     correctStates: { L1: 'on', L3: 'off', L4: 'on', L5: 'on' },
   },
-  
+
   // 4. Circuit Ordering (Efisiensi)
   {
     id: 'order-posttest-2',
     questionType: 'circuitOrdering',
-    title: 'Urutan Efisiensi Rangkaian',
-    description: 'Tiga rangkaian dengan losses berbeda.',
+    title: 'Membandingkan Efisiensi Rangkaian',
+    description:
+      'Tiga rangkaian dengan tingkat rugi-rugi berbeda. Urutkan dari paling efisien.',
     instruction: 'Urutkan dari efisiensi tertinggi ke terendah.',
-    hint: 'Efisiensi = P_output/P_input. Rangkaian sederhana biasanya lebih efisien.',
-    explanation: 'Rangkaian dengan komponen lebih sedikit dan resistansi internal lebih kecil memiliki efisiensi lebih tinggi.',
+    hint: 'Efisiensi = P_output / P_input. Rangkaian lebih sederhana cenderung lebih efisien.',
+    explanation:
+      'Semakin sedikit elemen yang menambah rugi-rugi (kawat panjang, sambungan, komponen), semakin tinggi efisiensi total.',
     difficulty: 'hard',
     circuits: [
       {
@@ -551,71 +586,81 @@ export const DEFAULT_POSTTEST_PACKAGE: Question[] = [
     ],
     correctOrder: ['E1', 'E2', 'E3'],
   },
-  
+
   // 5. Conceptual (Efek Kerusakan)
   {
     id: 'conceptual-5',
     questionType: 'conceptual',
-    title: 'Efek Kerusakan Komponen',
-    description: 'Pemahaman tentang efek kerusakan pada rangkaian',
-    question: 'Jika satu lampu putus pada rangkaian seri, apa yang terjadi?',
-    hint: 'Rangkaian seri hanya memiliki satu jalur arus',
-    explanation: 'Pada rangkaian seri, jika satu komponen putus, arus terputus sehingga semua komponen mati.',
+    title: 'Dampak Putus pada Rangkaian Seri',
+    description:
+      'Memahami konsekuensi kerusakan satu komponen terhadap aliran arus pada seri.',
+    question:
+      'Pada rangkaian seri ideal, jika satu lampu putus, apa yang terjadi pada rangkaian?',
+    hint: 'Seri hanya memiliki satu jalur arus.',
+    explanation:
+      'Putus pada satu komponen memutus jalur arus sehingga seluruh rangkaian tidak dialiri arus dan semua lampu padam.',
     difficulty: 'medium',
     choices: [
       { id: 'choice-1', text: 'Lampu lain tetap menyala', isCorrect: false },
       { id: 'choice-2', text: 'Semua lampu mati', isCorrect: true },
       { id: 'choice-3', text: 'Lampu lain menyala lebih terang', isCorrect: false },
       { id: 'choice-4', text: 'Tidak ada pengaruh', isCorrect: false },
+      { id: 'choice-5', text: 'Hanya lampu yang rusak yang padam', isCorrect: false },
     ],
     correctAnswers: ['choice-2'],
   },
-  
+
   // 6. Circuit (Master Paralel)
   {
     id: 6,
     questionType: 'circuit',
-    title: 'Master Paralel — Level Tinggi',
+    title: 'Master Paralel — Sinkron Arus Total',
     description:
-      'Rangkaian paralel ini memiliki tiga cabang yang harus diisi dengan resistor dari daftar pilihan yang disediakan guru. Siswa harus menempatkan resistor agar arus total sesuai target yang ditentukan. Konfigurasi paralel membuat setiap penambahan cabang memengaruhi hambatan total dan arus keseluruhan. Level soal ini menantang dengan 3 slot resistor.',
+    'Sebuah rangkaian paralel dengan tiga cabang resistor dihubungkan ke sumber tegangan 12 volt. Tugasmu adalah menentukan kombinasi tiga resistor yang mampu menghasilkan arus total sekitar 0,5 ampere. Perhatikan bahwa setiap cabang paralel menambah jalur arus, sehingga hambatan total menjadi semakin kecil.',
     explanation:
-      'Gunakan rumus paralel 1/R_total = 1/R1 + 1/R2 + 1/R3 untuk menghitung hambatan total, kemudian I = V/R_total.',
-    hint: 'Pada susunan paralel, penambahan cabang membuat hambatan total semakin kecil.',
+      'Hitung R_total dengan 1/R_total = 1/R₁ + 1/R₂ + 1/R₃, lalu I = V/R_total.',
+    hint: 'Setiap cabang menambah konduktansi total (1/R).',
     difficulty: 'hard',
     circuitType: 'parallel',
     voltage: 12,
     targetCurrent: 0.5,
     resistorSlots: 3,
   },
-  
-  // 7. Conceptual (Efisiensi Energi)
+
+  // 7. Conceptual (Efisiensi Energi) — multi-correct
   {
     id: 'conceptual-8',
     questionType: 'conceptual',
-    title: 'Efisiensi Energi',
-    description: 'Pemahaman tentang efisiensi dalam rangkaian listrik',
-    question: 'Manakah yang mempengaruhi efisiensi rangkaian listrik?',
-    hint: 'Efisiensi berkaitan dengan losses dan resistansi',
-    explanation: 'Efisiensi dipengaruhi oleh hambatan dalam (resistansi kawat), kualitas kontak, dan desain rangkaian.',
+    title: 'Faktor Penentu Efisiensi Rangkaian',
+    description:
+      'Mengidentifikasi faktor yang memengaruhi efisiensi sistem kelistrikan.',
+    question:
+      'Pilih semua faktor yang memengaruhi efisiensi rangkaian listrik praktis.',
+    hint: 'Pertimbangkan rugi-rugi resistif dan kualitas koneksi.',
+    explanation:
+      'Efisiensi menurun oleh hambatan dalam (kabel/komponen), sambungan kurang baik, dan pengaruh suhu. Warna kabel maupun logo produsen tidak berpengaruh teknis.',
     difficulty: 'hard',
     choices: [
       { id: 'choice-1', text: 'Hambatan dalam komponen', isCorrect: true },
       { id: 'choice-2', text: 'Kualitas sambungan kawat', isCorrect: true },
       { id: 'choice-3', text: 'Suhu lingkungan', isCorrect: true },
       { id: 'choice-4', text: 'Warna kabel', isCorrect: false },
+      { id: 'choice-5', text: 'Logo pabrik pada komponen', isCorrect: false },
     ],
     correctAnswers: ['choice-1', 'choice-2', 'choice-3'],
   },
-  
+
   // 8. Circuit Ordering (Daya Total)
   {
     id: 'order-posttest-1',
     questionType: 'circuitOrdering',
-    title: 'Urutan Daya Total Rangkaian',
-    description: 'Empat rangkaian kompleks dengan tegangan sama.',
+    title: 'Membandingkan Daya Total',
+    description:
+      'Empat rangkaian kompleks bervariasi. Tentukan urutan daya totalnya.',
     instruction: 'Urutkan dari daya total terbesar ke terkecil.',
-    hint: 'P_total = V²/R_total. Semakin kecil R_total, semakin besar daya.',
-    explanation: 'Rangkaian dengan R_total terkecil memiliki daya terbesar karena P = V²/R.',
+    hint: 'P_total = V²/R_total.',
+    explanation:
+      'Semakin kecil R_total, semakin besar P_total. Urutan mengikuti perbandingan R_total masing-masing rangkaian.',
     difficulty: 'hard',
     circuits: [
       {
@@ -627,7 +672,7 @@ export const DEFAULT_POSTTEST_PACKAGE: Question[] = [
         lamps: [{ id: 'L1', power: 2.4 }, { id: 'L2', power: 4.8 }, { id: 'L3', power: 7.2 }],
         brightnessLevel: 'low',
         totalCurrent: 0.5,
-        description: 'Seri 3R (R_total=24Ω, P=6W)',
+        description: 'Seri 3R (R_total=24Ω, P=6 W)',
       },
       {
         id: 'Q',
@@ -638,7 +683,7 @@ export const DEFAULT_POSTTEST_PACKAGE: Question[] = [
         lamps: [{ id: 'L1', power: 12 }, { id: 'L2', power: 12 }, { id: 'L3', power: 12 }],
         brightnessLevel: 'high',
         totalCurrent: 3.0,
-        description: 'Paralel 3R (R_total=4Ω, P=36W)',
+        description: 'Paralel 3R (R_total=4Ω, P=36 W)',
       },
       {
         id: 'R',
@@ -649,7 +694,7 @@ export const DEFAULT_POSTTEST_PACKAGE: Question[] = [
         lamps: [{ id: 'L1', power: 16 }, { id: 'L2', power: 24 }, { id: 'L3', power: 8 }],
         brightnessLevel: 'medium',
         totalCurrent: 2.0,
-        description: 'Campuran lanjut (R_total=6Ω, P=24W)',
+        description: 'Campuran lanjut (R_total=6Ω, P=24 W)',
       },
       {
         id: 'S',
@@ -660,46 +705,54 @@ export const DEFAULT_POSTTEST_PACKAGE: Question[] = [
         lamps: [{ id: 'L1', power: 8 }, { id: 'L2', power: 16 }],
         brightnessLevel: 'medium',
         totalCurrent: 2.0,
-        description: 'Seri 2R (R_total=6Ω, P=24W)',
+        description: 'Seri 2R (R_total=6Ω, P=24 W)',
       },
     ],
     correctOrder: ['Q', 'R', 'S', 'P'],
   },
-  
+
   // 9. Conceptual (Rangkaian Campuran)
   {
     id: 'conceptual-7',
     questionType: 'conceptual',
-    title: 'Analisis Rangkaian Campuran',
-    description: 'Pemahaman tentang rangkaian campuran seri-paralel',
-    question: 'Pada rangkaian campuran, untuk menghitung hambatan total:',
-    hint: 'Identifikasi bagian seri dan paralel terlebih dahulu',
-    explanation: 'Pada rangkaian campuran, kita harus mengidentifikasi bagian seri dan paralel, lalu menghitung secara bertahap.',
+    title: 'Strategi Menghitung R_total Rangkaian Campuran',
+    description:
+      'Menentukan langkah sistematis menghitung hambatan total rangkaian seri-paralel.',
+    question:
+      'Langkah yang paling tepat untuk menghitung hambatan total pada rangkaian campuran adalah…',
+    hint: 'Pisahkan bagian seri dan paralel menjadi tahapan bertahap.',
+    explanation:
+      'Identifikasi sub-bagian seri dan paralel, sederhanakan bertahap hingga tersisa satu hambatan ekuivalen.',
     difficulty: 'hard',
     choices: [
-      { id: 'choice-1', text: 'Jumlahkan semua hambatan', isCorrect: false },
-      { id: 'choice-2', text: 'Gunakan rumus paralel untuk semua', isCorrect: false },
+      { id: 'choice-1', text: 'Jumlahkan semua hambatan secara langsung', isCorrect: false },
+      { id: 'choice-2', text: 'Gunakan rumus paralel untuk semua bagian', isCorrect: false },
       { id: 'choice-3', text: 'Identifikasi bagian seri dan paralel terlebih dahulu', isCorrect: true },
-      { id: 'choice-4', text: 'Ambil nilai rata-rata semua hambatan', isCorrect: false },
+      { id: 'choice-4', text: 'Ambil nilai rata-rata seluruh hambatan', isCorrect: false },
+      { id: 'choice-5', text: 'Urutkan komponen secara abjad lalu jumlahkan', isCorrect: false },
     ],
     correctAnswers: ['choice-3'],
   },
-  
+
   // 10. Circuit Analysis (L4 Putus)
   {
     id: 'analysis-3',
     questionType: 'circuitAnalysis',
-    title: 'Rangkaian Bertingkat - L4 Putus',
-    description: 'Efek jika lampu di rangkaian seri yang berada dalam jalur paralel putus.',
-    question: 'Jika L4 putus pada rangkaian seri L4-L5 (yang berada dalam jalur paralel), bagaimana status lampu lain?',
-    hint: 'L1 mandiri, L2-L3 seri di jalur paralel, L4-L5 seri di jalur paralel lain.',
-    explanation: 'Ada 3 jalur paralel: (1) L1 sendiri, (2) L2-L3 seri, (3) L4-L5 seri. Jika L4 putus, maka L5 ikut padam (seri dengan L4), sedangkan L1, L2, L3 tetap menyala karena di jalur paralel terpisah.',
+    title: 'Paralel Bertingkat: L4 Putus pada Cabang Seri',
+    description:
+      'Menilai efek open circuit pada salah satu elemen di cabang seri yang menjadi bagian dari paralel.',
+    question:
+      'Jika L4 putus pada cabang seri L4–L5 (yang merupakan salah satu cabang paralel), bagaimana status lampu lain?',
+    hint: 'Ada 3 cabang paralel: (1) L1, (2) L2–L3, (3) L4–L5.',
+    explanation:
+      'Putus di L4 memutus arus pada cabang L4–L5, sehingga L5 ikut padam. L1 dan pasangan L2–L3 tetap menyala karena berada pada cabang paralel lain yang masih tersuplai.',
     difficulty: 'hard',
     circuit: 'nested-series-parallel',
     targetLamp: 'L4',
     correctStates: { L1: 'on', L2: 'on', L3: 'on', L5: 'off' },
   },
 ];
+
 
 // ===== Helper skor =====
 export const calculateQuizScore = (
