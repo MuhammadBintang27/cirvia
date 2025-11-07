@@ -96,8 +96,6 @@ export default function CircuitAnalysisQuestionForm({ onSubmit, initialData }: C
         correctStates: formData.correctStates!,
       };
 
-      console.log('[FORM DEBUG] Submitting question with correctStates:', question.correctStates);
-      console.log('[FORM DEBUG] Full question:', question);
       onSubmit(question);
     }
   };
