@@ -178,11 +178,9 @@ export class SupabaseQuestionService {
         case 'circuitAnalysis':
           const analysisQ = question as CircuitAnalysisQuestion;
           // Convert correctStates object to array format: ["L1-on", "L2-on", "L4-off", "L5-on"]
-          console.log('[DEBUG] circuitAnalysis correctStates:', analysisQ.correctStates);
           const correctAnswersArray = Object.entries(analysisQ.correctStates).map(
             ([lampId, state]) => `${lampId}-${state}`
           );
-          console.log('[DEBUG] correctAnswersArray to save:', correctAnswersArray);
           
           const { data: analysisData, error: analysisError } = await supabase
             .from('circuit_analysis_questions')
@@ -198,7 +196,6 @@ export class SupabaseQuestionService {
             }])
             .select()
             .single();
-          console.log('[DEBUG] Saved analysis data:', analysisData);
           specificData = analysisData;
           specificError = analysisError;
           break;
@@ -464,13 +461,26 @@ export class SupabaseQuestionService {
   
   static async deleteQuestion(questionId: string): Promise<{ error: any }> {
     try {
-      // Soft delete - just set is_active to false
-      const { error } = await supabase
+      // Method 1: Try direct delete with CASCADE
+      const { error: deleteError } = await supabase
         .from('questions')
-        .update({ is_active: false })
+        .delete()
         .eq('id', questionId);
       
-      return { error };
+      if (deleteError) {
+        // Method 2: Use stored procedure as fallback
+        const { error: rpcError } = await supabase.rpc('delete_question_cascade', {
+          question_uuid: questionId
+        });
+        
+        if (rpcError) {
+          return { error: rpcError };
+        }
+        
+        return { error: null };
+      }
+      
+      return { error: null };
     } catch (error) {
       console.error('Error deleting question:', error);
       return { error };
@@ -810,7 +820,7 @@ export function useSupabaseQuestions(teacherId: string) {
       throw new Error('Gagal menghapus soal');
     }
     
-    setQuestions(prev => prev.filter(q => q.id !== questionId));
+    setQuestions(prev => prev.filter(q => String(q.id) !== String(questionId)));
   };
   
   const getStats = async () => {
