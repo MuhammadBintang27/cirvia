@@ -84,7 +84,7 @@ export default function HomePage() {
               {/* Enhanced Tagline */}
               <div className="relative">
                 <p className="text-xl sm:text-2xl text-blue-200/90 max-w-4xl mx-auto leading-relaxed mb-4 font-medium">
-                  🚀 Revolusi Pembelajaran Fisika dengan Teknologi AR & Computer Vision
+                  🚀 Revolusi Pembelajaran Fisika dengan Teknologi AI & Computer Vision
                 </p>
                 <p className="text-lg text-blue-300/80 max-w-3xl mx-auto leading-relaxed mb-8">
                   Platform pembelajaran fisika yang menggabungkan simulasi rangkaian listrik virtual dengan teknologi computer vision untuk deteksi gerakan tangan, membuat belajar menjadi lebih menyenangkan dan efektif.

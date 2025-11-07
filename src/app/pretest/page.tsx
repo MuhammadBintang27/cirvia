@@ -417,6 +417,7 @@ export default function PretestPage() {
               <div className="mb-8">
                 <PostTestAIFeedback
                   studentId={user.id}
+                  studentName={user.name}
                   testType="pretest"
                   score={Math.round(scoreData.score)}
                 />

@@ -181,6 +181,39 @@ export class SupabaseAuthService {
     return uniqueClasses.sort()
   }
 
+  static async updateStudent(studentId: string, data: Partial<StudentImportData>): Promise<Student> {
+    const { data: student, error } = await supabase
+      .from('students')
+      .update({
+        ...(data.name && { name: data.name }),
+        ...(data.email && { email: data.email }),
+        ...(data.class && { class: data.class }),
+        ...(data.nis && { nis: data.nis }),
+        ...(data.phoneNumber && { phone_number: data.phoneNumber }),
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', studentId)
+      .select()
+      .single()
+
+    if (error) {
+      throw new Error(`Gagal memperbarui data siswa: ${error.message}`)
+    }
+
+    return this.convertStudentFromDB(student)
+  }
+
+  static async deleteStudent(studentId: string): Promise<void> {
+    const { error } = await supabase
+      .from('students')
+      .delete()
+      .eq('id', studentId)
+
+    if (error) {
+      throw new Error(`Gagal menghapus siswa: ${error.message}`)
+    }
+  }
+
   // Session management
   static async createSession(user: Teacher | Student): Promise<string> {
     // Clean up expired sessions first
