@@ -1,6 +1,7 @@
 /**
  * AI Assessment Service
  * Provides AI-powered analysis and recommendations based on student test results
+ * Uses Google Gemini 2.5 Flash via API route (FREE - 1500 RPD, 10 RPM!)
  */
 
 import { SupabaseTestService } from './supabase-test-service'
@@ -426,7 +427,7 @@ class AIAssessmentService {
   /**
    * Generate AI-powered recommendations using GPT with full context
    */
-  private static async generateAIRecommendations(
+    private static async generateAIRecommendations(
     studentId: string,
     studentName: string,
     studentClass: string,
@@ -612,17 +613,63 @@ class AIAssessmentService {
       prompt += `\n`
     }
 
-    // Specific request for AI analysis
-    prompt += `🎯 REQUEST ANALISIS AI:\n`
-    prompt += `Berdasarkan data lengkap di atas, berikan analisis mendalam yang mencakup:\n`
-    prompt += `1. Identifikasi pola kesalahan spesifik dalam konsep rangkaian listrik\n`
-    prompt += `2. Rekomendasi pembelajaran yang disesuaikan dengan gaya belajar ${contextData.learningStyle?.primaryStyle || 'campuran'}\n`
-    prompt += `3. Strategi konkret untuk memperbaiki area lemah\n`
-    prompt += `4. Langkah-langkah pembelajaran selanjutnya\n`
-    prompt += `5. Motivasi personal yang sesuai dengan pencapaian siswa\n\n`
+    // Specific request for AI analysis with detailed JSON format
+    prompt += `🎯 REQUEST ANALISIS AI:\n\n`
+    prompt += `Anda adalah AI mentor pribadi yang ramah dan supportif untuk siswa SMA dalam pembelajaran fisika rangkaian listrik.\n\n`
     
-    prompt += `Fokus pada konsep rangkaian listrik: Hukum Ohm, Rangkaian Seri-Paralel, Daya Listrik, Arus & Tegangan.\n`
-    prompt += `Berikan rekomendasi yang sangat spesifik, actionable, dan dapat diterapkan segera.`
+    prompt += `PERSONA: Bicara langsung ke "${contextData.student.name}" dengan cara yang friendly, encouraging, dan personal - seperti kakak yang peduli dengan pembelajaran mereka.\n\n`
+    
+    prompt += `INSTRUKSI RESPONSE:\n`
+    prompt += `1. BICARA LANGSUNG KE SISWA - gunakan "kamu", bukan "siswa" atau "peserta didik"\n`
+    prompt += `2. MULAI dengan sapaan personal yang sesuai hasil mereka (contoh: "Great job!", "Hebat!", "Ayo semangat!")\n`
+    prompt += `3. ANALISIS pencapaian mereka dengan spesifik - sebutkan apa yang sudah bagus dan apa yang perlu diperbaiki\n`
+    prompt += `4. BERIKAN rekomendasi yang jelas dan actionable (3 item per kategori)\n`
+    prompt += `5. AKHIRI dengan motivasi yang genuine dan mendorong\n\n`
+    
+    prompt += `GAYA BAHASA:\n`
+    prompt += `- Friendly dan conversational (seperti ngobrol dengan teman/kakak)\n`
+    prompt += `- Mix bahasa Indonesia dan sedikit English untuk kesan modern\n`
+    prompt += `- Emoji boleh dipakai untuk warmth tapi jangan berlebihan\n`
+    prompt += `- Hindari bahasa terlalu formal/kaku\n\n`
+    
+    prompt += `FORMAT RESPONSE (gunakan format JSON yang valid):\n`
+    prompt += `{\n`
+    prompt += `  "title": "[Sapaan personal + highlight pencapaian - contoh: 'Great Job, ${contextData.student.name}! Kamu Nailed the Basics! 🎉']",\n`
+    prompt += `  "summary": "[1 paragraf RINGKAS (3-4 kalimat) - Bicara langsung ke siswa. Mix Indo-English casual. Contoh tone: '${contextData.student.name}, I see that you've done a great job understanding the basics of electrical circuits. Kamu udah bisa ngerjain soal Hukum Ohm dan Analisis Arus Listrik dengan baik. That's fantastic! Tapi, aku notice ada beberapa area yang masih perlu kamu kuasai lebih dalam, khususnya tentang Rangkaian Seri dan dasar-dasar Rangkaian Listrik. No worries, kita bisa kerjain ini bareng! 💪']",\n`
+    prompt += `  "recommendations": [\n`
+    prompt += `    {\n`
+    prompt += `      "category": "Yang Bisa Kamu Lakukan",\n`
+    prompt += `      "items": ["[Item 1]", "[Item 2]", "[Item 3]"],\n`
+    prompt += `      "priority": "medium"\n`
+    prompt += `    },\n`
+    prompt += `    {\n`
+    prompt += `      "category": "Yang Perlu Kamu Kerjakan Lagi",\n`
+    prompt += `      "items": ["[Tips spesifik 1 - contoh: 'Untuk soal Membandingkan Kecerahan Lampu, coba kamu review lagi materi tentang Rangkaian Campuran (Seri-Paralel)']", "[Item 2]", "[Item 3]"],\n`
+    prompt += `      "priority": "high"\n`
+    prompt += `    }\n`
+    prompt += `  ],\n`
+    prompt += `  "nextSteps": [\n`
+    prompt += `    "[Langkah konkret 1 - contoh: 'Untuk memperdalam pemahamanmu, coba kamu tonton video tutorial tentang Rangkaian Seri dan Paralel']",\n`
+    prompt += `    "[Langkah 2]",\n`
+    prompt += `    "[Langkah 3]"\n`
+    prompt += `  ],\n`
+    prompt += `  "motivationalMessage": "[1-2 kalimat inspiring. Contoh: '${contextData.student.name}, jangan menyerah! Setiap ahli pernah menjadi pemula. Terus berlatih dan Anda pasti bisa! 💪 ✨']"\n`
+    prompt += `}\n\n`
+    
+    prompt += `CONTOH TONE YANG DIHARAPKAN:\n`
+    prompt += `❌ JANGAN: "Siswa menunjukkan pemahaman yang baik terhadap konsep dasar"\n`
+    prompt += `✅ LAKUKAN: "Hebat! Kamu udah ngerti banget konsep dasarnya. Aku impressed dengan jawabanmu di bagian Hukum Ohm!"\n\n`
+    
+    prompt += `❌ JANGAN: "Disarankan untuk memperdalam pemahaman"\n`
+    prompt += `✅ LAKUKAN: "Ayo kita tingkatkan lagi! Coba fokus lebih ke rangkaian seri-paralel - kamu pasti bisa!"\n\n`
+    
+    prompt += `PENTING:\n`
+    prompt += `- Summary: RINGKAS, cukup 1 paragraf (3-4 kalimat), mix Indo-English casual\n`
+    prompt += `- Recommendations: 2 kategori, masing-masing 3 items yang spesifik dan actionable\n`
+    prompt += `- Next Steps: 3 langkah konkret\n`
+    prompt += `- Sebutkan konsep spesifik (Hukum Ohm, Rangkaian Seri, dll) tapi jangan terlalu teknis\n`
+    prompt += `- Response HARUS dalam format JSON yang valid\n`
+    prompt += `- Tone friendly, casual, seperti ngobrol sama kakak - bukan guru formal!`
     
     return prompt
   }
@@ -665,14 +712,15 @@ class AIAssessmentService {
   }
 
   /**
-   * Call GPT API for real AI-powered analysis
+   * Call Gemini API via server-side route for real AI-powered analysis (FREE!)
    */
   private static async callGPTForAnalysis(prompt: string, contextData: any): Promise<AIRecommendation> {
     try {
-      console.log('🤖 [AI-SERVICE] Calling GPT-4 API for analysis...')
+      console.log('🤖 [AI-SERVICE] Calling Google Gemini 2.5 Flash API via server route...')
       console.log('🤖 [AI-SERVICE] Prompt length:', prompt.length, 'characters')
       
-      const response = await fetch('/api/ai/analyze-student', {
+      // Call server-side API route
+      const response = await fetch('/api/ai/analyze-gemini', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -680,34 +728,53 @@ class AIAssessmentService {
         body: JSON.stringify({
           prompt,
           contextData,
-          model: 'gpt-4',
           temperature: 0.7,
-          max_tokens: 2000
+          maxTokens: 3000  // Reduced for concise responses (like screenshot example)
         })
       })
 
       if (!response.ok) {
         const errorText = await response.text()
-        console.error('❌ [AI-SERVICE] GPT API call failed:', response.status, response.statusText)
+        console.error('❌ [AI-SERVICE] Gemini API call failed:', response.status, response.statusText)
         console.error('❌ [AI-SERVICE] Error response:', errorText)
-        throw new Error(`GPT API call failed: ${response.statusText}`)
+        throw new Error(`Gemini API call failed: ${response.statusText}`)
       }
 
       const aiResponse = await response.json()
       
-      console.log('✅ [AI-SERVICE] GPT-4 analysis completed successfully')
-      console.log('✅ [AI-SERVICE] Response preview:', aiResponse.analysis?.substring(0, 100) + '...')
+      console.log('📦 [AI-SERVICE] API Response received:', {
+        success: aiResponse.success,
+        hasAnalysis: !!aiResponse.analysis,
+        analysisLength: aiResponse.analysis?.length || 0,
+        fallback: aiResponse.fallback,
+        error: aiResponse.error
+      })
       
-      // Parse GPT response into structured format
-      return this.parseGPTResponse(aiResponse.analysis || aiResponse.message, contextData)
+      if (aiResponse.fallback || aiResponse.error) {
+        throw new Error(`Gemini API error: ${aiResponse.error || 'Fallback triggered'}`)
+      }
+      
+      const analysisText = aiResponse.analysis
+      
+      if (!analysisText || typeof analysisText !== 'string') {
+        console.error('❌ [AI-SERVICE] Invalid analysis response:', aiResponse)
+        throw new Error('Invalid or empty analysis response from Gemini')
+      }
+      
+      console.log('✅ [AI-SERVICE] Gemini analysis completed successfully')
+      console.log('✅ [AI-SERVICE] Response length:', analysisText.length, 'chars')
+      console.log('✅ [AI-SERVICE] Response preview:', analysisText.substring(0, 150) + '...')
+      
+      // Parse Gemini response into structured format
+      return this.parseGPTResponse(analysisText, contextData)
       
     } catch (error) {
-      console.error('❌ [AI-SERVICE] Error calling GPT API:', error)
+      console.error('❌ [AI-SERVICE] Error calling Gemini API:', error)
       console.error('❌ [AI-SERVICE] Error details:', error instanceof Error ? error.message : 'Unknown error')
       
-      // Fallback to rule-based analysis if GPT fails
-      console.warn('⚠️ [AI-SERVICE] Falling back to rule-based analysis (NOT RECOMMENDED)...')
-      console.warn('⚠️ [AI-SERVICE] Please check OPENAI_API_KEY and API availability')
+      // Fallback to rule-based analysis if Gemini fails
+      console.warn('⚠️ [AI-SERVICE] Falling back to rule-based analysis...')
+      console.warn('⚠️ [AI-SERVICE] Please check GOOGLE_AI_API_KEY in .env.local')
       return this.generateSmartRecommendations(contextData)
     }
   }
@@ -717,15 +784,30 @@ class AIAssessmentService {
    */
   private static parseGPTResponse(gptText: string, contextData: any): AIRecommendation {
     try {
+      console.log('📝 [AI-PARSE] Starting to parse Gemini response...')
+      
+      // Safety check for undefined/null
+      if (!gptText || typeof gptText !== 'string') {
+        console.error('❌ [AI-PARSE] Invalid input:', typeof gptText, gptText)
+        throw new Error('Invalid gptText: must be a non-empty string')
+      }
+      
+      console.log('📝 [AI-PARSE] Original response length:', gptText.length)
+      
       // Remove markdown code blocks if present
       let cleanedText = gptText.trim()
       
       // Remove ```json and ``` markers
       if (cleanedText.includes('```json')) {
         cleanedText = cleanedText.replace(/```json\s*/g, '').replace(/```\s*/g, '')
+        console.log('📝 [AI-PARSE] Removed ```json markers')
       } else if (cleanedText.includes('```')) {
         cleanedText = cleanedText.replace(/```\s*/g, '')
+        console.log('📝 [AI-PARSE] Removed ``` markers')
       }
+      
+      console.log('📝 [AI-PARSE] Cleaned text length:', cleanedText.length)
+      console.log('📝 [AI-PARSE] Cleaned text preview:', cleanedText.substring(0, 200))
       
       // Try to parse JSON response
       if (cleanedText.includes('{') && cleanedText.includes('}')) {
@@ -735,23 +817,40 @@ class AIAssessmentService {
           const lastBrace = cleanedText.lastIndexOf('}')
           const jsonString = cleanedText.substring(firstBrace, lastBrace + 1)
           
+          console.log('📝 [AI-PARSE] Attempting to parse JSON...')
           const parsedResponse = JSON.parse(jsonString)
           
+          console.log('✅ [AI-PARSE] JSON parsed successfully!')
+          console.log('✅ [AI-PARSE] Parsed structure:', {
+            hasTitle: !!parsedResponse.title,
+            hasSummary: !!parsedResponse.summary,
+            recommendationsCount: parsedResponse.recommendations?.length || 0,
+            nextStepsCount: parsedResponse.nextSteps?.length || 0,
+            hasMotivation: !!parsedResponse.motivationalMessage
+          })
+          
           if (parsedResponse.title && (parsedResponse.recommendations || parsedResponse.summary)) {
-            console.log('✅ [AI] Successfully parsed response')
+            console.log('✅ [AI-PARSE] Valid AI response structure detected')
             
-            return {
-              type: 'ai_powered',
+            const result = {
+              type: 'ai_powered' as const,
               title: parsedResponse.title || 'Analisis AI Komprehensif',
-              summary: parsedResponse.summary || 'Analisis berdasarkan AI GPT-4',
+              summary: parsedResponse.summary || 'Analisis berdasarkan Google Gemini',
               recommendations: parsedResponse.recommendations || [],
               nextSteps: parsedResponse.nextSteps || [],
               motivationalMessage: parsedResponse.motivationalMessage || this.generateMotivationalMessage(contextData)
             }
+            
+            console.log('🎉 [AI-PARSE] Final AI recommendation ready!')
+            console.log('🎉 [AI-PARSE] Title:', result.title)
+            console.log('🎉 [AI-PARSE] Summary length:', result.summary.length)
+            console.log('🎉 [AI-PARSE] Recommendations:', result.recommendations.length)
+            
+            return result
           }
         } catch (jsonError) {
-          console.warn('⚠️ [AI-SERVICE] Failed to parse as JSON, falling back to text parsing')
-          console.warn('⚠️ [AI-SERVICE] JSON error:', jsonError instanceof Error ? jsonError.message : 'Unknown')
+          console.warn('⚠️ [AI-PARSE] Failed to parse as JSON, falling back to text parsing')
+          console.warn('⚠️ [AI-PARSE] JSON error:', jsonError instanceof Error ? jsonError.message : 'Unknown')
         }
       }
 

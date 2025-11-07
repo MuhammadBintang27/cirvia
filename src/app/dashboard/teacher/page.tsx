@@ -53,6 +53,21 @@ const TeacherDashboard = () => {
   const [learningStyleStats, setLearningStyleStats] = useState<{visual: number, auditory: number, kinesthetic: number} | null>(null);
   const [studentsLearningStyle, setStudentsLearningStyle] = useState<{[key: string]: any}>({});
   
+  // Student management states
+  const [viewingStudent, setViewingStudent] = useState<Student | null>(null);
+  const [editingStudent, setEditingStudent] = useState<Student | null>(null);
+  const [showStudentDetail, setShowStudentDetail] = useState(false);
+  const [showEditStudent, setShowEditStudent] = useState(false);
+  
+  // New student form state
+  const [newStudentForm, setNewStudentForm] = useState({
+    name: '',
+    nis: '',
+    class: '',
+    email: '',
+    phoneNumber: ''
+  });
+  
   // Question management states
   const [questions, setQuestions] = useState<Question[]>([]);
   const [questionView, setQuestionView] = useState<'list' | 'create' | 'edit'>('list');
@@ -168,6 +183,116 @@ const TeacherDashboard = () => {
         type: 'info',
         title: 'Tidak ada data baru',
         message: 'Tidak ada data siswa baru yang diimpor.'
+      });
+    }
+  };
+
+  // Student management functions
+  const handleViewStudent = (student: Student) => {
+    setViewingStudent(student);
+    setShowStudentDetail(true);
+  };
+
+  const handleEditStudent = (student: Student) => {
+    setEditingStudent(student);
+    setShowEditStudent(true);
+  };
+
+  const handleUpdateStudent = async (updatedStudent: Student) => {
+    try {
+      // TODO: Implement update student in Supabase
+      await SupabaseAuthService.updateStudent(updatedStudent.id, {
+        name: updatedStudent.name,
+        email: updatedStudent.email,
+        class: updatedStudent.class,
+        nis: updatedStudent.nis
+      });
+      
+      await loadData();
+      setShowEditStudent(false);
+      setEditingStudent(null);
+      
+      addToast({
+        type: 'success',
+        title: 'Data siswa berhasil diperbarui!',
+        message: `Data ${updatedStudent.name} telah diperbarui.`
+      });
+    } catch (error) {
+      addToast({
+        type: 'error',
+        title: 'Gagal memperbarui data',
+        message: 'Terjadi kesalahan saat memperbarui data siswa. Silakan coba lagi.'
+      });
+    }
+  };
+
+  const handleDeleteStudent = async (student: Student) => {
+    if (confirm(`Yakin ingin menghapus siswa "${student.name}"?\n\nSemua data progress dan hasil tes siswa ini akan terhapus permanen.`)) {
+      try {
+        await SupabaseAuthService.deleteStudent(student.id);
+        await loadData();
+        
+        addToast({
+          type: 'success',
+          title: 'Siswa berhasil dihapus!',
+          message: `Data ${student.name} telah dihapus dari sistem.`
+        });
+      } catch (error) {
+        addToast({
+          type: 'error',
+          title: 'Gagal menghapus siswa',
+          message: 'Terjadi kesalahan saat menghapus data siswa. Silakan coba lagi.'
+        });
+      }
+    }
+  };
+
+  // Add new student handler
+  const handleAddStudent = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    // Validation
+    if (!newStudentForm.name || !newStudentForm.nis || !newStudentForm.class) {
+      addToast({
+        type: 'error',
+        title: 'Data tidak lengkap',
+        message: 'Nama, NIS, dan Kelas wajib diisi!'
+      });
+      return;
+    }
+
+    try {
+      await SupabaseAuthService.createStudent(teacher.id, {
+        name: newStudentForm.name,
+        nis: newStudentForm.nis,
+        class: newStudentForm.class,
+        email: newStudentForm.email || undefined,
+        phoneNumber: newStudentForm.phoneNumber || undefined
+      });
+      
+      await loadData();
+      setShowAddStudent(false);
+      
+      // Reset form
+      setNewStudentForm({
+        name: '',
+        nis: '',
+        class: '',
+        email: '',
+        phoneNumber: ''
+      });
+      
+      addToast({
+        type: 'success',
+        title: 'Siswa berhasil ditambahkan!',
+        message: `${newStudentForm.name} telah ditambahkan ke daftar siswa.`
+      });
+    } catch (error: any) {
+      console.error('Error creating student:', error);
+      addToast({
+        type: 'error',
+        title: 'Gagal menambahkan siswa',
+        message: error.message || 'Terjadi kesalahan saat menambahkan siswa.'
       });
     }
   };
@@ -793,39 +918,73 @@ const TeacherDashboard = () => {
                 {showAddStudent && (
                   <div className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl rounded-2xl p-6 border border-white/20">
                     <h3 className="text-lg font-bold text-white mb-4">Tambah Siswa Baru</h3>
-                    <div className="grid md:grid-cols-2 gap-4 mb-4">
-                      <input
-                        type="text"
-                        placeholder="Nama lengkap siswa"
-                        className="px-4 py-2 bg-white/10 border border-white/20 rounded-xl text-white placeholder-blue-200/50 focus:border-blue-400 focus:outline-none"
-                      />
-                      <input
-                        type="text"
-                        placeholder="Nomor Induk Siswa (NIS)"
-                        className="px-4 py-2 bg-white/10 border border-white/20 rounded-xl text-white placeholder-blue-200/50 focus:border-blue-400 focus:outline-none"
-                      />
-                      <input
-                        type="text"
-                        placeholder="Kelas (contoh: X-IPA-1)"
-                        className="px-4 py-2 bg-white/10 border border-white/20 rounded-xl text-white placeholder-blue-200/50 focus:border-blue-400 focus:outline-none"
-                      />
-                      <input
-                        type="email"
-                        placeholder="Email (opsional)"
-                        className="px-4 py-2 bg-white/10 border border-white/20 rounded-xl text-white placeholder-blue-200/50 focus:border-blue-400 focus:outline-none"
-                      />
-                    </div>
-                    <div className="flex space-x-3">
-                      <button className="px-6 py-2 bg-blue-500/20 hover:bg-blue-500/30 border border-blue-400/30 rounded-xl text-blue-300 hover:text-white transition-all">
-                        Simpan
-                      </button>
-                      <button
-                        onClick={() => setShowAddStudent(false)}
-                        className="px-6 py-2 bg-gray-500/20 hover:bg-gray-500/30 border border-gray-400/30 rounded-xl text-gray-300 hover:text-white transition-all"
-                      >
-                        Batal
-                      </button>
-                    </div>
+                    <form onSubmit={handleAddStudent}>
+                      <div className="grid md:grid-cols-2 gap-4 mb-4">
+                        <input
+                          type="text"
+                          placeholder="Nama lengkap siswa *"
+                          value={newStudentForm.name}
+                          onChange={(e) => setNewStudentForm({...newStudentForm, name: e.target.value})}
+                          className="px-4 py-2.5 bg-white/10 border border-white/20 rounded-xl text-white placeholder-blue-200/50 focus:border-blue-400 focus:outline-none"
+                          required
+                        />
+                        <input
+                          type="text"
+                          placeholder="Nomor Induk Siswa (NIS) *"
+                          value={newStudentForm.nis}
+                          onChange={(e) => setNewStudentForm({...newStudentForm, nis: e.target.value})}
+                          className="px-4 py-2.5 bg-white/10 border border-white/20 rounded-xl text-white placeholder-blue-200/50 focus:border-blue-400 focus:outline-none"
+                          required
+                        />
+                        <input
+                          type="text"
+                          placeholder="Kelas (contoh: X-IPA-1) *"
+                          value={newStudentForm.class}
+                          onChange={(e) => setNewStudentForm({...newStudentForm, class: e.target.value})}
+                          className="px-4 py-2.5 bg-white/10 border border-white/20 rounded-xl text-white placeholder-blue-200/50 focus:border-blue-400 focus:outline-none"
+                          required
+                        />
+                        <input
+                          type="email"
+                          placeholder="Email (opsional)"
+                          value={newStudentForm.email}
+                          onChange={(e) => setNewStudentForm({...newStudentForm, email: e.target.value})}
+                          className="px-4 py-2.5 bg-white/10 border border-white/20 rounded-xl text-white placeholder-blue-200/50 focus:border-blue-400 focus:outline-none"
+                        />
+                        <input
+                          type="tel"
+                          placeholder="Nomor Telepon (opsional)"
+                          value={newStudentForm.phoneNumber}
+                          onChange={(e) => setNewStudentForm({...newStudentForm, phoneNumber: e.target.value})}
+                          className="px-4 py-2.5 bg-white/10 border border-white/20 rounded-xl text-white placeholder-blue-200/50 focus:border-blue-400 focus:outline-none"
+                        />
+                      </div>
+                      <div className="flex space-x-3">
+                        <button 
+                          type="submit"
+                          className="px-6 py-2.5 bg-blue-500/20 hover:bg-blue-500/30 border border-blue-400/30 rounded-xl text-blue-300 hover:text-white transition-all font-medium"
+                        >
+                          Simpan Siswa
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setShowAddStudent(false);
+                            // Reset form when cancelled
+                            setNewStudentForm({
+                              name: '',
+                              nis: '',
+                              class: '',
+                              email: '',
+                              phoneNumber: ''
+                            });
+                          }}
+                          className="px-6 py-2.5 bg-gray-500/20 hover:bg-gray-500/30 border border-gray-400/30 rounded-xl text-gray-300 hover:text-white transition-all font-medium"
+                        >
+                          Batal
+                        </button>
+                      </div>
+                    </form>
                   </div>
                 )}
 
@@ -906,13 +1065,25 @@ const TeacherDashboard = () => {
                             </td>
                             <td className="px-6 py-4">
                               <div className="flex space-x-2">
-                                <button className="p-1.5 bg-blue-500/20 hover:bg-blue-500/30 border border-blue-400/30 rounded-lg text-blue-300 hover:text-white transition-all">
+                                <button 
+                                  onClick={() => handleViewStudent(student)}
+                                  className="p-1.5 bg-blue-500/20 hover:bg-blue-500/30 border border-blue-400/30 rounded-lg text-blue-300 hover:text-white transition-all"
+                                  title="Lihat Detail"
+                                >
                                   <Eye className="w-4 h-4" />
                                 </button>
-                                <button className="p-1.5 bg-yellow-500/20 hover:bg-yellow-500/30 border border-yellow-400/30 rounded-lg text-yellow-300 hover:text-white transition-all">
+                                <button 
+                                  onClick={() => handleEditStudent(student)}
+                                  className="p-1.5 bg-yellow-500/20 hover:bg-yellow-500/30 border border-yellow-400/30 rounded-lg text-yellow-300 hover:text-white transition-all"
+                                  title="Edit Data"
+                                >
                                   <Edit className="w-4 h-4" />
                                 </button>
-                                <button className="p-1.5 bg-red-500/20 hover:bg-red-500/30 border border-red-400/30 rounded-lg text-red-300 hover:text-white transition-all">
+                                <button 
+                                  onClick={() => handleDeleteStudent(student)}
+                                  className="p-1.5 bg-red-500/20 hover:bg-red-500/30 border border-red-400/30 rounded-lg text-red-300 hover:text-white transition-all"
+                                  title="Hapus Siswa"
+                                >
                                   <Trash2 className="w-4 h-4" />
                                 </button>
                               </div>
@@ -1147,6 +1318,242 @@ const TeacherDashboard = () => {
           onImportComplete={handleImportComplete}
           onClose={() => setShowExcelImport(false)}
         />
+      )}
+
+      {/* Student Detail Modal */}
+      {showStudentDetail && viewingStudent && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-gradient-to-br from-slate-900 via-blue-950 to-indigo-900 rounded-2xl border border-white/20 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6">
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-2xl font-bold text-white">Detail Siswa</h3>
+                <button
+                  onClick={() => setShowStudentDetail(false)}
+                  className="p-2 bg-white/10 hover:bg-white/20 rounded-lg text-white transition-all"
+                >
+                  ✕
+                </button>
+              </div>
+
+              <div className="space-y-6">
+                {/* Student Info */}
+                <div className="bg-gradient-to-br from-white/10 to-white/5 rounded-xl p-6 border border-white/20">
+                  <div className="flex items-center mb-6">
+                    <div className="w-20 h-20 bg-gradient-to-br from-blue-500/20 to-indigo-600/20 rounded-full flex items-center justify-center mr-4">
+                      <span className="text-blue-400 text-3xl font-bold">{viewingStudent.name.charAt(0)}</span>
+                    </div>
+                    <div>
+                      <h4 className="text-2xl font-bold text-white">{viewingStudent.name}</h4>
+                      <p className="text-blue-200/70">NIS: {viewingStudent.nis}</p>
+                      <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-500/20 text-blue-300 border border-blue-400/30 mt-2">
+                        {viewingStudent.class}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="grid md:grid-cols-2 gap-4">
+                    <div>
+                      <p className="text-blue-200/70 text-sm mb-1">Email</p>
+                      <p className="text-white font-medium">{viewingStudent.email || '-'}</p>
+                    </div>
+                    <div>
+                      <p className="text-blue-200/70 text-sm mb-1">Nomor Telepon</p>
+                      <p className="text-white font-medium">{viewingStudent.phoneNumber || '-'}</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Learning Style */}
+                {studentsLearningStyle[viewingStudent.id] && (
+                  <div className="bg-gradient-to-br from-white/10 to-white/5 rounded-xl p-6 border border-white/20">
+                    <h5 className="text-lg font-bold text-white mb-4">Gaya Belajar</h5>
+                    <div className="flex items-center space-x-4">
+                      {studentsLearningStyle[viewingStudent.id].primaryStyle === 'visual' && (
+                        <>
+                          <Eye className="w-8 h-8 text-blue-400" />
+                          <div>
+                            <p className="text-white font-bold text-xl">Visual Learner</p>
+                            <p className="text-blue-200/70 text-sm">Belajar lebih baik dengan gambar dan diagram</p>
+                          </div>
+                        </>
+                      )}
+                      {studentsLearningStyle[viewingStudent.id].primaryStyle === 'auditory' && (
+                        <>
+                          <Ear className="w-8 h-8 text-purple-400" />
+                          <div>
+                            <p className="text-white font-bold text-xl">Auditory Learner</p>
+                            <p className="text-purple-200/70 text-sm">Belajar lebih baik dengan mendengar</p>
+                          </div>
+                        </>
+                      )}
+                      {studentsLearningStyle[viewingStudent.id].primaryStyle === 'kinesthetic' && (
+                        <>
+                          <Hand className="w-8 h-8 text-emerald-400" />
+                          <div>
+                            <p className="text-white font-bold text-xl">Kinesthetic Learner</p>
+                            <p className="text-emerald-200/70 text-sm">Belajar lebih baik dengan praktik langsung</p>
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* Progress */}
+                <div className="bg-gradient-to-br from-white/10 to-white/5 rounded-xl p-6 border border-white/20">
+                  <h5 className="text-lg font-bold text-white mb-4">Progress Pembelajaran</h5>
+                  <div className="grid md:grid-cols-2 gap-4">
+                    <div className="bg-yellow-500/10 rounded-lg p-4 border border-yellow-400/30">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-yellow-200 text-sm">Pre-Test</span>
+                        <Trophy className="w-5 h-5 text-yellow-400" />
+                      </div>
+                      <p className="text-3xl font-bold text-yellow-300">
+                        {viewingStudent.progress?.preTestScore !== undefined ? `${viewingStudent.progress.preTestScore}%` : '-'}
+                      </p>
+                      <p className="text-yellow-200/70 text-xs mt-1">
+                        {viewingStudent.progress?.preTestScore !== undefined ? 'Selesai' : 'Belum mengerjakan'}
+                      </p>
+                    </div>
+                    <div className="bg-purple-500/10 rounded-lg p-4 border border-purple-400/30">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-purple-200 text-sm">Post-Test</span>
+                        <Trophy className="w-5 h-5 text-purple-400" />
+                      </div>
+                      <p className="text-3xl font-bold text-purple-300">
+                        {viewingStudent.progress?.postTestScore !== undefined ? `${viewingStudent.progress.postTestScore}%` : '-'}
+                      </p>
+                      <p className="text-purple-200/70 text-xs mt-1">
+                        {viewingStudent.progress?.postTestScore !== undefined ? 'Selesai' : 'Belum mengerjakan'}
+                      </p>
+                    </div>
+                  </div>
+
+                  {viewingStudent.progress?.preTestScore !== undefined && viewingStudent.progress?.postTestScore !== undefined && (
+                    <div className="mt-4 p-3 bg-green-500/10 rounded-lg border border-green-400/30">
+                      <div className="flex items-center justify-center text-green-400">
+                        <TrendingUp className="w-5 h-5 mr-2" />
+                        <span className="font-bold">
+                          Peningkatan: +{Math.round((viewingStudent.progress.postTestScore || 0) - (viewingStudent.progress.preTestScore || 0))}%
+                        </span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <div className="flex justify-end space-x-3 mt-6">
+                <button
+                  onClick={() => {
+                    setShowStudentDetail(false);
+                    handleEditStudent(viewingStudent);
+                  }}
+                  className="px-6 py-2 bg-blue-500/20 hover:bg-blue-500/30 border border-blue-400/30 rounded-xl text-blue-300 hover:text-white transition-all"
+                >
+                  Edit Data
+                </button>
+                <button
+                  onClick={() => setShowStudentDetail(false)}
+                  className="px-6 py-2 bg-gray-500/20 hover:bg-gray-500/30 border border-gray-400/30 rounded-xl text-gray-300 hover:text-white transition-all"
+                >
+                  Tutup
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Student Modal */}
+      {showEditStudent && editingStudent && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-gradient-to-br from-slate-900 via-blue-950 to-indigo-900 rounded-2xl border border-white/20 max-w-2xl w-full">
+            <div className="p-6">
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-2xl font-bold text-white">Edit Data Siswa</h3>
+                <button
+                  onClick={() => setShowEditStudent(false)}
+                  className="p-2 bg-white/10 hover:bg-white/20 rounded-lg text-white transition-all"
+                >
+                  ✕
+                </button>
+              </div>
+
+              <form onSubmit={(e) => {
+                e.preventDefault();
+                handleUpdateStudent(editingStudent);
+              }} className="space-y-4">
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-blue-200 mb-2">Nama Lengkap *</label>
+                    <input
+                      type="text"
+                      value={editingStudent.name}
+                      onChange={(e) => setEditingStudent({...editingStudent, name: e.target.value})}
+                      className="w-full px-4 py-2.5 bg-white/10 border border-white/20 rounded-xl text-white placeholder-blue-200/50 focus:border-blue-400 focus:outline-none"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-blue-200 mb-2">NIS *</label>
+                    <input
+                      type="text"
+                      value={editingStudent.nis}
+                      onChange={(e) => setEditingStudent({...editingStudent, nis: e.target.value})}
+                      className="w-full px-4 py-2.5 bg-white/10 border border-white/20 rounded-xl text-white placeholder-blue-200/50 focus:border-blue-400 focus:outline-none"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-blue-200 mb-2">Kelas *</label>
+                    <input
+                      type="text"
+                      value={editingStudent.class}
+                      onChange={(e) => setEditingStudent({...editingStudent, class: e.target.value})}
+                      placeholder="Contoh: X-IPA-1"
+                      className="w-full px-4 py-2.5 bg-white/10 border border-white/20 rounded-xl text-white placeholder-blue-200/50 focus:border-blue-400 focus:outline-none"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-blue-200 mb-2">Email</label>
+                    <input
+                      type="email"
+                      value={editingStudent.email || ''}
+                      onChange={(e) => setEditingStudent({...editingStudent, email: e.target.value})}
+                      className="w-full px-4 py-2.5 bg-white/10 border border-white/20 rounded-xl text-white placeholder-blue-200/50 focus:border-blue-400 focus:outline-none"
+                    />
+                  </div>
+                  <div className="md:col-span-2">
+                    <label className="block text-sm font-medium text-blue-200 mb-2">Nomor Telepon</label>
+                    <input
+                      type="tel"
+                      value={editingStudent.phoneNumber || ''}
+                      onChange={(e) => setEditingStudent({...editingStudent, phoneNumber: e.target.value})}
+                      className="w-full px-4 py-2.5 bg-white/10 border border-white/20 rounded-xl text-white placeholder-blue-200/50 focus:border-blue-400 focus:outline-none"
+                    />
+                  </div>
+                </div>
+
+                <div className="flex justify-end space-x-3 mt-6">
+                  <button
+                    type="button"
+                    onClick={() => setShowEditStudent(false)}
+                    className="px-6 py-2 bg-gray-500/20 hover:bg-gray-500/30 border border-gray-400/30 rounded-xl text-gray-300 hover:text-white transition-all"
+                  >
+                    Batal
+                  </button>
+                  <button
+                    type="submit"
+                    className="px-6 py-2 bg-blue-500/20 hover:bg-blue-500/30 border border-blue-400/30 rounded-xl text-blue-300 hover:text-white transition-all"
+                  >
+                    Simpan Perubahan
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

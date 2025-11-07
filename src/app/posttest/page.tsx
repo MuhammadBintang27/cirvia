@@ -70,6 +70,22 @@ const PostTestPage = () => {
     defaultQuestions // ✅ Use database-fetched default questions
   );
   
+  // 🐛 Debug logging untuk questions
+  useEffect(() => {
+    console.log('🔍 [POSTTEST DEBUG] Questions state:', {
+      questionsLength: questions.length,
+      questionsLoading,
+      questionsError,
+      defaultQuestionsLength: defaultQuestions.length,
+      loadingDefaults,
+      firstQuestion: questions[0] ? {
+        id: questions[0].id,
+        questionType: questions[0].questionType,
+        title: questions[0].title
+      } : null
+    });
+  }, [questions, questionsLoading, questionsError, defaultQuestions, loadingDefaults]);
+  
   // Auto-start test jika sudah login sebagai student
   useEffect(() => {
     if (isLoggedInStudent) {
@@ -364,6 +380,7 @@ const PostTestPage = () => {
               <div className="mb-8">
                 <PostTestAIFeedback
                   studentId={user.id}
+                  studentName={user.name}
                   testType="posttest"
                   score={Math.round(scoreData.score)}
                   improvement={undefined} // Will be calculated by the service
@@ -535,36 +552,74 @@ const PostTestPage = () => {
           </div>
 
           {/* Progress Bar */}
-          <div className="mb-8">
-            <div className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl rounded-2xl p-6 border border-white/20">
-              <div className="flex justify-between items-center mb-4">
-                <div className="text-white font-bold">
-                  Soal {quizState.currentQuestionIndex + 1} dari {questions.length}
-                </div>
-                <div className="flex items-center space-x-4">
-                  <div className="text-cyan-300 font-bold">{formatTime(timeElapsed)}</div>
-                  <div className="text-purple-300">
-                    Benar: {quizState.answers.filter(Boolean).length}
+          {!loadingDefaults && !questionsLoading && questions.length > 0 && (
+            <div className="mb-8">
+              <div className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl rounded-2xl p-6 border border-white/20">
+                <div className="flex justify-between items-center mb-4">
+                  <div className="text-white font-bold">
+                    Soal {quizState.currentQuestionIndex + 1} dari {questions.length}
+                  </div>
+                  <div className="flex items-center space-x-4">
+                    <div className="text-cyan-300 font-bold">{formatTime(timeElapsed)}</div>
+                    <div className="text-purple-300">
+                      Benar: {quizState.answers.filter(Boolean).length}
+                    </div>
                   </div>
                 </div>
-              </div>
-              <div className="w-full bg-white/10 rounded-full h-3">
-                <div 
-                  className="bg-gradient-to-r from-purple-500 to-pink-500 h-3 rounded-full transition-all duration-500"
-                  style={{ width: `${((quizState.currentQuestionIndex + 1) / questions.length) * 100}%` }}
-                ></div>
+                <div className="w-full bg-white/10 rounded-full h-3">
+                  <div 
+                    className="bg-gradient-to-r from-purple-500 to-pink-500 h-3 rounded-full transition-all duration-500"
+                    style={{ width: `${((quizState.currentQuestionIndex + 1) / questions.length) * 100}%` }}
+                  ></div>
+                </div>
               </div>
             </div>
-          </div>
+          )}
 
           {/* Question Section */}
-          <QuestionRenderer
-            question={currentQuestion}
-            onAnswer={handleAnswerSubmit}
-            onNextQuestion={handleNextQuestion}
-            showResult={quizState.showResult}
-            isLastQuestion={quizState.currentQuestionIndex >= questions.length - 1}
-          />
+          {loadingDefaults || questionsLoading ? (
+            <div className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl rounded-2xl p-12 border border-white/20 text-center">
+              <div className="flex flex-col items-center justify-center space-y-4">
+                <div className="w-16 h-16 border-4 border-purple-500/30 border-t-purple-500 rounded-full animate-spin"></div>
+                <p className="text-white text-xl font-bold">Memuat soal dari database...</p>
+                <p className="text-blue-200/70">Mohon tunggu sebentar</p>
+              </div>
+            </div>
+          ) : questionsError ? (
+            <div className="bg-gradient-to-br from-red-500/20 to-red-600/10 backdrop-blur-xl rounded-2xl p-12 border border-red-500/50 text-center">
+              <p className="text-red-300 text-xl font-bold mb-4">⚠️ Gagal memuat soal</p>
+              <p className="text-red-200/70 mb-6">{questionsError}</p>
+              <button
+                onClick={() => window.location.reload()}
+                className="px-6 py-3 bg-red-500/30 hover:bg-red-500/50 border border-red-400/50 rounded-xl text-white font-medium transition-all"
+              >
+                Muat Ulang Halaman
+              </button>
+            </div>
+          ) : questions.length === 0 ? (
+            <div className="bg-gradient-to-br from-yellow-500/20 to-yellow-600/10 backdrop-blur-xl rounded-2xl p-12 border border-yellow-500/50 text-center">
+              <p className="text-yellow-300 text-xl font-bold mb-4">📦 Tidak ada soal</p>
+              <p className="text-yellow-200/70">Belum ada soal post-test yang tersedia. Hubungi guru Anda.</p>
+            </div>
+          ) : !currentQuestion ? (
+            <div className="bg-gradient-to-br from-red-500/20 to-red-600/10 backdrop-blur-xl rounded-2xl p-12 border border-red-500/50 text-center">
+              <p className="text-red-300 text-xl font-bold mb-4">⚠️ Soal tidak ditemukan</p>
+              <p className="text-red-200/70">
+                Soal nomor {quizState.currentQuestionIndex + 1} tidak dapat dimuat.
+              </p>
+              <p className="text-red-200/50 text-sm mt-2">
+                Debug: questions.length = {questions.length}, currentIndex = {quizState.currentQuestionIndex}
+              </p>
+            </div>
+          ) : (
+            <QuestionRenderer
+              question={currentQuestion}
+              onAnswer={handleAnswerSubmit}
+              onNextQuestion={handleNextQuestion}
+              showResult={quizState.showResult}
+              isLastQuestion={quizState.currentQuestionIndex >= questions.length - 1}
+            />
+          )}
 
 
         </div>

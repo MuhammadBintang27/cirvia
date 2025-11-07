@@ -1,7 +1,5 @@
 import { SupabaseAuthService } from '@/lib/supabase-auth-service'
-import { supabase } from '@/lib/supabase'
-import fs from 'fs'
-import path from 'path'
+import { GoogleGenerativeAI } from '@google/generative-ai'
 
 type ChatRequest = {
   message: string
@@ -27,97 +25,8 @@ function checkRateLimit(key: string, maxPerMinute: number) {
   return { allowed: true, remaining: maxPerMinute - item.count, resetAt: item.resetAt }
 }
 
-async function generateQueryEmbedding(query: string): Promise<number[]> {
-  const OPENAI_KEY = process.env.OPENAI_API_KEY
-  if (!OPENAI_KEY) {
-    console.error('OPENAI_API_KEY not found in environment variables')
-    throw new Error('OPENAI_API_KEY not configured')
-  }
-
-  console.log('Generating embedding for query:', query.substring(0, 50) + '...')
-  
-  try {
-    const response = await fetch('https://api.openai.com/v1/embeddings', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${OPENAI_KEY}`
-      },
-      body: JSON.stringify({
-        input: query.trim(),
-        model: 'text-embedding-ada-002'
-      })
-    })
-
-    if (!response.ok) {
-      const errorText = await response.text()
-      console.error('OpenAI API error:', response.status, errorText)
-      throw new Error(`OpenAI API error: ${response.status} - ${errorText}`)
-    }
-
-    const data = await response.json()
-    
-    if (!data.data || !data.data[0] || !data.data[0].embedding) {
-      console.error('Invalid embedding response:', data)
-      throw new Error('Invalid embedding response from OpenAI')
-    }
-
-    console.log('Embedding generated successfully, dimension:', data.data[0].embedding.length)
-    return data.data[0].embedding
-  } catch (error) {
-    console.error('generateQueryEmbedding error:', error)
-    throw error
-  }
-}
-
-async function retrieveContext(query: string) {
-  console.log('retrieveContext called with query:', query.substring(0, 100) + '...')
-  
-  try {
-    const queryEmbedding = await generateQueryEmbedding(query)
-    console.log('Query embedding generated successfully')
-    
-    console.log('Searching for similar documents...')
-    const { data: matches, error } = await supabase.rpc('match_documents', {
-      query_embedding: queryEmbedding,
-      match_threshold: 0.78,
-      match_count: 5
-    })
-
-    if (error) {
-      console.error('Vector search error:', error)
-      console.log('Falling back to keyword search')
-      return fallbackKeywordSearch(query)
-    }
-
-    if (!matches || matches.length === 0) {
-      const { data: fallbackMatches } = await supabase.rpc('match_documents', {
-        query_embedding: queryEmbedding,
-        match_threshold: 0.5,
-        match_count: 3
-      })
-      
-      if (!fallbackMatches || fallbackMatches.length === 0) {
-        return fallbackKeywordSearch(query)
-      }
-      
-      return fallbackMatches
-        .map((match: any) => `${match.title} (similarity: ${match.similarity.toFixed(2)}): ${match.content}`)
-        .join('\n\n')
-    }
-
-    return matches
-      .map((match: any) => `${match.title} (similarity: ${match.similarity.toFixed(2)}): ${match.content}`)
-      .join('\n\n')
-
-  } catch (error) {
-    console.error('retrieveContext error:', error)
-    console.log('Using fallback keyword search due to vector search failure')
-    return fallbackKeywordSearch(query)
-  }
-}
-
-function handleLocalFallback(message: string, retrieved: string) {
+// Simple local fallback when Gemini API is unavailable
+function handleLocalFallback(message: string): string {
   console.log('Using local ChatBot knowledge base')
   
   const knowledgeBase: Record<string, string> = {
@@ -129,54 +38,14 @@ function handleLocalFallback(message: string, retrieved: string) {
   }
 
   const lowerMessage = message.toLowerCase()
-  let answer = ''
-
+  
   for (const [key, value] of Object.entries(knowledgeBase)) {
     if (lowerMessage.includes(key)) {
-      answer = value
-      break
+      return value
     }
   }
 
-  if (retrieved && !answer) {
-    answer = `Berdasarkan informasi yang saya temukan:\n\n${retrieved}\n\nSemoga ini membantu! Ada yang ingin ditanyakan lebih lanjut? 😊`
-  } else if (!answer) {
-    answer = 'Hmm, sepertinya aku belum paham betul dengan pertanyaan kamu 🤔 Tapi jangan khawatir! Coba tanyakan tentang:\n\n💡 Konsep dasar: Hukum Ohm, Tegangan, Arus, Hambatan\n🔌 Rangkaian: Seri atau Paralel\n⚡ Daya Listrik dan perhitungannya\n🎮 Fitur CIRVIA: Praktikum Virtual dan Gesture Control\n\nAtau kasih contoh soal juga boleh lho! Aku siap bantu! 😊✨'
-  }
-
-  return answer
-}
-
-function fallbackKeywordSearch(query: string): string {
-  const internalKb = [
-    { title: 'hukum ohm', text: 'Hukum Ohm: V = I × R. Tegangan (V), Arus (I), Hambatan (R).' },
-    { title: 'rangkaian seri', text: 'Rangkaian seri: arus sama di semua elemen, R total = R1 + R2 + ...' },
-    { title: 'rangkaian paralel', text: 'Rangkaian paralel: tegangan sama di semua cabang, 1/R total = 1/R1 + 1/R2 + ...' }
-  ]
-
-  const q = query.toLowerCase()
-  const found = internalKb.filter(d => q.includes(d.title) || d.text.toLowerCase().includes(q))
-
-  try {
-    const booksDir = path.join(process.cwd(), 'data', 'rag_books')
-    if (fs.existsSync(booksDir)) {
-      const files = fs.readdirSync(booksDir)
-      for (const f of files) {
-        if (f === 'README.md') continue
-        const full = path.join(booksDir, f)
-        if (fs.statSync(full).isFile()) {
-          const text = fs.readFileSync(full, 'utf8')
-          if (text.toLowerCase().includes(q)) {
-            found.push({ title: f, text: text.slice(0, 1000) })
-          }
-        }
-      }
-    }
-  } catch (e) {
-    console.warn('fallbackKeywordSearch error:', e)
-  }
-
-  return found.slice(0, 3).map(r => `${r.title}: ${r.text}`).join('\n')
+  return 'Hmm, sepertinya aku belum paham betul dengan pertanyaan kamu 🤔 Tapi jangan khawatir! Coba tanyakan tentang:\n\n💡 Konsep dasar: Hukum Ohm, Tegangan, Arus, Hambatan\n🔌 Rangkaian: Seri atau Paralel\n⚡ Daya Listrik dan perhitungannya\n🎮 Fitur CIRVIA: Praktikum Virtual dan Gesture Control\n\nAtau kasih contoh soal juga boleh lho! Aku siap bantu! 😊✨'
 }
 
 export async function POST(req: Request) {
@@ -212,69 +81,75 @@ export async function POST(req: Request) {
       })
     }
 
-    const OPENAI_KEY = process.env.OPENAI_API_KEY
-    const hasValidOpenAI = !!OPENAI_KEY
+    const GOOGLE_AI_KEY = process.env.GOOGLE_AI_API_KEY
+    const hasValidGemini = !!GOOGLE_AI_KEY
     
-    console.log('OpenAI API available:', hasValidOpenAI)
+    console.log('Google Gemini API available:', hasValidGemini)
 
-    const retrieved = await retrieveContext(message)
+    // System prompt - focus on CIRVIA educational context
+    const systemPrompt = `You are CIRVIA Assistant, a friendly educational chatbot for learning about electrical circuits (rangkaian listrik).
 
-    const systemPrompt = `You are CIRVIA Assistant, an educational assistant for electrical circuits. Use concise, friendly Indonesian explanations suitable for school students. When helpful, show formulas. If retrieved context is provided, incorporate it and cite the source.`
+Your personality:
+- Friendly, encouraging, like an older sibling helping with homework
+- Use casual Indonesian mixed with simple technical terms
+- Add emojis to make learning fun (💡🔋⚡🔌)
+- Use analogies and real-life examples
+- Always show formulas when relevant
 
-    const messages: any[] = [{ role: 'system', content: systemPrompt }]
-    if (retrieved) messages.push({ role: 'system', content: `Retrieved documents:\n${retrieved}` })
-    if (body.history && Array.isArray(body.history)) for (const h of body.history) messages.push(h)
-    messages.push({ role: 'user', content: message })
+Topics you excel at:
+- Hukum Ohm (V = I × R)
+- Rangkaian Seri & Paralel
+- Daya Listrik (P = V × I)
+- Hambatan, Tegangan, Arus
+- Circuit analysis and calculations
 
-    if (!OPENAI_KEY) {
-      console.log('No OpenAI key, using local fallback')
-      const reply = handleLocalFallback(message, retrieved)
+Keep answers concise but complete. Break down complex topics into simple steps.`
+
+    if (!GOOGLE_AI_KEY) {
+      console.log('No Google AI key, using local fallback')
+      const reply = handleLocalFallback(message)
       return new Response(JSON.stringify({ reply }), {
         headers: { 'Content-Type': 'application/json' }
       })
     }
 
     try {
-      // NON-STREAMING REQUEST (like AgroMarFeed)
-      const openaiRes = await fetch('https://api.openai.com/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${OPENAI_KEY}`
-        },
-        body: JSON.stringify({ 
-          model: 'gpt-4', 
-          messages, 
-          temperature: 0.2, 
-          max_tokens: 1024,
-          stream: false  // ← NON-STREAMING!
-        })
+      // GEMINI REQUEST - Simple, no RAG
+      const genAI = new GoogleGenerativeAI(GOOGLE_AI_KEY)
+      const model = genAI.getGenerativeModel({ 
+        model: 'gemini-2.0-flash-exp',
+        generationConfig: {
+          temperature: 0.3,  // Slightly higher for more engaging responses
+          maxOutputTokens: 1024
+        }
       })
 
-      if (!openaiRes.ok) {
-        const errorText = await openaiRes.text()
-        console.error('OpenAI API error:', openaiRes.status, errorText)
-        
-        if (openaiRes.status === 429 || openaiRes.status >= 400) {
-          console.log('OpenAI API unavailable, using local fallback')
-          const reply = handleLocalFallback(message, retrieved)
-          return new Response(JSON.stringify({ reply }), {
-            headers: { 'Content-Type': 'application/json' }
-          })
+      // Build conversation prompt
+      let prompt = systemPrompt + '\n\n'
+      
+      // Add conversation history if exists
+      if (body.history && Array.isArray(body.history)) {
+        for (const h of body.history) {
+          if (h.role === 'user') prompt += `User: ${h.content}\n`
+          else if (h.role === 'assistant') prompt += `Assistant: ${h.content}\n`
         }
-        
-        throw new Error(`OpenAI error: ${openaiRes.status} - ${errorText}`)
       }
+      
+      // Add current message
+      prompt += `User: ${message}\nAssistant:`
 
-      const data = await openaiRes.json()
-      const reply = data.choices?.[0]?.message?.content || 'AI tidak dapat merespons.'
+      console.log('Sending request to Gemini...')
+      const result = await model.generateContent(prompt)
+      const response = await result.response
+      const reply = response.text() || 'AI tidak dapat merespons.'
 
+      console.log('Gemini response received successfully')
       return new Response(JSON.stringify({ reply }), {
         headers: { 'Content-Type': 'application/json' }
       })
     } catch (err: any) {
-      console.error('OpenAI request error:', err)
-      const reply = handleLocalFallback(message, retrieved)
+      console.error('Gemini request error:', err)
+      const reply = handleLocalFallback(message)
       return new Response(JSON.stringify({ reply }), {
         headers: { 'Content-Type': 'application/json' }
       })

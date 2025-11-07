@@ -52,30 +52,11 @@ export default function HomePage() {
   }, [testimonials.length]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-950 to-indigo-900 relative overflow-hidden">
-      {/* Animated Background Elements */}
-      <div className="absolute inset-0">
-        <div className="absolute top-20 left-10 w-72 h-72 bg-blue-500/10 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute top-40 right-20 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
-        <div className="absolute bottom-20 left-1/3 w-80 h-80 bg-cyan-500/10 rounded-full blur-3xl animate-pulse delay-2000"></div>
-        {[...Array(20)].map((_, i) => (
-          <div
-            key={i}
-            className="absolute w-1 h-1 bg-blue-400/30 rounded-full animate-ping"
-            style={{
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
-              animationDelay: `${Math.random() * 3}s`,
-              animationDuration: `${3 + Math.random() * 2}s`
-            }}
-          ></div>
-        ))}
-      </div>
-
+    <>
       {/* Navbar */}
       <Navbar />
 
-      <main className="container mx-auto px-6 py-16 relative z-10">
+      <div className="container mx-auto px-6 py-16">
         <div className="max-w-7xl mx-auto">
           {/* Enhanced Hero Section */}
           <div className={`text-center mb-20 transition-all duration-1000 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
@@ -103,7 +84,7 @@ export default function HomePage() {
               {/* Enhanced Tagline */}
               <div className="relative">
                 <p className="text-xl sm:text-2xl text-blue-200/90 max-w-4xl mx-auto leading-relaxed mb-4 font-medium">
-                  🚀 Revolusi Pembelajaran Fisika dengan Teknologi AR & Computer Vision
+                  🚀 Revolusi Pembelajaran Fisika dengan Teknologi AI & Computer Vision
                 </p>
                 <p className="text-lg text-blue-300/80 max-w-3xl mx-auto leading-relaxed mb-8">
                   Platform pembelajaran fisika yang menggabungkan simulasi rangkaian listrik virtual dengan teknologi computer vision untuk deteksi gerakan tangan, membuat belajar menjadi lebih menyenangkan dan efektif.
@@ -567,7 +548,7 @@ export default function HomePage() {
             </div>
           </section>
         </div>
-      </main>
-    </div>
+      </div>
+    </>
   )
 }

@@ -24,6 +24,31 @@ const QuestionRenderer: React.FC<QuestionRendererProps> = ({
   isLastQuestion,
   disabled = false
 }) => {
+  // 🛡️ Safety check: Pastikan question object valid
+  if (!question) {
+    console.error('❌ QuestionRenderer: question is null/undefined');
+    return (
+      <div className="bg-red-500/20 border border-red-500/50 rounded-xl p-6 text-center">
+        <p className="text-red-300 font-bold text-lg">⚠️ Error: Soal tidak ditemukan</p>
+        <p className="text-red-200/70 text-sm mt-2">
+          Data soal tidak valid atau tidak dapat dimuat dari database.
+        </p>
+      </div>
+    );
+  }
+
+  if (!question.questionType) {
+    console.error('❌ QuestionRenderer: questionType is missing', question);
+    return (
+      <div className="bg-red-500/20 border border-red-500/50 rounded-xl p-6 text-center">
+        <p className="text-red-300 font-bold text-lg">⚠️ Error: Tipe soal tidak diketahui</p>
+        <p className="text-red-200/70 text-sm mt-2">
+          Soal ID: {(question as any).id || 'unknown'} - questionType hilang
+        </p>
+      </div>
+    );
+  }
+
   // Render komponen berdasarkan tipe soal
   switch (question.questionType) {
     case 'circuit':
