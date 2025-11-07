@@ -2,9 +2,8 @@
 
 import React, { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { User, Lock, AlertCircle, ArrowLeft, Star, Sparkles } from 'lucide-react';
+import { User, Lock, AlertCircle, ArrowLeft, Sparkles } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 
 const StudentLoginContent: React.FC = () => {
@@ -72,157 +71,165 @@ const StudentLoginContent: React.FC = () => {
   const testInfo = getTestInfo();
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-950 to-indigo-900 relative overflow-hidden">
-      {/* Clean Background Elements */}
-      <div className="absolute inset-0">
-        <div className="absolute top-20 left-10 w-72 h-72 bg-blue-500/10 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute top-40 right-20 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
-        <div className="absolute bottom-20 left-1/3 w-80 h-80 bg-cyan-500/10 rounded-full blur-3xl animate-pulse delay-2000"></div>
-      </div>
-
+    <div className="min-h-screen grid md:grid-cols-12">
       {/* Back Button */}
       <div className="absolute top-6 left-6 z-20">
         <Link 
           href="/"
-          className="inline-flex items-center px-3 py-2 bg-white/10 hover:bg-white/20 backdrop-blur-sm border border-white/20 rounded-lg text-white hover:text-blue-300 transition-all text-sm"
+          className="inline-flex items-center px-3 py-2 bg-white/90 hover:bg-white backdrop-blur-sm border border-gray-200 rounded-lg text-gray-700 hover:text-blue-600 transition-all text-sm shadow-sm"
         >
           <ArrowLeft className="w-4 h-4 mr-2" />
           Kembali ke Homepage
         </Link>
       </div>
 
-      {/* Main Content - Clean Split Layout */}
-      <div className="min-h-screen flex relative z-10">
-        {/* Left Side - Illustration */}
-        <div className="flex-1 flex items-center justify-center p-12">
-          <div className="max-w-lg text-center">
-            {/* Title */}
-            <div className="mb-8">
-              <h1 className="text-4xl font-bold text-white mb-4">
-                Selamat Datang, Siswa! 🎓
-              </h1>
-              <p className="text-blue-200/80 text-lg">
-                Platform Pembelajaran Rangkaian Listrik
-              </p>
-            </div>
-            
-            {/* Illustration */}
-            <div className="relative w-96 h-96 mx-auto mb-8">
-              <Image
-                src="/fotosiswa.png"
-                alt="Student Illustration"
-                fill
-                className="object-contain"
-              />
-            </div>
-
-            {/* Features */}
-            <div className="space-y-4">
-              <div className="flex items-center justify-start text-blue-200/90">
-                <span className="w-2 h-2 bg-emerald-400 rounded-full mr-4"></span>
-                <span>Akses materi pembelajaran interaktif</span>
-              </div>
-              <div className="flex items-center justify-start text-blue-200/90">
-                <span className="w-2 h-2 bg-emerald-400 rounded-full mr-4"></span>
-                <span>Praktikum dengan hand gesture detection</span>
-              </div>
-              <div className="flex items-center justify-start text-blue-200/90">
-                <span className="w-2 h-2 bg-emerald-400 rounded-full mr-4"></span>
-                <span>Track progress belajar secara real-time</span>
-              </div>
-            </div>
-          </div>
+      {/* Left Side - Video Illustration (Desktop) */}
+      <aside className="hidden md:flex md:col-span-7 items-center justify-center bg-gradient-to-br from-[#0A2E4D] to-[#1A4D6E] relative overflow-hidden">
+        {/* Video Background */}
+        <video 
+          autoPlay 
+          loop 
+          muted 
+          playsInline
+          className="absolute inset-0 w-full h-full object-cover opacity-90"
+        >
+          <source src="/assets/illustrations/videoLogin_register.mp4" type="video/mp4" />
+        </video>
+        
+        {/* Overlay gradient */}
+        <div className="absolute inset-0 bg-gradient-to-br from-blue-900/40 to-indigo-900/40"></div>
+        
+        {/* Text content over video */}
+        <div className="relative z-10 max-w-2xl px-8 text-center">
+          <h1 className="text-4xl font-bold text-white mb-4 drop-shadow-lg">
+            Selamat Datang, Siswa! 🎓
+          </h1>
+          <p className="text-blue-100 text-lg drop-shadow">
+            Masuk untuk melanjutkan pembelajaran rangkaian listrik di CIRVIA
+          </p>
         </div>
+      </aside>
 
-        {/* Right Side - Login Form */}
-        <div className="flex-1 flex items-center justify-center p-12 bg-white/5 backdrop-blur-sm">
-          <div className="w-full max-w-md">
-            <div className="bg-white/10 backdrop-blur-xl rounded-2xl border border-white/20 p-8 shadow-2xl">
-              
-              {/* Form Header */}
-              <div className="text-center mb-8">
-                <h2 className="text-2xl font-bold text-white mb-2">Login Siswa</h2>
-                <p className="text-blue-200/80">
-                  {testType ? `${testInfo.icon} ${testInfo.title}` : 'Akses Dashboard CIRVIA'}
-                </p>
-              </div>
-
-              {/* Login Form */}
-              <form onSubmit={handleSubmit} className="space-y-6">
-                {/* Name Field */}
-                <div>
-                  <label className="block text-blue-200 font-medium mb-2 text-sm">
-                    Nama Lengkap
-                  </label>
-                  <div className="relative">
-                    <User className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-blue-400" />
-                    <input
-                      type="text"
-                      name="name"
-                      value={formData.name}
-                      onChange={handleInputChange}
-                      placeholder="Masukkan nama lengkap"
-                      className="w-full pl-12 pr-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-blue-300/60 focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-400/20 transition-all"
-                      required
-                    />
-                  </div>
-                </div>
-
-                {/* NIS Field */}
-                <div>
-                  <label className="block text-blue-200 font-medium mb-2 text-sm">
-                    NIS (Nomor Induk Siswa)
-                  </label>
-                  <div className="relative">
-                    <Lock className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-blue-400" />
-                    <input
-                      type="text"
-                      name="nis"
-                      value={formData.nis}
-                      onChange={handleInputChange}
-                      placeholder="Masukkan NIS Anda"
-                      className="w-full pl-12 pr-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-blue-300/60 focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-400/20 transition-all"
-                      required
-                    />
-                  </div>
-                </div>
-
-                {/* Error Message */}
-                {error && (
-                  <div className="bg-red-500/10 border border-red-400/30 rounded-xl p-3 flex items-start">
-                    <AlertCircle className="w-4 h-4 text-red-400 mr-2 flex-shrink-0 mt-0.5" />
-                    <p className="text-red-300 text-sm">{error}</p>
-                  </div>
-                )}
-
-                
-
-                {/* Submit Button */}
-                <button
-                  type="submit"
-                  disabled={isLoading || !formData.name.trim() || !formData.nis.trim()}
-                  className={`w-full py-3 px-6 rounded-xl font-bold transition-all transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none ${
-                    testType 
-                      ? `bg-gradient-to-r ${testInfo.color} text-white`
-                      : 'bg-gradient-to-r from-blue-500 to-cyan-500 text-white'
-                  }`}
-                >
-                  {isLoading ? (
-                    <div className="flex items-center justify-center">
-                      <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2"></div>
-                      Memproses...
-                    </div>
-                  ) : (
-                    <>
-                      {testType ? `🚀 Mulai ${testInfo.title}` : '🎓 Login ke Dashboard'}
-                    </>
-                  )}
-                </button>
-              </form>
-            </div>
+      {/* Mobile Video (Above Form) */}
+      <div className="md:hidden relative h-64 bg-gradient-to-br from-[#0A2E4D] to-[#1A4D6E] overflow-hidden">
+        <video 
+          autoPlay 
+          loop 
+          muted 
+          playsInline
+          className="absolute inset-0 w-full h-full object-cover opacity-90"
+        >
+          <source src="/assets/illustrations/videoLogin_register.mp4" type="video/mp4" />
+        </video>
+        
+        <div className="absolute inset-0 bg-gradient-to-br from-blue-900/40 to-indigo-900/40"></div>
+        
+        <div className="relative z-10 h-full flex items-center justify-center text-center px-6">
+          <div>
+            <h1 className="text-2xl font-bold text-white mb-2 drop-shadow-lg">Login Siswa 🎓</h1>
+            <p className="text-blue-100 text-sm drop-shadow">Akses pembelajaran CIRVIA</p>
           </div>
         </div>
       </div>
+
+      {/* Right Side - Form */}
+      <main className="md:col-span-5 flex items-center justify-center p-6 md:p-10 bg-gradient-to-br from-gray-50 to-gray-100">
+        <div className="w-full max-w-[420px]">
+          {/* Form Card */}
+          <div className="rounded-2xl bg-white shadow-xl p-8 border border-gray-200">
+          
+          {/* Form Header */}
+          <header className="mb-6">
+            <h1 className="text-2xl font-bold text-gray-900">Login Siswa</h1>
+            <p className="text-sm text-gray-600 mt-1">
+              {testType ? `${testInfo.icon} ${testInfo.title}` : 'Masuk untuk melanjutkan'}
+            </p>
+          </header>
+
+          {/* Login Form */}
+          <form onSubmit={handleSubmit} className="space-y-5">
+            {/* Name Field */}
+            <div>
+              <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
+                Nama Lengkap
+              </label>
+              <div className="relative">
+                <User className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <input
+                  id="name"
+                  type="text"
+                  name="name"
+                  value={formData.name}
+                  onChange={handleInputChange}
+                  placeholder="Masukkan nama lengkap"
+                  aria-invalid={error ? 'true' : 'false'}
+                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl text-gray-900 placeholder-gray-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all"
+                  required
+                />
+              </div>
+            </div>
+
+            {/* NIS Field */}
+            <div>
+              <label htmlFor="nis" className="block text-sm font-medium text-gray-700 mb-2">
+                NIS (Nomor Induk Siswa)
+              </label>
+              <div className="relative">
+                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <input
+                  id="nis"
+                  type="text"
+                  name="nis"
+                  value={formData.nis}
+                  onChange={handleInputChange}
+                  placeholder="Masukkan NIS Anda"
+                  aria-invalid={error ? 'true' : 'false'}
+                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl text-gray-900 placeholder-gray-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all"
+                  required
+                />
+              </div>
+            </div>
+
+            {/* Error Message */}
+            {error && (
+              <div className="bg-red-50 border border-red-200 rounded-xl p-3 flex items-start" role="alert">
+                <AlertCircle className="w-4 h-4 text-red-600 mr-2 flex-shrink-0 mt-0.5" />
+                <p className="text-red-700 text-sm">{error}</p>
+              </div>
+            )}
+
+            {/* Submit Button */}
+            <button
+              type="submit"
+              disabled={isLoading || !formData.name.trim() || !formData.nis.trim()}
+              className="w-full py-3 px-6 rounded-xl font-semibold text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all transform hover:scale-[1.01] disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none shadow-lg shadow-blue-500/30"
+            >
+              {isLoading ? (
+                <span className="flex items-center justify-center">
+                  <svg className="w-4 h-4 mr-2 animate-spin" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"/>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
+                  </svg>
+                  Memproses...
+                </span>
+              ) : (
+                <span>{testType ? `Mulai ${testInfo.title}` : 'Masuk'}</span>
+              )}
+            </button>
+          </form>
+
+          {/* Footer Links */}
+          <div className="mt-6 pt-6 border-t border-gray-200 text-center">
+            <p className="text-sm text-gray-600">
+              Belum punya akun?{' '}
+              <Link href="/login" className="text-blue-600 hover:text-blue-700 font-medium hover:underline">
+                Login Guru
+              </Link>
+            </p>
+          </div>
+          </div>
+        </div>
+      </main>
     </div>
   );
 };
