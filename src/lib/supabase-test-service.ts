@@ -24,13 +24,15 @@ export interface StudentProgressComplete extends StudentProgress {
 
 export interface TestAnswerInput {
   questionId: string // Now accepts both integer (as string) and UUID
-  selectedAnswer: number
-  correctAnswer: number
+  selectedAnswer: number | string // number for index-based, string for simulation JSON
+  correctAnswer: number | string // number for index-based, string for simulation JSON
   isCorrect: boolean
   questionText: string
   selectedText: string
   correctText: string
   explanation: string
+  questionType?: 'conceptual' | 'circuit' | 'circuitAnalysis' | 'simulation' // Type of question
+  metadata?: Record<string, any> // Type-specific metadata (simulation values, circuit configs, etc.)
 }
 
 export interface TestResultInput {
@@ -110,19 +112,26 @@ export class SupabaseTestService {
       console.log('Test result saved successfully:', testResult.id);
 
       // 2. Save test answers
+      console.log('🔍 [DEBUG] Received answers count:', result.answers.length);
+      console.log('🔍 [DEBUG] First answer sample:', result.answers[0]);
+      
       const answersToInsert = result.answers.map(answer => ({
         test_result_id: testResult.id,
         question_id: answer.questionId,
-        selected_answer: answer.selectedAnswer,
-        correct_answer: answer.correctAnswer,
+        selected_answer: typeof answer.selectedAnswer === 'number' ? answer.selectedAnswer : -1,
+        correct_answer: typeof answer.correctAnswer === 'number' ? answer.correctAnswer : -1,
         is_correct: answer.isCorrect,
         question_text: answer.questionText,
         selected_text: answer.selectedText,
         correct_text: answer.correctText,
-        explanation: answer.explanation
+        explanation: answer.explanation,
+        question_type: answer.questionType || 'conceptual', // Default to conceptual for backward compatibility
+        metadata: answer.metadata || null // Store type-specific metadata
       }))
 
       console.log('Inserting test answers:', answersToInsert.length, 'answers');
+      console.log('🔍 [DEBUG] test_result_id:', testResult.id);
+      console.log('🔍 [DEBUG] First answer to insert:', answersToInsert[0]);
 
       // Delete existing test answers if this is an update
       await supabase
@@ -130,9 +139,15 @@ export class SupabaseTestService {
         .delete()
         .eq('test_result_id', testResult.id);
 
-      const { error: answersError } = await supabase
+      console.log('🔍 [DEBUG] About to insert answers:', JSON.stringify(answersToInsert, null, 2));
+
+      const { data: insertedAnswers, error: answersError } = await supabase
         .from('test_answers')
         .insert(answersToInsert)
+        .select()  // ✨ Add select to get inserted data back
+
+      console.log('🔍 [DEBUG] Insert result - Data:', insertedAnswers);
+      console.log('🔍 [DEBUG] Insert result - Error:', answersError);
 
       if (answersError) {
         console.error('Error saving test answers:', answersError)
@@ -335,23 +350,103 @@ export class SupabaseTestService {
     testType: 'pretest' | 'posttest'
   ): Promise<TestResultWithAnswers | null> {
     try {
-      const { data, error } = await supabase
+      console.log('🔍 [getLatestTestResult] Fetching:', { studentId, testType });
+      
+      // First, get the test result
+      const { data: testResults, error: testError } = await supabase
         .from('test_results')
-        .select(`
-          *,
-          answers:test_answers(*)
-        `)
+        .select('*')
         .eq('student_id', studentId)
         .eq('test_type', testType)
         .order('completed_at', { ascending: false })
         .limit(1)
-        .single()
 
-      if (error && error.code !== 'PGRST116') throw error
-      return data || null
+      if (testError) {
+        console.error('❌ [getLatestTestResult] Error fetching test result:', testError);
+        throw testError;
+      }
+
+      if (!testResults || testResults.length === 0) {
+        console.log('⚠️ [getLatestTestResult] No test result found');
+        return null;
+      }
+
+      const testResult = testResults[0];
+      console.log('✅ [getLatestTestResult] Test result found:', testResult.id);
+
+      // Then, fetch answers separately with retry logic for race condition
+      let answers = null;
+      let retryCount = 0;
+      const maxRetries = 3;
+      
+      while (retryCount < maxRetries) {
+        const { data: fetchedAnswers, error: answersError } = await supabase
+          .from('test_answers')
+          .select('*')
+          .eq('test_result_id', testResult.id)
+          .order('created_at', { ascending: true });
+
+        if (answersError) {
+          console.error('❌ [getLatestTestResult] Error fetching answers:', answersError);
+          break; // Don't retry on error, just return without answers
+        }
+
+        answers = fetchedAnswers;
+        
+        // If we got answers, break the loop
+        if (answers && answers.length > 0) {
+          console.log('✅ [getLatestTestResult] Answers fetched successfully:', answers.length);
+          break;
+        }
+        
+        // If no answers yet and this is recent test (< 5 seconds old), retry after delay
+        const testCompletedAt = new Date(testResult.completed_at).getTime();
+        const now = Date.now();
+        const ageInSeconds = (now - testCompletedAt) / 1000;
+        
+        if (ageInSeconds < 5 && retryCount < maxRetries - 1) {
+          console.log(`⏳ [getLatestTestResult] No answers yet (test is ${ageInSeconds.toFixed(1)}s old), retrying in 500ms... (attempt ${retryCount + 1}/${maxRetries})`);
+          await new Promise(resolve => setTimeout(resolve, 500)); // Wait 500ms before retry
+          retryCount++;
+        } else {
+          console.log(`⚠️ [getLatestTestResult] No answers found after ${retryCount + 1} attempts`);
+          break;
+        }
+      }
+
+      console.log('✅ [getLatestTestResult] Final answers count:', answers?.length || 0);
+      if (answers && answers.length > 0) {
+        console.log('🔍 [getLatestTestResult] First answer:', answers[0]);
+      }
+
+      return {
+        ...testResult,
+        answers: answers || []
+      };
 
     } catch (error) {
-      console.error('Error getting latest test result:', error)
+      console.error('❌ [getLatestTestResult] Unexpected error:', error);
+      return null;
+    }
+  }
+
+  // Get student info by ID
+  static async getStudentInfo(studentId: string): Promise<{ name: string; class: string; nis: string } | null> {
+    try {
+      const { data, error } = await supabase
+        .from('students')
+        .select('name, class, nis')
+        .eq('id', studentId)
+        .single()
+
+      if (error) {
+        console.error('Error fetching student info:', error)
+        return null
+      }
+
+      return data
+    } catch (error) {
+      console.error('Error in getStudentInfo:', error)
       return null
     }
   }
@@ -659,6 +754,233 @@ export class SupabaseTestService {
     } catch (error) {
       console.error('Error getting class learning styles:', error)
       return null
+    }
+  }
+
+  /**
+   * Get test result with detailed answers for AI analysis
+   */
+  static async getTestResultWithAnswers(studentId: string, testType: 'pretest' | 'posttest'): Promise<TestResultWithAnswers | null> {
+    try {
+      // Get the latest test result
+      const { data: testResult, error: testError } = await supabase
+        .from('test_results')
+        .select('*')
+        .eq('student_id', studentId)
+        .eq('test_type', testType)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .single()
+
+      if (testError || !testResult) {
+        return null
+      }
+
+      // Get detailed answers for this test result
+      const { data: answers, error: answersError } = await supabase
+        .from('test_answers')
+        .select('*')
+        .eq('test_result_id', testResult.id)
+        .order('question_id', { ascending: true })
+
+      if (answersError) {
+        console.error('Error fetching test answers:', answersError)
+        // Return test result without answers if answers fetch fails
+        return {
+          ...testResult,
+          answers: []
+        }
+      }
+
+      return {
+        ...testResult,
+        answers: answers || []
+      }
+
+    } catch (error) {
+      console.error('Error getting test result with answers:', error)
+      return null
+    }
+  }
+
+  /**
+   * Save AI feedback history to database
+   */
+  static async saveAIFeedback(
+    studentId: string,
+    testResultId: string | null,
+    learningStyleResultId: string | null,
+    feedbackType: 'post_learning_style' | 'post_pretest' | 'post_posttest',
+    feedbackData: {
+      title: string
+      summary: string
+      recommendations: any[]
+      nextSteps: string[]
+      motivationalMessage: string
+      contextData: any
+      aiPrompt?: string
+    }
+  ): Promise<string | null> {
+    try {
+      const { data, error } = await supabase
+        .from('ai_feedback_history')
+        .insert({
+          student_id: studentId,
+          test_result_id: testResultId,
+          learning_style_result_id: learningStyleResultId,
+          feedback_type: feedbackType,
+          title: feedbackData.title,
+          summary: feedbackData.summary,
+          recommendations: feedbackData.recommendations,
+          next_steps: feedbackData.nextSteps,
+          motivational_message: feedbackData.motivationalMessage,
+          context_data: feedbackData.contextData,
+          ai_prompt: feedbackData.aiPrompt
+        })
+        .select('id')
+        .single()
+
+      if (error) {
+        console.error('Error saving AI feedback:', error)
+        return null
+      }
+
+      return data.id
+    } catch (error) {
+      console.error('Error saving AI feedback:', error)
+      return null
+    }
+  }
+
+  /**
+   * Save comprehensive AI assessment to database
+   */
+  static async saveAIAssessment(
+    studentId: string,
+    studentName: string,
+    studentClass: string,
+    assessmentType: 'learning_style' | 'progress' | 'comprehensive' | 'ai_powered',
+    triggerEvent: string,
+    assessmentData: {
+      analysisData: any
+      recommendations: any[]
+      progressAnalysis?: any
+      learningStyleAnalysis?: any
+      overallRating: any
+      priorityAreas: any[]
+      nextSteps: string[]
+      motivationalMessage: string
+      improvementScore?: number
+      strengthAreas: string[]
+      weaknessAreas: string[]
+    }
+  ): Promise<string | null> {
+    try {
+      const { data, error } = await supabase
+        .from('ai_assessment_results')
+        .insert({
+          student_id: studentId,
+          student_name: studentName,
+          student_class: studentClass,
+          assessment_type: assessmentType,
+          trigger_event: triggerEvent,
+          analysis_data: assessmentData.analysisData,
+          recommendations: assessmentData.recommendations,
+          progress_analysis: assessmentData.progressAnalysis,
+          learning_style_analysis: assessmentData.learningStyleAnalysis,
+          overall_rating: assessmentData.overallRating,
+          priority_areas: assessmentData.priorityAreas,
+          next_steps: assessmentData.nextSteps,
+          motivational_message: assessmentData.motivationalMessage,
+          improvement_score: assessmentData.improvementScore,
+          strength_areas: assessmentData.strengthAreas,
+          weakness_areas: assessmentData.weaknessAreas
+        })
+        .select('id')
+        .single()
+
+      if (error) {
+        console.error('Error saving AI assessment:', error)
+        return null
+      }
+
+      return data.id
+    } catch (error) {
+      console.error('Error saving AI assessment:', error)
+      return null
+    }
+  }
+
+  /**
+   * Get AI feedback history for a student
+   */
+  static async getAIFeedbackHistory(studentId: string, limit: number = 10): Promise<any[]> {
+    try {
+      const { data, error } = await supabase
+        .from('ai_feedback_history')
+        .select('*')
+        .eq('student_id', studentId)
+        .order('created_at', { ascending: false })
+        .limit(limit)
+
+      if (error) {
+        console.error('Error getting AI feedback history:', error)
+        return []
+      }
+
+      return data || []
+    } catch (error) {
+      console.error('Error getting AI feedback history:', error)
+      return []
+    }
+  }
+
+  /**
+   * Get AI assessment history for a student
+   */
+  static async getAIAssessmentHistory(studentId: string, limit: number = 5): Promise<any[]> {
+    try {
+      const { data, error } = await supabase
+        .from('ai_assessment_results')
+        .select('*')
+        .eq('student_id', studentId)
+        .order('created_at', { ascending: false })
+        .limit(limit)
+
+      if (error) {
+        console.error('Error getting AI assessment history:', error)
+        return []
+      }
+
+      return data || []
+    } catch (error) {
+      console.error('Error getting AI assessment history:', error)
+      return []
+    }
+  }
+
+  /**
+   * Mark AI feedback as viewed
+   */
+  static async markAIFeedbackViewed(feedbackId: string, viewedFullReport: boolean = false): Promise<boolean> {
+    try {
+      const { error } = await supabase
+        .from('ai_feedback_history')
+        .update({
+          viewed_at: new Date().toISOString(),
+          viewed_full_report: viewedFullReport
+        })
+        .eq('id', feedbackId)
+
+      if (error) {
+        console.error('Error marking AI feedback as viewed:', error)
+        return false
+      }
+
+      return true
+    } catch (error) {
+      console.error('Error marking AI feedback as viewed:', error)
+      return false
     }
   }
 

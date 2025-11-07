@@ -208,6 +208,17 @@ export class StudentQuestionService {
               .single();
 
             if (!analysisError && analysisData) {
+              // Parse correct_answers format: ["L1-on", "L2-on", "L4-off", "L5-on"]
+              const correctStates: { [lampId: string]: 'on' | 'off' } = {};
+              analysisData.correct_answers.forEach((lampState: string) => {
+                const parts = lampState.split('-'); // Split "L1-on" -> ["L1", "on"]
+                if (parts.length === 2) {
+                  const lampId = parts[0]; // "L1"
+                  const state = parts[1] as 'on' | 'off'; // "on" or "off"
+                  correctStates[lampId] = state;
+                }
+              });
+
               fullQuestion = {
                 id: baseQuestion.id,
                 questionType: 'circuitAnalysis',
@@ -219,10 +230,7 @@ export class StudentQuestionService {
                 question: analysisData.question,
                 circuit: analysisData.circuit_template,
                 targetLamp: analysisData.broken_component,
-                correctStates: analysisData.correct_answers.reduce((acc: any, lampId: string) => {
-                  acc[lampId] = 'on'; // This should be properly parsed from database
-                  return acc;
-                }, {})
+                correctStates
               };
             }
             break;
@@ -323,10 +331,6 @@ export function useStudentQuestions(
   const [questions, setQuestions] = useState<Question[]>(fallbackQuestions);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
-  // Debug log for fallback questions
-  console.log(`[useStudentQuestions] Received fallback questions: ${fallbackQuestions?.length} questions`);
-  console.log('[useStudentQuestions] Fallback questions preview:', fallbackQuestions?.slice(0, 2).map(q => ({ id: q.id, title: q.title })));
 
   useEffect(() => {
     const loadQuestions = async () => {
