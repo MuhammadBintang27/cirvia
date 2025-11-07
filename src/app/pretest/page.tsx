@@ -6,18 +6,16 @@ import Navbar from '@/components/Navbar'
 import { useStudentAuth } from '@/hooks/useStudentAuth'
 import { useAuth } from '@/contexts/AuthContext'
 import { SupabaseTestService, TestAnswerInput } from '@/lib/supabase-test-service'
-import { DEFAULT_PRETEST_PACKAGE, calculateQuizScore } from '@/lib/questions'
+import { getDefaultPretestPackage, calculateQuizScore, Question } from '@/lib/questions'
 import { useStudentQuestions } from '@/lib/student-question-service'
 import { useToast } from '@/components/Toast'
 import QuestionRenderer from '@/components/tipesoal/QuestionRenderer'
-
-// Debug: Log package lengths
-console.log('DEFAULT_PRETEST_PACKAGE length:', DEFAULT_PRETEST_PACKAGE?.length)
-console.log('DEFAULT_PRETEST_PACKAGE preview:', DEFAULT_PRETEST_PACKAGE?.slice(0, 3).map(q => ({ id: q.id, title: q.title, type: q.questionType })))
+import PostTestAIFeedback from '@/components/fiturAi/PostTestAIFeedback'
+import { extractAnswer, calculateScore } from '@/lib/answer-tracking'
 
 interface QuizState {
   currentQuestionIndex: number;
-  answers: boolean[];
+  answers: (number | null | { voltage?: number; current?: number; resistance?: number })[];  // Support simulation values
   showResult: boolean;
   quizCompleted: boolean;
   startTime: number;
@@ -32,16 +30,30 @@ export default function PretestPage() {
   const { user } = useAuth();
   const { addToast } = useToast();
   
+  // State untuk default questions dari database
+  const [defaultQuestions, setDefaultQuestions] = useState<Question[]>([]);
+  const [loadingDefaults, setLoadingDefaults] = useState(true);
+  
   // Get questions based on student's class assignment
   const studentClass = user && user.role === 'student' ? String(user.class) : 'X-IPA-1';
   
-  // Debug log to see what class the student belongs to
-  console.log('🔍 [DEBUG] Student:', user?.name, 'Class:', studentClass, 'Teacher ID:', (user as any)?.teacherId, 'Role:', user?.role);
-  
-  // Memoize the fallback questions to prevent unnecessary re-renders
-  const memoizedFallbackQuestions = useMemo(() => {
-    console.log('[PreTest] Memoizing fallback questions, length:', DEFAULT_PRETEST_PACKAGE?.length);
-    return DEFAULT_PRETEST_PACKAGE;
+  // Fetch default questions dari database saat komponen mount
+  useEffect(() => {
+    const fetchDefaultQuestions = async () => {
+      try {
+        console.log('📦 [PRETEST] Fetching default questions from database...');
+        const questions = await getDefaultPretestPackage();
+        console.log('✅ [PRETEST] Loaded default questions from database:', questions.length);
+        setDefaultQuestions(questions);
+      } catch (error) {
+        console.error('❌ [PRETEST] Error fetching default questions:', error);
+        setDefaultQuestions([]); // Empty fallback
+      } finally {
+        setLoadingDefaults(false);
+      }
+    };
+    
+    fetchDefaultQuestions();
   }, []);
   
   const { questions, loading: questionsLoading, error: questionsError } = useStudentQuestions(
@@ -49,7 +61,7 @@ export default function PretestPage() {
     studentClass,
     (user?.role === 'student' ? (user as any).teacherId : null),
     'pretest',
-    memoizedFallbackQuestions // Use memoized default pretest package as fallback
+    defaultQuestions // ✅ Use database-fetched default questions
   );
   
   // Check if student has already completed pretest
@@ -99,9 +111,18 @@ export default function PretestPage() {
     return () => clearInterval(timer);
   }, [quizState.startTime]);
 
-  const handleAnswerSubmit = (isCorrect: boolean) => {
+  const handleAnswerSubmit = (selectedIndexOrCorrect: number | boolean, isCorrectParam?: boolean) => {
     const newAnswers = [...quizState.answers];
-    newAnswers[quizState.currentQuestionIndex] = isCorrect;
+    
+    // Support both old (boolean) and new (number, boolean) signatures
+    if (typeof selectedIndexOrCorrect === 'boolean') {
+      // Old signature: just boolean (for backward compatibility)
+      // We can't know which choice was selected, so mark as null if wrong, 0 if correct
+      newAnswers[quizState.currentQuestionIndex] = selectedIndexOrCorrect ? 0 : null;
+    } else {
+      // New signature: (selectedIndex: number, isCorrect: boolean)
+      newAnswers[quizState.currentQuestionIndex] = selectedIndexOrCorrect;
+    }
 
     setQuizState(prev => ({
       ...prev,
@@ -122,47 +143,64 @@ export default function PretestPage() {
         showResult: false
       }));
     } else {
-      // Quiz completed
-      const correctAnswers = quizState.answers.filter(Boolean).length;
-      const scoreData = calculateQuizScore(correctAnswers, questions.length);
+      // Quiz completed - use new answer tracking system
+      console.log('🔍 [ANSWER TRACKING] Processing quiz completion with new system');
+      
+      // Cast questions to proper Question type
+      const typedQuestions = questions as Question[];
+      
+      // Extract all answers with metadata using new system
+      const answerResults = typedQuestions.map((q, index) => {
+        const userAnswer = quizState.answers[index];
+        console.log(`🔍 [Q${index + 1}] Extracting answer for type: ${q.questionType}`, userAnswer);
+        return extractAnswer(q as any, userAnswer);
+      });
+      
+      console.log('✅ [ANSWER TRACKING] Extracted results:', answerResults.map(r => ({
+        type: r.questionType,
+        correct: r.isCorrect,
+        selected: r.selectedText,
+        metadata: r.metadata
+      })));
+      
+      // Calculate score using new utility function
+      const { correct, total, percentage } = calculateScore(answerResults);
+      
+      console.log(`📊 [SCORE] Correct: ${correct}/${total} = ${percentage}%`);
       
       // Save test result if user is logged in as student
       if (user && user.role === 'student') {
         const totalTimeSpent = Math.floor((Date.now() - quizState.startTime) / 1000);
         
-        // Create test answers array for detailed tracking
-        console.log('Questions data for test answers:', questions.map(q => ({ id: q.id, type: typeof q.id, title: q.title })));
-        
-        const testAnswers: TestAnswerInput[] = questions.map((question, index) => {
-          // Convert question ID to string, support both integer and UUID
-          const questionId = String(question.id || (index + 1)); // Fallback to index-based ID
-          console.log(`Processing question ${index}: id=${question.id}, converted=${questionId}`);
-          
-          return {
-            questionId: questionId,
-            selectedAnswer: quizState.answers[index] ? 1 : 0, // 1 for correct, 0 for incorrect
-            correctAnswer: 1, // Always 1 for correct
-            isCorrect: quizState.answers[index],
-            questionText: question.title || (question as any).question || question.description || '',
-            selectedText: quizState.answers[index] ? 'Benar' : 'Salah',
-            correctText: 'Benar',
-            explanation: question.explanation || question.hint || ''
-          };
-        });
+        // Create test answers array with new metadata support
+        const testAnswers: TestAnswerInput[] = answerResults.map(result => ({
+          questionId: result.questionId,
+          selectedAnswer: result.selectedAnswer,
+          correctAnswer: result.correctAnswer,
+          isCorrect: result.isCorrect,
+          questionText: result.questionText,
+          selectedText: result.selectedText,
+          correctText: result.correctText,
+          explanation: result.explanation,
+          questionType: result.questionType as 'conceptual' | 'circuit' | 'circuitAnalysis' | 'simulation', // ✨ NEW: Question type tracking
+          metadata: result.metadata // ✨ NEW: Type-specific metadata
+        }));
 
-        const percentage = Math.round(scoreData.score);
         const grade = SupabaseTestService.calculateGrade(percentage);
 
         // Save to Supabase with detailed logging
-        console.log('Attempting to save pretest result:', {
+        console.log('💾 [SAVE] Attempting to save pretest with new metadata:', {
           studentId: user.id,
           studentName: user.name,
           studentNis: user.nis,
           testType: 'pretest',
-          score: correctAnswers,
-          totalQuestions: questions.length,
+          score: correct,
+          totalQuestions: total,
           percentage,
-          testAnswersCount: testAnswers.length
+          testAnswersWithMetadata: testAnswers.map(a => ({
+            questionType: a.questionType,
+            hasMetadata: !!a.metadata
+          }))
         });
 
         SupabaseTestService.saveTestResult({
@@ -170,24 +208,24 @@ export default function PretestPage() {
           studentName: user.name,
           studentNis: user.nis,
           testType: 'pretest',
-          score: correctAnswers,
-          totalQuestions: questions.length,
-          correctAnswers,
+          score: correct,
+          totalQuestions: total,
+          correctAnswers: correct,
           percentage,
           timeSpent: totalTimeSpent,
           answers: testAnswers,
           grade
         }).then(result => {
           if (result) {
-            console.log('Pretest result saved successfully:', result.id);
+            console.log('✅ [SAVE] Pretest result saved successfully:', result.id);
             addToast({
               type: 'success',
               title: 'Pre-Test Tersimpan!',
-              message: 'Hasil pre-test Anda berhasil disimpan sebagai baseline pembelajaran.',
+              message: 'Hasil pre-test Anda berhasil disimpan dengan detail jawaban lengkap.',
               duration: 4000
             });
           } else {
-            console.error('Failed to save pretest result: No result returned');
+            console.error('❌ [SAVE] Failed to save pretest result: No result returned');
             addToast({
               type: 'error',
               title: 'Gagal Menyimpan',
@@ -196,7 +234,7 @@ export default function PretestPage() {
             });
           }
         }).catch(error => {
-          console.error('Error saving pretest result:', error);
+          console.error('❌ [SAVE] Error saving pretest result:', error);
           addToast({
             type: 'error',
             title: 'Kesalahan Sistem',
@@ -209,7 +247,7 @@ export default function PretestPage() {
       setQuizState(prev => ({
         ...prev,
         quizCompleted: true,
-        score: scoreData.score
+        score: percentage
       }));
     }
   };
@@ -306,7 +344,9 @@ export default function PretestPage() {
   }
 
   if (quizState.quizCompleted) {
-    const correctAnswers = quizState.answers.filter(Boolean).length;
+    // Use the score from state (already calculated as percentage)
+    const percentage = quizState.score;
+    const correctAnswers = Math.round((percentage / 100) * questions.length);
     const scoreData = calculateQuizScore(correctAnswers, questions.length);
     
     return (
@@ -371,6 +411,17 @@ export default function PretestPage() {
                 <div className="text-green-300">Grade</div>
               </div>
             </div>
+
+            {/* AI Assessment Feedback */}
+            {user && (
+              <div className="mb-8">
+                <PostTestAIFeedback
+                  studentId={user.id}
+                  testType="pretest"
+                  score={Math.round(scoreData.score)}
+                />
+              </div>
+            )}
 
             {/* Action Buttons - No retry button for pretest */}
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -537,11 +588,15 @@ export default function PretestPage() {
 
           {/* Question Section */}
           {/* Loading state */}
-          {checkingPreviousAttempt || questionsLoading ? (
+          {checkingPreviousAttempt || questionsLoading || loadingDefaults ? (
             <div className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl rounded-2xl p-8 border border-white/20 text-center">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-500 mx-auto mb-4"></div>
               <p className="text-white">
-                {checkingPreviousAttempt ? 'Memeriksa riwayat pre-test...' : `Memuat soal untuk kelas ${studentClass}...`}
+                {checkingPreviousAttempt 
+                  ? 'Memeriksa riwayat pre-test...' 
+                  : loadingDefaults 
+                    ? 'Memuat soal default dari database...'
+                    : `Memuat soal untuk kelas ${studentClass}...`}
               </p>
             </div>
           ) : questionsError ? (
@@ -552,7 +607,7 @@ export default function PretestPage() {
           ) : null}
 
           {/* Question Renderer */}
-          {!checkingPreviousAttempt && !questionsLoading && currentQuestion && !hasCompletedPretest && (
+          {!checkingPreviousAttempt && !questionsLoading && !loadingDefaults && currentQuestion && !hasCompletedPretest && (
             <QuestionRenderer
               question={currentQuestion}
               onAnswer={handleAnswerSubmit}

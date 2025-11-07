@@ -79,6 +79,79 @@ CREATE TABLE student_progress (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT now()
 );
 
+-- Create Learning Style Results table
+CREATE TABLE learning_style_results (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    student_id UUID REFERENCES students(id) ON DELETE CASCADE,
+    student_name VARCHAR(255) NOT NULL,
+    student_nis VARCHAR(50) NOT NULL,
+    visual INTEGER NOT NULL,
+    auditory INTEGER NOT NULL,
+    kinesthetic INTEGER NOT NULL,
+    primary_style VARCHAR(20) NOT NULL,
+    percentages JSONB NOT NULL,
+    time_spent INTEGER NOT NULL, -- in seconds
+    answers JSONB NOT NULL,
+    completed_at TIMESTAMP WITH TIME ZONE DEFAULT now(),
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT now()
+);
+
+-- Create AI Assessment Results table
+CREATE TABLE ai_assessment_results (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    student_id UUID REFERENCES students(id) ON DELETE CASCADE,
+    student_name VARCHAR(255) NOT NULL,
+    student_class VARCHAR(50) NOT NULL,
+    assessment_type VARCHAR(20) CHECK (assessment_type IN ('learning_style', 'progress', 'comprehensive', 'ai_powered')),
+    trigger_event VARCHAR(50) NOT NULL, -- 'learning_style_completed', 'pretest_completed', 'posttest_completed', 'manual_request'
+    
+    -- AI Analysis Results
+    analysis_data JSONB NOT NULL, -- Complete analysis context sent to AI
+    recommendations JSONB NOT NULL, -- Generated recommendations
+    progress_analysis JSONB, -- Progress comparison data
+    learning_style_analysis JSONB, -- Learning style analysis
+    
+    -- Metadata
+    overall_rating JSONB, -- Overall performance rating
+    priority_areas JSONB, -- High priority recommendations
+    next_steps TEXT[], -- Actionable next steps
+    motivational_message TEXT NOT NULL,
+    
+    -- Performance tracking
+    improvement_score DECIMAL(5,2), -- Overall improvement percentage
+    strength_areas TEXT[], -- Areas where student excels
+    weakness_areas TEXT[], -- Areas needing improvement
+    
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT now(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT now()
+);
+
+-- Create AI Feedback History table (for tracking feedback given after each test)
+CREATE TABLE ai_feedback_history (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    student_id UUID REFERENCES students(id) ON DELETE CASCADE,
+    test_result_id UUID REFERENCES test_results(id) ON DELETE CASCADE,
+    learning_style_result_id UUID REFERENCES learning_style_results(id) ON DELETE SET NULL,
+    feedback_type VARCHAR(20) CHECK (feedback_type IN ('post_learning_style', 'post_pretest', 'post_posttest')),
+    
+    -- Feedback content
+    title VARCHAR(255) NOT NULL,
+    summary TEXT NOT NULL,
+    recommendations JSONB NOT NULL,
+    next_steps TEXT[] NOT NULL,
+    motivational_message TEXT NOT NULL,
+    
+    -- Context data used for generation
+    context_data JSONB NOT NULL, -- Complete context sent to AI
+    ai_prompt TEXT, -- Generated prompt for AI
+    
+    -- Engagement tracking
+    viewed_at TIMESTAMP WITH TIME ZONE,
+    viewed_full_report BOOLEAN DEFAULT false,
+    
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT now()
+);
+
 -- Create Sessions table
 CREATE TABLE sessions (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -95,6 +168,12 @@ CREATE INDEX idx_test_results_student_id ON test_results(student_id);
 CREATE INDEX idx_test_results_test_type ON test_results(test_type);
 CREATE INDEX idx_test_answers_test_result_id ON test_answers(test_result_id);
 CREATE INDEX idx_student_progress_student_id ON student_progress(student_id);
+CREATE INDEX idx_learning_style_results_student_id ON learning_style_results(student_id);
+CREATE INDEX idx_ai_assessment_results_student_id ON ai_assessment_results(student_id);
+CREATE INDEX idx_ai_assessment_results_type ON ai_assessment_results(assessment_type);
+CREATE INDEX idx_ai_feedback_history_student_id ON ai_feedback_history(student_id);
+CREATE INDEX idx_ai_feedback_history_test_result_id ON ai_feedback_history(test_result_id);
+CREATE INDEX idx_ai_feedback_history_type ON ai_feedback_history(feedback_type);
 CREATE INDEX idx_sessions_user_id ON sessions(user_id);
 CREATE INDEX idx_sessions_expires_at ON sessions(expires_at);
 
@@ -115,6 +194,9 @@ CREATE TRIGGER update_students_updated_at BEFORE UPDATE ON students
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
 CREATE TRIGGER update_student_progress_updated_at BEFORE UPDATE ON student_progress
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+CREATE TRIGGER update_ai_assessment_results_updated_at BEFORE UPDATE ON ai_assessment_results
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
 -- Row Level Security Policies
@@ -182,12 +264,68 @@ CREATE POLICY "Insert/Update student progress" ON student_progress
         student_id IN (SELECT id FROM students WHERE auth.uid()::text = id::text)
     );
 
+-- Learning style results policies
+CREATE POLICY "View learning style results" ON learning_style_results
+    FOR SELECT USING (
+        student_id IN (SELECT id FROM students WHERE auth.uid()::text = id::text)
+        OR student_id IN (
+            SELECT s.id FROM students s 
+            JOIN teachers t ON s.teacher_id = t.id 
+            WHERE auth.uid()::text = t.id::text
+        )
+    );
+
+CREATE POLICY "Insert learning style results" ON learning_style_results
+    FOR INSERT WITH CHECK (
+        student_id IN (SELECT id FROM students WHERE auth.uid()::text = id::text)
+    );
+
+-- AI Assessment results policies
+CREATE POLICY "View AI assessment results" ON ai_assessment_results
+    FOR SELECT USING (
+        student_id IN (SELECT id FROM students WHERE auth.uid()::text = id::text)
+        OR student_id IN (
+            SELECT s.id FROM students s 
+            JOIN teachers t ON s.teacher_id = t.id 
+            WHERE auth.uid()::text = t.id::text
+        )
+    );
+
+CREATE POLICY "Insert AI assessment results" ON ai_assessment_results
+    FOR INSERT WITH CHECK (
+        student_id IN (SELECT id FROM students WHERE auth.uid()::text = id::text)
+    );
+
+-- AI Feedback history policies
+CREATE POLICY "View AI feedback history" ON ai_feedback_history
+    FOR SELECT USING (
+        student_id IN (SELECT id FROM students WHERE auth.uid()::text = id::text)
+        OR student_id IN (
+            SELECT s.id FROM students s 
+            JOIN teachers t ON s.teacher_id = t.id 
+            WHERE auth.uid()::text = t.id::text
+        )
+    );
+
+CREATE POLICY "Insert AI feedback history" ON ai_feedback_history
+    FOR INSERT WITH CHECK (
+        student_id IN (SELECT id FROM students WHERE auth.uid()::text = id::text)
+    );
+
+CREATE POLICY "Update AI feedback history" ON ai_feedback_history
+    FOR UPDATE USING (
+        student_id IN (SELECT id FROM students WHERE auth.uid()::text = id::text)
+    );
+
 -- Enable RLS on all tables
 ALTER TABLE teachers ENABLE ROW LEVEL SECURITY;
 ALTER TABLE students ENABLE ROW LEVEL SECURITY;
 ALTER TABLE test_results ENABLE ROW LEVEL SECURITY;
 ALTER TABLE test_answers ENABLE ROW LEVEL SECURITY;
 ALTER TABLE student_progress ENABLE ROW LEVEL SECURITY;
+ALTER TABLE learning_style_results ENABLE ROW LEVEL SECURITY;
+ALTER TABLE ai_assessment_results ENABLE ROW LEVEL SECURITY;
+ALTER TABLE ai_feedback_history ENABLE ROW LEVEL SECURITY;
 ALTER TABLE sessions ENABLE ROW LEVEL SECURITY;
 
 -- Insert default teacher account (for testing)

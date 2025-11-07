@@ -31,6 +31,7 @@ import {
 } from 'lucide-react';
 import { Student } from '@/types/auth';
 import Navbar from '@/components/Navbar';
+import AIAssessmentButton from '@/components/fiturAi/AIAssessmentButton';
 
 export default function StudentDashboard() {
   const { user, logout, isStudent } = useAuth();
@@ -166,13 +167,23 @@ export default function StudentDashboard() {
                     </div>
                   </div>
 
-                  <Link 
-                    href="/pretest" 
-                    className="inline-flex items-center px-8 py-4 bg-gradient-to-r from-emerald-500 to-teal-500 text-white text-lg font-bold rounded-xl hover:from-emerald-600 hover:to-teal-600 transition-all transform hover:scale-105"
-                  >
-                    <Target className="w-5 h-5 mr-3" />
-                    Mulai Pre-Test Sekarang
-                  </Link>
+                  <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+                    <Link 
+                      href="/pretest" 
+                      className="inline-flex items-center px-8 py-4 bg-gradient-to-r from-emerald-500 to-teal-500 text-white text-lg font-bold rounded-xl hover:from-emerald-600 hover:to-teal-600 transition-all transform hover:scale-105"
+                    >
+                      <Target className="w-5 h-5 mr-3" />
+                      Mulai Pre-Test Sekarang
+                    </Link>
+                    
+                    <Link 
+                      href="/learning-style" 
+                      className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white font-bold rounded-xl hover:from-purple-600 hover:to-pink-600 transition-all transform hover:scale-105"
+                    >
+                      <Brain className="w-5 h-5 mr-2" />
+                      Tes Gaya Belajar
+                    </Link>
+                  </div>
                 </div>
               </div>
             )}
@@ -467,6 +478,92 @@ export default function StudentDashboard() {
                         <span className="text-purple-300 text-sm font-medium">Prestasi Unggul</span>
                       </div>
                     )}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* AI Assessment Section */}
+            {(studentProgress?.learningStyleResult || studentProgress?.preTestResult || studentProgress?.postTestResult) && (
+              <div className="relative mb-8">
+                <div className="absolute -inset-1 bg-gradient-to-r from-purple-500/30 via-pink-500/30 to-indigo-500/30 rounded-3xl blur"></div>
+                <div className="relative bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl rounded-3xl p-8 border border-white/20">
+                  <div className="text-center">
+                    <div className="w-20 h-20 bg-gradient-to-br from-purple-500/30 to-pink-500/30 rounded-full flex items-center justify-center mx-auto mb-6 relative">
+                      <Brain className="w-10 h-10 text-white" />
+                      <div className="absolute -top-1 -right-1 w-4 h-4 bg-yellow-400 rounded-full animate-pulse"></div>
+                    </div>
+                    
+                    <h3 className="text-3xl font-black text-white mb-4">
+                      🤖 AI Personal Assessment
+                    </h3>
+                    
+                    <p className="text-purple-200/80 text-lg mb-8 max-w-2xl mx-auto">
+                      Dapatkan analisis mendalam dan rekomendasi pembelajaran yang dipersonalisasi berdasarkan 
+                      hasil tes gaya belajar, pre-test, dan post-test Anda menggunakan AI.
+                    </p>
+
+                    {/* Assessment Status */}
+                    <div className="grid md:grid-cols-3 gap-4 mb-8">
+                      <div className={`p-4 rounded-xl border ${
+                        studentProgress?.learningStyleResult 
+                          ? 'bg-green-500/20 border-green-400/30' 
+                          : 'bg-gray-500/20 border-gray-400/30'
+                      }`}>
+                        <Brain className={`w-6 h-6 mx-auto mb-2 ${
+                          studentProgress?.learningStyleResult ? 'text-green-400' : 'text-gray-400'
+                        }`} />
+                        <div className="text-sm font-medium text-white">Gaya Belajar</div>
+                        <div className={`text-xs ${
+                          studentProgress?.learningStyleResult ? 'text-green-300' : 'text-gray-400'
+                        }`}>
+                          {studentProgress?.learningStyleResult ? '✓ Complete' : '○ Pending'}
+                        </div>
+                      </div>
+
+                      <div className={`p-4 rounded-xl border ${
+                        studentProgress?.preTestResult 
+                          ? 'bg-green-500/20 border-green-400/30' 
+                          : 'bg-gray-500/20 border-gray-400/30'
+                      }`}>
+                        <Target className={`w-6 h-6 mx-auto mb-2 ${
+                          studentProgress?.preTestResult ? 'text-green-400' : 'text-gray-400'
+                        }`} />
+                        <div className="text-sm font-medium text-white">Pre-Test</div>
+                        <div className={`text-xs ${
+                          studentProgress?.preTestResult ? 'text-green-300' : 'text-gray-400'
+                        }`}>
+                          {studentProgress?.preTestResult ? '✓ Complete' : '○ Pending'}
+                        </div>
+                      </div>
+
+                      <div className={`p-4 rounded-xl border ${
+                        studentProgress?.postTestResult 
+                          ? 'bg-green-500/20 border-green-400/30' 
+                          : 'bg-gray-500/20 border-gray-400/30'
+                      }`}>
+                        <Trophy className={`w-6 h-6 mx-auto mb-2 ${
+                          studentProgress?.postTestResult ? 'text-green-400' : 'text-gray-400'
+                        }`} />
+                        <div className="text-sm font-medium text-white">Post-Test</div>
+                        <div className={`text-xs ${
+                          studentProgress?.postTestResult ? 'text-green-300' : 'text-gray-400'
+                        }`}>
+                          {studentProgress?.postTestResult ? '✓ Complete' : '○ Pending'}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* AI Assessment Button */}
+                    <AIAssessmentButton
+                      variant="primary"
+                      size="lg"
+                      className="shadow-2xl"
+                    />
+
+                    <p className="text-purple-200/60 text-sm mt-4">
+                      Analisis comprehensive menggunakan AI untuk memberikan insight mendalam tentang pembelajaran Anda
+                    </p>
                   </div>
                 </div>
               </div>

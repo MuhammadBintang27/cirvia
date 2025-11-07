@@ -9,6 +9,7 @@ import { useAuth } from '@/contexts/AuthContext'
 import { SupabaseTestService } from '@/lib/supabase-test-service'
 import { learningStyleQuestions, calculateLearningStyle, getLearningStyleDescription, LearningStyleQuestion } from '@/lib/learning-style-questions'
 import StudentLoginPrompt from '@/components/StudentLoginPrompt'
+import PostTestAIFeedback from '@/components/fiturAi/PostTestAIFeedback'
 
 export default function LearningStyleTestPage() {
   const [currentQuestion, setCurrentQuestion] = useState(0)
@@ -370,6 +371,14 @@ export default function LearningStyleTestPage() {
                   </ul>
                 </div>
               </div>
+            </div>
+
+            {/* AI Recommendation */}
+            <div className="mb-8">
+              <PostTestAIFeedback
+                studentId={user.id}
+                testType="learning_style"
+              />
             </div>
 
             {/* Action Buttons */}

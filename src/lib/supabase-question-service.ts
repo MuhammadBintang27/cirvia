@@ -177,6 +177,13 @@ export class SupabaseQuestionService {
 
         case 'circuitAnalysis':
           const analysisQ = question as CircuitAnalysisQuestion;
+          // Convert correctStates object to array format: ["L1-on", "L2-on", "L4-off", "L5-on"]
+          console.log('[DEBUG] circuitAnalysis correctStates:', analysisQ.correctStates);
+          const correctAnswersArray = Object.entries(analysisQ.correctStates).map(
+            ([lampId, state]) => `${lampId}-${state}`
+          );
+          console.log('[DEBUG] correctAnswersArray to save:', correctAnswersArray);
+          
           const { data: analysisData, error: analysisError } = await supabase
             .from('circuit_analysis_questions')
             .insert([{
@@ -187,10 +194,11 @@ export class SupabaseQuestionService {
               explanation: analysisQ.explanation,
               hint: analysisQ.hint,
               choices: [],
-              correct_answers: Object.keys(analysisQ.correctStates)
+              correct_answers: correctAnswersArray
             }])
             .select()
             .single();
+          console.log('[DEBUG] Saved analysis data:', analysisData);
           specificData = analysisData;
           specificError = analysisError;
           break;
@@ -293,7 +301,7 @@ export class SupabaseQuestionService {
             return { data: null, error: circuitError };
           }
 
-          const circuitQuestion = {
+          const circuitQuestion: CircuitQuestion = {
             id: baseQuestion.id,
             questionType: 'circuit',
             title: baseQuestion.title,
@@ -305,7 +313,14 @@ export class SupabaseQuestionService {
             voltage: circuitData.voltage,
             targetCurrent: circuitData.target_current,
             targetVoltage: circuitData.target_voltage,
-            resistorSlots: circuitData.resistor_slots
+            resistorSlots: circuitData.resistor_slots,
+            availableResistors: circuitData.available_resistors.map((value: number, index: number) => ({
+              id: index,
+              value,
+              label: `R${index + 1} (${value}Ω)`,
+              colorCode: [] // Optional: can be added later
+            })),
+            correctSolution: circuitData.correct_solution
           } as CircuitQuestion;
           
           // Add teacher settings for backwards compatibility
@@ -356,6 +371,17 @@ export class SupabaseQuestionService {
             return { data: null, error: analysisError };
           }
 
+          // Parse correct_answers format: ["L1-on", "L2-on", "L4-off", "L5-on"]
+          const correctStates: { [lampId: string]: 'on' | 'off' } = {};
+          analysisData.correct_answers.forEach((lampState: string) => {
+            const parts = lampState.split('-'); // Split "L1-on" -> ["L1", "on"]
+            if (parts.length === 2) {
+              const lampId = parts[0]; // "L1"
+              const state = parts[1] as 'on' | 'off'; // "on" or "off"
+              correctStates[lampId] = state;
+            }
+          });
+
           fullQuestion = {
             id: baseQuestion.id,
             questionType: 'circuitAnalysis',
@@ -367,10 +393,7 @@ export class SupabaseQuestionService {
             question: analysisData.question,
             circuit: analysisData.circuit_template,
             targetLamp: analysisData.broken_component,
-            correctStates: analysisData.correct_answers.reduce((acc: any, lampId: string) => {
-              acc[lampId] = 'on'; // Default to 'on', this should be enhanced
-              return acc;
-            }, {})
+            correctStates
           } as CircuitAnalysisQuestion;
           break;
 
@@ -457,6 +480,149 @@ export class SupabaseQuestionService {
   // ====================
   // QUESTION PACKAGE OPERATIONS (Same as before)
   // ====================
+  
+  /**
+   * Get default pretest package with all questions
+   */
+  static async getDefaultPretestPackage(): Promise<{ 
+    package: QuestionPackage | null
+    questions: Question[]
+  }> {
+    try {
+      const { data: packageData, error: packageError } = await supabase
+        .from('question_packages')
+        .select('*')
+        .eq('package_type', 'pretest')
+        .eq('is_default', true)
+        .eq('is_active', true)
+        .single()
+
+      if (packageError || !packageData) {
+        console.error('❌ Error fetching default pretest package:', packageError)
+        return { package: null, questions: [] }
+      }
+
+      console.log('✅ Found default pretest package:', packageData.name)
+      console.log('📦 Question IDs:', packageData.question_ids)
+
+      // Fetch all questions
+      const questions: Question[] = []
+      for (const questionId of packageData.question_ids) {
+        const { data: question } = await this.getQuestionById(questionId)
+        if (question) {
+          questions.push(question)
+        }
+      }
+
+      console.log('✅ Loaded', questions.length, 'questions from pretest package')
+
+      return {
+        package: packageData,
+        questions
+      }
+    } catch (error) {
+      console.error('❌ Error in getDefaultPretestPackage:', error)
+      return { package: null, questions: [] }
+    }
+  }
+
+  /**
+   * Get default posttest package with all questions
+   */
+  static async getDefaultPosttestPackage(): Promise<{ 
+    package: QuestionPackage | null
+    questions: Question[]
+  }> {
+    try {
+      const { data: packageData, error: packageError } = await supabase
+        .from('question_packages')
+        .select('*')
+        .eq('package_type', 'posttest')
+        .eq('is_default', true)
+        .eq('is_active', true)
+        .single()
+
+      if (packageError || !packageData) {
+        console.error('❌ Error fetching default posttest package:', packageError)
+        return { package: null, questions: [] }
+      }
+
+      console.log('✅ Found default posttest package:', packageData.name)
+
+      // Fetch all questions
+      const questions: Question[] = []
+      for (const questionId of packageData.question_ids) {
+        const { data: question } = await this.getQuestionById(questionId)
+        if (question) {
+          questions.push(question)
+        }
+      }
+
+      console.log('✅ Loaded', questions.length, 'questions from posttest package')
+
+      return {
+        package: packageData,
+        questions
+      }
+    } catch (error) {
+      console.error('❌ Error in getDefaultPosttestPackage:', error)
+      return { package: null, questions: [] }
+    }
+  }
+
+  /**
+   * Check if default packages exist in database
+   */
+  static async checkDefaultPackagesExist(): Promise<{
+    pretestExists: boolean
+    posttestExists: boolean
+  }> {
+    try {
+      const { data, error } = await supabase
+        .from('question_packages')
+        .select('package_type')
+        .eq('is_default', true)
+        .eq('is_active', true)
+
+      if (error) {
+        console.error('Error checking default packages:', error)
+        return { pretestExists: false, posttestExists: false }
+      }
+
+      const pretestExists = data?.some(p => p.package_type === 'pretest') || false
+      const posttestExists = data?.some(p => p.package_type === 'posttest') || false
+
+      return { pretestExists, posttestExists }
+    } catch (error) {
+      console.error('Error in checkDefaultPackagesExist:', error)
+      return { pretestExists: false, posttestExists: false }
+    }
+  }
+
+  /**
+   * Get package info without fetching all questions
+   */
+  static async getPackageInfo(packageType: 'pretest' | 'posttest'): Promise<QuestionPackage | null> {
+    try {
+      const { data, error } = await supabase
+        .from('question_packages')
+        .select('*')
+        .eq('package_type', packageType)
+        .eq('is_default', true)
+        .eq('is_active', true)
+        .single()
+
+      if (error) {
+        console.error(`Error fetching ${packageType} package info:`, error)
+        return null
+      }
+
+      return data
+    } catch (error) {
+      console.error('Error in getPackageInfo:', error)
+      return null
+    }
+  }
   
   static async createQuestionPackage(packageData: Omit<QuestionPackage, 'id' | 'created_at' | 'updated_at'>): Promise<{ data: QuestionPackage | null; error: any }> {
     try {
