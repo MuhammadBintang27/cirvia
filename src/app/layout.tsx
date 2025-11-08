@@ -1,5 +1,5 @@
 import './globals.css'
-import { Inter } from 'next/font/google'
+import { Poppins, Fira_Code } from 'next/font/google'
 import FloatingChatButton from '@/components/FloatingChatButton'
 import Footer from '@/components/Footer'
 import { AuthProvider } from '@/contexts/AuthContext'
@@ -8,7 +8,18 @@ import ConditionalFooter from '@/components/ConditionalFooter'
 import AuthLoader from '@/components/AuthLoader'
 import TeacherRedirect from '@/components/TeacherRedirect'
 
-const inter = Inter({ subsets: ['latin'] })
+const poppins = Poppins({ 
+  weight: ['300', '400', '500', '600', '700', '800'],
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-poppins',
+})
+
+const firaCode = Fira_Code({ 
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-fira-code',
+})
 
 export const metadata = {
   title: 'CIRVIA - Circuit Virtual Interactive Application',
@@ -21,8 +32,8 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="id">
-      <body className={`${inter.className} bg-gradient-to-br from-slate-900 via-blue-950 to-indigo-900`}>
+    <html lang="id" className={`${poppins.variable} ${firaCode.variable}`}>
+      <body className="font-sans bg-gradient-to-br from-slate-900 via-blue-950 to-indigo-900 antialiased">
         <AuthProvider>
           <ToastProvider>
             <AuthLoader>
