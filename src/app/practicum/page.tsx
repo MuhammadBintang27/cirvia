@@ -1,192 +1,41 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import Link from "next/link";
-import CVPracticumLauncher from "../../components/CVPracticumLauncher";
+import { useState } from "react";
 import CircuitBuilderEnhanced from "../../components/praktikum-drag-n-drop/CircuitBuilderEnhanced";
+import WebCVPracticum from "../../components/praktikum-cv/WebCVPracticum";
 import Navbar from "@/components/Navbar";
-
-interface CircuitElement {
-  id: string;
-  type: "battery" | "resistor" | "wire";
-  value: number;
-  position: { x: number; y: number };
-  connections: string[];
-}
-
-interface GestureResult {
-  gesture: string;
-  confidence: number;
-}
+import { CircuitAction, GestureResult } from "@/components/praktikum-cv/types";
 
 export default function PracticumPage() {
   // Tab state
-  const [activeTab, setActiveTab] = useState<"web" | "cv">("web");
+  const [activeTab, setActiveTab] = useState<"drag-drop" | "cv">("drag-drop");
 
-  // Circuit elements state
-  const [elements, setElements] = useState<CircuitElement[]>([
-    {
-      id: "battery1",
-      type: "battery",
-      value: 12, // 12V
-      position: { x: 100, y: 200 },
-      connections: ["wire1", "wire4"],
-    },
-    {
-      id: "resistor1",
-      type: "resistor",
-      value: 100, // 100Ω
-      position: { x: 300, y: 200 },
-      connections: ["wire2", "wire3"],
-    },
-  ]);
+  /**
+   * Handle circuit actions from CV gestures
+   */
+  const handleCircuitAction = (action: CircuitAction) => {
+    console.log("🎮 Circuit Action from Gesture:", action);
 
-  // UI state
-  const [selectedElement, setSelectedElement] = useState<string | null>(null);
-  const [showGestures, setShowGestures] = useState(false);
+    // TODO: Implement actual circuit manipulation
+    // This will be connected to CircuitBuilderEnhanced's state management
+    // For now, just log the action
 
-  // Gesture handling
-  const onGestureDetected = (result: GestureResult) => {
-    const { gesture, confidence } = result;
+    // Example integration:
+    // - action.type === 'add' → Call addComponent(action.componentType, action.position)
+    // - action.type === 'move' → Call moveComponent(action.componentId, action.position)
+    // - action.type === 'delete' → Call deleteComponent(action.componentId)
+    // - action.type === 'rotate' → Call rotateComponent(action.componentId)
+    // - action.type === 'toggle' → Call toggleSwitch(action.componentId)
+  };
 
-    if (confidence > 0.7) {
-      switch (gesture) {
-        case "point":
-        case "small_motion":
-          if (!selectedElement && elements.length > 0) {
-            setSelectedElement(elements[0].id);
-          }
-          break;
-
-        case "open_palm":
-        case "large_motion":
-          addResistor();
-          break;
-
-        case "fist":
-          if (
-            selectedElement &&
-            selectedElement !== "battery1" &&
-            selectedElement !== "resistor1"
-          ) {
-            removeElement(selectedElement);
-            setSelectedElement(null);
-          }
-          break;
-
-        case "wave":
-          setElements([
-            {
-              id: "battery1",
-              type: "battery",
-              value: 12,
-              position: { x: 100, y: 200 },
-              connections: ["wire1", "wire4"],
-            },
-            {
-              id: "resistor1",
-              type: "resistor",
-              value: 100,
-              position: { x: 300, y: 200 },
-              connections: ["wire2", "wire3"],
-            },
-          ]);
-          setSelectedElement(null);
-          break;
-      }
+  /**
+   * Handle gesture detection events
+   */
+  const handleGestureDetected = (gesture: GestureResult) => {
+    // Optional: Add gesture feedback or analytics
+    if (gesture.confidence > 0.85) {
+      console.log(`👋 High confidence gesture detected: ${gesture.name}`);
     }
-  };
-
-  const handleGestureCommand = (command: string) => {
-    switch (command) {
-      case "add_battery":
-        const batteries = elements.filter((el) => el.type === "battery");
-        if (batteries.length < 3) {
-          const newBattery = {
-            id: `battery_${Date.now()}`,
-            type: "battery" as const,
-            value: 9,
-            position: { x: 50 + batteries.length * 150, y: 150 },
-            connections: [],
-          };
-          setElements((prev) => [...prev, newBattery]);
-        }
-        break;
-
-      case "add_resistor":
-        addResistor();
-        break;
-
-      case "clear_circuit":
-        setElements([
-          {
-            id: "battery1",
-            type: "battery",
-            value: 12,
-            position: { x: 100, y: 200 },
-            connections: ["wire1", "wire4"],
-          },
-        ]);
-        setSelectedElement(null);
-        break;
-
-      case "calculate":
-        calculateCircuit();
-        break;
-    }
-  };
-
-  const addResistor = () => {
-    const resistors = elements.filter((el) => el.type === "resistor");
-    if (resistors.length < 5) {
-      const newResistor = {
-        id: `resistor_${Date.now()}`,
-        type: "resistor" as const,
-        value: Math.floor(Math.random() * 500) + 50,
-        position: { x: 200 + resistors.length * 100, y: 250 },
-        connections: [],
-      };
-      setElements((prev) => [...prev, newResistor]);
-    }
-  };
-
-  const removeElement = (elementId: string) => {
-    setElements((prev) => prev.filter((el) => el.id !== elementId));
-  };
-
-  const calculateCircuit = () => {
-    const batteries = elements.filter((el) => el.type === "battery");
-    const resistors = elements.filter((el) => el.type === "resistor");
-
-    if (batteries.length === 0 || resistors.length === 0) {
-      alert("Circuit membutuhkan minimal 1 baterai dan 1 resistor!");
-      return;
-    }
-
-    const totalVoltage = batteries.reduce(
-      (sum, battery) => sum + battery.value,
-      0
-    );
-    const totalResistance = resistors.reduce(
-      (sum, resistor) => sum + resistor.value,
-      0
-    );
-    const current = totalVoltage / totalResistance;
-    const power = totalVoltage * current;
-
-    alert(`
-Hasil Perhitungan Rangkaian:
-• Total Tegangan: ${totalVoltage}V
-• Total Resistansi: ${totalResistance}Ω  
-• Arus: ${current.toFixed(3)}A
-• Daya: ${power.toFixed(3)}W
-    `);
-  };
-
-  const updateElementValue = (elementId: string, newValue: number) => {
-    setElements((prev) =>
-      prev.map((el) => (el.id === elementId ? { ...el, value: newValue } : el))
-    );
   };
 
   return (
@@ -275,14 +124,14 @@ Hasil Perhitungan Rangkaian:
           <div className="flex justify-center mb-12">
             <div className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/20 p-2 inline-flex">
               <button
-                onClick={() => setActiveTab("web")}
+                onClick={() => setActiveTab("drag-drop")}
                 className={`px-8 py-3 rounded-xl font-bold text-lg transition-all duration-300 transform hover:scale-105 ${
-                  activeTab === "web"
+                  activeTab === "drag-drop"
                     ? "bg-gradient-to-r from-orange-500 to-red-600 text-white shadow-lg shadow-orange-500/25"
                     : "text-blue-200/80 hover:text-white hover:bg-white/10"
                 }`}
               >
-                🌐 Web Practicum
+                🖱️ Drag & Drop Mode
               </button>
               <button
                 onClick={() => setActiveTab("cv")}
@@ -292,13 +141,13 @@ Hasil Perhitungan Rangkaian:
                     : "text-blue-200/80 hover:text-white hover:bg-white/10"
                 }`}
               >
-                🤖 Computer Vision
+                👋 Computer Vision Mode
               </button>
             </div>
           </div>
 
-          {/* Web Practicum Content */}
-          {activeTab === "web" && (
+          {/* Drag & Drop Practicum Content */}
+          {activeTab === "drag-drop" && (
             <div className="max-w-6xl mx-auto">
               {/* Feature Introduction */}
               <div className="mb-8">
@@ -369,187 +218,69 @@ Hasil Perhitungan Rangkaian:
           {activeTab === "cv" && (
             <div className="max-w-6xl mx-auto">
               {/* AI-Powered Laboratory Section */}
-              <div className="mb-12">
-                <div className="bg-gradient-to-br from-blue-900/40 via-purple-900/30 to-blue-800/30 backdrop-blur-xl rounded-2xl p-8 border border-blue-400/20 shadow-2xl">
+              <div className="mb-8">
+                <div className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl rounded-2xl p-8 border border-white/20 shadow-2xl">
                   <div className="flex items-center mb-6">
-                    <div className="flex items-center justify-center w-16 h-16 bg-gradient-to-br from-blue-500/30 to-purple-600/30 rounded-2xl mr-4">
-                      <span className="text-2xl">🤖</span>
+                    <div className="flex items-center justify-center w-16 h-16 bg-gradient-to-br from-purple-500/20 to-blue-600/20 rounded-2xl mr-4">
+                      <span className="text-2xl">👋</span>
                     </div>
                     <div>
                       <h3 className="text-2xl font-bold text-white">
-                        AI-Powered Computer Vision Lab
+                        Computer Vision Hand Gesture Control
                       </h3>
                       <p className="text-blue-200/80">
-                        Kontrol rangkaian menggunakan gesture tangan dengan
-                        teknologi AI
+                        Kontrol rangkaian listrik menggunakan gesture tangan
+                        dengan teknologi MediaPipe AI
                       </p>
                     </div>
                   </div>
 
-                  {/* Features Grid */}
-                  <div className="grid md:grid-cols-3 gap-6 mb-8">
-                    <div className="bg-gradient-to-br from-blue-500/20 to-cyan-500/10 rounded-xl p-4 border border-blue-400/30">
-                      <div className="text-2xl mb-2">👆</div>
-                      <h4 className="text-white font-bold mb-2">
-                        Gesture Detection
-                      </h4>
-                      <p className="text-blue-200/80 text-sm">
-                        Deteksi real-time gerakan tangan untuk kontrol intuitif
-                      </p>
-                    </div>
-                    <div className="bg-gradient-to-br from-purple-500/20 to-blue-500/10 rounded-xl p-4 border border-purple-400/30">
-                      <div className="text-2xl mb-2">⚡</div>
-                      <h4 className="text-white font-bold mb-2">
-                        Real-time Calculation
-                      </h4>
-                      <p className="text-blue-200/80 text-sm">
-                        Perhitungan otomatis nilai rangkaian secara instant
-                      </p>
-                    </div>
-                    <div className="bg-gradient-to-br from-blue-700/20 to-purple-700/10 rounded-xl p-4 border border-blue-400/30">
-                      <div className="text-2xl mb-2">🔬</div>
-                      <h4 className="text-white font-bold mb-2">
-                        Interactive Components
-                      </h4>
-                      <p className="text-blue-200/80 text-sm">
-                        Komponen virtual yang responsif terhadap gesture
-                      </p>
-                    </div>
-                  </div>
+                  {/* Web CV Practicum Component */}
+                  <WebCVPracticum
+                    onCircuitAction={handleCircuitAction}
+                    onGestureDetected={handleGestureDetected}
+                  />
 
-                  {/* Gesture Guide */}
-                  <div className="bg-gradient-to-r from-blue-700/20 to-purple-700/10 rounded-xl p-6 border border-blue-400/30 mb-6">
-                    <h4 className="text-white font-bold mb-4 flex items-center">
-                      <span className="text-xl mr-2">🖐️</span>
-                      Panduan Gesture Control
+                  {/* Enhanced Tips */}
+                  <div className="mt-6 p-6 bg-gradient-to-r from-purple-500/10 to-blue-500/10 rounded-xl border border-purple-400/30">
+                    <h4 className="text-white font-bold mb-3 flex items-center">
+                      <span className="text-xl mr-2">�</span>
+                      Tips Penggunaan
                     </h4>
-                    <div className="grid md:grid-cols-2 gap-4 text-sm">
-                      <div className="space-y-3">
-                        <div className="flex items-center">
-                          <span className="text-2xl mr-3">👆</span>
-                          <div>
-                            <div className="text-blue-300 font-medium">
-                              Point Gesture
-                            </div>
-                            <div className="text-blue-200/70">
-                              Pilih dan seleksi komponen
-                            </div>
-                          </div>
-                        </div>
-                        <div className="flex items-center">
-                          <span className="text-2xl mr-3">✋</span>
-                          <div>
-                            <div className="text-blue-300 font-medium">
-                              Open Palm
-                            </div>
-                            <div className="text-blue-200/70">
-                              Tambah resistor baru
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                      <div className="space-y-3">
-                        <div className="flex items-center">
-                          <span className="text-2xl mr-3">✊</span>
-                          <div>
-                            <div className="text-blue-300 font-medium">
-                              Fist Gesture
-                            </div>
-                            <div className="text-blue-200/70">
-                              Hapus komponen terpilih
-                            </div>
-                          </div>
-                        </div>
-                        <div className="flex items-center">
-                          <span className="text-2xl mr-3">👋</span>
-                          <div>
-                            <div className="text-blue-300 font-medium">
-                              Wave Gesture
-                            </div>
-                            <div className="text-blue-200/70">
-                              Reset rangkaian ke default
-                            </div>
-                          </div>
-                        </div>
-                      </div>
+                    <div className="grid md:grid-cols-2 gap-4 text-blue-200/90 text-sm">
+                      <ul className="space-y-2">
+                        <li className="flex items-start">
+                          <span className="text-purple-400 mr-2">•</span>
+                          <span>
+                            Pastikan pencahayaan ruangan cukup untuk deteksi
+                            tangan optimal
+                          </span>
+                        </li>
+                        <li className="flex items-start">
+                          <span className="text-purple-400 mr-2">•</span>
+                          <span>
+                            Posisikan tangan di depan kamera dengan jarak 30-60
+                            cm
+                          </span>
+                        </li>
+                      </ul>
+                      <ul className="space-y-2">
+                        <li className="flex items-start">
+                          <span className="text-purple-400 mr-2">•</span>
+                          <span>
+                            Gunakan gesture yang jelas dan stabil untuk akurasi
+                            tinggi
+                          </span>
+                        </li>
+                        <li className="flex items-start">
+                          <span className="text-purple-400 mr-2">•</span>
+                          <span>
+                            Lihat panduan gesture di sebelah kanan canvas untuk
+                            referensi
+                          </span>
+                        </li>
+                      </ul>
                     </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Launch Application Section */}
-              <div className="grid md:grid-cols-1 gap-8">
-                <div className="group relative">
-                  <div className="absolute -inset-1 bg-gradient-to-r from-blue-500/40 to-purple-600/40 rounded-3xl blur opacity-25 group-hover:opacity-100 transition duration-1000"></div>
-                  <div className="relative bg-gradient-to-br from-blue-900/30 to-purple-900/20 backdrop-blur-xl rounded-3xl p-10 border border-blue-400/20 hover:border-blue-400/30 transition-all duration-500">
-                    <div className="flex items-center justify-center w-20 h-20 bg-gradient-to-br from-blue-500/30 to-purple-600/30 rounded-2xl mb-6 mx-auto group-hover:scale-110 transition-transform duration-300">
-                      <span className="text-3xl">💻</span>
-                    </div>
-
-                    <h3 className="text-3xl font-bold text-white mb-4 text-center">
-                      Desktop Computer Vision App
-                    </h3>
-                    <p className="text-blue-200/80 mb-8 text-lg text-center leading-relaxed">
-                      Aplikasi desktop Python dengan teknologi computer vision
-                      canggih untuk pengalaman praktikum yang immersive
-                    </p>
-
-                    <div className="space-y-3 mb-8">
-                      <div className="flex items-center justify-center text-blue-300">
-                        <div className="w-2 h-2 bg-blue-400 rounded-full mr-3"></div>
-                        <span>Hand Gesture Recognition dengan MediaPipe</span>
-                      </div>
-                      <div className="flex items-center justify-center text-blue-300">
-                        <div className="w-2 h-2 bg-blue-400 rounded-full mr-3"></div>
-                        <span>Real-time Circuit Simulation & Calculation</span>
-                      </div>
-                      <div className="flex items-center justify-center text-blue-300">
-                        <div className="w-2 h-2 bg-blue-400 rounded-full mr-3"></div>
-                        <span>Interactive Visual Interface with OpenCV</span>
-                      </div>
-                    </div>
-
-                    <div className="flex justify-center">
-                      <CVPracticumLauncher />
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* System Requirements */}
-              <div className="mt-8 bg-gradient-to-r from-blue-900/20 to-purple-900/10 backdrop-blur-xl rounded-2xl p-6 border border-blue-400/10">
-                <h4 className="text-white font-bold mb-4 flex items-center">
-                  <span className="text-xl mr-2">⚙️</span>
-                  System Requirements
-                </h4>
-                <div className="grid md:grid-cols-3 gap-4 text-sm text-blue-200/80">
-                  <div>
-                    <div className="text-blue-300 font-medium mb-2">Camera</div>
-                    <ul className="space-y-1 text-xs">
-                      <li>• Webcam atau kamera built-in</li>
-                      <li>• Resolusi minimal 640x480</li>
-                      <li>• Pencahayaan yang cukup</li>
-                    </ul>
-                  </div>
-                  <div>
-                    <div className="text-blue-300 font-medium mb-2">
-                      Software
-                    </div>
-                    <ul className="space-y-1 text-xs">
-                      <li>• Python 3.8+</li>
-                      <li>• OpenCV, MediaPipe</li>
-                      <li>• NumPy, Matplotlib</li>
-                    </ul>
-                  </div>
-                  <div>
-                    <div className="text-blue-300 font-medium mb-2">
-                      Hardware
-                    </div>
-                    <ul className="space-y-1 text-xs">
-                      <li>• CPU: Intel i3+ atau setara</li>
-                      <li>• RAM: 4GB minimum</li>
-                      <li>• GPU: Opsional untuk performa</li>
-                    </ul>
                   </div>
                 </div>
               </div>
