@@ -5,14 +5,14 @@ import Navbar from "@/components/Navbar";
 
 // Audio timestamps untuk auto-scroll (dalam detik)
 const AUDIO_TIMESTAMPS = {
-  section1Start: 80,
-  section2Start: 160,
-  section3Start: 260,
-  section4Start: 380,
-  section5Start: 520,
-  section6Start: 680,
-  section7Start: 840,
-  completion: 969
+  section1Start: 68,
+  section2Start: 153,
+  section3Start: 258,
+  section4Start: 409,
+  section5Start: 540,
+  section6Start: 644,
+  section7Start: 768,
+  completion: 923
 };
 
 interface ModuleSeriesPageProps {
@@ -49,7 +49,7 @@ const AudioPlayer = ({ onTimestampReached }: AudioPlayerProps) => {
       } else {
         // Jika belum pernah diputar, mulai dari detik 80
         if (audioRef.current.currentTime === 0) {
-          audioRef.current.currentTime = 80;
+          audioRef.current.currentTime = 0;
         }
         audioRef.current.play();
       }
@@ -60,7 +60,7 @@ const AudioPlayer = ({ onTimestampReached }: AudioPlayerProps) => {
   // Initialize audio ke detik 80 saat component mount
   useEffect(() => {
     if (audioRef.current) {
-      audioRef.current.currentTime = 80;
+      audioRef.current.currentTime = 0;
     }
   }, []);
 
@@ -213,50 +213,86 @@ const AudioPlayer = ({ onTimestampReached }: AudioPlayerProps) => {
               <button
                 onClick={() => {
                   if (audioRef.current) {
-                    audioRef.current.currentTime = 80;
+                    audioRef.current.currentTime = 68;
                     setIsPlaying(true);
                     audioRef.current.play();
                   }
                 }}
                 className="text-xs py-1.5 px-2 bg-blue-500/20 hover:bg-blue-500/40 rounded-lg text-blue-300 transition-all"
               >
-                S1 (1:20)
+                S1 (1:08)
               </button>
               <button
                 onClick={() => {
                   if (audioRef.current) {
-                    audioRef.current.currentTime = 160;
+                    audioRef.current.currentTime = 153;
                     setIsPlaying(true);
                     audioRef.current.play();
                   }
                 }}
                 className="text-xs py-1.5 px-2 bg-cyan-500/20 hover:bg-cyan-500/40 rounded-lg text-cyan-300 transition-all"
               >
-                S2 (2:40)
+                S2 (2:33)
               </button>
               <button
                 onClick={() => {
                   if (audioRef.current) {
-                    audioRef.current.currentTime = 260;
+                    audioRef.current.currentTime = 258;
                     setIsPlaying(true);
                     audioRef.current.play();
                   }
                 }}
                 className="text-xs py-1.5 px-2 bg-green-500/20 hover:bg-green-500/40 rounded-lg text-green-300 transition-all"
               >
-                S3 (4:20)
+                S3 (4:18)
               </button>
               <button
                 onClick={() => {
                   if (audioRef.current) {
-                    audioRef.current.currentTime = 380;
+                    audioRef.current.currentTime = 409;
                     setIsPlaying(true);
                     audioRef.current.play();
                   }
                 }}
                 className="text-xs py-1.5 px-2 bg-yellow-500/20 hover:bg-yellow-500/40 rounded-lg text-yellow-300 transition-all"
               >
-                S4 (6:20)
+                S4 (6:49)
+              </button>
+              <button
+                onClick={() => {
+                  if (audioRef.current) {
+                    audioRef.current.currentTime = 540;
+                    setIsPlaying(true);
+                    audioRef.current.play();
+                  }
+                }}
+                className="text-xs py-1.5 px-2 bg-orange-500/20 hover:bg-orange-500/40 rounded-lg text-orange-300 transition-all"
+              >
+                S5 (9:00)
+              </button>
+              <button
+                onClick={() => {
+                  if (audioRef.current) {
+                    audioRef.current.currentTime = 644;
+                    setIsPlaying(true);
+                    audioRef.current.play();
+                  }
+                }}
+                className="text-xs py-1.5 px-2 bg-pink-500/20 hover:bg-pink-500/40 rounded-lg text-pink-300 transition-all"
+              >
+                S6 (10:44)
+              </button>
+              <button
+                onClick={() => {
+                  if (audioRef.current) {
+                    audioRef.current.currentTime = 768;
+                    setIsPlaying(true);
+                    audioRef.current.play();
+                  }
+                }}
+                className="text-xs py-1.5 px-2 bg-purple-500/20 hover:bg-purple-500/40 rounded-lg text-purple-300 transition-all"
+              >
+                S7 (12:48)
               </button>
             </div>
 
