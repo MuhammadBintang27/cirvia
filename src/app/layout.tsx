@@ -6,6 +6,7 @@ import { AuthProvider } from '@/contexts/AuthContext'
 import { ToastProvider } from '@/components/Toast'
 import ConditionalFooter from '@/components/ConditionalFooter'
 import AuthLoader from '@/components/AuthLoader'
+import TeacherRedirect from '@/components/TeacherRedirect'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -25,6 +26,7 @@ export default function RootLayout({
         <AuthProvider>
           <ToastProvider>
             <AuthLoader>
+              <TeacherRedirect />
               <div className="min-h-screen flex flex-col relative overflow-hidden">
                 {/* Animated Background Elements - Global */}
                 <div className="fixed inset-0 pointer-events-none">

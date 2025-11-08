@@ -69,6 +69,24 @@ export interface LearningStyleResult {
   createdAt?: string
 }
 
+export interface AIFeedback {
+  id: string
+  studentId: string
+  testResultId: string
+  learningStyleResultId?: string
+  feedbackType: 'post_learning_style' | 'post_pretest' | 'post_posttest'
+  title: string
+  summary: string
+  recommendations: any // jsonb
+  nextSteps: string[]
+  motivationalMessage: string
+  contextData: any // jsonb
+  aiPrompt?: string
+  viewedAt?: string
+  viewedFullReport: boolean
+  createdAt: string
+}
+
 export class SupabaseTestService {
   
   // Simpan hasil test ke database
@@ -914,6 +932,49 @@ export class SupabaseTestService {
   /**
    * Get AI feedback history for a student
    */
+  /**
+   * Get AI feedback by test result ID
+   */
+  static async getAIFeedbackByTestResult(testResultId: string): Promise<AIFeedback | null> {
+    try {
+      const { data, error } = await supabase
+        .from('ai_feedback_history')
+        .select('*')
+        .eq('test_result_id', testResultId)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .single()
+
+      if (error) {
+        console.error('Error getting AI feedback by test result:', error)
+        return null
+      }
+
+      if (!data) return null
+
+      return {
+        id: data.id,
+        studentId: data.student_id,
+        testResultId: data.test_result_id,
+        learningStyleResultId: data.learning_style_result_id,
+        feedbackType: data.feedback_type,
+        title: data.title,
+        summary: data.summary,
+        recommendations: data.recommendations,
+        nextSteps: data.next_steps,
+        motivationalMessage: data.motivational_message,
+        contextData: data.context_data,
+        aiPrompt: data.ai_prompt,
+        viewedAt: data.viewed_at,
+        viewedFullReport: data.viewed_full_report,
+        createdAt: data.created_at
+      }
+    } catch (error) {
+      console.error('Error getting AI feedback by test result:', error)
+      return null
+    }
+  }
+
   static async getAIFeedbackHistory(studentId: string, limit: number = 10): Promise<any[]> {
     try {
       const { data, error } = await supabase

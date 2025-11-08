@@ -5,7 +5,7 @@ import React, { useState, useEffect } from 'react';
 import { ChevronRight, Trophy, Target, Brain, Zap, Star, ArrowRight, Sparkles, CheckCircle, Clock, Award } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import { useAuth } from '@/contexts/AuthContext';
-import { SupabaseTestService, TestResultWithAnswers, LearningStyleResult } from '@/lib/supabase-test-service';
+import { SupabaseTestService, TestResultWithAnswers, LearningStyleResult, AIFeedback } from '@/lib/supabase-test-service';
 import { useToast } from '@/components/Toast';
 
 const TestPage = () => {
@@ -14,6 +14,8 @@ const TestPage = () => {
   const [preTestResult, setPreTestResult] = useState<TestResultWithAnswers | null>(null);
   const [postTestResult, setPostTestResult] = useState<TestResultWithAnswers | null>(null);
   const [learningStyleResult, setLearningStyleResult] = useState<LearningStyleResult | null>(null);
+  const [preTestFeedback, setPreTestFeedback] = useState<AIFeedback | null>(null);
+  const [postTestFeedback, setPostTestFeedback] = useState<AIFeedback | null>(null);
 
   useEffect(() => {
     const loadTestResults = async () => {
@@ -24,6 +26,16 @@ const TestPage = () => {
         setPreTestResult(preResult);
         setPostTestResult(postResult);
         setLearningStyleResult(learningStyleResult);
+
+        // Load AI feedback for completed tests
+        if (preResult) {
+          const preFeedback = await SupabaseTestService.getAIFeedbackByTestResult(preResult.id);
+          setPreTestFeedback(preFeedback);
+        }
+        if (postResult) {
+          const postFeedback = await SupabaseTestService.getAIFeedbackByTestResult(postResult.id);
+          setPostTestFeedback(postFeedback);
+        }
       }
     }
     
@@ -220,14 +232,25 @@ const TestPage = () => {
                 <div className="flex-grow">
                   {preTestResult ? (
                     <div className="space-y-4 mb-8">
+                      {/* AI Feedback Title - Priority Display */}
+                      {preTestFeedback && (
+                        <div className="bg-gradient-to-r from-blue-500/20 to-cyan-500/20 rounded-xl p-4 border border-blue-400/40 mb-3">
+                          <div className="flex items-start space-x-3">
+                            <Sparkles className="w-5 h-5 text-blue-400 flex-shrink-0 mt-0.5" />
+                            <div>
+                              <div className="text-sm text-blue-300 mb-1">AI Feedback:</div>
+                              <div className="text-base font-bold text-white leading-snug">
+                                {preTestFeedback.title}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                      
                       <div className="bg-gradient-to-r from-green-500/10 to-emerald-500/10 rounded-xl p-4 border border-green-400/30">
                         <div className="flex items-center justify-between mb-2">
                           <span className="text-green-300 font-medium">Skor Anda:</span>
                           <span className="text-2xl font-bold text-white">{preTestResult.percentage}%</span>
-                        </div>
-                        <div className="flex items-center justify-between mb-2">
-                          <span className="text-green-200/70 text-sm">Grade:</span>
-                          <span className="text-green-400 font-bold">{preTestResult.grade}</span>
                         </div>
                         <div className="flex items-center justify-between mb-2">
                           <span className="text-green-200/70 text-sm">Benar:</span>
@@ -316,14 +339,25 @@ const TestPage = () => {
                 <div className="flex-grow">
                   {postTestResult ? (
                     <div className="space-y-4 mb-8">
+                      {/* AI Feedback Title - Priority Display */}
+                      {postTestFeedback && (
+                        <div className="bg-gradient-to-r from-purple-500/20 to-pink-500/20 rounded-xl p-4 border border-purple-400/40 mb-3">
+                          <div className="flex items-start space-x-3">
+                            <Sparkles className="w-5 h-5 text-purple-400 flex-shrink-0 mt-0.5" />
+                            <div>
+                              <div className="text-sm text-purple-300 mb-1">AI Feedback:</div>
+                              <div className="text-base font-bold text-white leading-snug">
+                                {postTestFeedback.title}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                      
                       <div className="bg-gradient-to-r from-purple-500/10 to-pink-500/10 rounded-xl p-4 border border-purple-400/30">
                         <div className="flex items-center justify-between mb-2">
                           <span className="text-purple-300 font-medium">Skor Anda:</span>
                           <span className="text-2xl font-bold text-white">{postTestResult.percentage}%</span>
-                        </div>
-                        <div className="flex items-center justify-between mb-2">
-                          <span className="text-purple-200/70 text-sm">Grade:</span>
-                          <span className="text-purple-400 font-bold">{postTestResult.grade}</span>
                         </div>
                         <div className="flex items-center justify-between mb-2">
                           <span className="text-purple-200/70 text-sm">Benar:</span>
@@ -335,19 +369,7 @@ const TestPage = () => {
                         </div>
                       </div>
                       
-                      {/* Show improvement if both tests completed */}
-                      {preTestResult && (
-                        <div className="bg-gradient-to-r from-yellow-500/10 to-amber-500/10 rounded-xl p-3 border border-yellow-400/30 mt-4">
-                          <div className="flex items-center justify-between">
-                            <span className="text-yellow-300 text-sm font-medium">Peningkatan:</span>
-                            <span className={`text-lg font-bold ${
-                              postTestResult.percentage >= preTestResult.percentage ? 'text-green-400' : 'text-red-400'
-                            }`}>
-                              {postTestResult.percentage >= preTestResult.percentage ? '+' : ''}{(postTestResult.percentage - preTestResult.percentage).toFixed(1)}%
-                            </span>
-                          </div>
-                        </div>
-                      )}
+                     
                 
                     </div>
                   ) : (

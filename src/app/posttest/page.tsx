@@ -344,8 +344,7 @@ const PostTestPage = () => {
             <div className="relative mb-12">
               <div className="inline-flex items-center justify-center w-40 h-40 rounded-full bg-gradient-to-br from-purple-500/20 to-pink-600/20 backdrop-blur-xl border border-white/20 shadow-2xl">
                 <div className="text-center">
-                  <div className="text-5xl font-black text-white mb-2">{Math.round(scoreData.score)}%</div>
-                  <div className="text-lg font-bold text-purple-300">{scoreData.grade}</div>
+                  <div className="text-6xl font-black text-white">{Math.round(scoreData.score)}%</div>
                 </div>
               </div>
             </div>
@@ -356,7 +355,7 @@ const PostTestPage = () => {
             </h1>
 
             {/* Statistics */}
-            <div className="grid md:grid-cols-4 gap-6 mb-12">
+            <div className="grid md:grid-cols-3 gap-6 mb-12">
               <div className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl rounded-2xl p-6 border border-white/20">
                 <div className="text-2xl font-bold text-white mb-2">{correctAnswers}/{questions.length}</div>
                 <div className="text-purple-300">Jawaban Benar</div>
@@ -368,10 +367,6 @@ const PostTestPage = () => {
               <div className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl rounded-2xl p-6 border border-white/20">
                 <div className="text-2xl font-bold text-white mb-2">{Math.round(timeElapsed / questions.length)}s</div>
                 <div className="text-purple-300">Rata-rata/Soal</div>
-              </div>
-              <div className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl rounded-2xl p-6 border border-white/20">
-                <div className="text-2xl font-bold text-white mb-2">{scoreData.grade}</div>
-                <div className="text-purple-300">Grade</div>
               </div>
             </div>
 

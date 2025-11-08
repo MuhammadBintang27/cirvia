@@ -10,9 +10,9 @@ export default function ConditionalFooter() {
   const excludedPaths = [
     '/login',
     '/login/student',
-    '/pretest',
-    '/posttest',
-    '/learning-style',
+    '/learning-style',  // Tes gaya belajar
+    '/pretest',         // Pre-test
+    '/posttest',        // Post-test
     '/materials/module-1', // ModuleIntroductionPageNew - has integrated footer
     '/materials/module-2', // ModuleSeriesPageNew - has integrated footer
     '/materials/module-3', // ModuleParallelPageNew - has integrated footer

@@ -4,13 +4,78 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { useState, useEffect, useRef } from 'react';
+import { usePathname } from 'next/navigation';
 import { Home, BookOpen, FlaskConical, ClipboardCheck, Users, LogIn, User, LogOut, BarChart3, ChevronDown, GraduationCap, BookOpen as TeacherIcon } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 
 export default function Navbar() {
-  const { user, logout } = useAuth();
+  const { user, logout, isTeacher } = useAuth();
+  const pathname = usePathname();
   const [isLoginDropdownOpen, setIsLoginDropdownOpen] = useState(false);
+  const [isVisible, setIsVisible] = useState(true);
+  const [lastScrollY, setLastScrollY] = useState(0);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Halaman yang tidak boleh ada navbar (halaman tes)
+  const excludedPaths = [
+    '/learning-style',
+    '/pretest',
+    '/posttest',
+  ];
+  
+  // Cek apakah path saat ini ada dalam daftar exclude
+  const shouldHideNavbar = excludedPaths.some(path => pathname.startsWith(path));
+  
+  // Jika harus disembunyikan, return null
+  if (shouldHideNavbar) {
+    return null;
+  }
+
+  // If user is a teacher, only show navbar on dashboard page
+  if (isTeacher() && !pathname.startsWith('/dashboard/teacher')) {
+    return null;
+  }
+
+  // Handle scroll to show/hide navbar
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      
+      // Clear previous timeout
+      if (scrollTimeoutRef.current) {
+        clearTimeout(scrollTimeoutRef.current);
+      }
+      
+      // Always show navbar at top (scroll position < 100px)
+      if (currentScrollY < 100) {
+        setIsVisible(true);
+        setLastScrollY(currentScrollY);
+        return;
+      }
+      
+      // Show navbar when scrolling (up or down)
+      setIsVisible(true);
+      
+      // Hide navbar after user stops scrolling for 1.5 seconds
+      scrollTimeoutRef.current = setTimeout(() => {
+        if (window.scrollY >= 100) {
+          setIsVisible(false);
+        }
+      }, 1500);
+      
+      setLastScrollY(currentScrollY);
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      if (scrollTimeoutRef.current) {
+        clearTimeout(scrollTimeoutRef.current);
+      }
+    };
+  }, []);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -26,7 +91,7 @@ export default function Navbar() {
     };
   }, []);
   
-  // Base navigation items
+  // Base navigation items (for students only)
   const baseNavigation = [
     { name: 'Beranda', href: '/', icon: Home },
     { name: 'Materi', href: '/materials', icon: BookOpen },
@@ -35,84 +100,141 @@ export default function Navbar() {
     { name: 'Tentang', href: '/about', icon: Users },
   ];
 
-  // Use base navigation without dashboard menu since it's accessible via user name
-  const navigation = baseNavigation;
+  // Teachers don't see navigation menu, only their profile/logout
+  const navigation = isTeacher() ? [] : baseNavigation;
 
   return (
     <>
-      {/* Desktop Navbar */}
-      <nav className="relative z-50 backdrop-blur-xl bg-white/5 border-b border-white/10">
-        <div className="container mx-auto px-8 py-4">
-          <div className="flex items-center justify-between">
-            <Link href="/" className="flex items-center space-x-3">
-              <div className=" ">
-                <Image 
-                  src="/logo.png" 
-                  alt="CIRVIA Logo" 
-                  width={30} 
-                  height={30} 
-                  className="w-9 h-9"
-                />
-              </div>
-              <span className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-cyan-300 bg-clip-text text-transparent">CIRVIA</span>
-            </Link>
-            <div className="hidden md:flex items-center space-x-6">
-              {navigation.map((item) => {
-                const Icon = item.icon;
-                return (
-                  <Link key={item.name} href={item.href} className="flex items-center space-x-2 text-white/80 hover:text-white transition-colors">
-                    <Icon className="w-5 h-5" />
-                    <span>{item.name}</span>
-                  </Link>
-                );
-              })}
-              
-              
+      {/* Spacer for fixed navbar - prevents content overlap (desktop only) */}
+      <div className="hidden md:block h-24"></div>
+
+      {/* Desktop Navbar - Floating Pill Style with Glow */}
+      <nav 
+        className={`hidden md:block fixed top-6 left-1/2 -translate-x-1/2 z-50 transition-all duration-500 ${
+          isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-20 pointer-events-none'
+        }`}
+      >
+        <div className="relative">
+          {/* Glow Effect */}
+          <div className="absolute -inset-1 bg-gradient-to-r from-blue-500 via-cyan-500 to-blue-500 rounded-full blur-xl opacity-60 group-hover:opacity-80 transition-opacity"></div>
+          
+          {/* Navbar Content */}
+          <div className="relative bg-gradient-to-br from-slate-900/95 via-slate-800/95 to-slate-900/95 backdrop-blur-2xl border-2 border-blue-400/30 rounded-full px-8 py-4 shadow-2xl">
+            <div className="flex items-center space-x-8">
+              {/* Logo */}
+              <Link href="/" className="flex items-center space-x-2 group">
+                <div className="relative">
+                  <div className="absolute inset-0 bg-gradient-to-r from-blue-400 to-cyan-300 rounded-lg blur-sm opacity-50 group-hover:opacity-75 transition-opacity"></div>
+                  <Image 
+                    src="/logo.png" 
+                    alt="CIRVIA Logo" 
+                    width={32} 
+                    height={32} 
+                    className="relative w-8 h-8"
+                  />
+                </div>
+                <span className="text-xl font-bold bg-gradient-to-r from-blue-400 to-cyan-300 bg-clip-text text-transparent">
+                  CIRVIA
+                </span>
+              </Link>
+
+              {/* Divider - Only show if there are navigation items */}
+              {navigation.length > 0 && (
+                <div className="h-8 w-px bg-gradient-to-b from-transparent via-blue-400/30 to-transparent"></div>
+              )}
+
+              {/* Navigation Items - Only for students */}
+              {navigation.length > 0 && (
+                <div className="hidden md:flex items-center space-x-2">
+                  {navigation.map((item) => {
+                    const Icon = item.icon;
+                    const isActive = typeof window !== 'undefined' && window.location.pathname === item.href;
+                    return (
+                      <Link 
+                        key={item.name} 
+                        href={item.href} 
+                        className={`group relative flex items-center space-x-2 px-4 py-2 rounded-full transition-all duration-300 ${
+                          isActive 
+                            ? 'bg-gradient-to-r from-blue-500/30 to-cyan-500/30 text-white' 
+                            : 'text-white/70 hover:text-white hover:bg-white/5'
+                        }`}
+                      >
+                        {isActive && (
+                          <div className="absolute inset-0 bg-gradient-to-r from-blue-500/20 to-cyan-500/20 rounded-full blur-sm"></div>
+                        )}
+                        <Icon className="relative w-4 h-4" />
+                        <span className="relative text-sm font-medium">{item.name}</span>
+                      </Link>
+                    );
+                  })}
+                </div>
+              )}
+
+              {/* Divider */}
+              <div className="h-8 w-px bg-gradient-to-b from-transparent via-blue-400/30 to-transparent"></div>
 
               {/* Auth Section */}
               {user ? (
-                <div className="ml-4 pl-4 border-l border-white/20">
+                <div className="flex items-center space-x-3">
                   <Link 
                     href={user.role === 'teacher' ? '/dashboard/teacher' : '/dashboard/student'}
-                    className={`flex items-center space-x-2 hover:text-white transition-colors ${
-                      user.role === 'teacher' ? 'text-blue-300' : 'text-emerald-300'
+                    className={`flex items-center space-x-2 px-4 py-2 rounded-full transition-all duration-300 ${
+                      user.role === 'teacher' 
+                        ? 'bg-blue-500/20 border border-blue-400/30 text-blue-300 hover:bg-blue-500/30' 
+                        : 'bg-emerald-500/20 border border-emerald-400/30 text-emerald-300 hover:bg-emerald-500/30'
                     }`}
                   >
                     <User className="w-4 h-4" />
-                    <span className="text-sm">{user.name}</span>
+                    <span className="text-sm font-medium">{user.name}</span>
                     {user.role === 'student' && (
-                      <span className="text-xs bg-emerald-500/20 px-2 py-1 rounded-full border border-emerald-400/30">
+                      <span className="text-xs bg-emerald-400/20 px-2 py-0.5 rounded-full">
                         Siswa
                       </span>
                     )}
+                    {user.role === 'teacher' && (
+                      <span className="text-xs bg-blue-400/20 px-2 py-0.5 rounded-full">
+                        Guru
+                      </span>
+                    )}
                   </Link>
+                  
+                  {/* Logout Button for Teacher */}
+                  {user.role === 'teacher' && (
+                    <button
+                      onClick={logout}
+                      className="flex items-center space-x-2 px-4 py-2 bg-red-500/20 border border-red-400/30 text-red-300 rounded-full transition-all duration-300 hover:bg-red-500/30"
+                    >
+                      <LogOut className="w-4 h-4" />
+                      <span className="text-sm font-medium">Logout</span>
+                    </button>
+                  )}
                 </div>
               ) : (
-                <div className="ml-4 pl-4 border-l border-white/20 relative" ref={dropdownRef}>
+                <div className="relative" ref={dropdownRef}>
                   <button
                     onClick={() => setIsLoginDropdownOpen(!isLoginDropdownOpen)}
-                    className="flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-blue-500/20 to-cyan-500/20 border border-blue-400/30 text-blue-300 rounded-xl font-medium hover:from-blue-500/30 hover:to-cyan-500/30 transition-all"
+                    className="flex items-center space-x-2 px-5 py-2 bg-gradient-to-r from-blue-500/30 to-cyan-500/30 border border-blue-400/40 text-white rounded-full font-medium hover:from-blue-500/40 hover:to-cyan-500/40 transition-all shadow-lg shadow-blue-500/20"
                   >
                     <LogIn className="w-4 h-4" />
-                    <span>Login</span>
+                    <span className="text-sm">Login</span>
                     <ChevronDown className={`w-4 h-4 transition-transform ${isLoginDropdownOpen ? 'rotate-180' : ''}`} />
                   </button>
 
                   {/* Login Dropdown */}
                   {isLoginDropdownOpen && (
-                    <div className="absolute right-0 top-full mt-2 w-56 bg-slate-900/95 backdrop-blur-xl border border-white/20 rounded-2xl shadow-2xl z-50">
+                    <div className="absolute right-0 top-full mt-3 w-64 bg-slate-900/95 backdrop-blur-xl border border-blue-400/30 rounded-2xl shadow-2xl z-50 overflow-hidden">
                       <div className="p-2">
                         <Link
                           href="/login/student"
                           onClick={() => setIsLoginDropdownOpen(false)}
                           className="flex items-center space-x-3 w-full px-4 py-3 text-left text-white/80 hover:text-white hover:bg-emerald-500/20 rounded-xl transition-all group"
                         >
-                          <div className="w-10 h-10 bg-emerald-500/20 rounded-xl flex items-center justify-center group-hover:bg-emerald-500/30 transition-colors">
+                          <div className="w-10 h-10 bg-emerald-500/20 rounded-xl flex items-center justify-center group-hover:bg-emerald-500/30 transition-colors border border-emerald-400/30">
                             <GraduationCap className="w-5 h-5 text-emerald-400" />
                           </div>
                           <div>
                             <div className="font-medium text-white">Login Sebagai Siswa</div>
-                            <div className="text-xs text-emerald-200/70">Akses materi dan test pembelajaran</div>
+                            <div className="text-xs text-emerald-200/70">Akses materi dan test</div>
                           </div>
                         </Link>
                         
@@ -121,12 +243,12 @@ export default function Navbar() {
                           onClick={() => setIsLoginDropdownOpen(false)}
                           className="flex items-center space-x-3 w-full px-4 py-3 text-left text-white/80 hover:text-white hover:bg-blue-500/20 rounded-xl transition-all group"
                         >
-                          <div className="w-10 h-10 bg-blue-500/20 rounded-xl flex items-center justify-center group-hover:bg-blue-500/30 transition-colors">
+                          <div className="w-10 h-10 bg-blue-500/20 rounded-xl flex items-center justify-center group-hover:bg-blue-500/30 transition-colors border border-blue-400/30">
                             <TeacherIcon className="w-5 h-5 text-blue-400" />
                           </div>
                           <div>
                             <div className="font-medium text-white">Login Sebagai Guru</div>
-                            <div className="text-xs text-blue-200/70">Kelola soal dan monitor siswa</div>
+                            <div className="text-xs text-blue-200/70">Kelola soal dan siswa</div>
                           </div>
                         </Link>
                       </div>
