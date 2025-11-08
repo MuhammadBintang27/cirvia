@@ -2,6 +2,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { ArrowLeft, CheckCircle, Trophy, Star, Zap, Lightbulb, Info, Clock, Play, Pause } from "lucide-react";
 import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
 
 // Audio timestamps untuk auto-scroll (dalam detik)
 const AUDIO_TIMESTAMPS = {
@@ -1242,8 +1243,9 @@ const ModuleIntroductionPage = ({ isCompleted = false, onMarkComplete }: ModuleI
         </div>
       </div>
 
-      {/* Completion Section */}
+      {/* Completion Section - Extended dengan Footer */}
       <div className="relative text-white py-32 px-6 overflow-hidden mt-20 opacity-0 animate-fade-in" style={{ animationDelay: "0.2s" }} ref={completionRef}>
+        {/* Background yang sama dengan section */}
         <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-blue-950 to-indigo-950"></div>
         
         <div className="absolute inset-0 opacity-40">
@@ -1252,7 +1254,8 @@ const ModuleIntroductionPage = ({ isCompleted = false, onMarkComplete }: ModuleI
         </div>
 
         <div className="max-w-7xl mx-auto relative z-10">
-          <div className="group relative">
+          {/* Completion Card */}
+          <div className="group relative mb-20">
             <div className="absolute -inset-1 bg-gradient-to-r from-yellow-500/30 via-orange-500/20 to-blue-500/30 rounded-3xl blur-2xl opacity-50 group-hover:opacity-75 transition duration-1000"></div>
             
             <div className="relative bg-gradient-to-br from-slate-900/80 to-blue-950/80 backdrop-blur-xl rounded-3xl border-2 border-yellow-400/30 p-12 shadow-2xl">
@@ -1332,6 +1335,9 @@ const ModuleIntroductionPage = ({ isCompleted = false, onMarkComplete }: ModuleI
               </div>
             </div>
           </div>
+
+          {/* Footer Section - Integrated dengan theme yellow */}
+          <Footer theme="yellow" />
         </div>
       </div>
     </div>

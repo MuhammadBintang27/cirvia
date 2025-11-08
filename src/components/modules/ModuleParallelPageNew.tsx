@@ -2,6 +2,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { ArrowLeft, CheckCircle, Trophy, Star, Zap, Lightbulb, Info, Home, Activity, TrendingUp, GitBranch, Calculator, Clock, Play, Pause } from "lucide-react";
 import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
 
 // Audio timestamps untuk auto-scroll (dalam detik)
 const AUDIO_TIMESTAMPS = {
@@ -2150,8 +2151,9 @@ const ModuleParallelPageNew = ({ isCompleted = false, onMarkComplete }: ModulePa
         </div>
       </div>
 
-      {/* Completion Section */}
+      {/* Completion Section - Extended dengan Footer */}
       <div className="relative text-white py-32 px-6 overflow-hidden mt-20 opacity-0 animate-fade-in" style={{ animationDelay: "0.2s" }} ref={completionRef}>
+        {/* Background yang sama dengan section */}
         <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-emerald-950 to-teal-950"></div>
         
         <div className="absolute inset-0 opacity-40">
@@ -2160,7 +2162,8 @@ const ModuleParallelPageNew = ({ isCompleted = false, onMarkComplete }: ModulePa
         </div>
 
         <div className="max-w-7xl mx-auto relative z-10">
-          <div className="group relative">
+          {/* Completion Card */}
+          <div className="group relative mb-20">
             <div className="absolute -inset-1 bg-gradient-to-r from-emerald-500/30 via-teal-500/20 to-emerald-500/30 rounded-3xl blur-2xl opacity-50 group-hover:opacity-75 transition duration-1000"></div>
             
             <div className="relative bg-gradient-to-br from-slate-900/80 to-emerald-950/80 backdrop-blur-xl rounded-3xl border-2 border-emerald-400/30 p-12 shadow-2xl">
@@ -2240,20 +2243,13 @@ const ModuleParallelPageNew = ({ isCompleted = false, onMarkComplete }: ModulePa
               </div>
             </div>
           </div>
+
+          {/* Footer Section - Integrated dengan theme emerald */}
+          <Footer theme="emerald" />
         </div>
       </div>
 
-      {/* Footer */}
-      <div className="relative bg-slate-950 py-12 px-6 text-center border-t border-white/10">
-        <div className="flex items-center justify-center gap-2 mb-4">
-          <Zap className="w-6 h-6 text-emerald-400" />
-          <p className="text-xl font-black text-white">CIRVIA</p>
-        </div>
-        <p className="text-emerald-200 text-base mb-2">
-          Platform Pembelajaran Rangkaian Listrik Interaktif
-        </p>
-        <p className="text-emerald-400/60 text-sm">© 2025 CIRVIA. All rights reserved.</p>
-      </div>
+      
     </div>
   );
 };

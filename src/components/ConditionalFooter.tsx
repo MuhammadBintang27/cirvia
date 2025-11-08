@@ -12,7 +12,10 @@ export default function ConditionalFooter() {
     '/login/student',
     '/pretest',
     '/posttest',
-    '/learning-style'
+    '/learning-style',
+    '/materials/module-1', // ModuleIntroductionPageNew - has integrated footer
+    '/materials/module-2', // ModuleSeriesPageNew - has integrated footer
+    '/materials/module-3', // ModuleParallelPageNew - has integrated footer
   ];
   
   // Cek apakah path saat ini ada dalam daftar exclude
