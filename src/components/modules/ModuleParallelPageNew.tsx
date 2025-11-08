@@ -1,12 +1,309 @@
 "use client";
 import React, { useState, useEffect, useRef } from "react";
-import { ArrowLeft, CheckCircle, Trophy, Star, Zap, Lightbulb, Info, Home, Activity, TrendingUp, GitBranch, Calculator, Clock } from "lucide-react";
+import { ArrowLeft, CheckCircle, Trophy, Star, Zap, Lightbulb, Info, Home, Activity, TrendingUp, GitBranch, Calculator, Clock, Play, Pause } from "lucide-react";
 import Navbar from "@/components/Navbar";
+
+// Audio timestamps untuk auto-scroll (dalam detik)
+const AUDIO_TIMESTAMPS = {
+  section1Start: 20,
+  section2Start: 144,
+  section3Start: 300,
+  section4Start: 420,
+  section5Start: 628,
+  section6Start: 680,
+  section7Start: 765,
+  completion: 938
+};
 
 interface ModuleParallelPageProps {
   isCompleted?: boolean;
   onMarkComplete?: () => void;
 }
+
+// Audio Player Component dengan Auto-Scroll
+interface AudioPlayerProps {
+  onTimestampReached?: (timestamp: keyof typeof AUDIO_TIMESTAMPS) => void;
+}
+
+const AudioPlayer = ({ onTimestampReached }: AudioPlayerProps) => {
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(0);
+  const [isHovering, setIsHovering] = useState(false);
+  const [lastTriggeredTimestamp, setLastTriggeredTimestamp] = useState<string>("");
+  const audioRef = useRef<HTMLAudioElement>(null);
+  const buttonRef = useRef<HTMLDivElement>(null);
+
+  // Format time helper
+  const formatTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+    return `${mins}:${secs < 10 ? "0" : ""}${secs}`;
+  };
+
+  // Handle play/pause
+  const handlePlayPause = () => {
+    if (audioRef.current) {
+      if (isPlaying) {
+        audioRef.current.pause();
+      } else {
+        // Jika belum pernah diputar, mulai dari detik 0
+        if (audioRef.current.currentTime === 0) {
+          audioRef.current.currentTime = 0;
+        }
+        audioRef.current.play();
+      }
+      setIsPlaying(!isPlaying);
+    }
+  };
+
+  // Initialize audio ke detik 80 saat component mount
+  useEffect(() => {
+    if (audioRef.current) {
+      audioRef.current.currentTime = 0;
+    }
+  }, []);
+
+  // Handle progress bar click to seek (range 45-969)
+  const handleSeek = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!audioRef.current) return;
+    const START_TIME = 45;
+    const END_TIME = 969;
+    const rect = e.currentTarget.getBoundingClientRect();
+    const percent = (e.clientX - rect.left) / rect.width;
+    const seekTime = START_TIME + (percent * (END_TIME - START_TIME));
+    audioRef.current.currentTime = seekTime;
+  };
+
+  // Handle time update dan auto-scroll
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
+
+    const handleTimeUpdate = () => {
+      setCurrentTime(audio.currentTime);
+
+      // Stop audio otomatis di detik 969
+      if (audio.currentTime >= 969) {
+        audio.pause();
+        setIsPlaying(false);
+        audio.currentTime = 969;
+      }
+
+      // Check timestamps dan trigger scroll
+      Object.entries(AUDIO_TIMESTAMPS).forEach(([key, timestamp]) => {
+        if (
+          Math.abs(audio.currentTime - timestamp) < 0.5 &&
+          lastTriggeredTimestamp !== key
+        ) {
+          setLastTriggeredTimestamp(key);
+          if (onTimestampReached) {
+            onTimestampReached(key as keyof typeof AUDIO_TIMESTAMPS);
+          }
+        }
+      });
+    };
+
+    const handleLoadedMetadata = () => {
+      setDuration(audio.duration);
+    };
+
+    const handleEnded = () => {
+      setIsPlaying(false);
+    };
+
+    audio.addEventListener("timeupdate", handleTimeUpdate);
+    audio.addEventListener("loadedmetadata", handleLoadedMetadata);
+    audio.addEventListener("ended", handleEnded);
+
+    return () => {
+      audio.removeEventListener("timeupdate", handleTimeUpdate);
+      audio.removeEventListener("loadedmetadata", handleLoadedMetadata);
+      audio.removeEventListener("ended", handleEnded);
+    };
+  }, [lastTriggeredTimestamp, onTimestampReached, isPlaying]);
+
+  // Progress bar dimulai dari detik ke 45, berakhir di detik ke 969
+  const START_TIME = 45;
+  const END_TIME = 969;
+  const ACTIVE_DURATION = END_TIME - START_TIME; // 924 detik
+  const adjustedCurrentTime = Math.max(0, currentTime - START_TIME);
+  const progressPercent = adjustedCurrentTime > 0 ? (adjustedCurrentTime / ACTIVE_DURATION) * 100 : 0;
+
+  return (
+    <>
+      {/* Audio Element - Hidden */}
+      <audio
+        ref={audioRef}
+        src="/audio/modul-paralel.mp3"
+        preload="auto"
+      />
+
+      {/* Audio Toggle Button with Hover Popup - Fixed Position */}
+      <div
+        ref={buttonRef}
+        onMouseEnter={() => setIsHovering(true)}
+        onMouseLeave={() => setIsHovering(false)}
+        className="fixed top-80 right-8 z-50 pointer-events-auto group"
+      >
+        {/* Glowing Background Effect */}
+        <div className="absolute inset-0 bg-gradient-to-br from-purple-500 via-pink-500 to-indigo-500 rounded-full blur-lg opacity-60 group-hover:opacity-100 transition-opacity duration-300 animate-pulse"></div>
+        
+        {/* Animated Ring */}
+        <div className="absolute inset-0 rounded-full border-2 border-purple-300/30 animate-spin" style={{ animationDuration: '3s' }}></div>
+
+        {/* Main Button */}
+        <button
+          onClick={handlePlayPause}
+          className="relative p-5 rounded-full bg-gradient-to-br from-purple-500 via-pink-500 to-indigo-500 hover:from-purple-600 hover:via-pink-600 hover:to-indigo-600 shadow-2xl shadow-purple-500/50 transform hover:scale-125 transition-all duration-300 z-10 group-hover:shadow-purple-500/80 border border-purple-300/50"
+          title={isPlaying ? "Matikan Audio" : "Nyalakan Audio"}
+        >
+          {isPlaying ? (
+            <Pause className="w-7 h-7 text-white animate-pulse drop-shadow-lg" />
+          ) : (
+            <Play className="w-7 h-7 text-white drop-shadow-lg" />
+          )}
+        </button>
+        
+        {/* Floating Label */}
+        {!isHovering && (
+          <div className="absolute -top-10 right-0 bg-gradient-to-r from-purple-600 to-pink-600 text-white text-xs font-bold px-3 py-1 rounded-full whitespace-nowrap shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+            🎧 Audio
+          </div>
+        )}
+
+        {/* Hover Popup - Audio Control Panel */}
+        {isHovering && (
+          <div 
+            onMouseEnter={() => setIsHovering(true)}
+            onMouseLeave={() => setIsHovering(false)}
+            className="absolute bottom-full right-0 mb-4 bg-gradient-to-br from-slate-900 to-slate-800 border border-purple-500/30 rounded-2xl p-4 shadow-2xl w-64 opacity-0 animate-fade-in backdrop-blur-sm z-50 pointer-events-auto"
+          >
+            {/* Title */}
+            <div className="text-xs font-bold text-purple-300 mb-3 uppercase tracking-widest">
+              🎧 Audio Pembelajaran
+            </div>
+
+            {/* Time Display */}
+            <div className="flex justify-between items-center mb-3 text-sm">
+              <span className="text-cyan-300 font-semibold">{formatTime(currentTime)}</span>
+              <span className="text-purple-300/60">/</span>
+              <span className="text-purple-300/80">{formatTime(duration)}</span>
+            </div>
+
+            {/* Progress Bar - Clickable */}
+            <div
+              onClick={handleSeek}
+              className="relative w-full bg-slate-700/50 rounded-full h-1.5 cursor-pointer group mb-4 hover:h-2 transition-all"
+            >
+              <div
+                className="bg-gradient-to-r from-cyan-400 to-purple-400 h-1.5 rounded-full transition-all group-hover:h-2"
+                style={{ width: `${progressPercent}%` }}
+              />
+              {/* Seek Indicator */}
+              <div
+                className="absolute top-1/2 -translate-y-1/2 w-3 h-3 bg-white rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-opacity"
+                style={{ left: `${progressPercent}%`, transform: "translateX(-50%)" }}
+              />
+            </div>
+
+            {/* Quick Timestamps */}
+            <div className="text-xs text-purple-200/70 mb-2 font-semibold">Quick Jump:</div>
+            <div className="grid grid-cols-2 gap-2">
+              <button
+                onClick={() => {
+                  if (audioRef.current) {
+                    audioRef.current.currentTime = 20;
+                    setIsPlaying(true);
+                    audioRef.current.play();
+                  }
+                }}
+                className="text-xs py-1.5 px-2 bg-blue-500/20 hover:bg-blue-500/40 rounded-lg text-blue-300 transition-all"
+              >
+                S1 (0:20)
+              </button>
+              <button
+                onClick={() => {
+                  if (audioRef.current) {
+                    audioRef.current.currentTime = 144;
+                    setIsPlaying(true);
+                    audioRef.current.play();
+                  }
+                }}
+                className="text-xs py-1.5 px-2 bg-cyan-500/20 hover:bg-cyan-500/40 rounded-lg text-cyan-300 transition-all"
+              >
+                S2 (2:24)
+              </button>
+              <button
+                onClick={() => {
+                  if (audioRef.current) {
+                    audioRef.current.currentTime = 300;
+                    setIsPlaying(true);
+                    audioRef.current.play();
+                  }
+                }}
+                className="text-xs py-1.5 px-2 bg-green-500/20 hover:bg-green-500/40 rounded-lg text-green-300 transition-all"
+              >
+                S3 (5:00)
+              </button>
+              <button
+                onClick={() => {
+                  if (audioRef.current) {
+                    audioRef.current.currentTime = 420;
+                    setIsPlaying(true);
+                    audioRef.current.play();
+                  }
+                }}
+                className="text-xs py-1.5 px-2 bg-yellow-500/20 hover:bg-yellow-500/40 rounded-lg text-yellow-300 transition-all"
+              >
+                S4 (7:00)
+              </button>
+              <button
+                onClick={() => {
+                  if (audioRef.current) {
+                    audioRef.current.currentTime = 628;
+                    setIsPlaying(true);
+                    audioRef.current.play();
+                  }
+                }}
+                className="text-xs py-1.5 px-2 bg-orange-500/20 hover:bg-orange-500/40 rounded-lg text-orange-300 transition-all"
+              >
+                S5 (10:28)
+              </button>
+              <button
+                onClick={() => {
+                  if (audioRef.current) {
+                    audioRef.current.currentTime = 680;
+                    setIsPlaying(true);
+                    audioRef.current.play();
+                  }
+                }}
+                className="text-xs py-1.5 px-2 bg-pink-500/20 hover:bg-pink-500/40 rounded-lg text-pink-300 transition-all"
+              >
+                S6 (11:20)
+              </button>
+              <button
+                onClick={() => {
+                  if (audioRef.current) {
+                    audioRef.current.currentTime = 765;
+                    setIsPlaying(true);
+                    audioRef.current.play();
+                  }
+                }}
+                className="text-xs py-1.5 px-2 bg-purple-500/20 hover:bg-purple-500/40 rounded-lg text-purple-300 transition-all"
+              >
+                S7 (12:45)
+              </button>
+            </div>
+
+            {/* Pointer Arrow */}
+            <div className="absolute -bottom-2 right-6 w-4 h-4 bg-gradient-to-br from-slate-900 to-slate-800 border-r border-b border-purple-500/30 transform rotate-45"></div>
+          </div>
+        )}
+      </div>
+    </>
+  );
+};
 
 // Custom hook untuk scroll animation
 const useScrollAnimation = () => {
@@ -1617,10 +1914,55 @@ const Section7Summary = () => {
 const ModuleParallelPageNew = ({ isCompleted = false, onMarkComplete }: ModuleParallelPageProps) => {
   const [isModuleCompleted, setIsModuleCompleted] = useState(isCompleted);
   const [isClient, setIsClient] = useState(false);
+  
+  // Refs untuk sections
+  const section1Ref = useRef<HTMLDivElement>(null);
+  const section2Ref = useRef<HTMLDivElement>(null);
+  const section3Ref = useRef<HTMLDivElement>(null);
+  const section4Ref = useRef<HTMLDivElement>(null);
+  const section5Ref = useRef<HTMLDivElement>(null);
+  const section6Ref = useRef<HTMLDivElement>(null);
+  const section7Ref = useRef<HTMLDivElement>(null);
+  const completionRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     setIsClient(true);
   }, []);
+
+  // Handle auto-scroll berdasarkan audio timestamp
+  const handleTimestampReached = (timestamp: keyof typeof AUDIO_TIMESTAMPS) => {
+    const scrollOptions: ScrollIntoViewOptions = {
+      behavior: "smooth",
+      block: "start",
+    };
+
+    switch (timestamp) {
+      case "section1Start":
+        section1Ref.current?.scrollIntoView(scrollOptions);
+        break;
+      case "section2Start":
+        section2Ref.current?.scrollIntoView(scrollOptions);
+        break;
+      case "section3Start":
+        section3Ref.current?.scrollIntoView(scrollOptions);
+        break;
+      case "section4Start":
+        section4Ref.current?.scrollIntoView(scrollOptions);
+        break;
+      case "section5Start":
+        section5Ref.current?.scrollIntoView(scrollOptions);
+        break;
+      case "section6Start":
+        section6Ref.current?.scrollIntoView(scrollOptions);
+        break;
+      case "section7Start":
+        section7Ref.current?.scrollIntoView(scrollOptions);
+        break;
+      case "completion":
+        completionRef.current?.scrollIntoView(scrollOptions);
+        break;
+    }
+  };
 
   if (!isClient) {
     return (
@@ -1632,6 +1974,9 @@ const ModuleParallelPageNew = ({ isCompleted = false, onMarkComplete }: ModulePa
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 relative overflow-hidden">
+      {/* Audio Player */}
+      {isClient && <AudioPlayer onTimestampReached={handleTimestampReached} />}
+
       {/* Animated Background */}
       <div className="fixed inset-0 -z-10 overflow-hidden pointer-events-none">
         <div className="absolute top-20 left-10 w-72 h-72 bg-emerald-500/10 rounded-full blur-3xl animate-pulse"></div>
@@ -1703,7 +2048,9 @@ const ModuleParallelPageNew = ({ isCompleted = false, onMarkComplete }: ModulePa
         <div className="max-w-7xl mx-auto px-6 space-y-20">
 
           {/* Section 1 */}
-          <Section1Introduction />
+          <div ref={section1Ref}>
+            <Section1Introduction />
+          </div>
 
           {/* Divider */}
           <div className="flex justify-center">
@@ -1717,7 +2064,9 @@ const ModuleParallelPageNew = ({ isCompleted = false, onMarkComplete }: ModulePa
           </div>
 
           {/* Section 2 */}
-          <Section2Current />
+          <div ref={section2Ref}>
+            <Section2Current />
+          </div>
 
           {/* Divider */}
           <div className="flex justify-center">
@@ -1731,7 +2080,9 @@ const ModuleParallelPageNew = ({ isCompleted = false, onMarkComplete }: ModulePa
           </div>
 
           {/* Section 3 */}
-          <Section3Voltage />
+          <div ref={section3Ref}>
+            <Section3Voltage />
+          </div>
 
           {/* Divider */}
           <div className="flex justify-center">
@@ -1745,7 +2096,9 @@ const ModuleParallelPageNew = ({ isCompleted = false, onMarkComplete }: ModulePa
           </div>
 
           {/* Section 4 */}
-          <Section4Resistance />
+          <div ref={section4Ref}>
+            <Section4Resistance />
+          </div>
 
           {/* Divider */}
           <div className="flex justify-center">
@@ -1759,7 +2112,9 @@ const ModuleParallelPageNew = ({ isCompleted = false, onMarkComplete }: ModulePa
           </div>
 
           {/* Section 5 */}
-          <Section5RealExample />
+          <div ref={section5Ref}>
+            <Section5RealExample />
+          </div>
 
           {/* Divider */}
           <div className="flex justify-center">
@@ -1773,7 +2128,9 @@ const ModuleParallelPageNew = ({ isCompleted = false, onMarkComplete }: ModulePa
           </div>
 
           {/* Section 6 */}
-          <Section6Calculation />
+          <div ref={section6Ref}>
+            <Section6Calculation />
+          </div>
 
           {/* Divider */}
           <div className="flex justify-center">
@@ -1787,12 +2144,14 @@ const ModuleParallelPageNew = ({ isCompleted = false, onMarkComplete }: ModulePa
           </div>
 
           {/* Section 7 */}
-          <Section7Summary />
+          <div ref={section7Ref}>
+            <Section7Summary />
+          </div>
         </div>
       </div>
 
       {/* Completion Section */}
-      <div className="relative text-white py-32 px-6 overflow-hidden mt-20 opacity-0 animate-fade-in" style={{ animationDelay: "0.2s" }}>
+      <div className="relative text-white py-32 px-6 overflow-hidden mt-20 opacity-0 animate-fade-in" style={{ animationDelay: "0.2s" }} ref={completionRef}>
         <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-emerald-950 to-teal-950"></div>
         
         <div className="absolute inset-0 opacity-40">
