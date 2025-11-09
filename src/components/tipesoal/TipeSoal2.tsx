@@ -17,7 +17,7 @@ import { CircuitOrderingQuestion } from '@/lib/questions';
 
 interface TipeSoal2Props {
   question: CircuitOrderingQuestion;
-  onAnswerSubmit: (isCorrect: boolean) => void;
+  onAnswerSubmit: (userOrder: string[] | boolean, isCorrect?: boolean) => void;
   onNextQuestion: () => void;
   showResult: boolean;
   isLastQuestion: boolean;
@@ -236,7 +236,8 @@ const TipeSoal2: React.FC<TipeSoal2Props> = ({
   const handleSubmitAnswer = () => {
     const userOrder = state.slotAssignments.filter(id => id !== null) as string[];
     const isCorrect = JSON.stringify(userOrder) === JSON.stringify(currentCorrectOrder);
-    onAnswerSubmit(isCorrect);
+    // Send actual user order, not just boolean
+    onAnswerSubmit(userOrder, isCorrect);
   };
 
   // Check if answer can be submitted
@@ -301,6 +302,24 @@ const TipeSoal2: React.FC<TipeSoal2Props> = ({
         <h2 className="text-2xl font-bold text-white mb-4">{question.title}</h2>
         <p className="text-blue-200/90 text-lg mb-4">{question.description}</p>
         
+        
+        {/* Question Text */}
+        {question.question && (
+          <div className="bg-gradient-to-r from-blue-500/10 to-cyan-500/10 rounded-xl p-4 border border-blue-400/30 mb-4">
+            <div className="flex items-start space-x-3">
+              <div className="flex-shrink-0 w-8 h-8 bg-blue-500/20 rounded-lg flex items-center justify-center mt-0.5">
+                <span className="text-lg">❓</span>
+              </div>
+              <div className="flex-1">
+                <p className="text-blue-200/90 font-medium text-sm mb-1">Pertanyaan:</p>
+                <p className="text-blue-100 leading-relaxed">
+                  {question.question}
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Instruction */}
         <div className="bg-gradient-to-r from-cyan-500/10 to-blue-500/10 rounded-xl p-4 border border-cyan-400/30 mb-6">
           <div className="flex items-center mb-2">

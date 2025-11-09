@@ -6,7 +6,7 @@ import { CircuitAnalysisQuestion, resolveCircuitTemplate } from '@/lib/questions
 
 interface TipeSoal4Props {
   question: CircuitAnalysisQuestion;
-  onAnswer: (isCorrect: boolean) => void;
+  onAnswer: (lampStates: { [lampId: string]: 'on' | 'off' | 'unknown' } | boolean, isCorrect?: boolean) => void;
 }
 
 interface TipeSoal4State {
@@ -207,7 +207,8 @@ const TipeSoal4: React.FC<TipeSoal4Props> = ({ question, onAnswer }) => {
       feedback
     }));
 
-    onAnswer(isCorrect);
+    // Send actual lamp states, not just boolean
+    onAnswer(state.lampStates, isCorrect);
   }, [state, lampIds, question.targetLamp, question.correctStates, onAnswer]);
 
   // Render SVG lamp component - more realistic bulb shape
@@ -543,20 +544,20 @@ const TipeSoal4: React.FC<TipeSoal4Props> = ({ question, onAnswer }) => {
   };
 
   return (
-    <div className="bg-gradient-to-br from-slate-900/95 to-slate-800/95 backdrop-blur-sm rounded-2xl border border-white/10 shadow-2xl p-6">
+    <div className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl rounded-2xl border border-white/20 shadow-2xl p-6">
       <div className="grid grid-cols-2 gap-6 h-full">
         {/* Interactive SVG Circuit Diagram */}
-        <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 rounded-xl border border-white/10 p-6">
+        <div className="bg-gradient-to-br from-blue-500/10 to-cyan-500/10 backdrop-blur-sm rounded-xl border border-blue-400/30 p-6">
           <div className="mb-4">
             <h3 className="text-xl font-bold text-white mb-2">
               Rangkaian Listrik
             </h3>
-            <p className="text-gray-300 text-sm">
+            <p className="text-blue-200/90 text-sm">
               Klik lampu untuk memprediksi kondisi Nyala/Padam
             </p>
           </div>
           
-          <svg viewBox="0 0 520 360" className="w-full h-80 bg-slate-900/30 rounded-lg border border-white/5">
+          <svg viewBox="0 0 520 360" className="w-full h-80 bg-gradient-to-br from-slate-900/50 to-blue-900/30 rounded-lg border border-blue-500/20">
             {/* Render wire connections first (behind components) */}
             {renderWires()}
             
@@ -579,12 +580,19 @@ const TipeSoal4: React.FC<TipeSoal4Props> = ({ question, onAnswer }) => {
         {/* Information and Controls Panel */}
         <div className="flex flex-col justify-between">
           {/* Question Info */}
-          <div className="bg-slate-800/40 rounded-xl border border-white/10 p-6 mb-6">
-            <h3 className="text-xl font-bold text-white mb-4">
+          <div className="bg-gradient-to-br from-blue-500/10 to-cyan-500/10 backdrop-blur-sm rounded-xl border border-blue-400/30 p-6 mb-6">
+            <h3 className="text-xl font-bold bg-gradient-to-r from-blue-300 to-cyan-300 bg-clip-text text-transparent mb-4">
               Analisis Rangkaian
             </h3>
             
             <div className="space-y-4">
+              <div className="p-4 bg-blue-500/10 border border-blue-400/30 rounded-lg">
+                <p className="text-blue-200/90 font-medium mb-2">❓ Pertanyaan:</p>
+                <p className="text-blue-100 text-sm leading-relaxed">
+                  {question.question}
+                </p>
+              </div>
+
               <div className="p-4 bg-red-500/10 border border-red-400/30 rounded-lg">
                 <div className="flex items-center space-x-3">
                   <X className="w-6 h-6 text-red-400" />
@@ -612,8 +620,8 @@ const TipeSoal4: React.FC<TipeSoal4Props> = ({ question, onAnswer }) => {
           </div>
 
           {/* Prediction Summary */}
-          <div className="bg-slate-800/40 rounded-xl border border-white/10 p-6 mb-6">
-            <h4 className="text-lg font-semibold text-white mb-3">
+          <div className="bg-gradient-to-br from-blue-500/10 to-cyan-500/10 backdrop-blur-sm rounded-xl border border-blue-400/30 p-6 mb-6">
+            <h4 className="text-lg font-semibold bg-gradient-to-r from-blue-300 to-cyan-300 bg-clip-text text-transparent mb-3">
               Status Prediksi
             </h4>
             
@@ -628,14 +636,14 @@ const TipeSoal4: React.FC<TipeSoal4Props> = ({ question, onAnswer }) => {
                   return (
                     <div
                       key={lampId}
-                      className={`p-3 rounded-lg border ${
+                      className={`p-3 rounded-lg border transition-all duration-300 ${
                         state.showResult
                           ? feedback === 'correct'
-                            ? 'bg-green-500/10 border-green-400/30'
+                            ? 'bg-gradient-to-br from-green-500/20 to-emerald-500/20 border-green-400/40'
                             : feedback === 'incorrect'
-                            ? 'bg-red-500/10 border-red-400/30'
-                            : 'bg-gray-500/10 border-gray-400/30'
-                          : 'bg-slate-700/30 border-slate-600/30'
+                            ? 'bg-gradient-to-br from-red-500/20 to-pink-500/20 border-red-400/40'
+                            : 'bg-gradient-to-br from-gray-500/10 to-slate-500/10 border-gray-400/30'
+                          : 'bg-gradient-to-br from-blue-500/5 to-cyan-500/5 border-blue-400/20 hover:border-blue-400/40'
                       }`}
                     >
                       <div className="flex items-center justify-between">
@@ -672,13 +680,13 @@ const TipeSoal4: React.FC<TipeSoal4Props> = ({ question, onAnswer }) => {
               <div className="flex space-x-3">
                 <button
                   onClick={handleReset}
-                  className="flex-1 px-4 py-3 bg-slate-600/50 hover:bg-slate-600/70 text-white rounded-lg border border-slate-500/30 transition-all duration-200"
+                  className="flex-1 px-4 py-3 bg-gradient-to-r from-slate-600/50 to-slate-700/50 hover:from-slate-600/70 hover:to-slate-700/70 text-white rounded-xl border border-slate-500/40 transition-all duration-300 transform hover:scale-105 font-semibold shadow-lg"
                 >
                   Reset
                 </button>
                 <button
                   onClick={handleSubmit}
-                  className="flex-1 px-4 py-3 bg-blue-600/80 hover:bg-blue-600 text-white rounded-lg border border-blue-500/30 transition-all duration-200"
+                  className="flex-1 px-4 py-3 bg-gradient-to-r from-blue-500 to-cyan-600 hover:from-blue-600 hover:to-cyan-700 text-white rounded-xl border border-blue-400/30 transition-all duration-300 transform hover:scale-105 font-semibold shadow-lg shadow-blue-500/25"
                 >
                   Submit
                 </button>
@@ -686,10 +694,10 @@ const TipeSoal4: React.FC<TipeSoal4Props> = ({ question, onAnswer }) => {
             )}
 
             {state.showResult && (
-              <div className={`p-4 rounded-lg border text-center ${
+              <div className={`p-4 rounded-xl border text-center transition-all duration-300 ${
                 state.isCorrect
-                  ? 'bg-green-500/10 border-green-400/30 text-green-300'
-                  : 'bg-red-500/10 border-red-400/30 text-red-300'
+                  ? 'bg-gradient-to-br from-green-500/20 to-emerald-500/20 border-green-400/40 text-green-300'
+                  : 'bg-gradient-to-br from-red-500/20 to-pink-500/20 border-red-400/40 text-red-300'
               }`}>
                 <div className="flex items-center justify-center space-x-2 mb-2">
                   {state.isCorrect ? (

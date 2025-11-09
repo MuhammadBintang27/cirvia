@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { 
   Brain, 
   Sparkles, 
@@ -31,14 +31,13 @@ const PostTestAIFeedback: React.FC<PostTestAIFeedbackProps> = ({
 }) => {
   const [recommendation, setRecommendation] = useState<AIRecommendation | null>(null)
   const [loading, setLoading] = useState(true)
+  const [hasLoaded, setHasLoaded] = useState(false) // ✅ PENTING: Track apakah sudah pernah load
 
-  useEffect(() => {
-    loadRecommendation()
-  }, [studentId, testType])
-
-  const loadRecommendation = async () => {
+  // ✅ Wrap loadRecommendation dengan useCallback untuk stabilitas
+  const loadRecommendation = useCallback(async () => {
     try {
       setLoading(true)
+      console.log(`🤖 [AI-FEEDBACK] Loading recommendation for ${testType}...`)
       let result: AIRecommendation
 
       if (testType === 'learning_style') {
@@ -48,12 +47,22 @@ const PostTestAIFeedback: React.FC<PostTestAIFeedbackProps> = ({
       }
 
       setRecommendation(result)
+      setHasLoaded(true) // ✅ PENTING: Mark sebagai sudah loaded
+      console.log(`✅ [AI-FEEDBACK] Recommendation loaded successfully for ${testType}`)
     } catch (error) {
-      console.error('Error loading AI recommendation:', error)
+      console.error('❌ [AI-FEEDBACK] Error loading AI recommendation:', error)
+      setHasLoaded(true) // ✅ Mark sebagai sudah dicoba (meskipun error)
     } finally {
       setLoading(false)
     }
-  }
+  }, [studentId, testType]) // ✅ Dependencies yang benar
+
+  useEffect(() => {
+    // ✅ PENTING: Hanya load 1x saat component mount atau studentId/testType berubah
+    if (!hasLoaded) {
+      loadRecommendation()
+    }
+  }, [hasLoaded, loadRecommendation]) // ✅ Dependencies yang benar
 
   const getTestTypeIcon = () => {
     switch (testType) {

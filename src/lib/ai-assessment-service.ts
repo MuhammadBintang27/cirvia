@@ -859,7 +859,7 @@ class AIAssessmentService {
       const recommendations: any[] = [];
       let currentCategory = '';
       let currentItems: string[] = [];
-      let title = 'Rekomendasi AI Berdasarkan Analisis GPT-4';
+      let title = 'Rekomendasi AI Berdasarkan Analisis Gemini 2.5 Flash';
       let summary = '';
       let nextSteps: string[] = [];
       let motivationalMessage = '';

@@ -15,7 +15,7 @@ import { extractAnswer, calculateScore } from '@/lib/answer-tracking'
 
 interface QuizState {
   currentQuestionIndex: number;
-  answers: (number | null | { voltage?: number; current?: number; resistance?: number })[];  // Support simulation values
+  answers: (number | null | string[] | number[] | { [key: string]: string })[];  // ✅ Support all question types
   showResult: boolean;
   quizCompleted: boolean;
   startTime: number;
@@ -111,17 +111,36 @@ export default function PretestPage() {
     return () => clearInterval(timer);
   }, [quizState.startTime]);
 
-  const handleAnswerSubmit = (selectedIndexOrCorrect: number | boolean, isCorrectParam?: boolean) => {
+  const handleAnswerSubmit = (
+    selectedData: number | boolean | string[] | number[] | { [key: string]: string }, 
+    isCorrectParam?: boolean
+  ) => {
     const newAnswers = [...quizState.answers];
+    const index = quizState.currentQuestionIndex;
+    const currentQuestion = questions[index];
     
-    // Support both old (boolean) and new (number, boolean) signatures
-    if (typeof selectedIndexOrCorrect === 'boolean') {
-      // Old signature: just boolean (for backward compatibility)
-      // We can't know which choice was selected, so mark as null if wrong, 0 if correct
-      newAnswers[quizState.currentQuestionIndex] = selectedIndexOrCorrect ? 0 : null;
-    } else {
-      // New signature: (selectedIndex: number, isCorrect: boolean)
-      newAnswers[quizState.currentQuestionIndex] = selectedIndexOrCorrect;
+    console.log('🔍 [Pretest] handleAnswerSubmit:', {
+      questionType: currentQuestion?.questionType,
+      selectedData,
+      isCorrectParam
+    });
+    
+    // ✅ Handle different question types
+    if (Array.isArray(selectedData)) {
+      // Conceptual (string[]) or Circuit (number[]) or Ordering (string[])
+      // Store the actual selection
+      newAnswers[index] = selectedData;
+    } else if (typeof selectedData === 'object' && selectedData !== null) {
+      // Circuit Analysis (lamp states object)
+      // Store the lamp states object
+      newAnswers[index] = selectedData;
+    } else if (typeof selectedData === 'boolean') {
+      // Old signature: just boolean (backward compatibility)
+      // We don't know what was selected, mark as 0 if correct, null if wrong
+      newAnswers[index] = selectedData ? 0 : null;
+    } else if (typeof selectedData === 'number') {
+      // Index-based answer or old format
+      newAnswers[index] = selectedData === -1 ? null : selectedData;
     }
 
     setQuizState(prev => ({

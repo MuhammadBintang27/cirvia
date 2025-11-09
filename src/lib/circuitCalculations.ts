@@ -179,13 +179,14 @@ export const calculateCircuit = (
 };
 
 /**
- * Check if the calculated result matches the target within tolerance
+ * Check if the calculated result matches the target - EXACT MATCH ONLY (NO TOLERANCE)
+ * ⚠️ PENTING: Tidak ada toleransi! Jawaban harus exact match dengan target yang ditentukan.
  */
 export const checkAnswer = (
   result: CircuitResult,
   targetCurrent?: number,
   targetVoltage?: number,
-  tolerance: number = 0.1 // 10% tolerance
+  tolerance: number = 0 // ✅ NO TOLERANCE - EXACT MATCH REQUIRED
 ): { isCorrect: boolean; message: string; details: string } => {
   if (!result.isValid) {
     return {
@@ -195,39 +196,60 @@ export const checkAnswer = (
     };
   }
 
-  let isCorrect = false;
+  let isCorrect = true; // Start with true, will be set to false if any check fails
   let message = '';
   let details = '';
+  const messages: string[] = [];
+  const detailsList: string[] = [];
 
-  if (targetCurrent !== undefined) {
-    const currentDiff = Math.abs(result.totalCurrent - targetCurrent);
-    const currentTolerance = targetCurrent * tolerance;
+  // ✅ Check current if target is provided - EXACT MATCH (bulatkan ke 4 desimal)
+  if (targetCurrent !== undefined && targetCurrent !== null) {
+    // Bulatkan ke 4 desimal untuk perbandingan yang konsisten
+    const resultCurrent = parseFloat(result.totalCurrent.toFixed(4));
+    const target = parseFloat(targetCurrent.toFixed(4));
     
-    if (currentDiff <= currentTolerance) {
-      isCorrect = true;
-      message = `✅ Benar! Arus yang dihasilkan: ${result.totalCurrent.toFixed(3)}A (target: ${targetCurrent}A)`;
-      details = `Resistansi total: ${result.totalResistance.toFixed(2)}Ω, Daya total: ${result.totalPower.toFixed(3)}W`;
+    if (resultCurrent === target) {
+      messages.push(`✅ Benar! Arus yang dihasilkan: ${result.totalCurrent.toFixed(4)}A (target: ${targetCurrent.toFixed(4)}A)`);
+      detailsList.push(`Resistansi total: ${result.totalResistance.toFixed(2)}Ω, Daya total: ${result.totalPower.toFixed(4)}W`);
     } else {
-      message = `❌ Kurang tepat. Arus yang dihasilkan: ${result.totalCurrent.toFixed(3)}A (target: ${targetCurrent}A)`;
-      details = `Selisih: ${currentDiff.toFixed(3)}A. Coba periksa kembali kombinasi resistor Anda.`;
+      isCorrect = false;
+      const currentDiff = Math.abs(result.totalCurrent - targetCurrent);
+      messages.push(`❌ Salah! Arus yang dihasilkan: ${result.totalCurrent.toFixed(4)}A (target: ${targetCurrent.toFixed(4)}A)`);
+      detailsList.push(`Selisih: ${currentDiff.toFixed(4)}A. Kombinasi resistor Anda tidak menghasilkan nilai yang tepat.`);
     }
   }
 
-  if (targetVoltage !== undefined) {
+  // ✅ Check voltage if target is provided - EXACT MATCH (bulatkan ke 4 desimal)
+  if (targetVoltage !== undefined && targetVoltage !== null) {
     // For voltage targets, we typically check the first resistor's voltage drop
     const firstVoltage = result.voltageDrops[0] || 0;
-    const voltageDiff = Math.abs(firstVoltage - targetVoltage);
-    const voltageTolerance = targetVoltage * tolerance;
+    // Bulatkan ke 4 desimal untuk perbandingan yang konsisten
+    const resultVoltage = parseFloat(firstVoltage.toFixed(4));
+    const target = parseFloat(targetVoltage.toFixed(4));
     
-    if (voltageDiff <= voltageTolerance) {
-      isCorrect = true;
-      message = `✅ Benar! Tegangan yang dihasilkan: ${firstVoltage.toFixed(2)}V (target: ${targetVoltage}V)`;
-      details = `Arus rangkaian: ${result.totalCurrent.toFixed(3)}A, Resistansi total: ${result.totalResistance.toFixed(2)}Ω`;
+    if (resultVoltage === target) {
+      messages.push(`✅ Benar! Tegangan yang dihasilkan: ${firstVoltage.toFixed(4)}V (target: ${targetVoltage.toFixed(4)}V)`);
+      detailsList.push(`Arus rangkaian: ${result.totalCurrent.toFixed(4)}A, Resistansi total: ${result.totalResistance.toFixed(2)}Ω`);
     } else {
-      message = `❌ Kurang tepat. Tegangan yang dihasilkan: ${firstVoltage.toFixed(2)}V (target: ${targetVoltage}V)`;
-      details = `Selisih: ${voltageDiff.toFixed(2)}V. Periksa kembali nilai resistor dan konfigurasi rangkaian.`;
+      isCorrect = false;
+      const voltageDiff = Math.abs(firstVoltage - targetVoltage);
+      messages.push(`❌ Salah! Tegangan yang dihasilkan: ${firstVoltage.toFixed(4)}V (target: ${targetVoltage.toFixed(4)}V)`);
+      detailsList.push(`Selisih: ${voltageDiff.toFixed(4)}V. Kombinasi resistor Anda tidak menghasilkan nilai yang tepat.`);
     }
   }
+
+  // If no targets were provided, it's an error
+  if (messages.length === 0) {
+    return {
+      isCorrect: false,
+      message: 'Tidak ada target yang ditentukan',
+      details: 'Soal harus memiliki target arus atau tegangan'
+    };
+  }
+
+  // Combine messages
+  message = messages.join(' ');
+  details = detailsList.join(' ');
 
   return {
     isCorrect,

@@ -2,7 +2,7 @@
 
 import React, { useState, useCallback } from 'react';
 import { DragDropContext, Droppable, Draggable, DropResult, DroppableProvided, DroppableStateSnapshot, DraggableProvided, DraggableStateSnapshot } from '@hello-pangea/dnd';
-import { CheckCircle, RotateCcw, Target, X, Check } from 'lucide-react';
+import { CheckCircle, RotateCcw, Target, X, Check, Lightbulb } from 'lucide-react';
 import { ConceptualQuestion } from '@/lib/questions';
 
 interface TipeSoal3Props {
@@ -15,6 +15,7 @@ interface TipeSoal3State {
   selectedAnswers: ConceptualQuestion['choices'];
   showResult: boolean;
   isCorrect: boolean;
+  showHint: boolean;
 }
 
 const TipeSoal3: React.FC<TipeSoal3Props> = ({ question, onAnswer }) => {
@@ -22,7 +23,8 @@ const TipeSoal3: React.FC<TipeSoal3Props> = ({ question, onAnswer }) => {
     availableChoices: [...question.choices],
     selectedAnswers: [],
     showResult: false,
-    isCorrect: false
+    isCorrect: false,
+    showHint: false
   });
 
   const handleDragEnd = useCallback((result: DropResult) => {
@@ -63,8 +65,23 @@ const TipeSoal3: React.FC<TipeSoal3Props> = ({ question, onAnswer }) => {
 
   const handleSubmit = useCallback(() => {
     const selectedIds = state.selectedAnswers.map(answer => answer.id);
-    const isCorrect = selectedIds.length === question.correctAnswers.length &&
-                     selectedIds.every(id => question.correctAnswers.includes(id));
+    
+    // ✅ VALIDASI KETAT: Tidak boleh kosong dan harus exact match dengan correctAnswers
+    const isCorrect = 
+      selectedIds.length > 0 && // ✅ WAJIB: Minimal harus pilih 1 jawaban
+      selectedIds.length === question.correctAnswers.length && // ✅ Jumlah harus sama
+      selectedIds.every(id => question.correctAnswers.includes(id)) && // ✅ Semua pilihan harus benar
+      question.correctAnswers.every(id => selectedIds.includes(id)); // ✅ Semua jawaban benar harus dipilih
+
+    console.log('🔍 [TipeSoal3] Validation:', {
+      selectedIds,
+      correctAnswers: question.correctAnswers,
+      selectedCount: selectedIds.length,
+      correctCount: question.correctAnswers.length,
+      allSelectedAreCorrect: selectedIds.every(id => question.correctAnswers.includes(id)),
+      allCorrectAreSelected: question.correctAnswers.every(id => selectedIds.includes(id)),
+      finalIsCorrect: isCorrect
+    });
 
     setState(prevState => ({
       ...prevState,
@@ -72,6 +89,8 @@ const TipeSoal3: React.FC<TipeSoal3Props> = ({ question, onAnswer }) => {
       isCorrect
     }));
 
+    // ✅ Kirim selectedIds (array of choice IDs) dan isCorrect boolean
+    // QuestionRenderer akan convert ke format yang sesuai
     onAnswer(selectedIds, isCorrect);
   }, [state.selectedAnswers, question.correctAnswers, onAnswer]);
 
@@ -80,7 +99,8 @@ const TipeSoal3: React.FC<TipeSoal3Props> = ({ question, onAnswer }) => {
       availableChoices: [...question.choices],
       selectedAnswers: [],
       showResult: false,
-      isCorrect: false
+      isCorrect: false,
+      showHint: false
     });
   }, [question.choices]);
 
@@ -98,9 +118,24 @@ const TipeSoal3: React.FC<TipeSoal3Props> = ({ question, onAnswer }) => {
             {question.question}
           </h3>
           {question.description && (
-            <p className="text-blue-200/80 text-sm">
+            <p className="text-blue-200/80 text-sm mb-4">
               {question.description}
             </p>
+          )}
+
+          {/* Hint Button */}
+          <button
+            onClick={() => setState(prev => ({ ...prev, showHint: !prev.showHint }))}
+            className="flex items-center px-4 py-2 bg-gradient-to-r from-yellow-500/20 to-amber-500/20 rounded-xl border border-yellow-400/30 text-yellow-300 hover:bg-yellow-500/30 transition-all"
+          >
+            <Lightbulb className="w-4 h-4 mr-2" />
+            {state.showHint ? 'Sembunyikan Hint' : 'Tampilkan Hint'}
+          </button>
+
+          {state.showHint && question.hint && (
+            <div className="mt-4 p-4 bg-gradient-to-r from-yellow-500/10 to-amber-500/10 rounded-xl border border-yellow-400/30">
+              <p className="text-yellow-200">{question.hint}</p>
+            </div>
           )}
         </div>
       </div>

@@ -57,7 +57,7 @@ const UnifiedCircuitCard: React.FC<UnifiedCircuitCardProps> = ({
   className = ''
 }) => {
   
-  const getBrightnessInfo = (brightnessLevel: 'high' | 'medium' | 'low') => {
+  const getBrightnessInfo = (brightnessLevel?: 'high' | 'medium' | 'low') => {
     switch (brightnessLevel) {
       case 'high': return { 
         label: 'Terang', 
@@ -76,6 +76,12 @@ const UnifiedCircuitCard: React.FC<UnifiedCircuitCardProps> = ({
         color: 'text-red-400', 
         glow: 'shadow-red-400/50',
         fillColor: '#EF4444'
+      };
+      default: return {
+        label: 'Normal',
+        color: 'text-yellow-400',
+        glow: 'shadow-yellow-400/50',
+        fillColor: '#fbbf24'
       };
     }
   };
@@ -236,7 +242,12 @@ const UnifiedCircuitCard: React.FC<UnifiedCircuitCardProps> = ({
   };
 
   const values = calculateCircuitValues();
-  const brightnessInfo = getBrightnessInfo(circuit.brightnessLevel);
+  const brightnessInfo = getBrightnessInfo(circuit.brightnessLevel) || {
+    label: 'Normal',
+    color: 'text-yellow-400',
+    glow: 'shadow-yellow-400/50',
+    fillColor: '#fbbf24'
+  };
 
   const renderCircuitSVG = () => {
     switch (circuit.template) {
@@ -901,10 +912,7 @@ const UnifiedCircuitCard: React.FC<UnifiedCircuitCardProps> = ({
               <div className="text-green-400 font-bold">{circuit.battery.voltage}V</div>
             </div>
             
-            <div className="space-y-1">
-              <div className="text-white/60">Arus:</div>
-              <div className="text-blue-400 font-bold">{values.current.toFixed(2)}A</div>
-            </div>
+            
           </div>
 
           {/* Component Count */}

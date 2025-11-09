@@ -154,15 +154,15 @@ DECLARE
 BEGIN
   INSERT INTO questions (
     question_type, title, difficulty, tags, is_active
-  ) VALUES (
+) VALUES (
     'circuitOrdering',
     'Membandingkan Kecerahan Lampu',
     'medium',
     ARRAY['pretest', 'circuit-ordering']::text[],
     true
-  ) RETURNING id INTO v_question_id;
+) RETURNING id INTO v_question_id;
 
-  INSERT INTO circuit_ordering_questions (
+INSERT INTO circuit_ordering_questions (
     question_id,
     ordering_type,
     question,
@@ -170,49 +170,75 @@ BEGIN
     correct_order,
     explanation,
     hint
-  ) VALUES (
+) VALUES (
     v_question_id,
     'brightness',
-    'Urutkan dari rangkaian paling terang ke paling redup.',
+    'Diketahui: Semua pilihan rangkaian di bawah menggunakan baterai yang sama 12V, dan masing-masing lampu memiliki daya 3W.
+Urutkan rangkaian dari kecerahan TOTAL paling tinggi ke paling rendah.',
     '[
       {
         "id": "A",
         "name": "Rangkaian A",
-        "template": "series",
+        "template": "parallel",
         "voltage": 12,
-        "resistors": [{"id": "R1", "value": 10, "color": "red"}, {"id": "R2", "value": 15, "color": "green"}],
-        "lamps": [{"id": "L1", "power": 5.76}, {"id": "L2", "power": 8.64}],
+        "resistors": [
+          {"id": "R1", "value": 20, "color": "green"},
+          {"id": "R2", "value": 40, "color": "blue"}
+        ],
+        "lamps": [
+          {"id": "L1", "power": 3},
+          {"id": "L2", "power": 3}
+        ],
         "brightnessLevel": "high",
-        "totalCurrent": 0.48,
-        "description": "Seri 2R (R_total=25Ω, P≈5,76 W)"
+        "totalCurrent": 0.5,
+        "description": "Rangkaian paralel dengan 2 resistor dan 2 lampu"
       },
       {
         "id": "B",
         "name": "Rangkaian B",
-        "template": "parallel",
+        "template": "series",
         "voltage": 12,
-        "resistors": [{"id": "R1", "value": 30, "color": "green"}, {"id": "R2", "value": 60, "color": "blue"}],
-        "lamps": [{"id": "L1", "power": 4.8}, {"id": "L2", "power": 2.4}],
+        "resistors": [
+          {"id": "R1", "value": 15, "color": "red"},
+          {"id": "R2", "value": 25, "color": "yellow"}
+        ],
+        "lamps": [
+          {"id": "L1", "power": 3},
+          {"id": "L2", "power": 3}
+        ],
         "brightnessLevel": "medium",
-        "totalCurrent": 0.6,
-        "description": "Paralel 2R (R_total=20Ω, P≈7,2 W)"
+        "totalCurrent": 0.5,
+        "description": "Rangkaian seri dengan 2 resistor dan 2 lampu"
       },
       {
         "id": "C",
         "name": "Rangkaian C",
         "template": "series",
         "voltage": 12,
-        "resistors": [{"id": "R1", "value": 20, "color": "blue"}, {"id": "R2", "value": 30, "color": "yellow"}, {"id": "R3", "value": 40, "color": "purple"}],
-        "lamps": [{"id": "L1", "power": 0.71}, {"id": "L2", "power": 1.07}, {"id": "L3", "power": 1.42}],
+        "resistors": [
+          {"id": "R1", "value": 10, "color": "red"},
+          {"id": "R2", "value": 20, "color": "green"},
+          {"id": "R3", "value": 30, "color": "blue"}
+        ],
+        "lamps": [
+          {"id": "L1", "power": 3},
+          {"id": "L2", "power": 3},
+          {"id": "L3", "power": 3}
+        ],
         "brightnessLevel": "low",
-        "totalCurrent": 0.133,
-        "description": "Seri 3R (R_total≈90Ω, P≈1,6 W)"
+        "totalCurrent": 0.5,
+        "description": "Rangkaian seri dengan 3 resistor dan 3 lampu"
       }
     ]'::jsonb,
-    ARRAY[1, 0, 2]::integer[],
-    'Rangkaian paralel umumnya memiliki R_total lebih kecil daripada seri, sehingga daya total (dan kecerahan) cenderung lebih besar.',
-    'P_total ≈ V²/R_total. R_total lebih kecil → P_total lebih besar.'
-  );
+    ARRAY[0, 1, 2]::integer[],
+    'Semua lampu identik: 12V 3W. Kecerahan ∝ daya total P_total = V²/R_total.
+• A (paralel 20Ω || 40Ω): R_total = 13.33 Ω → P_total = 144/13.33 = 10.8 W (paling terang).
+• B (seri 15Ω + 25Ω): R_total = 40 Ω → P_total = 144/40 = 3.6 W (sedang).
+• C (seri 10Ω + 20Ω + 30Ω): R_total = 60 Ω → P_total = 144/60 = 2.4 W (paling redup).
+Catatan: Jumlah lampu tidak mengubah urutan brightness, yang menentukan adalah R_total rangkaian.
+Urutan kecerahan (terang → redup): A, B, C.',
+    'Gunakan P_total = V²/R_total untuk membandingkan; seri: R dijumlahkan, paralel: gunakan 1/R_total = 1/R1 + 1/R2. Lampu hanya indikator visual.'
+);
 
   RAISE NOTICE '✅ Pretest Q4 (Circuit Ordering) inserted: %', v_question_id;
 END $$;
@@ -239,20 +265,21 @@ BEGIN
     correct_answers,
     explanation,
     hint
-  ) VALUES (
+) VALUES (
     v_question_id,
-    'Manakah pernyataan yang BENAR untuk rangkaian seri ideal dengan komponen linear?',
+    'Seorang siswa menyalakan kipas dan mengisi daya ponsel melalui stopkontak yang sama. Arus total meningkat, namun tegangan tetap 220 V. Berdasarkan Hukum Ohm dan konsep rangkaian, pernyataan yang benar adalah …',
     '[
-      {"id": "choice-1", "text": "Arus sama di semua komponen", "isCorrect": true},
-      {"id": "choice-2", "text": "Tegangan sama di semua komponen", "isCorrect": false},
-      {"id": "choice-3", "text": "Hambatan total lebih kecil dari hambatan terkecil", "isCorrect": false},
-      {"id": "choice-4", "text": "Jika satu komponen putus, komponen lain tetap bekerja", "isCorrect": false},
-      {"id": "choice-5", "text": "Hambatan total adalah jumlah seluruh hambatan", "isCorrect": true}
+      {"id": "choice-1", "text": "Kipas dan charger disusun paralel terhadap sumber listrik", "isCorrect": true},
+      {"id": "choice-2", "text": "Hambatan total rangkaian menjadi lebih kecil", "isCorrect": true},
+      {"id": "choice-3", "text": "Tegangan total rangkaian bertambah", "isCorrect": false},
+      {"id": "choice-4", "text": "Arus total berkurang karena beban bertambah", "isCorrect": false},
+      {"id": "choice-5", "text": "Arus total bertambah karena penambahan beban paralel", "isCorrect": true}
     ]'::jsonb,
-    ARRAY['choice-1', 'choice-5']::text[],
-    'Di rangkaian seri, arus sama di semua komponen. Tegangan terbagi sesuai nilai hambatan masing-masing. Hambatan total adalah penjumlahan semua hambatan.',
-    'Rangkaian seri hanya memiliki satu jalur arus.'
-  );
+    ARRAY['choice-1','choice-2','choice-5']::text[],
+    'Peralatan rumah tangga pada stopkontak terhubung paralel. Saat beban bertambah, hambatan total menurun (1/R_total = Σ(1/R_i)), sehingga arus total meningkat. Tegangan sumber tetap 220 V, tidak berubah.',
+    'Gunakan konsep paralel: menambah cabang → R_total turun → arus total naik (V tetap). Pada soal ini, ada 3 jawaban benar.'
+);
+
 
   RAISE NOTICE '✅ Pretest Q5 (Conceptual - Seri) inserted: %', v_question_id;
 END $$;
@@ -315,7 +342,7 @@ INSERT INTO questions (
     'circuit',
     'Rangkaian Seri — Tentukan Resistor yang Tepat',
     'easy',
-    ARRAY['pretest', 'rangkaian-seri']::text[],
+    ARRAY['posttest', 'rangkaian-seri']::text[],
     true
 ) RETURNING id INTO v_question_id;
 
@@ -392,15 +419,15 @@ DECLARE
 BEGIN
   INSERT INTO questions (
     question_type, title, difficulty, tags, is_active
-  ) VALUES (
+) VALUES (
     'circuitOrdering',
-    'Membandingkan Efisiensi Rangkaian',
-    'hard',
+    'Membandingkan Kecerahan Lampu — Redup ke Terang',
+    'medium',
     ARRAY['posttest', 'circuit-ordering']::text[],
     true
-  ) RETURNING id INTO v_question_id;
+) RETURNING id INTO v_question_id;
 
-  INSERT INTO circuit_ordering_questions (
+INSERT INTO circuit_ordering_questions (
     question_id,
     ordering_type,
     question,
@@ -408,49 +435,76 @@ BEGIN
     correct_order,
     explanation,
     hint
-  ) VALUES (
+) VALUES (
     v_question_id,
-    'power',
-    'Urutkan dari efisiensi tertinggi ke terendah.',
+    'brightness',
+    'Diketahui: Semua pilihan rangkaian di bawah menggunakan baterai yang sama 9V, dan masing-masing lampu memiliki daya 2W.
+Urutkan rangkaian dari kecerahan TOTAL paling rendah (paling redup) ke paling tinggi (paling terang).',
     '[
       {
-        "id": "E1",
-        "name": "Rangkaian E1",
-        "template": "simple",
-        "voltage": 12,
-        "resistors": [{"id": "R1", "value": 12}],
-        "lamps": [{"id": "L1", "power": 12}],
-        "brightnessLevel": "high",
-        "totalCurrent": 1.0,
-        "description": "Sederhana 1R (Efisiensi ≈ 95%)"
-      },
-      {
-        "id": "E2",
-        "name": "Rangkaian E2",
-        "template": "series",
-        "voltage": 12,
-        "resistors": [{"id": "R1", "value": 6}, {"id": "R2", "value": 6}],
-        "lamps": [{"id": "L1", "power": 6}, {"id": "L2", "power": 6}],
-        "brightnessLevel": "medium",
-        "totalCurrent": 1.0,
-        "description": "Seri 2R (Efisiensi ≈ 90%)"
-      },
-      {
-        "id": "E3",
-        "name": "Rangkaian E3",
+        "id": "D",
+        "name": "Rangkaian D",
         "template": "parallel",
-        "voltage": 12,
-        "resistors": [{"id": "R1", "value": 24}, {"id": "R2", "value": 24}],
-        "lamps": [{"id": "L1", "power": 6}, {"id": "L2", "power": 6}],
+        "voltage": 9,
+        "resistors": [
+          {"id": "R1", "value": 30, "color": "red"},
+          {"id": "R2", "value": 60, "color": "green"}
+        ],
+        "lamps": [
+          {"id": "L1", "power": 2},
+          {"id": "L2", "power": 2}
+        ],
+        "brightnessLevel": "high",
+        "totalCurrent": 0.5,
+        "description": "Rangkaian paralel dengan 2 resistor dan 2 lampu"
+      },
+      {
+        "id": "E",
+        "name": "Rangkaian E",
+        "template": "series",
+        "voltage": 9,
+        "resistors": [
+          {"id": "R1", "value": 20, "color": "blue"},
+          {"id": "R2", "value": 25, "color": "yellow"}
+        ],
+        "lamps": [
+          {"id": "L1", "power": 2},
+          {"id": "L2", "power": 2}
+        ],
         "brightnessLevel": "medium",
-        "totalCurrent": 1.0,
-        "description": "Paralel 2R (Efisiensi ≈ 85%)"
+        "totalCurrent": 0.5,
+        "description": "Rangkaian seri dengan 2 resistor dan 2 lampu"
+      },
+      {
+        "id": "F",
+        "name": "Rangkaian F",
+        "template": "series",
+        "voltage": 9,
+        "resistors": [
+          {"id": "R1", "value": 20, "color": "purple"},
+          {"id": "R2", "value": 30, "color": "orange"},
+          {"id": "R3", "value": 40, "color": "teal"}
+        ],
+        "lamps": [
+          {"id": "L1", "power": 2},
+          {"id": "L2", "power": 2},
+          {"id": "L3", "power": 2}
+        ],
+        "brightnessLevel": "low",
+        "totalCurrent": 0.5,
+        "description": "Rangkaian seri dengan 3 resistor dan 3 lampu"
       }
     ]'::jsonb,
-    ARRAY[0, 1, 2]::integer[],
-    'Semakin sedikit elemen yang menambah rugi-rugi (kawat panjang, sambungan, komponen), semakin tinggi efisiensi total.',
-    'Efisiensi = P_output / P_input. Rangkaian lebih sederhana cenderung lebih efisien.'
-  );
+    ARRAY[2, 1, 0]::integer[],
+    'Semua lampu identik: 9V 2W. Kecerahan ∝ daya total P_total = V²/R_total.
+• F: Rt = 90 Ω (20+30+40) → P_total = 81/90 = 0.9 W (paling redup)
+• E: Rt = 45 Ω (20+25) → P_total = 81/45 = 1.8 W (sedang)
+• D: Rt = 20 Ω (30||60) → P_total = 81/20 = 4.05 W (paling terang)
+Catatan: Yang menentukan brightness adalah R_total rangkaian, bukan jumlah atau spesifikasi lampu.
+Urutan redup → terang: F, E, D.',
+    'Seri: Rt dijumlahkan; Paralel: Rt dari 1/Rt = Σ(1/Ri). Kecerahan ∝ P_total = V²/R_total. Lampu hanya indikator visual.'
+);
+
 
   RAISE NOTICE '✅ Posttest Q4 (Circuit Ordering) inserted: %', v_question_id;
 END $$;
@@ -477,20 +531,21 @@ BEGIN
     correct_answers,
     explanation,
     hint
-  ) VALUES (
+) VALUES (
     v_question_id,
-    'Pada rangkaian seri ideal, jika satu lampu putus, apa yang terjadi pada rangkaian?',
+    'Dalam praktikum Hukum Ohm, seorang siswa menghubungkan resistor ke sumber tegangan dan mengukur arus menggunakan amperemeter. Ketika nilai resistor diganti dua kali lipat, arus yang terukur menjadi setengahnya. Dari hasil ini dapat disimpulkan bahwa …',
     '[
-      {"id": "choice-1", "text": "Lampu lain tetap menyala", "isCorrect": false},
-      {"id": "choice-2", "text": "Semua lampu mati", "isCorrect": true},
-      {"id": "choice-3", "text": "Lampu lain menyala lebih terang", "isCorrect": false},
-      {"id": "choice-4", "text": "Tidak ada pengaruh", "isCorrect": false},
-      {"id": "choice-5", "text": "Hanya lampu yang rusak yang padam", "isCorrect": false}
+      {"id": "choice-1", "text": "Tegangan sumber tetap konstan", "isCorrect": true},
+      {"id": "choice-2", "text": "Hasil pengamatan sesuai dengan Hukum Ohm", "isCorrect": true},
+      {"id": "choice-3", "text": "Arus berbanding lurus dengan hambatan", "isCorrect": false},
+      {"id": "choice-4", "text": "Jika hambatan naik, tegangan juga naik", "isCorrect": false},
+      {"id": "choice-5", "text": "Semakin besar hambatan, semakin besar arus", "isCorrect": false}
     ]'::jsonb,
-    ARRAY['choice-2']::text[],
-    'Putus pada satu komponen memutus jalur arus sehingga seluruh rangkaian tidak dialiri arus dan semua lampu padam.',
-    'Seri hanya memiliki satu jalur arus.'
-  );
+    ARRAY['choice-1','choice-2']::text[],
+    'Ketika R dinaikkan dua kali dan I turun menjadi setengahnya, berarti tegangan sumber tetap (V konstan). Perubahan ini konsisten dengan Hukum Ohm: I = V/R, menunjukkan hubungan berbanding terbalik antara arus dan hambatan.',
+    'Gunakan persamaan I = V/R: jika R naik 2×, maka I turun 2× bila V tetap. Ada 2 jawaban benar pada soal ini.'
+);
+
 
   RAISE NOTICE '✅ Posttest Q5 (Conceptual - Seri) inserted: %', v_question_id;
 END $$;

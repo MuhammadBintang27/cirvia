@@ -9,7 +9,7 @@ import { Question } from '@/lib/questions';
 
 interface QuestionRendererProps {
   question: Question;
-  onAnswer: (selectedIndexOrCorrect: number | boolean, isCorrect?: boolean) => void;
+  onAnswer: (selectedData: number | boolean | string[] | number[] | { [key: string]: string }, isCorrect?: boolean) => void;
   onNextQuestion: () => void;
   showResult: boolean;
   isLastQuestion: boolean;
@@ -55,7 +55,10 @@ const QuestionRenderer: React.FC<QuestionRendererProps> = ({
       return (
         <TipeSoal1
           question={question}
-          onAnswerSubmit={onAnswer}
+          onAnswerSubmit={(selectedResistors, isCorrect) => {
+            // selectedResistors is number[] or boolean (for backwards compatibility)
+            onAnswer(selectedResistors, isCorrect);
+          }}
           onNextQuestion={onNextQuestion}
           showResult={showResult}
           isLastQuestion={isLastQuestion}
@@ -67,7 +70,10 @@ const QuestionRenderer: React.FC<QuestionRendererProps> = ({
       return (
         <TipeSoal2
           question={question}
-          onAnswerSubmit={onAnswer}
+          onAnswerSubmit={(userOrder, isCorrect) => {
+            // userOrder is string[] or boolean (for backwards compatibility)
+            onAnswer(userOrder, isCorrect);
+          }}
           onNextQuestion={onNextQuestion}
           showResult={showResult}
           isLastQuestion={isLastQuestion}
@@ -81,17 +87,14 @@ const QuestionRenderer: React.FC<QuestionRendererProps> = ({
           <TipeSoal3
             question={question}
             onAnswer={(selectedChoices, isCorrect) => {
-              // ✨ FIX: Convert choice ID to index
-              // selectedChoices is array of IDs like ["choice1"]
-              // We need to find the index of the first selected choice
-              if (Array.isArray(selectedChoices) && selectedChoices.length > 0) {
-                const selectedId = selectedChoices[0];
-                const selectedIndex = question.choices.findIndex(choice => choice.id === selectedId);
-                console.log('🔍 [QuestionRenderer] Converting choice ID to index:', { selectedId, selectedIndex });
-                onAnswer(selectedIndex >= 0 ? selectedIndex : 0, isCorrect);
-              } else {
-                onAnswer(0, isCorrect);
-              }
+              // ✅ PERBAIKAN: Untuk conceptual questions, kirim array of choice IDs
+              // selectedChoices adalah array seperti ['choice-1', 'choice-3']
+              // Kita kirim ini langsung ke parent untuk tracking yang proper
+              console.log('🔍 [QuestionRenderer-Conceptual] selectedChoices:', selectedChoices, 'isCorrect:', isCorrect);
+              
+              // ✅ Kirim selectedChoices (array) sebagai parameter pertama
+              // Parent harus bisa handle array of strings untuk conceptual questions
+              onAnswer(selectedChoices as any, isCorrect);
             }}
           />
           {showResult && (
@@ -113,8 +116,9 @@ const QuestionRenderer: React.FC<QuestionRendererProps> = ({
         <div className="space-y-6">
           <TipeSoal4
             question={question}
-            onAnswer={(isCorrect) => {
-              onAnswer(isCorrect);
+            onAnswer={(lampStates, isCorrect) => {
+              // lampStates is object or boolean (for backwards compatibility)
+              onAnswer(lampStates, isCorrect);
             }}
           />
           {showResult && (

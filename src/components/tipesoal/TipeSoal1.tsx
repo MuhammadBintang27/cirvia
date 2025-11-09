@@ -17,7 +17,7 @@ import { calculateCircuit, checkAnswer, generateSolutionSteps } from '@/lib/circ
 
 interface TipeSoal1Props {
   question: CircuitQuestion;
-  onAnswerSubmit: (isCorrect: boolean) => void;
+  onAnswerSubmit: (selectedResistors: number[] | boolean, isCorrect?: boolean) => void;
   onNextQuestion: () => void;
   showResult: boolean;
   isLastQuestion: boolean;
@@ -132,7 +132,8 @@ const TipeSoal1: React.FC<TipeSoal1Props> = ({
     const result = calculateCircuit(question.circuitType, question.voltage, resistorValues);
     const answerCheck = checkAnswer(result, question.targetCurrent, question.targetVoltage);
 
-    onAnswerSubmit(answerCheck.isCorrect);
+    // Send actual resistor values selected, not just boolean
+    onAnswerSubmit(resistorValues, answerCheck.isCorrect);
   };
 
   const getCurrentResult = () => {
