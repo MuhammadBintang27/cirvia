@@ -17,26 +17,6 @@ export default function Navbar() {
   const dropdownRef = useRef<HTMLDivElement>(null);
   const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Halaman yang tidak boleh ada navbar (halaman tes)
-  const excludedPaths = [
-    '/learning-style',
-    '/pretest',
-    '/posttest',
-  ];
-  
-  // Cek apakah path saat ini ada dalam daftar exclude
-  const shouldHideNavbar = excludedPaths.some(path => pathname.startsWith(path));
-  
-  // Jika harus disembunyikan, return null
-  if (shouldHideNavbar) {
-    return null;
-  }
-
-  // If user is a teacher, only show navbar on dashboard page
-  if (isTeacher() && !pathname.startsWith('/dashboard/teacher')) {
-    return null;
-  }
-
   // Handle scroll to show/hide navbar
   useEffect(() => {
     const handleScroll = () => {
@@ -90,6 +70,26 @@ export default function Navbar() {
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, []);
+
+  // Halaman yang tidak boleh ada navbar (halaman tes)
+  const excludedPaths = [
+    '/learning-style',
+    '/pretest',
+    '/posttest',
+  ];
+  
+  // Cek apakah path saat ini ada dalam daftar exclude
+  const shouldHideNavbar = excludedPaths.some(path => pathname.startsWith(path));
+  
+  // Jika harus disembunyikan, return null
+  if (shouldHideNavbar) {
+    return null;
+  }
+
+  // If user is a teacher, only show navbar on dashboard page
+  if (isTeacher() && !pathname.startsWith('/dashboard/teacher')) {
+    return null;
+  }
   
   // Base navigation items (for students only)
   const baseNavigation = [
