@@ -1750,7 +1750,7 @@ export default function CircuitBuilderEnhanced() {
                 y1={-8}
                 x2={15}
                 y2={8}
-                stroke="#ef4444"
+                stroke="#d3d3d3"
                 strokeWidth={3}
               />
               <line
@@ -1758,7 +1758,7 @@ export default function CircuitBuilderEnhanced() {
                 y1={0}
                 x2={23}
                 y2={0}
-                stroke="#ef4444"
+                stroke="#d3d3d3"
                 strokeWidth={3}
               />
               {/* - terminal */}
@@ -1776,7 +1776,7 @@ export default function CircuitBuilderEnhanced() {
                 y1={0}
                 x2={-25}
                 y2={0}
-                stroke="#1f2937"
+                stroke="#d3d3d3"
                 strokeWidth={3}
               />
               <line
@@ -1784,7 +1784,7 @@ export default function CircuitBuilderEnhanced() {
                 y1={0}
                 x2={terminalOffset}
                 y2={0}
-                stroke="#1f2937"
+                stroke="#d3d3d3"
                 strokeWidth={3}
               />
               {/* Label */}
@@ -1812,7 +1812,7 @@ export default function CircuitBuilderEnhanced() {
                 y1={0}
                 x2={-20}
                 y2={0}
-                stroke="#1f2937"
+                stroke="#d3d3d3"
                 strokeWidth={3}
               />
               <line
@@ -1820,7 +1820,7 @@ export default function CircuitBuilderEnhanced() {
                 y1={0}
                 x2={terminalOffset}
                 y2={0}
-                stroke="#1f2937"
+                stroke="#d3d3d3"
                 strokeWidth={3}
               />
               {/* Resistor body */}
@@ -1859,7 +1859,36 @@ export default function CircuitBuilderEnhanced() {
             (calc.lampPowers as Record<string, number>)?.[el.id] || 0;
           // Lampu hanya menyala jika rangkaian tertutup DAN ada arus yang mengalir
           const isOn = calc.isClosed && calc.current > 0 && lampPower > 0.1;
-          const brightness = Math.min(1, lampPower / 2);
+
+          // 🔆 LOGIKA BRIGHTNESS BERDASARKAN RASIO BATERAI:LAMPU
+          let brightness = 1; // Default 100%
+
+          if (
+            calc.topology?.type === "series" ||
+            !calc.topology?.hasParallelBranch
+          ) {
+            // RANGKAIAN SERI: Brightness = (Jumlah Baterai) / (Jumlah Lampu)
+            const totalBatteries = elements.filter(
+              (e) => e.type === "battery"
+            ).length;
+            const totalLamps = elements.filter((e) => e.type === "lamp").length;
+
+            if (totalLamps > 0) {
+              // Rasio baterai:lampu menentukan brightness
+              // 1 baterai : 1 lampu = 100%
+              // 2 baterai : 2 lampu = 100%
+              // 1 baterai : 2 lampu = 50%
+              const batteryToLampRatio = totalBatteries / totalLamps;
+              brightness = Math.min(1, batteryToLampRatio); // Max 100%
+            }
+          } else {
+            // RANGKAIAN PARALEL: Brightness berdasarkan daya aktual
+            const idealPower =
+              ((calc.totalV || 0) * (calc.totalV || 0)) / el.value;
+            if (idealPower > 0) {
+              brightness = Math.min(1, lampPower / idealPower);
+            }
+          }
 
           return (
             <g>
@@ -1869,7 +1898,7 @@ export default function CircuitBuilderEnhanced() {
                 y1={0}
                 x2={-20}
                 y2={0}
-                stroke="#1f2937"
+                stroke="#d3d3d3"
                 strokeWidth={3}
               />
               <line
@@ -1877,7 +1906,7 @@ export default function CircuitBuilderEnhanced() {
                 y1={0}
                 x2={terminalOffset}
                 y2={0}
-                stroke="#1f2937"
+                stroke="#d3d3d3"
                 strokeWidth={3}
               />
 
@@ -1898,12 +1927,12 @@ export default function CircuitBuilderEnhanced() {
                 </>
               )}
 
-              {/* Bulb */}
+              {/* Bulb - opacity based on brightness */}
               <circle
                 r={18}
                 fill={
                   isOn
-                    ? `rgba(254, 243, 199, ${0.9 + 0.1 * brightness})`
+                    ? `rgba(254, 243, 199, ${0.5 + 0.5 * brightness})`
                     : "#e5e7eb"
                 }
                 stroke={isSel ? "#eab308" : isOn ? "#fbbf24" : "#9ca3af"}
@@ -1911,13 +1940,13 @@ export default function CircuitBuilderEnhanced() {
                 style={{
                   filter: isOn
                     ? `drop-shadow(0 0 ${
-                        8 + 8 * brightness
+                        8 + 12 * brightness
                       }px rgba(251, 191, 36, ${brightness}))`
                     : "none",
                 }}
               />
 
-              {/* Filament */}
+              {/* Filament - brightness affects color intensity */}
               {isOn ? (
                 <path
                   d="M -6 -6 Q 0 -8 6 -6 Q 0 -4 -6 -6 M -6 0 Q 0 2 6 0 Q 0 4 -6 0 M -6 6 Q 0 8 6 6 Q 0 10 -6 6"
@@ -1925,6 +1954,9 @@ export default function CircuitBuilderEnhanced() {
                   strokeWidth={2}
                   fill="none"
                   className="animate-pulse"
+                  style={{
+                    opacity: brightness,
+                  }}
                 />
               ) : (
                 <path
@@ -1988,7 +2020,7 @@ export default function CircuitBuilderEnhanced() {
                 y1={0}
                 x2={-15}
                 y2={0}
-                stroke="#1f2937"
+                stroke="#d3d3d3"
                 strokeWidth={3}
               />
               <line
@@ -1996,7 +2028,7 @@ export default function CircuitBuilderEnhanced() {
                 y1={0}
                 x2={terminalOffset}
                 y2={0}
-                stroke="#1f2937"
+                stroke="#d3d3d3"
                 strokeWidth={3}
               />
 
@@ -2093,7 +2125,7 @@ export default function CircuitBuilderEnhanced() {
                 y1={0}
                 x2={terminalOffset}
                 y2={0}
-                stroke={isSel ? "#1f2937" : "#374151"}
+                stroke="#d3d3d3"
                 strokeWidth={isMobile ? 4 : 6}
                 strokeLinecap="round"
               />
