@@ -2,7 +2,8 @@
 'use client'
 
 import React, { useState, useEffect } from 'react';
-import { ChevronRight, Trophy, Target, Brain, Zap, Star, ArrowRight, Sparkles, CheckCircle, Clock, Award } from 'lucide-react';
+import { ChevronRight, Trophy, Target, Brain, Zap, Star, ArrowRight, CheckCircle, Clock, Award } from 'lucide-react';
+import Image from 'next/image';
 import Navbar from '@/components/Navbar';
 import { useAuth } from '@/contexts/AuthContext';
 import { SupabaseTestService, TestResultWithAnswers, LearningStyleResult, AIFeedback } from '@/lib/supabase-test-service';
@@ -14,8 +15,6 @@ const TestPage = () => {
   const [preTestResult, setPreTestResult] = useState<TestResultWithAnswers | null>(null);
   const [postTestResult, setPostTestResult] = useState<TestResultWithAnswers | null>(null);
   const [learningStyleResult, setLearningStyleResult] = useState<LearningStyleResult | null>(null);
-  const [preTestFeedback, setPreTestFeedback] = useState<AIFeedback | null>(null);
-  const [postTestFeedback, setPostTestFeedback] = useState<AIFeedback | null>(null);
 
   useEffect(() => {
     const loadTestResults = async () => {
@@ -26,16 +25,6 @@ const TestPage = () => {
         setPreTestResult(preResult);
         setPostTestResult(postResult);
         setLearningStyleResult(learningStyleResult);
-
-        // Load AI feedback for completed tests
-        if (preResult) {
-          const preFeedback = await SupabaseTestService.getAIFeedbackByTestResult(preResult.id);
-          setPreTestFeedback(preFeedback);
-        }
-        if (postResult) {
-          const postFeedback = await SupabaseTestService.getAIFeedbackByTestResult(postResult.id);
-          setPostTestFeedback(postFeedback);
-        }
       }
     }
     
@@ -74,11 +63,20 @@ const TestPage = () => {
 
             {/* Main Icon */}
             <div className="relative mb-8">
-              <div className="inline-flex items-center justify-center w-32 h-32 rounded-full bg-gradient-to-br from-blue-500/20 to-indigo-600/20 backdrop-blur-xl border border-white/20 shadow-2xl">
+              {/* Enhanced Logo with multiple layers */}
+              <div className="inline-flex items-center justify-center w-32 h-32 rounded-full bg-gradient-to-br from-blue-500/20 to-indigo-600/20 backdrop-blur-xl border border-white/20 shadow-2xl relative">
                 <div className="absolute inset-0 rounded-full bg-gradient-to-br from-blue-400/10 to-purple-600/10 animate-pulse"></div>
-                <span className="text-6xl relative z-10">📝</span>
+                <div className="absolute inset-2 rounded-full bg-gradient-to-br from-cyan-400/5 to-blue-500/5 animate-pulse delay-500"></div>
+                <div className="relative w-[80px] h-[80px] z-10">
+                  <Image
+                    src="/assets/illustrations/tesicon.png"
+                    alt="Test Icon"
+                    fill
+                    className="object-contain drop-shadow-lg"
+                  />
+                </div>
               </div>
-              <div className="absolute -inset-4 bg-gradient-to-r from-blue-500/20 to-indigo-500/20 rounded-full blur-xl"></div>
+              <div className="absolute -inset-4 bg-gradient-to-r from-blue-500/20 via-purple-500/20 to-indigo-500/20 rounded-full blur-xl animate-pulse"></div>
             </div>
 
             {/* Title */}
@@ -195,7 +193,6 @@ const TestPage = () => {
                   onClick={() => window.location.href = '/learning-style'}
                 >
                   {learningStyleResult ? 'Lihat Hasil / Ulangi' : 'Mulai Tes Gaya Belajar'}
-                  <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
                 </button>
               </div>
             </div>
@@ -232,25 +229,14 @@ const TestPage = () => {
                 <div className="flex-grow">
                   {preTestResult ? (
                     <div className="space-y-4 mb-8">
-                      {/* AI Feedback Title - Priority Display */}
-                      {preTestFeedback && (
-                        <div className="bg-gradient-to-r from-blue-500/20 to-cyan-500/20 rounded-xl p-4 border border-blue-400/40 mb-3">
-                          <div className="flex items-start space-x-3">
-                            <Sparkles className="w-5 h-5 text-blue-400 flex-shrink-0 mt-0.5" />
-                            <div>
-                              <div className="text-sm text-blue-300 mb-1">AI Feedback:</div>
-                              <div className="text-base font-bold text-white leading-snug">
-                                {preTestFeedback.title}
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      )}
-                      
                       <div className="bg-gradient-to-r from-green-500/10 to-emerald-500/10 rounded-xl p-4 border border-green-400/30">
                         <div className="flex items-center justify-between mb-2">
                           <span className="text-green-300 font-medium">Skor Anda:</span>
                           <span className="text-2xl font-bold text-white">{preTestResult.percentage}%</span>
+                        </div>
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-green-200/70 text-sm">Grade:</span>
+                          <span className="text-green-400 font-bold">{preTestResult.grade}</span>
                         </div>
                         <div className="flex items-center justify-between mb-2">
                           <span className="text-green-200/70 text-sm">Benar:</span>
@@ -303,7 +289,6 @@ const TestPage = () => {
                     onClick={() => window.location.href = '/pretest'}
                   >
                     Mulai Tes Diagnostik
-                    <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
                   </button>
                 )}
               </div>
@@ -339,25 +324,14 @@ const TestPage = () => {
                 <div className="flex-grow">
                   {postTestResult ? (
                     <div className="space-y-4 mb-8">
-                      {/* AI Feedback Title - Priority Display */}
-                      {postTestFeedback && (
-                        <div className="bg-gradient-to-r from-purple-500/20 to-pink-500/20 rounded-xl p-4 border border-purple-400/40 mb-3">
-                          <div className="flex items-start space-x-3">
-                            <Sparkles className="w-5 h-5 text-purple-400 flex-shrink-0 mt-0.5" />
-                            <div>
-                              <div className="text-sm text-purple-300 mb-1">AI Feedback:</div>
-                              <div className="text-base font-bold text-white leading-snug">
-                                {postTestFeedback.title}
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      )}
-                      
                       <div className="bg-gradient-to-r from-purple-500/10 to-pink-500/10 rounded-xl p-4 border border-purple-400/30">
                         <div className="flex items-center justify-between mb-2">
                           <span className="text-purple-300 font-medium">Skor Anda:</span>
                           <span className="text-2xl font-bold text-white">{postTestResult.percentage}%</span>
+                        </div>
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-purple-200/70 text-sm">Grade:</span>
+                          <span className="text-purple-400 font-bold">{postTestResult.grade}</span>
                         </div>
                         <div className="flex items-center justify-between mb-2">
                           <span className="text-purple-200/70 text-sm">Benar:</span>
@@ -369,7 +343,19 @@ const TestPage = () => {
                         </div>
                       </div>
                       
-                     
+                      {/* Show improvement if both tests completed */}
+                      {preTestResult && (
+                        <div className="bg-gradient-to-r from-yellow-500/10 to-amber-500/10 rounded-xl p-3 border border-yellow-400/30 mt-4">
+                          <div className="flex items-center justify-between">
+                            <span className="text-yellow-300 text-sm font-medium">Peningkatan:</span>
+                            <span className={`text-lg font-bold ${
+                              postTestResult.percentage >= preTestResult.percentage ? 'text-green-400' : 'text-red-400'
+                            }`}>
+                              {postTestResult.percentage >= preTestResult.percentage ? '+' : ''}{(postTestResult.percentage - preTestResult.percentage).toFixed(1)}%
+                            </span>
+                          </div>
+                        </div>
+                      )}
                 
                     </div>
                   ) : (
@@ -403,7 +389,6 @@ const TestPage = () => {
                 >
                   {!preTestResult ? 'Selesaikan Pre-Test Dulu' : 
                    postTestResult ? 'Lihat Hasil / Ulangi' : 'Mulai Tes Sumatif'}
-                  <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
                 </button>
               </div>
             </div>
@@ -489,20 +474,25 @@ const TestPage = () => {
             <div className="relative">
               <div className="absolute -inset-1 bg-gradient-to-r from-cyan-500/30 to-blue-600/30 rounded-3xl blur"></div>
               <div className="relative bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl rounded-3xl p-12 border border-white/20">
-                <div className="flex items-center justify-center w-24 h-24 bg-gradient-to-br from-cyan-500/20 to-blue-600/20 rounded-full mb-8 mx-auto">
-                  <Sparkles className="w-12 h-12 text-cyan-400" />
+                <div className="flex items-center justify-center mb-8 mx-auto">
+                  <div className="relative w-32 h-32">
+                    <Image
+                      src="/assets/illustrations/AI.png"
+                      alt="AI"
+                      fill
+                      className="object-contain"
+                    />
+                  </div>
                 </div>
                 
-                <h3 className="text-4xl font-bold text-white mb-4">Sistem Evaluasi Lengkap</h3>
+                <h3 className="text-4xl font-bold text-white mb-4">Sistem Evaluasi Lengkap Berbasis AI</h3>
                 <p className="text-blue-200/90 text-xl max-w-3xl mx-auto mb-8">
-                  CIRVIA menggunakan sistem evaluasi bertingkat untuk mengukur pemahaman Anda secara komprehensif. 
-                  Mulai dari Pre-Test untuk baseline knowledge hingga Post-Test untuk validasi pencapaian learning objectives.
-                </p>
+                  CIRVIA menerapkan sistem evaluasi bertingkat berbasis AI untuk menilai pemahaman Anda secara menyeluruh, mulai dari Tes Diagnostik untuk memetakan kemampuan awal hingga Tes Sumatif yang memvalidasi hasil belajar melalui umpan balik personal dan analisis cerdas.                </p>
                 
                 <div className="flex flex-wrap justify-center gap-6">
                   <div className="flex items-center px-4 py-2 bg-white/10 rounded-full backdrop-blur-sm border border-white/20">
                     <div className="w-2 h-2 bg-blue-400 rounded-full mr-2 animate-pulse"></div>
-                    <span className="text-blue-300">Adaptive Assessment</span>
+                    <span className="text-blue-300">AI-Powered Evaluation</span>
                   </div>
                   <div className="flex items-center px-4 py-2 bg-white/10 rounded-full backdrop-blur-sm border border-white/20">
                     <div className="w-2 h-2 bg-cyan-400 rounded-full mr-2 animate-pulse"></div>
@@ -510,7 +500,7 @@ const TestPage = () => {
                   </div>
                   <div className="flex items-center px-4 py-2 bg-white/10 rounded-full backdrop-blur-sm border border-white/20">
                     <div className="w-2 h-2 bg-indigo-400 rounded-full mr-2 animate-pulse"></div>
-                    <span className="text-indigo-300">Progress Tracking</span>
+                    <span className="text-indigo-300">Personalized Feedback</span>
                   </div>
                 </div>
               </div>

@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
 import { X, Send, Volume2, VolumeX } from 'lucide-react'
 import { useAuth } from '@/contexts/AuthContext'
+import Image from 'next/image'
 
 interface Message {
   id: string
@@ -291,8 +292,13 @@ const ChatBot: React.FC<ChatBotProps> = ({ isOpen, onClose }) => {
           <div className="space-y-1">
             {/* AI Badge */}
             <div className="flex items-center gap-2 mb-3 pb-2 border-b border-slate-600/30">
-              <div className="w-6 h-6 bg-gradient-to-r from-cyan-400 to-blue-500 rounded-full flex items-center justify-center">
-                <span className="text-xs font-bold text-white">🤖</span>
+              <div className="relative w-6 h-6 rounded-full overflow-hidden flex items-center justify-center">
+                <Image
+                  src="/assets/illustrations/maskotkepala.png"
+                  alt="CIRVIA"
+                  fill
+                  className="object-contain"
+                />
               </div>
               <span className="text-xs text-cyan-300 font-medium">CIRVIA Assistant</span>
             </div>
@@ -371,19 +377,6 @@ const ChatBot: React.FC<ChatBotProps> = ({ isOpen, onClose }) => {
           <Send size={14} className="md:w-4 md:h-4" />
         </button>
       </div>
-      
-      {/* Quick Questions */}
-      <div className="mt-3 md:mt-4 flex flex-wrap gap-1.5 md:gap-2">
-        {QUICK_TOPICS.map((topic) => (
-          <button
-            key={topic}
-            onClick={() => setInputText(`Jelaskan tentang ${topic.toLowerCase()}`)}
-            className="px-2.5 md:px-3 py-1.5 md:py-2 text-xs bg-gradient-to-r from-cyan-500/20 to-blue-500/20 text-cyan-300 rounded-full hover:from-cyan-500/30 hover:to-blue-500/30 transition-all duration-300 backdrop-blur-sm border border-cyan-400/30 hover:border-cyan-400/50 transform hover:scale-105"
-          >
-            {topic}
-          </button>
-        ))}
-      </div>
         
       {/* AI Status Indicator */}
       <div className="mt-2 md:mt-3 flex items-center justify-center">
@@ -422,12 +415,16 @@ const ChatBot: React.FC<ChatBotProps> = ({ isOpen, onClose }) => {
       {/* Header */}
       <div className="relative flex items-center justify-between p-4 md:p-4 bg-gradient-to-r from-purple-500/20 to-cyan-500/20 backdrop-blur-xl border-b border-white/10 rounded-t-2xl shrink-0">
         <div className="flex items-center space-x-3">
-          <div className="w-10 h-10 md:w-12 md:h-12 bg-gradient-to-br from-purple-500/20 to-cyan-500/20 rounded-full flex items-center justify-center backdrop-blur-sm border border-white/20 shadow-lg">
-            <span className="text-xl md:text-2xl">🤖</span>
+          <div className="relative w-10 h-10 md:w-12 md:h-12">
+            <Image
+              src="/assets/illustrations/maskotkepala.png"
+              alt="CIRVIA Maskot"
+              fill
+              className="object-contain"
+            />
           </div>
           <div>
             <h3 className="font-bold text-white text-base md:text-lg">CIRVIA Assistant</h3>
-            <p className="text-xs text-blue-200/80">🧠 AI Physics Expert</p>
           </div>
         </div>
         <button

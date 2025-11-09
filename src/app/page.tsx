@@ -62,17 +62,19 @@ export default function HomePage() {
           <div className={`text-center mb-20 transition-all duration-1000 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
             <div className="relative mb-8">
               {/* Enhanced Logo with multiple layers */}
-              <div className="inline-flex items-center justify-center w-40 h-40 rounded-full bg-gradient-to-br from-blue-500/20 to-indigo-600/20 backdrop-blur-xl border border-white/20 shadow-2xl relative">
+              <div className="inline-flex items-center justify-center w-32 h-32 rounded-full bg-gradient-to-br from-blue-500/20 to-indigo-600/20 backdrop-blur-xl border border-white/20 shadow-2xl relative">
                 <div className="absolute inset-0 rounded-full bg-gradient-to-br from-blue-400/10 to-purple-600/10 animate-pulse"></div>
                 <div className="absolute inset-2 rounded-full bg-gradient-to-br from-cyan-400/5 to-blue-500/5 animate-pulse delay-500"></div>
-                <Image src="/logo.png" alt="CIRVIA Logo" width={100} height={100} className="relative z-10 w-24 h-24 object-contain drop-shadow-lg" />
+                <div className="relative w-[80px] h-[80px] z-10">
+                  <Image src="/assets/illustrations/Iconutama.png" alt="CIRVIA Logo" fill className="object-contain drop-shadow-lg" />
+                </div>
               </div>
-              <div className="absolute -inset-8 bg-gradient-to-r from-blue-500/20 via-purple-500/20 to-indigo-500/20 rounded-full blur-2xl animate-pulse"></div>
+              <div className="absolute -inset-4 bg-gradient-to-r from-blue-500/20 via-purple-500/20 to-indigo-500/20 rounded-full blur-xl animate-pulse"></div>
             </div>
             
             {/* Enhanced Title with Animation */}
             <div className="mb-8">
-              <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-8xl font-black mb-4 sm:mb-6 leading-tight">
+              <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black mb-4 sm:mb-6 leading-tight">
                 <span className="bg-gradient-to-r from-white via-blue-200 to-cyan-300 bg-clip-text text-transparent drop-shadow-2xl block animate-fade-in">
                   CIRVIA
                 </span>
