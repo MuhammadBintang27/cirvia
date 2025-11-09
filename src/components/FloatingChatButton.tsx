@@ -1,11 +1,29 @@
 'use client'
 
 import { useState } from 'react'
+import { usePathname } from 'next/navigation'
 import Image from 'next/image'
 import ChatBot from './ChatBot'
 
 const FloatingChatButton = () => {
   const [isOpen, setIsOpen] = useState(false)
+  const pathname = usePathname()
+
+  // Hide chatbot on specific pages
+  const hiddenPages = [
+    '/login',
+    '/login/student',
+    '/register',
+    '/pretest',
+    '/posttest',
+    '/learning-style'
+  ]
+
+  const shouldHide = hiddenPages.some(page => pathname?.startsWith(page))
+
+  if (shouldHide) {
+    return null
+  }
 
   const toggleChat = () => {
     setIsOpen(!isOpen)

@@ -83,7 +83,7 @@ export default function AboutPage() {
                         Full Stack Developer
                       </p>
                       <p className="text-slate-300 text-sm italic mt-auto">
-                        "I commit, I push, I build. Just like I do in life."
+                        &ldquo;I commit, I push, I build. Just like I do in life.&rdquo;
                       </p>
                     </div>
                   </div>
@@ -109,7 +109,8 @@ export default function AboutPage() {
                         Virtual Lab & CV Developer
                       </p>
                       <p className="text-slate-300 text-sm italic mt-auto">
-"Many think the mistake is taking a wrong step, but the real problem is whether they dare to take the next one" </p>
+                        &ldquo;Many think the mistake is taking a wrong step, but the real problem is whether they dare to take the next one&rdquo;
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -134,7 +135,8 @@ export default function AboutPage() {
                         Content & Learning Material Designer
                       </p>
                       <p className="text-slate-300 text-sm italic mt-auto">
-"Don't let what you cannot do interfere with what you can do"                      </p>
+                        &ldquo;Don&apos;t let what you cannot do interfere with what you can do&rdquo;
+                      </p>
                     </div>
                   </div>
                 </div>
