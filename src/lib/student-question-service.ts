@@ -246,12 +246,14 @@ export class StudentQuestionService {
               fullQuestion = {
                 id: baseQuestion.id,
                 questionType: 'circuitOrdering',
+                orderingType: orderingData.ordering_type || 'brightness',
                 title: baseQuestion.title,
                 description: '',
+                question: orderingData.question,
                 explanation: orderingData.explanation,
                 hint: orderingData.hint || '',
                 difficulty: baseQuestion.difficulty,
-                instruction: orderingData.question,
+                instruction: orderingData.question, // Use question as instruction
                 circuits: orderingData.circuit_items,
                 correctOrder: orderingData.correct_order.map((index: number) => orderingData.circuit_items[index]?.id || `circuit-${index}`)
               };

@@ -16,8 +16,10 @@ export default function CircuitOrderingQuestionForm({ onSubmit, initialData }: C
   const [showPreview, setShowPreview] = useState(false);
   const [formData, setFormData] = useState<Partial<CircuitOrderingQuestion>>({
     questionType: 'circuitOrdering',
+    orderingType: 'brightness', // Default ordering type
     title: '',
     description: '',
+    question: '', // Main question text
     explanation: '',
     hint: '',
     difficulty: 'easy',
@@ -45,6 +47,10 @@ export default function CircuitOrderingQuestionForm({ onSubmit, initialData }: C
 
     if (!formData.title?.trim()) {
       newErrors.title = 'Judul soal harus diisi';
+    }
+
+    if (!formData.question?.trim()) {
+      newErrors.question = 'Pertanyaan utama harus diisi';
     }
 
     if (!formData.description?.trim()) {
@@ -97,8 +103,10 @@ export default function CircuitOrderingQuestionForm({ onSubmit, initialData }: C
       const question: CircuitOrderingQuestion = {
         id: initialData?.id || Date.now(),
         questionType: 'circuitOrdering',
+        orderingType: formData.orderingType || 'brightness',
         title: formData.title!,
         description: formData.description!,
+        question: formData.question!,
         explanation: formData.explanation!,
         hint: formData.hint!,
         difficulty: formData.difficulty!,
@@ -417,6 +425,39 @@ export default function CircuitOrderingQuestionForm({ onSubmit, initialData }: C
                 placeholder="Berikan konteks tentang tujuan pengurutan rangkaian..."
               />
               {errors.description && <p className="text-red-300 text-sm mt-1.5">{errors.description}</p>}
+            </div>
+
+            <div className="pl-9">
+              <label className="block text-sm font-medium text-blue-200 mb-2">
+                Pertanyaan Utama *
+              </label>
+              <textarea
+                value={formData.question || ''}
+                onChange={(e) => handleInputChange('question', e.target.value)}
+                rows={3}
+                className={`w-full px-4 py-3 bg-white/5 border-2 rounded-xl text-white placeholder-blue-300/40 focus:outline-none focus:border-pink-400/60 focus:bg-white/10 transition-all resize-none ${
+                  errors.question ? 'border-red-400/60 bg-red-500/10' : 'border-white/10 hover:border-white/20'
+                }`}
+                placeholder="contoh: Urutkan rangkaian dari kecerahan TOTAL paling tinggi ke paling rendah."
+              />
+              {errors.question && <p className="text-red-300 text-sm mt-1.5">{errors.question}</p>}
+            </div>
+
+            <div className="pl-9">
+              <label className="block text-sm font-medium text-blue-200 mb-2">
+                Tipe Pengurutan
+              </label>
+              <select
+                value={formData.orderingType || 'brightness'}
+                onChange={(e) => handleInputChange('orderingType', e.target.value as 'brightness' | 'current' | 'voltage' | 'resistance' | 'power')}
+                className="w-full px-4 py-3 bg-white/5 border-2 border-white/10 hover:border-white/20 rounded-xl text-white focus:outline-none focus:border-pink-400/60 focus:bg-white/10 transition-all"
+              >
+                <option value="brightness" className="bg-gray-800">Brightness (Kecerahan)</option>
+                <option value="current" className="bg-gray-800">Current (Arus)</option>
+                <option value="voltage" className="bg-gray-800">Voltage (Tegangan)</option>
+                <option value="resistance" className="bg-gray-800">Resistance (Hambatan)</option>
+                <option value="power" className="bg-gray-800">Power (Daya)</option>
+              </select>
             </div>
 
             <div className="pl-9">
