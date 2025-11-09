@@ -975,6 +975,64 @@ export class SupabaseTestService {
     }
   }
 
+  /**
+   * Get AI feedback by student ID and feedback type
+   */
+  static async getAIFeedback(
+    studentId: string, 
+    feedbackType: 'post_learning_style' | 'post_pretest' | 'post_posttest',
+    testResultId?: string,
+    learningStyleResultId?: string
+  ): Promise<AIFeedback | null> {
+    try {
+      let query = supabase
+        .from('ai_feedback_history')
+        .select('*')
+        .eq('student_id', studentId)
+        .eq('feedback_type', feedbackType)
+        .order('created_at', { ascending: false })
+        .limit(1)
+
+      if (testResultId) {
+        query = query.eq('test_result_id', testResultId)
+      }
+
+      if (learningStyleResultId) {
+        query = query.eq('learning_style_result_id', learningStyleResultId)
+      }
+
+      const { data, error } = await query.single()
+
+      if (error) {
+        console.error('Error getting AI feedback:', error)
+        return null
+      }
+
+      if (!data) return null
+
+      return {
+        id: data.id,
+        studentId: data.student_id,
+        testResultId: data.test_result_id,
+        learningStyleResultId: data.learning_style_result_id,
+        feedbackType: data.feedback_type,
+        title: data.title,
+        summary: data.summary,
+        recommendations: data.recommendations,
+        nextSteps: data.next_steps,
+        motivationalMessage: data.motivational_message,
+        contextData: data.context_data,
+        aiPrompt: data.ai_prompt,
+        viewedAt: data.viewed_at,
+        viewedFullReport: data.viewed_full_report,
+        createdAt: data.created_at
+      }
+    } catch (error) {
+      console.error('Error getting AI feedback:', error)
+      return null
+    }
+  }
+
   static async getAIFeedbackHistory(studentId: string, limit: number = 10): Promise<any[]> {
     try {
       const { data, error } = await supabase

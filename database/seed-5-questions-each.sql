@@ -46,20 +46,22 @@ BEGIN
     correct_answers,
     explanation,
     hint
-  ) VALUES (
+) VALUES (
     v_question_id,
-    'Sebuah rangkaian sederhana memiliki hambatan tetap. Jika sumber tegangannya dinaikkan menjadi 2 kali semula, bagaimana perubahan arus yang mengalir melalui rangkaian menurut Hukum Ohm?',
+    'Di ruang tamu, tiga lampu terhubung pada sumber 220 V. Ketika satu lampu padam, dua lainnya tetap menyala dengan terang yang sama.
+Pernyataan yang benar adalah ….',
     '[
-      {"id": "choice-1", "text": "Tetap sama", "isCorrect": false},
-      {"id": "choice-2", "text": "Naik 2 kali", "isCorrect": true},
-      {"id": "choice-3", "text": "Turun 2 kali", "isCorrect": false},
-      {"id": "choice-4", "text": "Naik 4 kali", "isCorrect": false},
-      {"id": "choice-5", "text": "Naik 1,5 kali", "isCorrect": false}
+      {"id": "choice-1", "text": "Lampu-lampu disusun paralel", "isCorrect": true},
+      {"id": "choice-2", "text": "Arus yang mengalir di setiap lampu sama besar", "isCorrect": false},
+      {"id": "choice-3", "text": "Tegangan pada tiap lampu sama besar", "isCorrect": true},
+      {"id": "choice-4", "text": "Lampu disusun seri", "isCorrect": false},
+      {"id": "choice-5", "text": "Hambatan total rangkaian bertambah jika satu lampu dilepas", "isCorrect": false}
     ]'::jsonb,
-    ARRAY['choice-2']::text[],
-    'Hukum Ohm menyatakan I = V/R. Karena R tetap dan V menjadi 2V, maka I baru = (2V)/R = 2 × (V/R). Arus meningkat 2 kali lipat.',
-    'Gunakan I = V/R dan bandingkan kondisi sebelum–sesudah.'
-  );
+    ARRAY['choice-1','choice-3']::text[],
+    'Karena ketika satu lampu padam dua lainnya tetap menyala, susunannya paralel (cabang-cabang bekerja independen). Pada paralel, tiap lampu mendapat tegangan sumber yang sama (≈220 V). Arus pada tiap lampu tidak harus sama karena bergantung daya/hambatan lampu masing-masing. Susunan seri jelas tidak sesuai, dan melepas satu cabang paralel justru menaikkan hambatan ekivalen (bukan bertambah ketika lampu tetap terpasang), sehingga pernyataan tentang hambatan bertambah “jika satu lampu dilepas” tidak tepat dalam konteks pernyataan yang diberikan.',
+    'Ingat ciri paralel: tiap beban tetap menyala sendiri dan tegangannya sama. Jawaban pada soal ini ada 2 pilihan yang benar'
+);
+
 
   RAISE NOTICE '✅ Pretest Q1 (Conceptual - Hukum Ohm) inserted: %', v_question_id;
 END $$;
@@ -71,15 +73,15 @@ DECLARE
 BEGIN
   INSERT INTO questions (
     question_type, title, difficulty, tags, is_active
-  ) VALUES (
+) VALUES (
     'circuit',
-    'Rangkaian Seri — Menyetel Arus Target',
-    'easy',
-    ARRAY['pretest', 'rangkaian-seri']::text[],
+    'Rangkaian Paralel — Tentukan Resistor yang Tepat',
+    'medium',
+    ARRAY['pretest', 'rangkaian-paralel']::text[],
     true
-  ) RETURNING id INTO v_question_id;
+) RETURNING id INTO v_question_id;
 
-  INSERT INTO circuit_questions (
+INSERT INTO circuit_questions (
     question_id,
     circuit_type,
     voltage,
@@ -90,18 +92,19 @@ BEGIN
     description,
     explanation,
     hint
-  ) VALUES (
+) VALUES (
     v_question_id,
-    'series',
+    'parallel',
     12,
-    0.08,
+    0.6,
     2,
-    ARRAY[50, 75, 100, 120, 150, 200]::integer[],
-    ARRAY[100, 50]::integer[],
-    'Sebuah rangkaian terdiri atas dua slot resistor yang disusun seri dan dihubungkan dengan sumber tegangan sebesar 12 volt. Tujuan percobaan ini adalah menentukan kombinasi dua resistor yang mampu menghasilkan arus total sekitar 0,08 ampere.',
-    'Pada rangkaian seri, R_total = R₁ + R₂. Dengan V = 12V dan I_target = 0.08A, maka R_total = V/I = 12/0.08 = 150Ω. Kombinasi 100Ω + 50Ω = 150Ω.',
-    'Gunakan Hukum Ohm: I = V/R. Untuk rangkaian seri, hambatan total adalah penjumlahan semua resistor.'
-  );
+    ARRAY[20, 30, 40, 60, 80, 100]::integer[],
+    ARRAY[30, 60]::integer[],
+    'Dua slot resistor disusun paralel dan dihubungkan ke sumber tegangan 12 volt. Tentukan kombinasi dua resistor yang menghasilkan arus total tepat sebesar 0,6 ampere.',
+    'Rangkaian paralel dengan V = 12 V dan I = 0,6 A memiliki R_total = 12/0,6 = 20 Ω. Kombinasi R₁ = 30 Ω dan R₂ = 60 Ω memberikan 1/R_total = 1/30 + 1/60 = 1/20 → R_total = 20 Ω tepat, sehingga arus total tepat 0,6 A.',
+    'Gunakan Hukum Ohm dan rumus paralel: 1/R_total = 1/R₁ + 1/R₂. Cari kombinasi yang menghasilkan R_total = V / I_target.'
+);
+
 
   RAISE NOTICE '✅ Pretest Q2 (Circuit - Seri) inserted: %', v_question_id;
 END $$;
@@ -280,20 +283,22 @@ BEGIN
     correct_answers,
     explanation,
     hint
-  ) VALUES (
+) VALUES (
     v_question_id,
-    'Dua resistor 6Ω dipasang paralel pada sumber yang sama. Berapakah hambatan total ekuivalennya?',
+    'Lampu hias pohon Natal disusun memanjang dalam satu rangkaian. Ketika satu lampu kecil putus, seluruh rangkaian padam.
+Pernyataan yang benar adalah …',
     '[
-      {"id": "choice-1", "text": "12Ω", "isCorrect": false},
-      {"id": "choice-2", "text": "6Ω", "isCorrect": false},
-      {"id": "choice-3", "text": "3Ω", "isCorrect": true},
-      {"id": "choice-4", "text": "2Ω", "isCorrect": false},
-      {"id": "choice-5", "text": "3,5Ω", "isCorrect": false}
+      {"id": "choice-1", "text": "Lampu-lampu kemungkinan besar disusun seri", "isCorrect": true},
+      {"id": "choice-2", "text": "Arus yang mengalir di setiap lampu sama besar", "isCorrect": true},
+      {"id": "choice-3", "text": "Tegangan pada tiap lampu pasti sama 220 V", "isCorrect": false},
+      {"id": "choice-4", "text": "Rangkaian paralel tidak mungkin padam semua jika satu lampu putus", "isCorrect": false},
+      {"id": "choice-5", "text": "Susunan ini pasti paralel karena panjang", "isCorrect": false}
     ]'::jsonb,
-    ARRAY['choice-3']::text[],
-    '1/R_total = 1/6 + 1/6 = 2/6 = 1/3 → R_total = 3Ω.',
-    'Gunakan 1/R_total = 1/R₁ + 1/R₂.'
-  );
+    ARRAY['choice-1','choice-2']::text[],
+    'Rangkaian lampu padam seluruhnya saat satu lampu putus menunjukkan susunan seri — satu jalur arus tunggal. Pada seri, arus yang mengalir di setiap lampu sama besar karena hanya ada satu lintasan arus. Tegangan tidak sama di tiap lampu karena terbagi sesuai jumlah lampu.',
+    'Perhatikan gejala: semua padam saat satu putus → berarti seri. Arus di seri selalu sama. Pada Soal ini ada 2 jawaban benar.'
+);
+
 
   RAISE NOTICE '✅ Posttest Q1 (Conceptual - Paralel) inserted: %', v_question_id;
 END $$;
@@ -303,17 +308,18 @@ DO $$
 DECLARE
   v_question_id uuid;
 BEGIN
-  INSERT INTO questions (
+  -- Soal: Rangkaian Seri — Arus Tepat 0,12 A
+INSERT INTO questions (
     question_type, title, difficulty, tags, is_active
-  ) VALUES (
+) VALUES (
     'circuit',
-    'Tantangan Seri — Presisi Arus',
-    'hard',
-    ARRAY['posttest', 'rangkaian-seri']::text[],
+    'Rangkaian Seri — Tentukan Resistor yang Tepat',
+    'easy',
+    ARRAY['pretest', 'rangkaian-seri']::text[],
     true
-  ) RETURNING id INTO v_question_id;
+) RETURNING id INTO v_question_id;
 
-  INSERT INTO circuit_questions (
+INSERT INTO circuit_questions (
     question_id,
     circuit_type,
     voltage,
@@ -324,18 +330,19 @@ BEGIN
     description,
     explanation,
     hint
-  ) VALUES (
+) VALUES (
     v_question_id,
     'series',
-    20,
-    0.05,
+    12,
+    0.12,
     2,
-    ARRAY[100, 150, 200, 250, 300, 400]::integer[],
-    ARRAY[200, 200]::integer[],
-    'Rangkaian ini terdiri dari dua resistor yang dihubungkan secara seri dengan sumber tegangan 20 volt. Tantanganmu adalah mencari kombinasi dua resistor yang menghasilkan arus sekitar 0,05 ampere.',
-    'R_total = V/I = 20/0.05 = 400Ω. Kombinasi 200Ω + 200Ω = 400Ω menghasilkan I = 20/400 = 0.05A.',
-    'Hitung R_total = R₁ + R₂, lalu I = V/R_total. Sesuaikan pilihan hingga mendekati target.'
-  );
+    ARRAY[20, 30, 40, 60, 70, 80]::integer[],
+    ARRAY[70, 30]::integer[],
+    'Terdapat dua slot resistor yang disusun seri dan dihubungkan ke sumber tegangan 12 volt. Pilih dua resistor dari daftar sehingga arus total rangkaian tepat sebesar 0,12 ampere.',
+    'Untuk seri, hambatan total adalah penjumlahan: R_total = R1 + R2. Dengan V = 12 V dan I_target = 0,12 A, maka R_total = V/I = 12/0,12 = 100 Ω. Kombinasi 70 Ω + 30 Ω menghasilkan R_total = 100 Ω tepat, sehingga arus I = 12/100 = 0,12 A.',
+    'Gunakan I = V/R_total. Cari pasangan resistor yang jumlahnya tepat sama dengan V / I_target.'
+);
+
 
   RAISE NOTICE '✅ Posttest Q2 (Circuit - Seri) inserted: %', v_question_id;
 END $$;

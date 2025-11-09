@@ -15,6 +15,9 @@ const TestPage = () => {
   const [preTestResult, setPreTestResult] = useState<TestResultWithAnswers | null>(null);
   const [postTestResult, setPostTestResult] = useState<TestResultWithAnswers | null>(null);
   const [learningStyleResult, setLearningStyleResult] = useState<LearningStyleResult | null>(null);
+  const [preTestFeedback, setPreTestFeedback] = useState<AIFeedback | null>(null);
+  const [postTestFeedback, setPostTestFeedback] = useState<AIFeedback | null>(null);
+  const [learningStyleFeedback, setLearningStyleFeedback] = useState<AIFeedback | null>(null);
 
   useEffect(() => {
     const loadTestResults = async () => {
@@ -25,6 +28,20 @@ const TestPage = () => {
         setPreTestResult(preResult);
         setPostTestResult(postResult);
         setLearningStyleResult(learningStyleResult);
+        
+        // Load AI feedback
+        if (preResult) {
+          const preFeedback = await SupabaseTestService.getAIFeedback(user.id, 'post_pretest', preResult.id);
+          setPreTestFeedback(preFeedback);
+        }
+        if (postResult) {
+          const postFeedback = await SupabaseTestService.getAIFeedback(user.id, 'post_posttest', postResult.id);
+          setPostTestFeedback(postFeedback);
+        }
+        if (learningStyleResult) {
+          const styleFeedback = await SupabaseTestService.getAIFeedback(user.id, 'post_learning_style', undefined, learningStyleResult.id);
+          setLearningStyleFeedback(styleFeedback);
+        }
       }
     }
     
@@ -143,6 +160,25 @@ const TestPage = () => {
                 <div className="flex-grow">
                   {learningStyleResult ? (
                     <div className="space-y-4 mb-8">
+                      {/* AI Feedback Title */}
+                      {learningStyleFeedback && (
+                        <div className="bg-gradient-to-r from-yellow-500/10 to-amber-500/10 rounded-xl p-4 border border-yellow-400/30 mb-4">
+                          <div className="flex items-start space-x-3">
+                            <div className="flex-shrink-0 w-8 h-8 bg-yellow-500/20 rounded-lg flex items-center justify-center">
+                              <span className="text-lg">✨</span>
+                            </div>
+                            <div className="flex-1">
+                              <p className="text-yellow-400/70 text-xs font-semibold uppercase tracking-wider mb-1">
+                                Feedback CIRVIA AI
+                              </p>
+                              <p className="text-yellow-200 text-sm font-medium leading-relaxed">
+                                {learningStyleFeedback.title}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                      
                       <div className="bg-gradient-to-r from-purple-500/10 to-pink-500/10 rounded-xl p-4 border border-purple-400/30">
                         <div className="flex items-center justify-between mb-2">
                           <span className="text-purple-300 font-medium">Gaya Belajar Anda:</span>
@@ -229,14 +265,29 @@ const TestPage = () => {
                 <div className="flex-grow">
                   {preTestResult ? (
                     <div className="space-y-4 mb-8">
+                      {/* AI Feedback Title */}
+                      {preTestFeedback && (
+                        <div className="bg-gradient-to-r from-yellow-500/10 to-amber-500/10 rounded-xl p-4 border border-yellow-400/30 mb-4">
+                          <div className="flex items-start space-x-3">
+                            <div className="flex-shrink-0 w-8 h-8 bg-yellow-500/20 rounded-lg flex items-center justify-center">
+                              <span className="text-lg">✨</span>
+                            </div>
+                            <div className="flex-1">
+                              <p className="text-yellow-400/70 text-xs font-semibold uppercase tracking-wider mb-1">
+                                Feedback CIRVIA AI
+                              </p>
+                              <p className="text-yellow-200 text-sm font-medium leading-relaxed">
+                                {preTestFeedback.title}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                      
                       <div className="bg-gradient-to-r from-green-500/10 to-emerald-500/10 rounded-xl p-4 border border-green-400/30">
                         <div className="flex items-center justify-between mb-2">
                           <span className="text-green-300 font-medium">Skor Anda:</span>
                           <span className="text-2xl font-bold text-white">{preTestResult.percentage}%</span>
-                        </div>
-                        <div className="flex items-center justify-between mb-2">
-                          <span className="text-green-200/70 text-sm">Grade:</span>
-                          <span className="text-green-400 font-bold">{preTestResult.grade}</span>
                         </div>
                         <div className="flex items-center justify-between mb-2">
                           <span className="text-green-200/70 text-sm">Benar:</span>
@@ -279,7 +330,7 @@ const TestPage = () => {
                       });
                     }}
                   >
-                    Sudah Selesai - Hasil Tercatat
+                    Sudah Selesai
                     <CheckCircle className="w-5 h-5 ml-2 text-blue-400" />
                   </button>
                 ) : (
@@ -317,21 +368,36 @@ const TestPage = () => {
                 
                 <h3 className="text-3xl font-bold text-white mb-4">Tes Sumatif</h3>
                 <p className="text-blue-200/80 mb-8 text-lg leading-relaxed">
-                  Validasi pencapaian learning outcomes dengan standar internasional dan sertifikasi digital
+                  Validasi pencapaian learning outcomes dengan standar internasional dan sertifikasi digital 
                 </p>
 
                 {/* Show results if completed */}
                 <div className="flex-grow">
                   {postTestResult ? (
                     <div className="space-y-4 mb-8">
+                      {/* AI Feedback Title */}
+                      {postTestFeedback && (
+                        <div className="bg-gradient-to-r from-yellow-500/10 to-amber-500/10 rounded-xl p-4 border border-yellow-400/30 mb-4">
+                          <div className="flex items-start space-x-3">
+                            <div className="flex-shrink-0 w-8 h-8 bg-yellow-500/20 rounded-lg flex items-center justify-center">
+                              <span className="text-lg">✨</span>
+                            </div>
+                            <div className="flex-1">
+                              <p className="text-yellow-400/70 text-xs font-semibold uppercase tracking-wider mb-1">
+                                Feedback CIRVIA AI
+                              </p>
+                              <p className="text-yellow-200 text-sm font-medium leading-relaxed">
+                                {postTestFeedback.title}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                      
                       <div className="bg-gradient-to-r from-purple-500/10 to-pink-500/10 rounded-xl p-4 border border-purple-400/30">
                         <div className="flex items-center justify-between mb-2">
                           <span className="text-purple-300 font-medium">Skor Anda:</span>
                           <span className="text-2xl font-bold text-white">{postTestResult.percentage}%</span>
-                        </div>
-                        <div className="flex items-center justify-between mb-2">
-                          <span className="text-purple-200/70 text-sm">Grade:</span>
-                          <span className="text-purple-400 font-bold">{postTestResult.grade}</span>
                         </div>
                         <div className="flex items-center justify-between mb-2">
                           <span className="text-purple-200/70 text-sm">Benar:</span>
@@ -342,20 +408,6 @@ const TestPage = () => {
                           <span className="text-white text-sm">{new Date(postTestResult.completed_at).toLocaleDateString('id-ID')}</span>
                         </div>
                       </div>
-                      
-                      {/* Show improvement if both tests completed */}
-                      {preTestResult && (
-                        <div className="bg-gradient-to-r from-yellow-500/10 to-amber-500/10 rounded-xl p-3 border border-yellow-400/30 mt-4">
-                          <div className="flex items-center justify-between">
-                            <span className="text-yellow-300 text-sm font-medium">Peningkatan:</span>
-                            <span className={`text-lg font-bold ${
-                              postTestResult.percentage >= preTestResult.percentage ? 'text-green-400' : 'text-red-400'
-                            }`}>
-                              {postTestResult.percentage >= preTestResult.percentage ? '+' : ''}{(postTestResult.percentage - preTestResult.percentage).toFixed(1)}%
-                            </span>
-                          </div>
-                        </div>
-                      )}
                 
                     </div>
                   ) : (
