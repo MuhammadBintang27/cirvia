@@ -17,6 +17,13 @@ export default function Navbar() {
   const dropdownRef = useRef<HTMLDivElement>(null);
   const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
+  // Reset navbar visibility when pathname changes
+  useEffect(() => {
+    setIsVisible(true);
+    setIsLoginDropdownOpen(false);
+    window.scrollTo(0, 0); // Scroll to top on page change
+  }, [pathname]);
+
   // Handle scroll to show/hide navbar
   useEffect(() => {
     const handleScroll = () => {
@@ -148,7 +155,7 @@ export default function Navbar() {
                 <div className="hidden md:flex items-center space-x-2">
                   {navigation.map((item) => {
                     const Icon = item.icon;
-                    const isActive = typeof window !== 'undefined' && window.location.pathname === item.href;
+                    const isActive = pathname === item.href;
                     return (
                       <Link 
                         key={item.name} 
@@ -263,11 +270,13 @@ export default function Navbar() {
 
       {/* Mobile Bottom Navigation */}
       <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-white/10 backdrop-blur-xl border-t border-white/10 shadow-lg px-4">
-        <div className={`grid ${user ? 'grid-cols-6' : 'grid-cols-6'} py-1`}>
+        <div className={`grid ${user ? 'grid-cols-5' : 'grid-cols-5'} py-1`}>
           {navigation.map((item) => {
             const Icon = item.icon;
-            // Active state based on window.location.pathname
-            const isActive = typeof window !== 'undefined' ? window.location.pathname.startsWith(item.href) : false;
+            // Active state - exact match for home, startsWith for others
+            const isActive = item.href === '/' 
+              ? pathname === '/' 
+              : pathname.startsWith(item.href);
             return (
               <Link
                 key={item.name}
@@ -291,35 +300,80 @@ export default function Navbar() {
               </Link>
             );
           })}
-          
-          {/* Mobile Auth */}
+        </div>
+      </div>
+
+      {/* Mobile Top Bar - Logo & Login */}
+      <div className="md:hidden fixed top-0 left-0 right-0 z-50 bg-gradient-to-br from-slate-900/95 via-slate-800/95 to-slate-900/95 backdrop-blur-xl border-b border-white/10 shadow-lg">
+        <div className="flex items-center justify-between px-4 py-3">
+          {/* Logo */}
+          <Link href="/" className="flex items-center space-x-2">
+            <div className="relative w-8 h-8">
+              <Image 
+                src="/logo.png" 
+                alt="CIRVIA Logo" 
+                width={32} 
+                height={32} 
+                className="w-full h-full"
+              />
+            </div>
+            <span className="text-lg font-bold bg-gradient-to-r from-blue-400 to-cyan-300 bg-clip-text text-transparent">
+              CIRVIA
+            </span>
+          </Link>
+
+          {/* Auth Button */}
           {user ? (
             <Link
               href={user.role === 'teacher' ? '/dashboard/teacher' : '/dashboard/student'}
-              className={`flex flex-col items-center justify-center py-2 px-1 transition-all duration-200 ${
-                user.role === 'teacher' ? 'text-blue-300' : 'text-emerald-300'
+              className={`flex items-center space-x-2 px-3 py-1.5 rounded-full transition-all duration-300 ${
+                user.role === 'teacher' 
+                  ? 'bg-blue-500/20 border border-blue-400/30 text-blue-300' 
+                  : 'bg-emerald-500/20 border border-emerald-400/30 text-emerald-300'
               }`}
             >
-              <div className="p-1 rounded-lg">
-                <User className="w-5 h-5" />
-              </div>
-              <span className="text-xs mt-1 font-medium truncate max-w-[50px]">
-                {user.name.split(' ')[0]}
-              </span>
+              <User className="w-4 h-4" />
+              <span className="text-sm font-medium">{user.name.split(' ')[0]}</span>
             </Link>
           ) : (
-            <Link
-              href="/login"
-              className="flex flex-col items-center justify-center py-2 px-1 transition-all duration-200 text-white/80 hover:text-white hover:bg-blue-900/10"
-            >
-              <div className="p-1 rounded-lg">
-                <LogIn className="w-5 h-5" />
-              </div>
-              <span className="text-xs mt-1 font-medium">Login</span>
-            </Link>
+            <div className="relative" ref={dropdownRef}>
+              <button
+                onClick={() => setIsLoginDropdownOpen(!isLoginDropdownOpen)}
+                className="flex items-center space-x-2 px-4 py-1.5 rounded-full bg-gradient-to-r from-blue-500 to-cyan-500 text-white shadow-lg shadow-blue-500/30 hover:shadow-blue-500/50 transition-all"
+              >
+                <LogIn className="w-4 h-4" />
+                <span className="text-sm font-medium">Login</span>
+                <ChevronDown className={`w-3 h-3 transition-transform ${isLoginDropdownOpen ? 'rotate-180' : ''}`} />
+              </button>
+
+              {/* Dropdown Menu */}
+              {isLoginDropdownOpen && (
+                <div className="absolute right-0 top-full mt-2 w-48 bg-gradient-to-br from-slate-800/95 to-slate-900/95 backdrop-blur-xl border border-blue-400/30 rounded-xl shadow-2xl overflow-hidden">
+                  <Link
+                    href="/login/student"
+                    className="flex items-center space-x-3 px-4 py-3 text-white/90 hover:bg-blue-500/20 hover:text-white transition-all border-b border-white/10"
+                    onClick={() => setIsLoginDropdownOpen(false)}
+                  >
+                    <GraduationCap className="w-5 h-5 text-emerald-400" />
+                    <span className="font-medium">Login Siswa</span>
+                  </Link>
+                  <Link
+                    href="/login"
+                    className="flex items-center space-x-3 px-4 py-3 text-white/90 hover:bg-blue-500/20 hover:text-white transition-all"
+                    onClick={() => setIsLoginDropdownOpen(false)}
+                  >
+                    <TeacherIcon className="w-5 h-5 text-blue-400" />
+                    <span className="font-medium">Login Guru</span>
+                  </Link>
+                </div>
+              )}
+            </div>
           )}
         </div>
       </div>
+
+      {/* Spacer for mobile top bar */}
+      <div className="md:hidden h-14"></div>
 
       {/* Spacer for mobile bottom navigation */}
       <div className="md:hidden h-16"></div>

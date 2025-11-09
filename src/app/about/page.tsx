@@ -246,13 +246,13 @@ function GallerySection() {
         </div>
 
         {/* Main Slider */}
-        <div className="relative group mb-6 px-8 md:px-16">
+        <div className="relative group mb-6 px-2 sm:px-4 md:px-8 lg:px-16">
           {/* Enhanced Glow Effect */}
           <div className="absolute -inset-2 bg-gradient-to-r from-purple-500/40 via-pink-500/40 to-purple-500/40 rounded-3xl blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
           
           {/* Image Container */}
-          <div className="relative bg-gradient-to-br from-slate-900/90 to-purple-950/90 rounded-3xl overflow-hidden border-2 border-purple-400/40 shadow-2xl">
-            <div className="relative h-[350px] md:h-[420px]">
+          <div className="relative bg-gradient-to-br from-slate-900/90 to-purple-950/90 rounded-2xl md:rounded-3xl overflow-hidden border-2 border-purple-400/40 shadow-2xl">
+            <div className="relative h-[280px] sm:h-[320px] md:h-[350px] lg:h-[420px]">
               {/* Current Image with Animation */}
               <div className="relative w-full h-full">
                 <Image
@@ -268,26 +268,26 @@ function GallerySection() {
               </div>
 
               {/* Enhanced Image Info */}
-              <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-slate-900 via-slate-900/95 to-transparent">
-                <div className="flex items-start justify-between gap-4">
+              <div className="absolute bottom-0 left-0 right-0 p-3 sm:p-4 md:p-6 bg-gradient-to-t from-slate-900 via-slate-900/95 to-transparent">
+                <div className="flex items-start justify-between gap-2 sm:gap-4">
                   <div className="flex-1">
-                    <div className="flex items-center gap-3 mb-2">
-                      <div className="h-1 w-10 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full"></div>
-                      <span className="text-purple-300 text-xs font-semibold uppercase tracking-wider">
+                    <div className="flex items-center gap-2 sm:gap-3 mb-1 sm:mb-2">
+                      <div className="h-0.5 sm:h-1 w-6 sm:w-10 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full"></div>
+                      <span className="text-purple-300 text-[10px] sm:text-xs font-semibold uppercase tracking-wider">
                         {currentIndex + 1} / {galleryImages.length}
                       </span>
                     </div>
-                    <h4 className="text-2xl md:text-3xl font-black bg-gradient-to-r from-white via-purple-100 to-pink-100 bg-clip-text text-transparent mb-2 leading-tight">
+                    <h4 className="text-base sm:text-xl md:text-2xl lg:text-3xl font-black bg-gradient-to-r from-white via-purple-100 to-pink-100 bg-clip-text text-transparent mb-1 sm:mb-2 leading-tight">
                       {galleryImages[currentIndex].title}
                     </h4>
-                    <p className="text-base text-blue-200/90 leading-relaxed max-w-2xl">
+                    <p className="text-xs sm:text-sm md:text-base text-blue-200/90 leading-relaxed max-w-2xl line-clamp-2 sm:line-clamp-none">
                       {galleryImages[currentIndex].description}
                     </p>
                   </div>
                   
                   {/* Image Counter Badge */}
-                  <div className="hidden md:flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-br from-purple-500/30 to-pink-500/30 backdrop-blur-xl border border-purple-400/30">
-                    <span className="text-xl font-bold text-white">
+                  <div className="hidden md:flex items-center justify-center w-12 h-12 lg:w-14 lg:h-14 rounded-2xl bg-gradient-to-br from-purple-500/30 to-pink-500/30 backdrop-blur-xl border border-purple-400/30">
+                    <span className="text-lg lg:text-xl font-bold text-white">
                       {currentIndex + 1}
                     </span>
                   </div>
@@ -297,17 +297,17 @@ function GallerySection() {
               {/* Enhanced Navigation Arrows */}
               <button
                 onClick={prevSlide}
-                className="absolute left-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-gradient-to-br from-purple-500/20 to-pink-500/20 hover:from-purple-500/40 hover:to-pink-500/40 backdrop-blur-xl border-2 border-white/30 hover:border-purple-400/60 rounded-xl flex items-center justify-center transition-all duration-300 hover:scale-110 hover:-translate-x-1 shadow-lg group/btn"
+                className="absolute left-1 sm:left-2 md:left-4 top-1/2 -translate-y-1/2 w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 bg-gradient-to-br from-purple-500/20 to-pink-500/20 hover:from-purple-500/40 hover:to-pink-500/40 backdrop-blur-xl border-2 border-white/30 hover:border-purple-400/60 rounded-lg md:rounded-xl flex items-center justify-center transition-all duration-300 hover:scale-110 hover:-translate-x-1 shadow-lg group/btn"
               >
-                <svg className="w-5 h-5 text-white group-hover/btn:text-purple-200 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-4 h-4 sm:w-5 sm:h-5 text-white group-hover/btn:text-purple-200 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M15 19l-7-7 7-7" />
                 </svg>
               </button>
               <button
                 onClick={nextSlide}
-                className="absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-gradient-to-br from-purple-500/20 to-pink-500/20 hover:from-purple-500/40 hover:to-pink-500/40 backdrop-blur-xl border-2 border-white/30 hover:border-purple-400/60 rounded-xl flex items-center justify-center transition-all duration-300 hover:scale-110 hover:translate-x-1 shadow-lg group/btn"
+                className="absolute right-1 sm:right-2 md:right-4 top-1/2 -translate-y-1/2 w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 bg-gradient-to-br from-purple-500/20 to-pink-500/20 hover:from-purple-500/40 hover:to-pink-500/40 backdrop-blur-xl border-2 border-white/30 hover:border-purple-400/60 rounded-lg md:rounded-xl flex items-center justify-center transition-all duration-300 hover:scale-110 hover:translate-x-1 shadow-lg group/btn"
               >
-                <svg className="w-5 h-5 text-white group-hover/btn:text-purple-200 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-4 h-4 sm:w-5 sm:h-5 text-white group-hover/btn:text-purple-200 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M9 5l7 7-7 7" />
                 </svg>
               </button>
@@ -324,16 +324,16 @@ function GallerySection() {
         </div>
 
         {/* Enhanced Thumbnail Navigation */}
-        <div className="relative mb-6 px-4">
-          <div className="flex gap-3 justify-center pb-3 scrollbar-hide">
+        <div className="relative mb-6 px-2 sm:px-4">
+          <div className="flex gap-2 sm:gap-3 justify-start md:justify-center pb-3 pt-3 overflow-x-auto scrollbar-hide">
             {galleryImages.map((image, index) => (
               <button
                 key={index}
                 onClick={() => goToSlide(index)}
-                className={`relative flex-shrink-0 rounded-xl overflow-hidden transition-all duration-300 ${
+                className={`relative flex-shrink-0 rounded-lg sm:rounded-xl overflow-hidden transition-all duration-300 ${
                   currentIndex === index
-                    ? 'w-24 h-24 ring-4 ring-purple-400 scale-105 shadow-xl shadow-purple-500/50'
-                    : 'w-20 h-20 ring-2 ring-white/20 hover:ring-purple-300 opacity-70 hover:opacity-100 hover:scale-105'
+                    ? 'w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 ring-2 sm:ring-3 md:ring-4 ring-purple-400 scale-105 shadow-xl shadow-purple-500/50'
+                    : 'w-14 h-14 sm:w-16 sm:h-16 md:w-20 md:h-20 ring-1 sm:ring-2 ring-white/20 hover:ring-purple-300 opacity-70 hover:opacity-100 hover:scale-105'
                 }`}
               >
                 <Image
@@ -350,14 +350,14 @@ function GallerySection() {
                 }`}></div>
                 
                 {/* Index Badge */}
-                <div className="absolute top-1.5 right-1.5 w-5 h-5 bg-slate-900/80 backdrop-blur-sm rounded-full flex items-center justify-center border border-white/20">
-                  <span className="text-xs font-bold text-white">{index + 1}</span>
+                <div className="absolute top-1 right-1 sm:top-1.5 sm:right-1.5 w-4 h-4 sm:w-5 sm:h-5 bg-slate-900/80 backdrop-blur-sm rounded-full flex items-center justify-center border border-white/20">
+                  <span className="text-[10px] sm:text-xs font-bold text-white">{index + 1}</span>
                 </div>
                 
                 {/* Active Indicator */}
                 {currentIndex === index && (
-                  <div className="absolute bottom-1.5 left-1/2 -translate-x-1/2">
-                    <div className="w-1.5 h-1.5 bg-purple-400 rounded-full animate-pulse"></div>
+                  <div className="absolute bottom-1 sm:bottom-1.5 left-1/2 -translate-x-1/2">
+                    <div className="w-1 h-1 sm:w-1.5 sm:h-1.5 bg-purple-400 rounded-full animate-pulse"></div>
                   </div>
                 )}
               </button>
@@ -366,15 +366,15 @@ function GallerySection() {
         </div>
 
         {/* Enhanced Dots Indicator */}
-        <div className="flex justify-center items-center gap-2">
+        <div className="flex justify-center items-center gap-1.5 sm:gap-2">
           {galleryImages.map((_, index) => (
             <button
               key={index}
               onClick={() => goToSlide(index)}
               className={`transition-all duration-300 ${
                 currentIndex === index
-                  ? 'w-8 h-2.5 bg-gradient-to-r from-purple-400 via-pink-400 to-purple-400 shadow-lg shadow-purple-500/50'
-                  : 'w-2.5 h-2.5 bg-white/30 hover:bg-purple-400/50 hover:scale-125'
+                  ? 'w-6 sm:w-8 h-2 sm:h-2.5 bg-gradient-to-r from-purple-400 via-pink-400 to-purple-400 shadow-lg shadow-purple-500/50'
+                  : 'w-2 sm:w-2.5 h-2 sm:h-2.5 bg-white/30 hover:bg-purple-400/50 hover:scale-125'
               } rounded-full`}
             />
           ))}
