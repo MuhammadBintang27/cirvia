@@ -40,17 +40,17 @@ export default function PracticumPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-950 to-indigo-900 relative overflow-hidden">
-      {/* Animated Background Elements */}
+      {/* Animated Background Elements - Matching Landing Page */}
       <div className="absolute inset-0">
-        <div className="absolute top-20 left-10 w-72 h-72 bg-orange-500/10 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute top-40 right-20 w-96 h-96 bg-red-500/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
-        <div className="absolute bottom-20 left-1/3 w-80 h-80 bg-cyan-500/10 rounded-full blur-3xl animate-pulse delay-2000"></div>
+        <div className="absolute top-20 left-10 w-72 h-72 bg-blue-500/10 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute top-40 right-20 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
+        <div className="absolute bottom-20 left-1/3 w-80 h-80 bg-indigo-500/10 rounded-full blur-3xl animate-pulse delay-2000"></div>
 
         {/* Floating particles */}
         {[...Array(20)].map((_, i) => (
           <div
             key={i}
-            className="absolute w-1 h-1 bg-orange-400/30 rounded-full animate-ping"
+            className="absolute w-1 h-1 bg-blue-400/30 rounded-full animate-ping"
             style={{
               left: `${Math.random() * 100}%`,
               top: `${Math.random() * 100}%`,
@@ -68,31 +68,23 @@ export default function PracticumPage() {
         <div className="max-w-7xl mx-auto">
           {/* Page Title */}
           <div className="text-center mb-16">
-            {/* Premium Badge */}
-            <div className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-orange-400/20 to-red-400/20 rounded-full border border-orange-400/30 backdrop-blur-sm mb-8">
-              <span className="text-2xl mr-2">🔬</span>
-              <span className="text-orange-400 text-sm font-medium">
-                Interactive Laboratory
-              </span>
-              <span className="text-2xl ml-2">⚡</span>
-            </div>
-
             {/* Main Icon */}
             <div className="relative mb-8">
-              <div className="inline-flex items-center justify-center w-32 h-32 rounded-full bg-gradient-to-br from-orange-500/20 to-red-600/20 backdrop-blur-xl border border-white/20 shadow-2xl">
-                <div className="absolute inset-0 rounded-full bg-gradient-to-br from-orange-400/10 to-red-600/10 animate-pulse"></div>
+              <div className="inline-flex items-center justify-center w-32 h-32 rounded-full bg-gradient-to-br from-blue-500/20 to-indigo-600/20 backdrop-blur-xl border border-white/20 shadow-2xl">
+                <div className="absolute inset-0 rounded-full bg-gradient-to-br from-blue-400/10 to-purple-600/10 animate-pulse"></div>
+                <div className="absolute inset-2 rounded-full bg-gradient-to-br from-cyan-400/5 to-blue-500/5 animate-pulse delay-500"></div>
                 <span className="text-6xl relative z-10">🔬</span>
               </div>
-              <div className="absolute -inset-4 bg-gradient-to-r from-orange-500/20 to-red-500/20 rounded-full blur-xl"></div>
+              <div className="absolute -inset-4 bg-gradient-to-r from-blue-500/20 via-purple-500/20 to-indigo-500/20 rounded-full blur-xl animate-pulse"></div>
             </div>
 
             {/* Title */}
             <h1 className="text-6xl md:text-7xl font-black mb-6 leading-tight">
-              <span className="bg-gradient-to-r from-white via-orange-200 to-red-300 bg-clip-text text-transparent drop-shadow-2xl">
+              <span className="bg-gradient-to-r from-white via-blue-200 to-cyan-300 bg-clip-text text-transparent drop-shadow-2xl">
                 Praktikum
               </span>
               <br />
-              <span className="bg-gradient-to-r from-red-300 via-orange-400 to-yellow-400 bg-clip-text text-transparent">
+              <span className="bg-gradient-to-r from-cyan-300 via-blue-400 to-indigo-400 bg-clip-text text-transparent">
                 Rangkaian Listrik
               </span>
             </h1>
@@ -107,15 +99,15 @@ export default function PracticumPage() {
             <div className="flex justify-center space-x-8 mb-12">
               <div className="text-center">
                 <div className="text-3xl font-bold text-white">Virtual</div>
-                <div className="text-orange-300 text-sm">Lab Environment</div>
+                <div className="text-blue-300 text-sm">Lab Environment</div>
               </div>
               <div className="text-center">
                 <div className="text-3xl font-bold text-white">AI-Powered</div>
-                <div className="text-orange-300 text-sm">Gesture Control</div>
+                <div className="text-blue-300 text-sm">Gesture Control</div>
               </div>
               <div className="text-center">
                 <div className="text-3xl font-bold text-white">Real-time</div>
-                <div className="text-orange-300 text-sm">Calculations</div>
+                <div className="text-blue-300 text-sm">Calculations</div>
               </div>
             </div>
           </div>
@@ -127,7 +119,7 @@ export default function PracticumPage() {
                 onClick={() => setActiveTab("drag-drop")}
                 className={`px-8 py-3 rounded-xl font-bold text-lg transition-all duration-300 transform hover:scale-105 ${
                   activeTab === "drag-drop"
-                    ? "bg-gradient-to-r from-orange-500 to-red-600 text-white shadow-lg shadow-orange-500/25"
+                    ? "bg-gradient-to-r from-blue-500 to-cyan-400 text-white shadow-lg shadow-blue-500/25"
                     : "text-blue-200/80 hover:text-white hover:bg-white/10"
                 }`}
               >
@@ -137,7 +129,7 @@ export default function PracticumPage() {
                 onClick={() => setActiveTab("cv")}
                 className={`px-8 py-3 rounded-xl font-bold text-lg transition-all duration-300 transform hover:scale-105 ${
                   activeTab === "cv"
-                    ? "bg-gradient-to-r from-orange-500 to-red-600 text-white shadow-lg shadow-orange-500/25"
+                    ? "bg-gradient-to-r from-blue-500 to-cyan-400 text-white shadow-lg shadow-blue-500/25"
                     : "text-blue-200/80 hover:text-white hover:bg-white/10"
                 }`}
               >
@@ -153,7 +145,7 @@ export default function PracticumPage() {
               <div className="mb-8">
                 <div className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl rounded-2xl p-8 border border-white/20 shadow-2xl">
                   <div className="flex items-center mb-6">
-                    <div className="flex items-center justify-center w-16 h-16 bg-gradient-to-br from-orange-500/20 to-red-600/20 rounded-2xl mr-4">
+                    <div className="flex items-center justify-center w-16 h-16 bg-gradient-to-br from-blue-500/20 to-cyan-600/20 rounded-2xl mr-4">
                       <span className="text-2xl">🌐</span>
                     </div>
                     <div>
@@ -170,7 +162,7 @@ export default function PracticumPage() {
                   <CircuitBuilderEnhanced />
 
                   {/* Enhanced Tips */}
-                  <div className="mt-6 p-6 bg-gradient-to-r from-cyan-500/10 to-blue-500/10 rounded-xl border border-cyan-400/30">
+                  <div className="mt-6 p-6 bg-gradient-to-r from-blue-500/10 to-cyan-500/10 rounded-xl border border-blue-400/30">
                     <h4 className="text-white font-bold mb-3 flex items-center">
                       <span className="text-xl mr-2">💡</span>
                       Panduan Penggunaan
