@@ -1460,10 +1460,15 @@ export default function CircuitBuilderEnhanced() {
         {/* Main wire */}
         <path
           d={path}
-          stroke={isActive ? "#3b82f6" : "#1f2937"}
+          stroke={isActive ? "#3b82f6" : hasCurrent ? "#06b6d4" : "#475569"}
           strokeWidth={isMobile ? 4 : 6}
           fill="none"
           className="transition-all duration-200"
+          style={{
+            filter: hasCurrent
+              ? "drop-shadow(0 0 4px rgba(6, 182, 212, 0.6))"
+              : "none",
+          }}
         />
         {/* Current flow animation */}
         {hasCurrent && (
@@ -1656,10 +1661,15 @@ export default function CircuitBuilderEnhanced() {
         {/* Main wire */}
         <path
           d={path}
-          stroke="#1f2937"
+          stroke={hasCurrent ? "#06b6d4" : "#475569"}
           strokeWidth={isMobile ? 4 : 6}
           fill="none"
           className="transition-all duration-200"
+          style={{
+            filter: hasCurrent
+              ? "drop-shadow(0 0 4px rgba(6, 182, 212, 0.6))"
+              : "none",
+          }}
         />
         {/* Current animation */}
         {hasCurrent && (
@@ -1740,7 +1750,7 @@ export default function CircuitBuilderEnhanced() {
                 y1={-8}
                 x2={15}
                 y2={8}
-                stroke="#ef4444"
+                stroke="#d3d3d3"
                 strokeWidth={3}
               />
               <line
@@ -1748,7 +1758,7 @@ export default function CircuitBuilderEnhanced() {
                 y1={0}
                 x2={23}
                 y2={0}
-                stroke="#ef4444"
+                stroke="#d3d3d3"
                 strokeWidth={3}
               />
               {/* - terminal */}
@@ -1766,7 +1776,7 @@ export default function CircuitBuilderEnhanced() {
                 y1={0}
                 x2={-25}
                 y2={0}
-                stroke="#1f2937"
+                stroke="#d3d3d3"
                 strokeWidth={3}
               />
               <line
@@ -1774,7 +1784,7 @@ export default function CircuitBuilderEnhanced() {
                 y1={0}
                 x2={terminalOffset}
                 y2={0}
-                stroke="#1f2937"
+                stroke="#d3d3d3"
                 strokeWidth={3}
               />
               {/* Label */}
@@ -1802,7 +1812,7 @@ export default function CircuitBuilderEnhanced() {
                 y1={0}
                 x2={-20}
                 y2={0}
-                stroke="#1f2937"
+                stroke="#d3d3d3"
                 strokeWidth={3}
               />
               <line
@@ -1810,7 +1820,7 @@ export default function CircuitBuilderEnhanced() {
                 y1={0}
                 x2={terminalOffset}
                 y2={0}
-                stroke="#1f2937"
+                stroke="#d3d3d3"
                 strokeWidth={3}
               />
               {/* Resistor body */}
@@ -1849,7 +1859,36 @@ export default function CircuitBuilderEnhanced() {
             (calc.lampPowers as Record<string, number>)?.[el.id] || 0;
           // Lampu hanya menyala jika rangkaian tertutup DAN ada arus yang mengalir
           const isOn = calc.isClosed && calc.current > 0 && lampPower > 0.1;
-          const brightness = Math.min(1, lampPower / 2);
+
+          // 🔆 LOGIKA BRIGHTNESS BERDASARKAN RASIO BATERAI:LAMPU
+          let brightness = 1; // Default 100%
+
+          if (
+            calc.topology?.type === "series" ||
+            !calc.topology?.hasParallelBranch
+          ) {
+            // RANGKAIAN SERI: Brightness = (Jumlah Baterai) / (Jumlah Lampu)
+            const totalBatteries = elements.filter(
+              (e) => e.type === "battery"
+            ).length;
+            const totalLamps = elements.filter((e) => e.type === "lamp").length;
+
+            if (totalLamps > 0) {
+              // Rasio baterai:lampu menentukan brightness
+              // 1 baterai : 1 lampu = 100%
+              // 2 baterai : 2 lampu = 100%
+              // 1 baterai : 2 lampu = 50%
+              const batteryToLampRatio = totalBatteries / totalLamps;
+              brightness = Math.min(1, batteryToLampRatio); // Max 100%
+            }
+          } else {
+            // RANGKAIAN PARALEL: Brightness berdasarkan daya aktual
+            const idealPower =
+              ((calc.totalV || 0) * (calc.totalV || 0)) / el.value;
+            if (idealPower > 0) {
+              brightness = Math.min(1, lampPower / idealPower);
+            }
+          }
 
           return (
             <g>
@@ -1859,7 +1898,7 @@ export default function CircuitBuilderEnhanced() {
                 y1={0}
                 x2={-20}
                 y2={0}
-                stroke="#1f2937"
+                stroke="#d3d3d3"
                 strokeWidth={3}
               />
               <line
@@ -1867,7 +1906,7 @@ export default function CircuitBuilderEnhanced() {
                 y1={0}
                 x2={terminalOffset}
                 y2={0}
-                stroke="#1f2937"
+                stroke="#d3d3d3"
                 strokeWidth={3}
               />
 
@@ -1888,12 +1927,12 @@ export default function CircuitBuilderEnhanced() {
                 </>
               )}
 
-              {/* Bulb */}
+              {/* Bulb - opacity based on brightness */}
               <circle
                 r={18}
                 fill={
                   isOn
-                    ? `rgba(254, 243, 199, ${0.9 + 0.1 * brightness})`
+                    ? `rgba(254, 243, 199, ${0.5 + 0.5 * brightness})`
                     : "#e5e7eb"
                 }
                 stroke={isSel ? "#eab308" : isOn ? "#fbbf24" : "#9ca3af"}
@@ -1901,13 +1940,13 @@ export default function CircuitBuilderEnhanced() {
                 style={{
                   filter: isOn
                     ? `drop-shadow(0 0 ${
-                        8 + 8 * brightness
+                        8 + 12 * brightness
                       }px rgba(251, 191, 36, ${brightness}))`
                     : "none",
                 }}
               />
 
-              {/* Filament */}
+              {/* Filament - brightness affects color intensity */}
               {isOn ? (
                 <path
                   d="M -6 -6 Q 0 -8 6 -6 Q 0 -4 -6 -6 M -6 0 Q 0 2 6 0 Q 0 4 -6 0 M -6 6 Q 0 8 6 6 Q 0 10 -6 6"
@@ -1915,6 +1954,9 @@ export default function CircuitBuilderEnhanced() {
                   strokeWidth={2}
                   fill="none"
                   className="animate-pulse"
+                  style={{
+                    opacity: brightness,
+                  }}
                 />
               ) : (
                 <path
@@ -1978,7 +2020,7 @@ export default function CircuitBuilderEnhanced() {
                 y1={0}
                 x2={-15}
                 y2={0}
-                stroke="#1f2937"
+                stroke="#d3d3d3"
                 strokeWidth={3}
               />
               <line
@@ -1986,7 +2028,7 @@ export default function CircuitBuilderEnhanced() {
                 y1={0}
                 x2={terminalOffset}
                 y2={0}
-                stroke="#1f2937"
+                stroke="#d3d3d3"
                 strokeWidth={3}
               />
 
@@ -2060,7 +2102,7 @@ export default function CircuitBuilderEnhanced() {
                 y={25}
                 textAnchor="middle"
                 fontSize={fontSize - 2}
-                fill="#6b7280"
+                fill="#ffffff"
               >
                 (double-click)
               </text>
@@ -2083,7 +2125,7 @@ export default function CircuitBuilderEnhanced() {
                 y1={0}
                 x2={terminalOffset}
                 y2={0}
-                stroke={isSel ? "#1f2937" : "#374151"}
+                stroke="#d3d3d3"
                 strokeWidth={isMobile ? 4 : 6}
                 strokeLinecap="round"
               />
@@ -2279,12 +2321,12 @@ export default function CircuitBuilderEnhanced() {
         </defs>
       </svg>
 
-      <div className="bg-gradient-to-br from-slate-50 to-slate-100 rounded-2xl shadow-2xl p-4 sm:p-6 border-2 border-slate-200">
+      <div className="bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl shadow-2xl p-4 sm:p-6 border-2 border-slate-700">
         {/* Toolbar */}
         <div className="mb-6 space-y-3">
           {/* Component Buttons */}
           <div className="flex flex-wrap gap-2">
-            <div className="text-sm font-bold text-slate-700 mr-2 flex items-center">
+            <div className="text-sm font-bold text-blue-200 mr-2 flex items-center">
               Komponen:
             </div>
             <button
@@ -2330,7 +2372,7 @@ export default function CircuitBuilderEnhanced() {
               className={`px-3 py-2 rounded-xl font-medium shadow-lg hover:shadow-xl transition-all duration-200 text-sm ${
                 connectMode
                   ? "bg-gradient-to-br from-blue-600 to-indigo-700 text-white scale-105"
-                  : "bg-white text-blue-600 border-2 border-blue-300 hover:bg-blue-50"
+                  : "bg-slate-700 text-blue-300 border-2 border-blue-500/30 hover:bg-slate-600"
               }`}
             >
               {connectMode ? "✓ Mode Koneksi ON" : "🔗 Mode Koneksi"}
@@ -2338,27 +2380,27 @@ export default function CircuitBuilderEnhanced() {
             <button
               onClick={rotateSelected}
               disabled={!selectedId}
-              className="px-3 py-2 rounded-xl bg-white text-slate-700 border-2 border-slate-300 font-medium shadow-lg hover:shadow-xl hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-200 text-sm"
+              className="px-3 py-2 rounded-xl bg-slate-700 text-slate-200 border-2 border-slate-500/30 font-medium shadow-lg hover:shadow-xl hover:bg-slate-600 disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-200 text-sm"
             >
               ↻ Rotasi
             </button>
             <button
               onClick={deleteSelected}
               disabled={!selectedId}
-              className="px-3 py-2 rounded-xl bg-white text-red-600 border-2 border-red-300 font-medium shadow-lg hover:shadow-xl hover:bg-red-50 disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-200 text-sm"
+              className="px-3 py-2 rounded-xl bg-slate-700 text-red-400 border-2 border-red-500/30 font-medium shadow-lg hover:shadow-xl hover:bg-slate-600 disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-200 text-sm"
             >
               🗑️ Hapus
             </button>
             <button
               onClick={resetCircuit}
-              className="px-3 py-2 rounded-xl bg-white text-orange-600 border-2 border-orange-300 font-medium shadow-lg hover:shadow-xl hover:bg-orange-50 transition-all duration-200 text-sm"
+              className="px-3 py-2 rounded-xl bg-slate-700 text-orange-400 border-2 border-orange-500/30 font-medium shadow-lg hover:shadow-xl hover:bg-slate-600 transition-all duration-200 text-sm"
             >
               ↺ Reset
             </button>
             {isMobile && (
               <button
                 onClick={() => setShowStats(!showStats)}
-                className="px-3 py-2 rounded-xl bg-white text-slate-600 border-2 border-slate-300 font-medium shadow-lg hover:shadow-xl hover:bg-slate-50 transition-all duration-200 text-sm"
+                className="px-3 py-2 rounded-xl bg-slate-700 text-slate-200 border-2 border-slate-500/30 font-medium shadow-lg hover:shadow-xl hover:bg-slate-600 transition-all duration-200 text-sm"
               >
                 📊 Stats
               </button>
@@ -2425,17 +2467,17 @@ export default function CircuitBuilderEnhanced() {
 
         {/* Topology Detection Display - Tampil jika rangkaian terhubung (terlepas dari saklar) */}
         {showStats && calc.isConnected && calc.topology && (
-          <div className="mb-6 bg-gradient-to-br from-emerald-50 to-teal-50 rounded-2xl p-4 border-2 border-emerald-200 shadow-lg">
+          <div className="mb-6 bg-gradient-to-br from-slate-700/50 to-slate-800/50 rounded-2xl p-4 border-2 border-emerald-500/30 shadow-lg">
             {/* Status Badge - Rangkaian Aktif (tertutup & arus mengalir) */}
             {calc.isClosed && calc.current > 0 && (
-              <div className="mb-3 p-2 bg-green-100 border-2 border-green-300 rounded-lg">
+              <div className="mb-3 p-2 bg-green-900/30 border-2 border-green-500/40 rounded-lg">
                 <div className="flex items-center gap-2">
                   <span className="text-lg">✅</span>
                   <div className="flex-1">
-                    <div className="text-xs font-bold text-green-900">
+                    <div className="text-xs font-bold text-green-300">
                       Rangkaian Aktif - Arus Mengalir
                     </div>
-                    <div className="text-xs text-green-700 mt-0.5">
+                    <div className="text-xs text-green-400 mt-0.5">
                       Topologi terdeteksi dan semua saklar tertutup
                     </div>
                   </div>
@@ -2445,14 +2487,14 @@ export default function CircuitBuilderEnhanced() {
 
             {/* Status Badge - Terhubung tapi saklar terbuka */}
             {!calc.isClosed && (
-              <div className="mb-3 p-2 bg-orange-100 border-2 border-orange-300 rounded-lg">
+              <div className="mb-3 p-2 bg-orange-900/30 border-2 border-orange-500/40 rounded-lg">
                 <div className="flex items-center gap-2">
                   <span className="text-lg">⚠️</span>
                   <div className="flex-1">
-                    <div className="text-xs font-bold text-orange-900">
+                    <div className="text-xs font-bold text-orange-300">
                       Topologi Terdeteksi - Rangkaian Terbuka
                     </div>
-                    <div className="text-xs text-orange-700 mt-0.5">
+                    <div className="text-xs text-orange-400 mt-0.5">
                       Struktur rangkaian sudah teridentifikasi, tapi arus tidak
                       mengalir karena saklar terbuka
                     </div>
@@ -2468,10 +2510,10 @@ export default function CircuitBuilderEnhanced() {
                 {calc.topology.type === "mixed" && "🔄"}
               </div>
               <div className="flex-1">
-                <div className="text-xs text-emerald-700 font-medium">
+                <div className="text-xs text-emerald-400 font-medium">
                   Topologi Rangkaian
                 </div>
-                <div className="text-lg font-bold text-emerald-900">
+                <div className="text-lg font-bold text-emerald-300">
                   {calc.topology.type === "series" && "Seri"}
                   {calc.topology.type === "parallel" && "Paralel"}
                   {calc.topology.type === "mixed" &&
@@ -2480,9 +2522,9 @@ export default function CircuitBuilderEnhanced() {
               </div>
               {/* Indicator Percabangan */}
               {calc.topology.hasParallelBranch && (
-                <div className="flex items-center gap-1 px-2 py-1 bg-blue-100 rounded-lg border border-blue-300">
+                <div className="flex items-center gap-1 px-2 py-1 bg-blue-900/40 rounded-lg border border-blue-500/40">
                   <span className="text-lg">🌿</span>
-                  <span className="text-xs text-blue-700 font-semibold">
+                  <span className="text-xs text-blue-300 font-semibold">
                     Percabangan Terdeteksi
                   </span>
                 </div>
@@ -2492,21 +2534,21 @@ export default function CircuitBuilderEnhanced() {
             {/* Branch Nodes Info */}
             {calc.topology.branchNodes &&
               calc.topology.branchNodes.length > 0 && (
-                <div className="mb-3 p-2 bg-blue-50 rounded-lg border border-blue-200">
-                  <div className="text-xs text-blue-700 font-semibold mb-1">
+                <div className="mb-3 p-2 bg-blue-900/20 rounded-lg border border-blue-500/30">
+                  <div className="text-xs text-blue-300 font-semibold mb-1">
                     🔍 Node Percabangan (Degree &gt; 2):
                   </div>
                   <div className="flex flex-wrap gap-1">
                     {calc.topology.branchNodes.map((node, idx) => (
                       <span
                         key={idx}
-                        className="inline-block px-2 py-0.5 bg-blue-100 text-blue-800 rounded text-xs font-mono"
+                        className="inline-block px-2 py-0.5 bg-blue-900/40 text-blue-300 rounded text-xs font-mono"
                       >
                         {node}
                       </span>
                     ))}
                   </div>
-                  <div className="text-xs text-blue-600 mt-1">
+                  <div className="text-xs text-blue-400 mt-1">
                     💡 Node ini terhubung ke lebih dari 2 terminal (terjadi
                     percabangan paralel)
                   </div>
@@ -2516,22 +2558,22 @@ export default function CircuitBuilderEnhanced() {
             {/* Groups Details */}
             {calc.topology.groups && calc.topology.groups.length > 0 && (
               <div className="space-y-2 mt-3">
-                <div className="text-xs text-emerald-700 font-semibold mb-2">
+                <div className="text-xs text-emerald-300 font-semibold mb-2">
                   Detail Grup Komponen:
                 </div>
                 {calc.topology.groups.map((group, idx) => (
                   <div
                     key={idx}
-                    className="bg-white rounded-lg p-3 border border-emerald-200"
+                    className="bg-slate-800/50 rounded-lg p-3 border border-emerald-500/30"
                   >
                     <div className="flex items-center justify-between mb-2">
-                      <div className="font-semibold text-sm text-emerald-800">
+                      <div className="font-semibold text-sm text-emerald-300">
                         {group.type === "parallel"
                           ? "🔀 Grup Paralel"
                           : "📏 Grup Seri"}{" "}
                         #{idx + 1}
                       </div>
-                      <div className="text-xs text-blue-600 font-bold">
+                      <div className="text-xs text-blue-400 font-bold">
                         Arus: {group.current.toFixed(3)} A
                       </div>
                     </div>
@@ -2539,7 +2581,7 @@ export default function CircuitBuilderEnhanced() {
                       {group.elements.map((elem) => (
                         <div
                           key={elem.id}
-                          className="inline-flex items-center gap-1 px-2 py-1 bg-slate-100 rounded-md text-xs"
+                          className="inline-flex items-center gap-1 px-2 py-1 bg-slate-700/50 rounded-md text-xs"
                         >
                           <span>
                             {elem.type === "battery" && "🔋"}
@@ -2547,7 +2589,7 @@ export default function CircuitBuilderEnhanced() {
                             {elem.type === "lamp" && "💡"}
                             {elem.type === "switch" && "🔘"}
                           </span>
-                          <span className="font-medium text-slate-700">
+                          <span className="font-medium text-slate-200">
                             {elem.type === "battery" && `${elem.voltage}V`}
                             {elem.type === "resistor" && `${elem.resistance}Ω`}
                             {elem.type === "lamp" && `${elem.resistance}Ω`}
@@ -2558,7 +2600,7 @@ export default function CircuitBuilderEnhanced() {
                             (elem.type === "resistor" ||
                               elem.type === "lamp") &&
                             elem.resistance && (
-                              <span className="text-blue-500 font-bold ml-1">
+                              <span className="text-cyan-400 font-bold ml-1">
                                 {((calc.totalV || 0) / elem.resistance).toFixed(
                                   3
                                 )}
@@ -2569,7 +2611,7 @@ export default function CircuitBuilderEnhanced() {
                       ))}
                     </div>
                     {group.type === "parallel" && (
-                      <div className="mt-2 text-xs text-slate-600">
+                      <div className="mt-2 text-xs text-slate-400">
                         Resistansi ekuivalen:{" "}
                         {group.equivalentResistance.toFixed(2)} Ω
                       </div>
@@ -2584,14 +2626,14 @@ export default function CircuitBuilderEnhanced() {
         {/* Canvas */}
         <div
           ref={canvasRef}
-          className="relative border-4 border-dashed border-slate-300 rounded-2xl overflow-hidden bg-white shadow-inner mx-auto"
+          className="relative border-4 border-dashed border-slate-600 rounded-2xl overflow-hidden bg-slate-800 shadow-inner mx-auto"
           style={{
             width: canvasSize.width,
             height: canvasSize.height,
             backgroundImage: `
-              radial-gradient(circle, rgba(148, 163, 184, 0.15) 1px, transparent 1px),
-              linear-gradient(to right, rgba(148, 163, 184, 0.05) 1px, transparent 1px),
-              linear-gradient(to bottom, rgba(148, 163, 184, 0.05) 1px, transparent 1px)
+              radial-gradient(circle, rgba(100, 116, 139, 0.2) 1px, transparent 1px),
+              linear-gradient(to right, rgba(71, 85, 105, 0.1) 1px, transparent 1px),
+              linear-gradient(to bottom, rgba(71, 85, 105, 0.1) 1px, transparent 1px)
             `,
             backgroundSize: `${GRID}px ${GRID}px, ${GRID}px ${GRID}px, ${GRID}px ${GRID}px`,
             backgroundPosition: "0 0, 0 0, 0 0",
@@ -2681,13 +2723,13 @@ export default function CircuitBuilderEnhanced() {
         {/* Instructions & Status */}
         <div className="mt-6 space-y-3">
           {/* Tips */}
-          <div className="bg-gradient-to-r from-cyan-50 to-blue-50 rounded-xl p-4 border-2 border-cyan-200">
-            <h4 className="text-sm font-bold text-cyan-900 mb-2 flex items-center">
+          <div className="bg-gradient-to-r from-slate-700/50 to-slate-800/50 rounded-xl p-4 border-2 border-cyan-500/30">
+            <h4 className="text-sm font-bold text-cyan-300 mb-2 flex items-center">
               <span className="text-lg mr-2">💡</span>
               Panduan Cepat
             </h4>
-            <div className="space-y-2 text-xs text-cyan-800">
-              <div className="font-semibold text-cyan-900">📦 Komponen:</div>
+            <div className="space-y-2 text-xs text-blue-200">
+              <div className="font-semibold text-cyan-300">📦 Komponen:</div>
               <div>• Tambahkan Baterai, Lampu, Resistor, Saklar, dan Kabel</div>
               <div>
                 • <strong>Drag body komponen</strong> untuk memindahkan posisi
@@ -2697,7 +2739,7 @@ export default function CircuitBuilderEnhanced() {
                 komponen 🔄
               </div>
 
-              <div className="font-semibold text-cyan-900 mt-2">
+              <div className="font-semibold text-cyan-300 mt-2">
                 🔗 Koneksi dengan Kabel:
               </div>
               <div>• Tambahkan item &quot;Kabel&quot; ke canvas</div>
@@ -2706,7 +2748,7 @@ export default function CircuitBuilderEnhanced() {
               <div>• Lalu klik terminal Komponen (Baterai, Lampu, dll)</div>
               <div>• Ulangi untuk ujung kabel lainnya</div>
 
-              <div className="font-semibold text-cyan-900 mt-2">
+              <div className="font-semibold text-cyan-300 mt-2">
                 ⚡ Rangkaian Paralel:
               </div>
               <div>• Gunakan lebih dari 1 kabel</div>
@@ -2720,8 +2762,8 @@ export default function CircuitBuilderEnhanced() {
 
           {/* Status Messages */}
           {elements.length === 0 && (
-            <div className="bg-gradient-to-r from-orange-50 to-amber-50 rounded-xl p-4 border-2 border-orange-200 text-center">
-              <p className="text-sm font-medium text-orange-900">
+            <div className="bg-gradient-to-r from-slate-700/50 to-slate-800/50 rounded-xl p-4 border-2 border-orange-500/30 text-center">
+              <p className="text-sm font-medium text-orange-300">
                 👆 Mulai dengan menambahkan komponen di atas!
               </p>
             </div>
@@ -2730,8 +2772,8 @@ export default function CircuitBuilderEnhanced() {
           {!calc.isConnected &&
             elements.length > 0 &&
             elements.filter((e) => e.type === "wire").length === 0 && (
-              <div className="bg-gradient-to-r from-yellow-50 to-amber-50 rounded-xl p-4 border-2 border-yellow-300">
-                <p className="text-sm font-medium text-yellow-900">
+              <div className="bg-gradient-to-r from-slate-700/50 to-slate-800/50 rounded-xl p-4 border-2 border-yellow-500/30">
+                <p className="text-sm font-medium text-yellow-300">
                   ⚠️ Tambahkan item &quot;Kabel&quot; untuk menghubungkan
                   komponen!
                 </p>
@@ -2742,8 +2784,8 @@ export default function CircuitBuilderEnhanced() {
             !calc.isClosed &&
             !calc.hasOpenSwitch &&
             wires.length > 0 && (
-              <div className="bg-gradient-to-r from-yellow-50 to-amber-50 rounded-xl p-4 border-2 border-yellow-300">
-                <p className="text-sm font-medium text-yellow-900">
+              <div className="bg-gradient-to-r from-slate-700/50 to-slate-800/50 rounded-xl p-4 border-2 border-yellow-500/30">
+                <p className="text-sm font-medium text-yellow-300">
                   ⚠️ Rangkaian belum tertutup. Pastikan semua komponen terhubung
                   dalam satu loop!
                 </p>
@@ -2751,8 +2793,8 @@ export default function CircuitBuilderEnhanced() {
             )}
 
           {calc.hasOpenSwitch && (
-            <div className="bg-gradient-to-r from-red-50 to-pink-50 rounded-xl p-4 border-2 border-red-300">
-              <p className="text-sm font-medium text-red-900">
+            <div className="bg-gradient-to-r from-slate-700/50 to-slate-800/50 rounded-xl p-4 border-2 border-red-500/30">
+              <p className="text-sm font-medium text-red-300">
                 🔴 Saklar terbuka! Arus listrik tidak mengalir. Double-click
                 saklar untuk menutup.
               </p>
@@ -2760,8 +2802,8 @@ export default function CircuitBuilderEnhanced() {
           )}
 
           {calc.isClosed && !calc.hasOpenSwitch && calc.current > 0 && (
-            <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl p-4 border-2 border-green-300">
-              <p className="text-sm font-medium text-green-900">
+            <div className="bg-gradient-to-r from-slate-700/50 to-slate-800/50 rounded-xl p-4 border-2 border-green-500/30">
+              <p className="text-sm font-medium text-green-300">
                 ✅ Rangkaian tertutup! Arus mengalir:{" "}
                 <strong>{calc.current.toFixed(3)} A</strong>
               </p>
