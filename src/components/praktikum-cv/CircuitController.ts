@@ -18,28 +18,39 @@ export class CircuitController {
   private lastPinchTime = 0;
   private readonly pinchResetDelay = 150; // ms - tolerance before resetting pinch state
 
-  // NEW: Wire connection state
+  // NEW: Wire connection state with point gesture
   private wireStartComponent: string | null = null;
   private isConnecting = false;
+  private pointHoldStartTime = 0; // Track when point gesture started
+  private readonly pointHoldDuration = 3000; // 3 seconds hold to start wire
+  private lastPointComponent: string | null = null; // Track component under point
 
   /**
    * Convert gesture to circuit action - ENHANCED with handedness
    */
   gestureToAction(gesture: GestureResult): CircuitAction | null {
-    // 🔧 FIXED: Lower confidence threshold for PINCH gesture
-    // PINCH is high-priority and 0.95 confidence from detector, so 0.70 is safe
-    const MIN_CONFIDENCE = gesture.name === "pinch" ? 0.7 : 0.75;
+    // 🔧 FIXED: Lower confidence threshold for specific gestures
+    // PINCH and POINT are high-priority gestures
+    const MIN_CONFIDENCE =
+      gesture.name === "pinch" || gesture.name === "point" ? 0.7 : 0.75;
 
     // Only process high confidence gestures
     if (gesture.confidence < MIN_CONFIDENCE) {
-      if (gesture.name === "pinch") {
-        console.log(
-          `🤏 PINCH confidence too low: ${gesture.confidence.toFixed(
-            2
-          )} (need > ${MIN_CONFIDENCE})`
-        );
-      }
+      console.log(
+        `⚠️ ${gesture.name.toUpperCase()} confidence too low: ${gesture.confidence.toFixed(
+          2
+        )} (need > ${MIN_CONFIDENCE})`
+      );
       return null;
+    }
+
+    // Log gesture being processed
+    if (gesture.name === "point") {
+      console.log(
+        `👆 Processing POINT gesture | Confidence: ${gesture.confidence.toFixed(
+          2
+        )} | Handedness: ${gesture.handedness}`
+      );
     }
 
     let action: CircuitAction | null = null;
@@ -62,6 +73,11 @@ export class CircuitController {
           action = this.handleRightHandPinch(gesture);
           break;
 
+        case "point":
+          // 🆕 POINT gesture now handles wire connection with 3-second hold
+          action = this.handleRightHandPoint(gesture);
+          break;
+
         case "grab":
           action = this.handleRightHandGrab(gesture);
           break;
@@ -76,10 +92,6 @@ export class CircuitController {
 
         case "rotate":
           action = this.handleRotate(gesture);
-          break;
-
-        case "point":
-          action = this.handlePoint(gesture);
           break;
 
         case "thumbs_up":
@@ -258,6 +270,10 @@ export class CircuitController {
     this.isPinching = false;
     this.lastActionTime = 0;
     this.componentTypeIndex = 0;
+    this.wireStartComponent = null;
+    this.isConnecting = false;
+    this.pointHoldStartTime = 0;
+    this.lastPointComponent = null;
   }
 
   /**
@@ -354,11 +370,21 @@ export class CircuitController {
     // Update last pinch time
     this.lastPinchTime = Date.now();
 
-    // 🔧 FIX: If no component selected, always trigger SELECT first (even if isPinching is true)
-    if (!this.isPinching || !this.selectedComponent) {
-      // First PINCH detected OR no component selected → SELECT action
+    // 🔧 FIX: Always trigger SELECT when starting a new PINCH
+    // Even if isPinching is true, if no component is selected yet, we need to SELECT first
+    if (!this.selectedComponent) {
+      // No component selected yet → SELECT action (start new grab)
       this.isPinching = true;
-      console.log("🤏 PINCH → SELECT");
+      console.log("🤏 PINCH → SELECT (new grab)");
+      return {
+        type: "select",
+        position: gesture.position,
+        handedness: "Right",
+      };
+    } else if (!this.isPinching) {
+      // Component was selected but pinch was released → Start new SELECT
+      this.isPinching = true;
+      console.log("🤏 PINCH → SELECT (after release)");
       return {
         type: "select",
         position: gesture.position,
@@ -376,41 +402,196 @@ export class CircuitController {
   }
 
   /**
-   * 👉 RIGHT HAND: Grab (FIST) to start wire connection or delete
+   * 👉 RIGHT HAND: Point (1 finger) - Wire connection with 3-second hold
+   * NEW: Simplified wire connection using point gesture
+   * - Hold point on component A for 3 seconds → Start wire
+   * - Move finger → Wire follows
+   * - Point at component B → Auto-connect wire
+   */
+  private handleRightHandPoint(gesture: GestureResult): CircuitAction {
+    this.isPinching = false;
+
+    const now = Date.now();
+    const holdProgress = gesture.metadata?.holdProgress || 0;
+    const componentAtPosition = gesture.metadata?.componentId || null;
+
+    console.log(
+      `👆 handleRightHandPoint called | Component: ${
+        componentAtPosition || "none"
+      } | Connecting: ${this.isConnecting}`
+    );
+
+    // 🔌 CASE 1: Wire is already connecting (dragging wire)
+    if (this.isConnecting) {
+      // Check if pointing at a valid component (not the start component)
+      if (
+        componentAtPosition &&
+        componentAtPosition !== this.wireStartComponent
+      ) {
+        // � TARGET COMPONENT HOLD: Must hold 3 seconds to complete connection
+
+        // Check if this is the same target component being held
+        if (this.lastPointComponent !== componentAtPosition) {
+          // New target component - reset hold timer
+          this.pointHoldStartTime = now;
+          this.lastPointComponent = componentAtPosition;
+          console.log(
+            `👆 POINT → Hold started on TARGET component: ${componentAtPosition}`
+          );
+        }
+
+        const holdDuration = now - this.pointHoldStartTime;
+        const currentProgress = Math.min(
+          holdDuration / this.pointHoldDuration,
+          1.0
+        );
+
+        console.log(
+          `🕐 TARGET Hold: ${holdDuration}ms / ${this.pointHoldDuration}ms (${(
+            currentProgress * 100
+          ).toFixed(0)}%)`
+        );
+
+        // Check if 3-second hold on target is complete
+        if (holdDuration >= this.pointHoldDuration || holdProgress >= 1.0) {
+          // ✅ COMPLETE WIRE after 3-second hold on target
+          console.log(
+            `✅ POINT → COMPLETE WIRE: ${this.wireStartComponent} → ${componentAtPosition} (held for ${holdDuration}ms)`
+          );
+
+          const action: CircuitAction = {
+            type: "complete_wire",
+            componentId: this.wireStartComponent || undefined,
+            targetComponentId: componentAtPosition,
+            position: gesture.position,
+            handedness: "Right",
+          };
+
+          // Reset wire state
+          this.wireStartComponent = null;
+          this.isConnecting = false;
+          this.pointHoldStartTime = 0;
+          this.lastPointComponent = null;
+
+          return action;
+        }
+
+        // 🕐 Still holding on target - return hold progress for visual feedback
+        console.log(
+          `   📊 TARGET hold progress: ${(currentProgress * 100).toFixed(0)}%`
+        );
+
+        return {
+          type: "wire_target_hold_progress",
+          componentId: this.wireStartComponent || undefined,
+          targetComponentId: componentAtPosition,
+          position: gesture.position,
+          holdProgress: currentProgress,
+          handedness: "Right",
+        };
+      } else {
+        // Reset hold timer when not pointing at any valid component
+        if (this.pointHoldStartTime > 0) {
+          console.log(
+            "👆 POINT → Target hold cancelled (moved away from target component)"
+          );
+          this.pointHoldStartTime = 0;
+          this.lastPointComponent = null;
+        }
+      }
+
+      // 📍 Wire is connecting but no valid target component - show wire following finger
+      return {
+        type: "wire_dragging",
+        componentId: this.wireStartComponent || undefined,
+        position: gesture.position,
+        handedness: "Right",
+      };
+    }
+
+    // 🔌 CASE 2: Starting new wire connection (3-second hold on component)
+    if (componentAtPosition) {
+      // Check if this is the same component being held
+      if (this.lastPointComponent !== componentAtPosition) {
+        // New component - reset hold timer
+        this.pointHoldStartTime = now;
+        this.lastPointComponent = componentAtPosition;
+        console.log(
+          `👆 POINT → Hold started on component: ${componentAtPosition}`
+        );
+      }
+
+      const holdDuration = now - this.pointHoldStartTime;
+      const currentProgress = Math.min(
+        holdDuration / this.pointHoldDuration,
+        1.0
+      );
+
+      console.log(
+        `🕐 Hold duration: ${holdDuration}ms / ${this.pointHoldDuration}ms (${(
+          currentProgress * 100
+        ).toFixed(0)}%)`
+      );
+
+      // Check if 3-second hold is complete
+      if (holdDuration >= this.pointHoldDuration || holdProgress >= 1.0) {
+        // ✅ START WIRE after 3-second hold
+        this.wireStartComponent = componentAtPosition;
+        this.isConnecting = true;
+        this.pointHoldStartTime = 0; // Reset hold timer
+
+        console.log(
+          `✅ POINT → START WIRE from component: ${componentAtPosition} (held for ${holdDuration}ms)`
+        );
+
+        return {
+          type: "start_wire",
+          componentId: componentAtPosition,
+          position: gesture.position,
+          handedness: "Right",
+        };
+      }
+
+      // 🕐 Still holding - return hold progress for visual feedback
+      console.log(
+        `   📊 Returning hold progress: ${(currentProgress * 100).toFixed(0)}%`
+      );
+
+      return {
+        type: "point_hold_progress",
+        componentId: componentAtPosition,
+        position: gesture.position,
+        holdProgress: currentProgress,
+        handedness: "Right",
+      };
+    }
+
+    // 🔌 CASE 3: Pointing at empty space (no component) - reset hold timer
+    if (this.pointHoldStartTime > 0) {
+      console.log("👆 POINT → Hold cancelled (moved away from component)");
+      this.pointHoldStartTime = 0;
+      this.lastPointComponent = null;
+    }
+
+    // Neutral action - just tracking finger position
+    return {
+      type: "move",
+      position: gesture.position,
+      componentId: undefined,
+      handedness: "Right",
+    };
+  }
+
+  /**
+   * 👉 RIGHT HAND: Grab (FIST) - DEPRECATED for wire connection
+   * Now only used for potential future features
    */
   private handleRightHandGrab(gesture: GestureResult): CircuitAction {
     this.isPinching = false;
 
-    if (!this.isConnecting && this.selectedComponent) {
-      // Start wire from selected component
-      this.wireStartComponent = this.selectedComponent;
-      this.isConnecting = true;
-
-      return {
-        type: "start_wire",
-        componentId: this.selectedComponent,
-        position: gesture.position,
-        handedness: "Right",
-      };
-    } else if (this.isConnecting) {
-      // Complete wire to target component
-      const action: CircuitAction = {
-        type: "complete_wire",
-        componentId: this.wireStartComponent || undefined,
-        targetComponentId: this.selectedComponent || undefined,
-        position: gesture.position,
-        handedness: "Right",
-      };
-
-      // Reset wire state
-      this.wireStartComponent = null;
-      this.isConnecting = false;
-
-      return action;
-    }
-
-    // No connection in progress - DELETE DISABLED to prevent accidental deletion
-    console.log("⚠️ RIGHT HAND GRAB (no wire) - DELETE is DISABLED");
+    console.log(
+      "⚠️ GRAB (FIST) gesture detected - Wire connection now uses POINT gesture (1 finger)"
+    );
 
     return {
       type: "move",
@@ -455,6 +636,9 @@ export class CircuitController {
   cancelWireConnection() {
     this.wireStartComponent = null;
     this.isConnecting = false;
+    this.pointHoldStartTime = 0;
+    this.lastPointComponent = null;
+    console.log("🔄 Wire connection cancelled");
   }
 
   /**
@@ -469,5 +653,22 @@ export class CircuitController {
    */
   getWireStartComponent(): string | null {
     return this.wireStartComponent;
+  }
+
+  /**
+   * Get point hold progress (0.0 to 1.0)
+   */
+  getPointHoldProgress(): number {
+    if (this.pointHoldStartTime === 0) return 0;
+    const elapsed = Date.now() - this.pointHoldStartTime;
+    return Math.min(elapsed / this.pointHoldDuration, 1.0);
+  }
+
+  /**
+   * Reset point hold timer when gesture changes
+   */
+  resetPointHold() {
+    this.pointHoldStartTime = 0;
+    this.lastPointComponent = null;
   }
 }

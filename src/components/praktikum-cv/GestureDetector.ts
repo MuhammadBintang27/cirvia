@@ -174,8 +174,16 @@ export class GestureDetector {
           holdDuration >= this.fingerCountHoldDuration &&
           actualHandedness === "Left"
         ) {
+          const componentNames: { [key: number]: string } = {
+            1: "🔋 BATTERY",
+            2: "💡 LAMP",
+            3: "⚡ RESISTOR",
+            4: "🔘 SWITCH",
+            5: "━ WIRE",
+          };
+
           console.log(
-            `✅ FINGER COUNT COMPLETE! ${fingerCount} fingers held for 3 seconds`
+            `✅ FINGER COUNT COMPLETE! ${fingerCount} fingers (${componentNames[fingerCount]}) held for 3 seconds - ADDING COMPONENT!`
           );
 
           // Reset to prevent repeated triggers
@@ -211,8 +219,16 @@ export class GestureDetector {
         );
       } else {
         // New finger count detected - start timer
+        const componentNames: { [key: number]: string } = {
+          1: "🔋 BATTERY",
+          2: "💡 LAMP",
+          3: "⚡ RESISTOR",
+          4: "🔘 SWITCH",
+          5: "━ WIRE",
+        };
+
         console.log(
-          `🖐️ NEW FINGER COUNT: ${fingerCount} fingers on ${actualHandedness} hand - Starting 3s timer`
+          `🖐️ NEW FINGER COUNT: ${fingerCount} fingers (${componentNames[fingerCount]}) on ${actualHandedness} hand - Starting 3s timer`
         );
         this.fingerCountStartTime = now;
         this.lastFingerCount = fingerCount;
@@ -263,9 +279,12 @@ export class GestureDetector {
 
     // 5. POINT (Only index extended)
     if (isIndexExtended && !isMiddleExtended && isRingClosed && isPinkyClosed) {
+      console.log(
+        `👆 POINT gesture detected | Handedness: ${actualHandedness} | Confidence: 0.90`
+      );
       return this.createGestureResult(
         "point",
-        0.88,
+        0.9, // Increased from 0.88 to ensure it passes threshold
         actualHandedness, // Use corrected handedness
         landmarks,
         indexTip
@@ -490,6 +509,7 @@ export class GestureDetector {
       absoluteAngle?: number;
       isAddAction?: boolean;
       holdProgress?: number; // NEW: Hold progress (0.0 - 1.0)
+      componentId?: string; // NEW: Component ID at finger position
     }
   ): GestureResult {
     return {
