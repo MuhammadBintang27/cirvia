@@ -73,8 +73,18 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
     rotation: number;
   }
 
+  // 🆕 Wire interface for permanent wire connections
+  interface WireComponent {
+    id: string;
+    fromComponentId: string;
+    toComponentId: string;
+  }
+
   const [components, setComponents] = useState<CircuitComponent[]>([]);
   const componentsRef = useRef<CircuitComponent[]>([]); // 🔧 FIX: Always get latest components
+
+  // 🆕 Permanent wire connections
+  const [wires, setWires] = useState<WireComponent[]>([]);
 
   // Sync components state to ref
   useEffect(() => {
@@ -110,9 +120,6 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
   const [selectedComponentId, setSelectedComponentId] = useState<string | null>(
     null
   );
-
-  // 🆕 Gesture reset delay ref
-  const gestureResetTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // FPS counter
   const fpsCounterRef = useRef({ frames: 0, lastTime: Date.now() });
@@ -250,7 +257,20 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
         return;
       }
 
-      // 🆕 RIGHT HAND: Start wire connection
+      // 🆕 RIGHT HAND: Point hold progress (visual feedback while holding)
+      if (action.type === "point_hold_progress" && action.position) {
+        const holdProgress = action.holdProgress || 0;
+        console.log(
+          `🕐 POINT HOLD: ${(holdProgress * 100).toFixed(0)}% (${
+            action.componentId
+          })`
+        );
+        // Visual feedback will be drawn on canvas
+        // No state update needed, just log for now
+        return;
+      }
+
+      // 🆕 RIGHT HAND: Start wire connection (after 3-second hold)
       if (action.type === "start_wire" && action.componentId) {
         setWireConnection({
           isActive: true,
@@ -262,24 +282,91 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
               }
             : null,
         });
-        console.log("🔌 WIRE START");
+        console.log(`🔌 WIRE START from component: ${action.componentId}`);
+        debugLogger.log("action", "WIRE START", {
+          componentId: action.componentId,
+        });
         return;
       }
 
-      // 🆕 RIGHT HAND: Complete wire connection
+      // 🆕 RIGHT HAND: Wire target hold progress (holding on target component)
+      if (action.type === "wire_target_hold_progress" && action.position) {
+        const holdProgress = action.holdProgress || 0;
+        console.log(
+          `🕐 TARGET HOLD: ${(holdProgress * 100).toFixed(0)}% on target: ${
+            action.targetComponentId || "none"
+          }`
+        );
+
+        // Update wire end position while holding
+        setWireConnection((prev) => ({
+          ...prev,
+          endPosition: action.position
+            ? {
+                x: mirrorX(action.position.x) * 1200,
+                y: action.position.y * 700,
+              }
+            : prev.endPosition,
+        }));
+
+        // Visual feedback will be drawn on canvas
+        return;
+      }
+
+      // 🆕 RIGHT HAND: Wire dragging (wire follows finger)
+      if (action.type === "wire_dragging" && action.position) {
+        setWireConnection((prev) => ({
+          ...prev,
+          endPosition: action.position
+            ? {
+                x: mirrorX(action.position.x) * 1200,
+                y: action.position.y * 700,
+              }
+            : prev.endPosition,
+        }));
+        // No log to avoid spam
+        return;
+      }
+
+      // 🆕 RIGHT HAND: Complete wire connection (after 3-second hold on target)
       if (
         action.type === "complete_wire" &&
         action.componentId &&
         action.targetComponentId
       ) {
-        console.log("🔌 WIRE COMPLETE");
+        console.log(
+          `🔌 WIRE COMPLETE: ${action.componentId} → ${action.targetComponentId}`
+        );
+        debugLogger.log("action", "WIRE COMPLETE", {
+          from: action.componentId,
+          to: action.targetComponentId,
+        });
 
-        // Reset wire state
+        // ✅ Create permanent wire connection
+        const newWire: WireComponent = {
+          id: `wire_${Date.now()}`,
+          fromComponentId: action.componentId,
+          toComponentId: action.targetComponentId,
+        };
+
+        setWires((prev) => {
+          const updated = [...prev, newWire];
+          console.log(`✅ WIRE SAVED: ${updated.length} total wires`);
+          debugLogger.log("action", "WIRE SAVED", {
+            wireId: newWire.id,
+            totalWires: updated.length,
+          });
+          return updated;
+        });
+
+        // ✅ Reset temporary wire connection state
         setWireConnection({
           isActive: false,
           startComponentId: null,
           endPosition: null,
         });
+
+        console.log("🔄 Wire connection state reset");
         return;
       }
 
@@ -529,6 +616,53 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
             true // 🔄 isFrontCamera = true (laptop camera = mirror)
           );
 
+          // 🆕 Detect component at finger position (for POINT gesture)
+          if (gesture.name === "point" && gesture.position) {
+            const mirrorX = (x: number) => 1 - x;
+            const fingerX = mirrorX(gesture.position.x) * 1200;
+            const fingerY = gesture.position.y * 700;
+
+            console.log(
+              `👆 POINT detected at (${fingerX.toFixed(0)}, ${fingerY.toFixed(
+                0
+              )})`
+            );
+
+            // Find component under finger (80px radius)
+            const DETECTION_RADIUS = 80;
+            const componentAtFinger = componentsRef.current.find((c) => {
+              const dx = c.position.x - fingerX;
+              const dy = c.position.y - fingerY;
+              const distance = Math.sqrt(dx * dx + dy * dy);
+
+              if (distance < DETECTION_RADIUS) {
+                console.log(
+                  `   ✅ Component ${c.type} at distance ${distance.toFixed(
+                    1
+                  )}px`
+                );
+              }
+
+              return distance < DETECTION_RADIUS;
+            });
+
+            // Initialize metadata if not exists
+            if (!gesture.metadata) {
+              gesture.metadata = {};
+            }
+
+            // Add componentId to gesture metadata
+            if (componentAtFinger) {
+              gesture.metadata.componentId = componentAtFinger.id;
+              console.log(
+                `   🎯 Component under finger: ${componentAtFinger.type} (${componentAtFinger.id})`
+              );
+            } else {
+              gesture.metadata.componentId = undefined;
+              console.log("   ❌ No component under finger");
+            }
+          }
+
           // Smooth gesture
           const smoothGesture =
             gestureDetectorRef.current.getSmoothGesture(gesture);
@@ -567,41 +701,34 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
           }
 
           // 🔄 Reset PINCH state if RIGHT hand but NOT pinching
-          // IMPROVED: Add delay tolerance to prevent premature reset
+          // IMPROVED: Immediate reset when gesture changes from PINCH
           if (
             smoothGesture.handedness === "Right" &&
             smoothGesture.name !== "pinch"
           ) {
-            // Clear any pending reset timeout
-            if (gestureResetTimeoutRef.current) {
-              clearTimeout(gestureResetTimeoutRef.current);
+            // 🔧 FIX: Immediate reset when NOT pinching
+            // This prevents old component selection from affecting next pinch
+
+            // Log DROP action if component was selected
+            if (selectedComponentId) {
+              console.log("📍 DROP - Component released");
+              debugLogger.log("action", "DROP", {
+                id: selectedComponentId,
+                gesture: smoothGesture.name,
+              });
             }
 
-            // Set timeout with 150ms delay tolerance
-            gestureResetTimeoutRef.current = setTimeout(() => {
-              // Double-check gesture is still not PINCH after delay
-              if (
-                state.currentGesture?.handedness === "Right" &&
-                state.currentGesture?.name !== "pinch"
-              ) {
-                // Log DROP action if component was selected
-                if (selectedComponentId) {
-                  console.log("📍 DROP");
-                }
+            // Immediate reset - no delay tolerance
+            circuitControllerRef.current.forceResetPinchState();
+            setSelectedComponentId(null);
+          }
 
-                circuitControllerRef.current.resetPinchState();
-                setSelectedComponentId(null);
-              }
-            }, 150); // 150ms delay tolerance
-          } else if (
+          // 🆕 Reset POINT hold timer if gesture changes from POINT
+          if (
             smoothGesture.handedness === "Right" &&
-            smoothGesture.name === "pinch"
+            smoothGesture.name !== "point"
           ) {
-            // Cancel reset if PINCH is detected again
-            if (gestureResetTimeoutRef.current) {
-              clearTimeout(gestureResetTimeoutRef.current);
-              gestureResetTimeoutRef.current = null;
-            }
+            circuitControllerRef.current.resetPointHold();
           }
         }
       } else {
@@ -636,8 +763,6 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
       handleCircuitAction,
       selectedComponentId,
       // Removed 'components' - now using componentsRef.current
-      state.currentGesture?.handedness,
-      state.currentGesture?.name,
     ]
   );
 
@@ -739,6 +864,37 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
       ctx.lineTo(canvas.width, y);
       ctx.stroke();
     }
+
+    // 🆕 Draw permanent wires FIRST (below components)
+    wires.forEach((wire) => {
+      const fromComp = components.find((c) => c.id === wire.fromComponentId);
+      const toComp = components.find((c) => c.id === wire.toComponentId);
+
+      if (fromComp && toComp) {
+        ctx.beginPath();
+        ctx.moveTo(fromComp.position.x, fromComp.position.y);
+        ctx.lineTo(toComp.position.x, toComp.position.y);
+
+        // Solid line for permanent connection
+        ctx.strokeStyle = "#10B981"; // Green
+        ctx.lineWidth = 5;
+        ctx.shadowColor = "#10B981";
+        ctx.shadowBlur = 10;
+        ctx.stroke();
+        ctx.shadowBlur = 0;
+
+        // Draw connection points (circles at endpoints)
+        [fromComp, toComp].forEach((comp) => {
+          ctx.beginPath();
+          ctx.arc(comp.position.x, comp.position.y, 8, 0, Math.PI * 2);
+          ctx.fillStyle = "#10B981";
+          ctx.fill();
+          ctx.strokeStyle = "#FFFFFF";
+          ctx.lineWidth = 2;
+          ctx.stroke();
+        });
+      }
+    });
 
     // Draw components
     components.forEach((component) => {
@@ -1295,6 +1451,301 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
           }
         }
       }
+
+      // 🆕 DRAW POINT GESTURE CURSOR AND HOLD PROGRESS
+      const isPointActive =
+        state.currentGesture?.name === "point" &&
+        state.currentGesture?.handedness === "Right";
+
+      if (isPointActive && state.currentGesture?.position) {
+        // Get finger position (index fingertip)
+        const indexTip = mirrorLandmarks[8];
+        const fingerX = indexTip.x * canvasWidth;
+        const fingerY = indexTip.y * canvasHeight;
+
+        // Get hold progress from circuit controller
+        const holdProgress =
+          circuitControllerRef.current.getPointHoldProgress();
+
+        // Draw point cursor
+        ctx.strokeStyle = "#8B5CF6"; // Purple
+        ctx.lineWidth = 3;
+        ctx.shadowColor = "#8B5CF6";
+        ctx.shadowBlur = 15;
+
+        // Crosshair for pointer
+        ctx.beginPath();
+        ctx.moveTo(fingerX - 20, fingerY);
+        ctx.lineTo(fingerX + 20, fingerY);
+        ctx.moveTo(fingerX, fingerY - 20);
+        ctx.lineTo(fingerX, fingerY + 20);
+        ctx.stroke();
+
+        ctx.shadowBlur = 0;
+
+        // 🕐 Draw hold progress circle (if holding on component)
+        if (holdProgress > 0) {
+          const radius = 35;
+
+          // Background circle (gray)
+          ctx.beginPath();
+          ctx.arc(fingerX, fingerY, radius, 0, Math.PI * 2);
+          ctx.strokeStyle = "rgba(148, 163, 184, 0.3)";
+          ctx.lineWidth = 6;
+          ctx.stroke();
+
+          // Progress arc (purple to green)
+          const progressAngle = holdProgress * Math.PI * 2 - Math.PI / 2;
+          ctx.beginPath();
+          ctx.arc(fingerX, fingerY, radius, -Math.PI / 2, progressAngle);
+
+          // Color gradient based on progress
+          const color =
+            holdProgress < 0.5
+              ? `rgba(139, 92, 246, ${0.8 + holdProgress * 0.2})` // Purple
+              : `rgba(16, 185, 129, ${0.8 + (holdProgress - 0.5) * 0.4})`; // Green
+
+          ctx.strokeStyle = color;
+          ctx.lineWidth = 8;
+          ctx.shadowColor = color;
+          ctx.shadowBlur = 15;
+          ctx.stroke();
+          ctx.shadowBlur = 0;
+
+          // Progress percentage text
+          ctx.fillStyle = "#FFFFFF";
+          ctx.font = "bold 16px Arial";
+          ctx.textAlign = "center";
+          ctx.textBaseline = "middle";
+          ctx.fillText(`${Math.round(holdProgress * 100)}%`, fingerX, fingerY);
+
+          // "HOLD TO START WIRE" label
+          ctx.fillStyle =
+            holdProgress < 1.0
+              ? "rgba(139, 92, 246, 0.95)" // Purple while holding
+              : "rgba(16, 185, 129, 0.95)"; // Green when complete
+
+          ctx.beginPath();
+          ctx.roundRect(fingerX - 90, fingerY + 50, 180, 30, 8);
+          ctx.fill();
+
+          ctx.strokeStyle = "#FFFFFF";
+          ctx.lineWidth = 2;
+          ctx.stroke();
+
+          ctx.fillStyle = "#FFFFFF";
+          ctx.font = "bold 13px Arial";
+          ctx.fillText(
+            holdProgress < 1.0 ? "HOLD TO START WIRE" : "WIRE STARTED!",
+            fingerX,
+            fingerY + 65
+          );
+        } else {
+          // Show "POINT AT COMPONENT" hint
+          ctx.fillStyle = "rgba(139, 92, 246, 0.9)";
+          ctx.beginPath();
+          ctx.roundRect(fingerX - 85, fingerY + 30, 170, 28, 8);
+          ctx.fill();
+
+          ctx.strokeStyle = "#FFFFFF";
+          ctx.lineWidth = 2;
+          ctx.stroke();
+
+          ctx.fillStyle = "#FFFFFF";
+          ctx.font = "bold 12px Arial";
+          ctx.fillText("👆 POINT AT COMPONENT", fingerX, fingerY + 44);
+        }
+      }
+    }
+
+    // 🔌 DRAW WIRE DRAGGING (when wire is active)
+    if (wireConnection.isActive && wireConnection.startComponentId) {
+      const startComp = components.find(
+        (c) => c.id === wireConnection.startComponentId
+      );
+
+      if (startComp && wireConnection.endPosition) {
+        // Draw wire line from start component to cursor
+        ctx.beginPath();
+        ctx.moveTo(startComp.position.x, startComp.position.y);
+        ctx.lineTo(wireConnection.endPosition.x, wireConnection.endPosition.y);
+
+        // Animated dashed line
+        const dashOffset = (Date.now() / 20) % 20;
+        ctx.setLineDash([10, 10]);
+        ctx.lineDashOffset = -dashOffset;
+        ctx.strokeStyle = "#F59E0B"; // Amber
+        ctx.lineWidth = 4;
+        ctx.shadowColor = "#F59E0B";
+        ctx.shadowBlur = 15;
+        ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.shadowBlur = 0;
+
+        // Draw start point indicator
+        ctx.beginPath();
+        ctx.arc(startComp.position.x, startComp.position.y, 12, 0, Math.PI * 2);
+        ctx.fillStyle = "#10B981"; // Green
+        ctx.fill();
+        ctx.strokeStyle = "#FFFFFF";
+        ctx.lineWidth = 3;
+        ctx.stroke();
+
+        // 🆕 Check if cursor is on target component
+        const DETECTION_RADIUS = 80;
+        const targetComp = components.find((c) => {
+          if (c.id === startComp.id) return false; // Skip start component
+          const dx = c.position.x - wireConnection.endPosition!.x;
+          const dy = c.position.y - wireConnection.endPosition!.y;
+          const distance = Math.sqrt(dx * dx + dy * dy);
+          return distance < DETECTION_RADIUS;
+        });
+
+        // Get hold progress from circuit controller
+        const targetHoldProgress =
+          circuitControllerRef.current.getPointHoldProgress();
+
+        if (targetComp && targetHoldProgress > 0) {
+          // 🕐 DRAW TARGET HOLD PROGRESS CIRCLE
+          const radius = 40;
+          const centerX = targetComp.position.x;
+          const centerY = targetComp.position.y;
+
+          // Background circle (gray)
+          ctx.beginPath();
+          ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
+          ctx.strokeStyle = "rgba(148, 163, 184, 0.3)";
+          ctx.lineWidth = 6;
+          ctx.stroke();
+
+          // Progress arc (amber to green)
+          const progressAngle = targetHoldProgress * Math.PI * 2 - Math.PI / 2;
+          ctx.beginPath();
+          ctx.arc(centerX, centerY, radius, -Math.PI / 2, progressAngle);
+
+          // Color gradient based on progress
+          const color =
+            targetHoldProgress < 0.5
+              ? `rgba(245, 158, 11, ${0.8 + targetHoldProgress * 0.2})` // Amber
+              : `rgba(16, 185, 129, ${0.8 + (targetHoldProgress - 0.5) * 0.4})`; // Green
+
+          ctx.strokeStyle = color;
+          ctx.lineWidth = 8;
+          ctx.shadowColor = color;
+          ctx.shadowBlur = 15;
+          ctx.stroke();
+          ctx.shadowBlur = 0;
+
+          // Progress percentage text
+          ctx.fillStyle = "#FFFFFF";
+          ctx.font = "bold 18px Arial";
+          ctx.textAlign = "center";
+          ctx.textBaseline = "middle";
+          ctx.fillText(
+            `${Math.round(targetHoldProgress * 100)}%`,
+            centerX,
+            centerY
+          );
+
+          // "HOLD TO CONNECT" label
+          ctx.fillStyle =
+            targetHoldProgress < 1.0
+              ? "rgba(245, 158, 11, 0.95)" // Amber while holding
+              : "rgba(16, 185, 129, 0.95)"; // Green when complete
+
+          ctx.beginPath();
+          ctx.roundRect(centerX - 85, centerY + 55, 170, 30, 8);
+          ctx.fill();
+
+          ctx.strokeStyle = "#FFFFFF";
+          ctx.lineWidth = 2;
+          ctx.stroke();
+
+          ctx.fillStyle = "#FFFFFF";
+          ctx.font = "bold 13px Arial";
+          ctx.fillText(
+            targetHoldProgress < 1.0 ? "HOLD TO CONNECT" : "CONNECTING!",
+            centerX,
+            centerY + 70
+          );
+
+          // Draw end point indicator on target component
+          ctx.beginPath();
+          ctx.arc(centerX, centerY, 15, 0, Math.PI * 2);
+          ctx.fillStyle = color;
+          ctx.fill();
+          ctx.strokeStyle = "#FFFFFF";
+          ctx.lineWidth = 3;
+          ctx.stroke();
+        } else {
+          // Draw normal end point indicator (follows cursor)
+          ctx.beginPath();
+          ctx.arc(
+            wireConnection.endPosition.x,
+            wireConnection.endPosition.y,
+            10,
+            0,
+            Math.PI * 2
+          );
+          ctx.fillStyle = "#F59E0B"; // Amber
+          ctx.fill();
+          ctx.strokeStyle = "#FFFFFF";
+          ctx.lineWidth = 3;
+          ctx.stroke();
+        }
+
+        // "WIRE CONNECTING" label at start component
+        ctx.fillStyle = "rgba(16, 185, 129, 0.95)";
+        ctx.beginPath();
+        ctx.roundRect(
+          startComp.position.x - 70,
+          startComp.position.y - 65,
+          140,
+          28,
+          8
+        );
+        ctx.fill();
+
+        ctx.strokeStyle = "#FFFFFF";
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        ctx.fillStyle = "#FFFFFF";
+        ctx.font = "bold 12px Arial";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText(
+          "🔌 WIRE START",
+          startComp.position.x,
+          startComp.position.y - 51
+        );
+
+        // "POINT AT TARGET" label at cursor (only if not on target component)
+        if (!targetComp || targetHoldProgress === 0) {
+          ctx.fillStyle = "rgba(245, 158, 11, 0.95)";
+          ctx.beginPath();
+          ctx.roundRect(
+            wireConnection.endPosition.x - 90,
+            wireConnection.endPosition.y + 25,
+            180,
+            28,
+            8
+          );
+          ctx.fill();
+
+          ctx.strokeStyle = "#FFFFFF";
+          ctx.lineWidth = 2;
+          ctx.stroke();
+
+          ctx.fillStyle = "#FFFFFF";
+          ctx.font = "bold 12px Arial";
+          ctx.fillText(
+            "👆 HOLD ON TARGET 3s",
+            wireConnection.endPosition.x,
+            wireConnection.endPosition.y + 39
+          );
+        }
+      }
     }
   }, [
     components,
@@ -1302,6 +1753,7 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
     wireConnection,
     state.currentGesture,
     selectedComponentId,
+    wires, // 🆕 Added wires dependency
   ]);
 
   /**
@@ -1340,10 +1792,6 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
   useEffect(() => {
     return () => {
       stopTracking();
-      // Clear gesture reset timeout
-      if (gestureResetTimeoutRef.current) {
-        clearTimeout(gestureResetTimeoutRef.current);
-      }
     };
   }, [stopTracking]);
 
@@ -1542,8 +1990,11 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
               <h4 className="text-white font-bold text-sm flex items-center gap-2">
                 <span className="text-orange-400">🔧</span> AREA PRAKTIKUM
               </h4>
-              <div className="text-blue-300 text-xs">
-                {components.length} komponen
+              <div className="flex items-center gap-3 text-xs">
+                <div className="text-blue-300">
+                  {components.length} komponen
+                </div>
+                <div className="text-green-300">{wires.length} koneksi</div>
               </div>
             </div>
 

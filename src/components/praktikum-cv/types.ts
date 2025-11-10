@@ -76,7 +76,10 @@ export interface CircuitAction {
     | "start_wire" // NEW: Start wire connection (right hand)
     | "update_wire" // NEW: Update wire position
     | "complete_wire" // NEW: Complete wire connection
-    | "add_direct"; // NEW: Direct add from left hand
+    | "add_direct" // NEW: Direct add from left hand
+    | "wire_dragging" // NEW: Wire following finger
+    | "point_hold_progress" // NEW: Hold progress feedback for starting wire (0.0 - 1.0)
+    | "wire_target_hold_progress"; // NEW: Hold progress on target component (0.0 - 1.0)
   componentType?: ComponentType;
   position?: { x: number; y: number };
   componentId?: string;
@@ -87,6 +90,7 @@ export interface CircuitAction {
   rotation?: number; // Changed to number for smooth rotation
   absoluteRotation?: number; // NEW
   handedness?: "Left" | "Right"; // NEW: Track which hand
+  holdProgress?: number; // NEW: Progress of hold (0.0 - 1.0) for visual feedback
 }
 
 export interface CVPracticumState {
