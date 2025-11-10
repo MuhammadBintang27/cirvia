@@ -344,65 +344,10 @@ const MaterialsPage = () => {
           </div>
         </section>
 
-        {/* ====== INFO SECTION ====== */}
-        <section className="py-12 px-6 md:px-12 border-t border-white/10">
-          <div className="max-w-6xl mx-auto">
-            <div className="grid md:grid-cols-3 gap-6">
-              <div className="group relative">
-                <div className="absolute -inset-1 bg-gradient-to-r from-blue-500/20 to-cyan-500/20 rounded-2xl blur opacity-0 group-hover:opacity-50 transition duration-1000"></div>
-                <div className="relative bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl rounded-2xl p-6 border border-white/20 text-center">
-                  <BookOpen className="w-10 h-10 text-blue-400 mx-auto mb-3" />
-                  <h3 className="text-lg font-bold text-white mb-2">Materi Lengkap</h3>
-                  <p className="text-blue-200/70 text-sm">Teori + konsep + praktik dalam satu platform</p>
-                </div>
-              </div>
-
-              <div className="group relative">
-                <div className="absolute -inset-1 bg-gradient-to-r from-purple-500/20 to-pink-500/20 rounded-2xl blur opacity-0 group-hover:opacity-50 transition duration-1000"></div>
-                <div className="relative bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl rounded-2xl p-6 border border-white/20 text-center">
-                  <Zap className="w-10 h-10 text-purple-400 mx-auto mb-3" />
-                  <h3 className="text-lg font-bold text-white mb-2">Demo Interaktif</h3>
-                  <p className="text-blue-200/70 text-sm">Simulasi real-time untuk pemahaman lebih baik</p>
-                </div>
-              </div>
-
-              <div className="group relative">
-                <div className="absolute -inset-1 bg-gradient-to-r from-emerald-500/20 to-teal-500/20 rounded-2xl blur opacity-0 group-hover:opacity-50 transition duration-1000"></div>
-                <div className="relative bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl rounded-2xl p-6 border border-white/20 text-center">
-                  <CheckCircle className="w-10 h-10 text-emerald-400 mx-auto mb-3" />
-                  <h3 className="text-lg font-bold text-white mb-2">Progress Tracking</h3>
-                  <p className="text-blue-200/70 text-sm">Pantau kemajuan belajar Anda secara real-time</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
+        
 
 
-        {/* ====== CTA SECTION (AKHIR) ====== */}
-        <section className="py-16 px-6 md:px-12 border-t border-white/10">
-          <div className="max-w-4xl mx-auto">
-            <div className="relative group">
-              <div className="absolute -inset-1 bg-gradient-to-r from-emerald-500/30 to-teal-500/30 rounded-2xl blur-lg opacity-50 group-hover:opacity-75 transition duration-1000"></div>
-              
-              <div className="relative bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl rounded-2xl p-8 border border-white/20 text-center">
-                <h3 className="text-3xl font-black text-white mb-3">Siap untuk Praktikum?</h3>
-                <p className="text-blue-200/80 mb-6 max-w-lg mx-auto">
-                  Setelah mempelajari teori, uji pemahaman Anda dengan simulator rangkaian listrik interaktif
-                </p>
-                
-                <button
-                  className="inline-flex items-center gap-2 bg-gradient-to-r from-emerald-500 to-teal-500 text-white px-8 py-3 rounded-lg font-bold hover:from-emerald-600 hover:to-teal-600 transition-all transform hover:scale-105 shadow-lg"
-                  onClick={() => window.location.href = '/practicum'}
-                >
-                  <Zap className="w-5 h-5" />
-                  <span>Mulai Praktikum</span>
-                  <ArrowRight className="w-5 h-5" />
-                </button>
-              </div>
-            </div>
-          </div>
-        </section>
+        
 
         <div className="h-6"></div>
       </div>

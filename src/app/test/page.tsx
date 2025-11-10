@@ -111,21 +111,6 @@ const TestPage = () => {
               Uji kemampuan Anda dengan sistem evaluasi berstandar internasional yang dirancang khusus untuk mengasah pemahaman rangkaian listrik
             </p>
 
-            {/* Stats */}
-            <div className="flex justify-center space-x-8 mb-12">
-              <div className="text-center">
-                <div className="text-3xl font-bold text-white">1000+</div>
-                <div className="text-blue-300 text-sm">Soal Berkualitas</div>
-              </div>
-              <div className="text-center">
-                <div className="text-3xl font-bold text-white">95%</div>
-                <div className="text-blue-300 text-sm">Tingkat Akurasi</div>
-              </div>
-              <div className="text-center">
-                <div className="text-3xl font-bold text-white">24/7</div>
-                <div className="text-blue-300 text-sm">Akses Unlimited</div>
-              </div>
-            </div>
           </div>
 
           {/* Premium Test Cards */}
