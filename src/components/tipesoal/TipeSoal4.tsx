@@ -171,9 +171,23 @@ const TipeSoal4: React.FC<TipeSoal4Props> = ({ question, onAnswer }) => {
     }));
   }, [state.showResult, lampIds, question.targetLamp]);
 
+  // Check if all lamps are answered (no 'unknown' states)
+  const canSubmit = useCallback(() => {
+    // Check if all lamps (except broken one) have been answered
+    const allAnswered = lampIds.every(lampId => state.lampStates[lampId] !== 'unknown');
+    return allAnswered && !state.showResult;
+  }, [state.lampStates, state.showResult, lampIds]);
+
   // Submit answer
   const handleSubmit = useCallback(() => {
     if (state.showResult) return;
+
+    // Check if all lamps are answered
+    const hasUnanswered = lampIds.some(lampId => state.lampStates[lampId] === 'unknown');
+    if (hasUnanswered) {
+      alert('⚠️ Silakan pilih status untuk semua lampu (Menyala atau Mati) sebelum submit!');
+      return;
+    }
 
     const feedback: { [lampId: string]: 'correct' | 'incorrect' | 'none' } = {};
     let correctCount = 0;
@@ -614,6 +628,7 @@ const TipeSoal4: React.FC<TipeSoal4Props> = ({ question, onAnswer }) => {
                   <li>• Klik lampu pada diagram untuk memprediksi kondisinya</li>
                   <li>• 💡 = Nyala/Padam, ? = Belum diprediksi</li>
                   <li>• Perhatikan: lampu mana yang akan terpengaruh jika target lamp putus</li>
+                  <li className="text-yellow-300 font-medium">⚠️ Semua lampu harus dipilih sebelum submit!</li>
                 </ul>
               </div>
             </div>
@@ -621,9 +636,16 @@ const TipeSoal4: React.FC<TipeSoal4Props> = ({ question, onAnswer }) => {
 
           {/* Prediction Summary */}
           <div className="bg-gradient-to-br from-blue-500/10 to-cyan-500/10 backdrop-blur-sm rounded-xl border border-blue-400/30 p-6 mb-6">
-            <h4 className="text-lg font-semibold bg-gradient-to-r from-blue-300 to-cyan-300 bg-clip-text text-transparent mb-3">
-              Status Prediksi
-            </h4>
+            <div className="flex items-center justify-between mb-3">
+              <h4 className="text-lg font-semibold bg-gradient-to-r from-blue-300 to-cyan-300 bg-clip-text text-transparent">
+                Status Prediksi
+              </h4>
+              {!state.showResult && !canSubmit() && (
+                <span className="text-xs px-3 py-1 bg-yellow-500/20 text-yellow-300 rounded-full border border-yellow-400/30">
+                  {lampIds.filter(id => state.lampStates[id] === 'unknown').length} lampu belum dipilih
+                </span>
+              )}
+            </div>
             
             <div className="grid grid-cols-2 gap-3">
               {lampIds
@@ -686,7 +708,12 @@ const TipeSoal4: React.FC<TipeSoal4Props> = ({ question, onAnswer }) => {
                 </button>
                 <button
                   onClick={handleSubmit}
-                  className="flex-1 px-4 py-3 bg-gradient-to-r from-blue-500 to-cyan-600 hover:from-blue-600 hover:to-cyan-700 text-white rounded-xl border border-blue-400/30 transition-all duration-300 transform hover:scale-105 font-semibold shadow-lg shadow-blue-500/25"
+                  disabled={!canSubmit()}
+                  className={`flex-1 px-4 py-3 rounded-xl border transition-all duration-300 font-semibold shadow-lg ${
+                    canSubmit()
+                      ? 'bg-gradient-to-r from-blue-500 to-cyan-600 hover:from-blue-600 hover:to-cyan-700 text-white border-blue-400/30 transform hover:scale-105 shadow-blue-500/25'
+                      : 'bg-gray-600/30 text-gray-400 border-gray-500/30 cursor-not-allowed opacity-50'
+                  }`}
                 >
                   Submit
                 </button>
