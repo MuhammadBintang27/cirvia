@@ -46,20 +46,24 @@ const AudioPlayer = ({ title, description, chapters }: AudioPlayerProps) => {
   };
 
   const audioFileName = getAudioFileName(title);
-  const audioSrc = `/audio/${audioFileName}`;
+  // Use absolute path for production
+  const [audioSrc, setAudioSrc] = React.useState('');
 
-  // Debug logging - only in browser
+  // Set audio source only on client side
   React.useEffect(() => {
     if (typeof window !== 'undefined') {
+      const src = `/audio/${audioFileName}`;
+      setAudioSrc(src);
+      
       console.log('🎵 Audio Player Debug:', {
         originalTitle: title,
         cleanedTitle: title.toLowerCase().replace(/^audio:\s*/i, ''),
         audioFileName,
-        audioSrc,
-        fullPath: window.location.origin + audioSrc
+        audioSrc: src,
+        fullPath: window.location.origin + src
       });
     }
-  }, [title, audioFileName, audioSrc]);
+  }, [title, audioFileName]);
 
   // Handle audio load error
   React.useEffect(() => {
@@ -79,17 +83,29 @@ const AudioPlayer = ({ title, description, chapters }: AudioPlayerProps) => {
     };
 
     const handleError = (e: Event) => {
+      const audio = audioRef.current;
       console.error('❌ Audio load error:', {
         audioSrc,
         error: e,
         audioElement: audio,
-        networkState: audio.networkState,
-        readyState: audio.readyState,
-        currentSrc: audio.currentSrc || 'no source'
+        networkState: audio?.networkState,
+        readyState: audio?.readyState,
+        currentSrc: audio?.currentSrc || 'no source',
+        errorCode: (e.target as HTMLMediaElement)?.error?.code,
+        errorMessage: (e.target as HTMLMediaElement)?.error?.message,
       });
-      setAudioError(true);
-      setAudioLoaded(false);
-      setIsPlaying(false);
+      
+      // Try to reload once if it's a network error
+      if (audio && audio.networkState === 3) { // NETWORK_NO_SOURCE
+        console.log('🔄 Attempting to reload audio...');
+        setTimeout(() => {
+          audio.load();
+        }, 1000);
+      } else {
+        setAudioError(true);
+        setAudioLoaded(false);
+        setIsPlaying(false);
+      }
     };
 
     const handleLoadStart = () => {
@@ -219,13 +235,18 @@ const AudioPlayer = ({ title, description, chapters }: AudioPlayerProps) => {
 
       <audio 
         ref={audioRef} 
-        preload="auto"
+        preload="metadata"
         crossOrigin="anonymous"
         onEnded={() => setIsPlaying(false)}
         key={audioSrc}
+        style={{ display: 'none' }}
       >
-        <source src={audioSrc} type="audio/mpeg" />
-        <source src={audioSrc} type="audio/mp3" />
+        {audioSrc && (
+          <>
+            <source src={audioSrc} type="audio/mpeg" />
+            <source src={audioSrc} type="audio/mp3" />
+          </>
+        )}
         Your browser does not support the audio element.
       </audio>
 
