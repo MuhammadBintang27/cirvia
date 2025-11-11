@@ -95,7 +95,10 @@ export class CircuitController {
           break;
 
         case "thumbs_up":
-          action = this.handleThumbsUp(gesture);
+          // Only allow RIGHT hand for toggle switch
+          if (gesture.handedness === "Right") {
+            action = this.handleThumbsUp(gesture);
+          }
           break;
 
         default:

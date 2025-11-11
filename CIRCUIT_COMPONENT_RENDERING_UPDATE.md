@@ -239,8 +239,83 @@ const lampPower = 0; // TODO: Calculate based on circuit analysis
 3. **Start camera**
 4. **Add components** with left hand gestures (1-5 fingers)
 5. **Observe realistic rendering** of each component
-6. **Double-click switches** to toggle open/closed
+6. **Toggle switches** using RIGHT hand THUMBS UP (hold 3 seconds)
 7. **Check console logs** for state changes
+
+---
+
+## 🆕 Toggle Switch via Computer Vision (THUMBS UP)
+
+### Implementation:
+
+✅ **Gesture**: THUMBS UP (jempol tegak, 4 jari lain tertutup)
+✅ **Hand**: RIGHT hand only (tangan kanan)
+✅ **Hold Duration**: 3 seconds
+✅ **Visual Feedback**: Green progress circle (0% → 100%)
+✅ **Target**: Closest switch in circuit (tidak perlu di atas saklar)
+
+### Logic Flow:
+
+1. **Detection**: User shows THUMBS UP with RIGHT hand
+2. **Find Target**: System finds CLOSEST switch from all switches
+3. **Start Hold**: Progress circle appears on target switch (0%)
+4. **Hold Progress**: Circle fills up (33% → 67% → 100%)
+5. **Toggle Complete**: Switch state changes (OPEN ↔ CLOSED)
+6. **Reset**: Hold cancels if gesture changes or no switches available
+
+### Code Changes:
+
+**CircuitController.ts**:
+
+```typescript
+case "thumbs_up":
+  // Only allow RIGHT hand for toggle switch
+  if (gesture.handedness === "Right") {
+    action = this.handleThumbsUp(gesture);
+  }
+  break;
+```
+
+**WebCVPracticum.tsx**:
+
+```typescript
+// Find ALL switches in circuit
+const switches = componentsRef.current.filter((c) => c.type === "switch");
+
+if (switches.length > 0) {
+  // Find CLOSEST switch (tidak perlu ada di atas saklar)
+  let closestSwitch = switches[0];
+  let minDistance = ...;
+
+  switches.forEach((sw) => {
+    const dist = Math.sqrt(...);
+    if (dist < minDistance) {
+      minDistance = dist;
+      closestSwitch = sw;
+    }
+  });
+  
+  // Start/update hold for closest switch
+  // ...
+}
+```
+
+### User Instructions:
+
+1. ✋ **Add switch** to circuit (left hand, 4 fingers, hold 3s)
+2. 👍 **Show THUMBS UP** with RIGHT hand anywhere
+3. ⏱️ **Hold still** for 3 seconds
+4. 👀 **Watch progress** circle fill up on closest switch
+5. ✅ **Switch toggles** automatically at 100%
+
+### Console Output:
+
+```
+👍 THUMBS UP START at (600, 350) on switch: switch-abc123
+🕐 TOGGLE HOLD: 33% on switch-abc123
+🕐 TOGGLE HOLD: 67% on switch-abc123
+✅ SWITCH TOGGLED: switch-abc123 open → closed
+```
 
 ---
 
@@ -251,7 +326,7 @@ const lampPower = 0; // TODO: Calculate based on circuit analysis
 - 🔋 Battery: Orange body with terminals
 - 🔌 Resistor: Beige with color bands
 - 💡 Lamp: Yellow glow (when circuit closed)
-- ⚡ Switch: Lever showing state
+- ⚡ Switch: Lever showing state + toggle hold progress
 - ━ Wire: Orange cable
 
 ### User Experience:
@@ -259,3 +334,4 @@ const lampPower = 0; // TODO: Calculate based on circuit analysis
 - Consistent visual design across practicum modes
 - Clear visual feedback for component states
 - Professional circuit diagram appearance
+- **NEW**: Computer vision toggle switch with hold progress indicator
