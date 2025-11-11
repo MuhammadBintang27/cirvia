@@ -133,10 +133,10 @@ const AudioPlayer = ({ onTimestampReached }: AudioPlayerProps) => {
 
   return (
     <>
-      {/* Audio Element - Hidden */}
+      {/* Audio Element - Hidden - Using Supabase Storage */}
       <audio
         ref={audioRef}
-        src="/audio/modul-seri.mp3"
+        src="https://hczgbjgcolqxejtmaffn.supabase.co/storage/v1/object/public/audio-materials/modul-seri.mp3"
         preload="auto"
       />
 
