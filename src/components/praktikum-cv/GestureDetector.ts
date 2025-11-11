@@ -21,16 +21,44 @@ export class GestureDetector {
   // At 1280px: 0.05 * 1280 = 64px (similar to Python's 40px)
   private readonly PINCH_THRESHOLD = 0.05; // Lowered from 0.10 to match Python
 
+  // 🐛 DEBUG: Toggle untuk logging detail
+  private static DEBUG_FINGER_DETECTION = true; // Set false untuk disable logging detail
+  private static DEBUG_THUMB_ONLY = false; // Set true untuk hanya log thumb
+
+  // � FINGER EXTENSION THRESHOLD: Y-distance for finger extension detection
+  // Lowered from 0.02 to 0.015 for better tolerance
+  private static FINGER_EXTENSION_THRESHOLD = 0.015;
+
+  // �📝 LOG HISTORY: Store detection logs for export
+  private static detectionLogs: Array<{
+    timestamp: string;
+    type: "finger_detection" | "gesture" | "action";
+    data: any;
+  }> = [];
+  private static MAX_LOG_ENTRIES = 500; // Limit log size
+
   constructor() {
     // Log initialization info
-    console.log(
-      `🎯 GestureDetector initialized:
+    const initMessage = `🎯 GestureDetector initialized:
       - PINCH Threshold: ${this.PINCH_THRESHOLD} (normalized)
       - At 1280px width: ${(this.PINCH_THRESHOLD * 1280).toFixed(0)}px
       - At 1920px width: ${(this.PINCH_THRESHOLD * 1920).toFixed(0)}px
       - Python equivalent: ~40px @ 640px
-      - Finger count hold: ${this.fingerCountHoldDuration}ms`
-    );
+      - Finger count hold: ${this.fingerCountHoldDuration}ms
+      - Debug Finger Detection: ${GestureDetector.DEBUG_FINGER_DETECTION}
+      - Debug Thumb Only: ${GestureDetector.DEBUG_THUMB_ONLY}`;
+    
+    console.log(initMessage);
+    
+    // Log to history
+    GestureDetector.addLog("gesture", {
+      event: "initialized",
+      config: {
+        pinchThreshold: this.PINCH_THRESHOLD,
+        fingerCountHold: this.fingerCountHoldDuration,
+        debugMode: GestureDetector.DEBUG_FINGER_DETECTION,
+      },
+    });
   }
 
   /**
@@ -386,14 +414,86 @@ export class GestureDetector {
     const tip = landmarks[indices[3]];
     const pip = landmarks[indices[2]];
     const mcp = landmarks[indices[0]];
+    const wrist = landmarks[0];
 
-    // For thumb, check horizontal distance
+    // 🔧 FIX: Better thumb detection
     if (finger === "thumb") {
-      return Math.abs(tip.x - mcp.x) > 0.04;
+      // Calculate distance from thumb tip to wrist
+      const thumbTipToWrist = Math.sqrt(
+        Math.pow(tip.x - wrist.x, 2) + Math.pow(tip.y - wrist.y, 2)
+      );
+      
+      // Calculate distance from thumb MCP to wrist
+      const thumbMcpToWrist = Math.sqrt(
+        Math.pow(mcp.x - wrist.x, 2) + Math.pow(mcp.y - wrist.y, 2)
+      );
+      
+      // Thumb is extended if tip is significantly farther from wrist than MCP
+      // Also check horizontal distance to avoid false positives
+      const distanceRatio = thumbTipToWrist / thumbMcpToWrist;
+      const isExtended = distanceRatio > 1.3;
+      const horizontalDistance = Math.abs(tip.x - mcp.x);
+      const hasHorizontalDistance = horizontalDistance > 0.05;
+      
+      const result = isExtended && hasHorizontalDistance;
+      
+      // 🐛 DEBUG: Log thumb detection details
+      if (GestureDetector.DEBUG_FINGER_DETECTION) {
+        console.log(
+          `👍 THUMB Check: ` +
+          `TipToWrist=${thumbTipToWrist.toFixed(3)} | ` +
+          `McpToWrist=${thumbMcpToWrist.toFixed(3)} | ` +
+          `Ratio=${distanceRatio.toFixed(2)} (need > 1.3) | ` +
+          `HorizDist=${horizontalDistance.toFixed(3)} (need > 0.05) | ` +
+          `Extended=${isExtended} | HasHorizDist=${hasHorizontalDistance} | ` +
+          `Result=${result ? '✅ EXTENDED' : '❌ CLOSED'}`
+        );
+      }
+
+      // 📝 Always log thumb detection to history (even if debug off)
+      GestureDetector.addLog("finger_detection", {
+        finger: "thumb",
+        tipToWrist: parseFloat(thumbTipToWrist.toFixed(3)),
+        mcpToWrist: parseFloat(thumbMcpToWrist.toFixed(3)),
+        ratio: parseFloat(distanceRatio.toFixed(2)),
+        horizontalDistance: parseFloat(horizontalDistance.toFixed(3)),
+        isExtended: result,
+      });
+      
+      return result;
     }
 
     // For other fingers, tip should be above PIP
-    return tip.y < pip.y - 0.02;
+    const yDistance = pip.y - tip.y;
+    
+    // 🔧 FIX: Use static threshold for consistent detection
+    // Previous: 0.02 (too strict, caused false negatives)
+    // Current: 0.015 (more tolerant, better for 2-finger gesture)
+    const isExtended = yDistance > GestureDetector.FINGER_EXTENSION_THRESHOLD;
+    
+    // 🐛 DEBUG: Log other finger detection (only if debug enabled and not thumb-only mode)
+    if (GestureDetector.DEBUG_FINGER_DETECTION && !GestureDetector.DEBUG_THUMB_ONLY) {
+      console.log(
+        `☝️ ${finger.toUpperCase()} Check: ` +
+        `TipY=${tip.y.toFixed(3)} | PipY=${pip.y.toFixed(3)} | ` +
+        `Distance=${yDistance.toFixed(3)} (need > ${GestureDetector.FINGER_EXTENSION_THRESHOLD}) | ` +
+        `Result=${isExtended ? '✅ EXTENDED' : '❌ CLOSED'}`
+      );
+    }
+
+    // 📝 Log to history for debugging (especially for middle and ring fingers)
+    if (finger === "middle" || finger === "ring") {
+      GestureDetector.addLog("finger_detection", {
+        finger: finger,
+        tipY: parseFloat(tip.y.toFixed(3)),
+        pipY: parseFloat(pip.y.toFixed(3)),
+        yDistance: parseFloat(yDistance.toFixed(3)),
+        threshold: GestureDetector.FINGER_EXTENSION_THRESHOLD,
+        isExtended: isExtended,
+      });
+    }
+    
+    return isExtended;
   }
 
   /**
@@ -556,13 +656,62 @@ export class GestureDetector {
    * NEW: Count how many fingers are extended
    */
   private countExtendedFingers(landmarks: HandLandmark[]): number {
+    console.log("\n" + "=".repeat(70));
+    console.log("🔍 COUNTING EXTENDED FINGERS:");
+    console.log("=".repeat(70));
+    
     let count = 0;
+    const extendedFingers: string[] = [];
+    const closedFingers: string[] = [];
 
     const fingers = ["thumb", "index", "middle", "ring", "pinky"];
     fingers.forEach((finger) => {
-      if (this.isFingerExtended(landmarks, finger)) {
+      const isExtended = this.isFingerExtended(landmarks, finger);
+      if (isExtended) {
         count++;
+        extendedFingers.push(finger);
+      } else {
+        closedFingers.push(finger);
       }
+    });
+
+    // 🎯 SPECIAL CASE: Gesture 2 jari (lamp) protection
+    // If detected 3 fingers and ring is barely extended, check if it should be 2
+    if (count === 3 && extendedFingers.includes("ring")) {
+      // Get ring finger extension measurement
+      const ringTip = landmarks[16]; // Ring tip
+      const ringPip = landmarks[14]; // Ring PIP
+      const ringYDistance = ringPip.y - ringTip.y;
+      
+      // If ring is barely above threshold, downgrade to 2 fingers
+      const TOLERANCE = 0.005; // Allow 0.5% tolerance above threshold
+      if (ringYDistance < GestureDetector.FINGER_EXTENSION_THRESHOLD + TOLERANCE) {
+        console.log(`⚠️  TOLERANCE CHECK: Ring finger borderline (${ringYDistance.toFixed(4)} < ${(GestureDetector.FINGER_EXTENSION_THRESHOLD + TOLERANCE).toFixed(4)})`);
+        console.log(`✅ CORRECTION: Treating as 2 fingers (index + middle) instead of 3`);
+        
+        count = 2;
+        const ringIndex = extendedFingers.indexOf("ring");
+        extendedFingers.splice(ringIndex, 1);
+        closedFingers.push("ring");
+      }
+    }
+
+    // 🐛 DEBUG: Log summary with clear visual separation
+    if (GestureDetector.DEBUG_FINGER_DETECTION) {
+      console.log("=".repeat(70));
+      console.log(
+        `📊 RESULT: ${count} finger(s) detected\n` +
+        `   ✅ EXTENDED: [${extendedFingers.join(", ") || "none"}]\n` +
+        `   ❌ CLOSED:   [${closedFingers.join(", ") || "none"}]`
+      );
+      console.log("=".repeat(70) + "\n");
+    }
+
+    // 📝 Add to log history
+    GestureDetector.addLog("finger_detection", {
+      fingerCount: count,
+      extended: extendedFingers,
+      closed: closedFingers,
     });
 
     return count;
@@ -675,6 +824,126 @@ export class GestureDetector {
       normal: 0.05, // 5% - Default (match Python)
       hard: 0.03, // 3% - Untuk advanced user
       expert: 0.02, // 2% - Butuh presisi tinggi
+    };
+  }
+
+  /**
+   * 🐛 Enable/Disable detailed finger detection logging
+   * @param enabled - true to enable debug logs, false to disable
+   * @param thumbOnly - true to only log thumb detection
+   */
+  static setDebugMode(enabled: boolean, thumbOnly: boolean = false): void {
+    GestureDetector.DEBUG_FINGER_DETECTION = enabled;
+    GestureDetector.DEBUG_THUMB_ONLY = thumbOnly;
+    const message = `🐛 Debug Mode: ${enabled ? "ENABLED" : "DISABLED"}` +
+      (enabled && thumbOnly ? " (Thumb Only)" : "");
+    console.log(message);
+    
+    GestureDetector.addLog("gesture", {
+      event: "debug_mode_changed",
+      enabled,
+      thumbOnly,
+    });
+  }
+
+  /**
+   * 🐛 Get current debug mode status
+   */
+  static getDebugMode(): { enabled: boolean; thumbOnly: boolean } {
+    return {
+      enabled: GestureDetector.DEBUG_FINGER_DETECTION,
+      thumbOnly: GestureDetector.DEBUG_THUMB_ONLY,
+    };
+  }
+
+  /**
+   * 📝 Add entry to detection log history
+   */
+  private static addLog(
+    type: "finger_detection" | "gesture" | "action",
+    data: any
+  ): void {
+    const logEntry = {
+      timestamp: new Date().toISOString(),
+      type,
+      data,
+    };
+
+    // Add to log history
+    GestureDetector.detectionLogs.push(logEntry);
+
+    // Limit log size to prevent memory issues
+    if (GestureDetector.detectionLogs.length > GestureDetector.MAX_LOG_ENTRIES) {
+      GestureDetector.detectionLogs.shift(); // Remove oldest entry
+    }
+  }
+
+  /**
+   * 📊 Get all detection logs
+   */
+  static getDetectionLogs(): Array<{
+    timestamp: string;
+    type: string;
+    data: any;
+  }> {
+    return [...GestureDetector.detectionLogs]; // Return copy
+  }
+
+  /**
+   * 📥 Export detection logs as JSON string
+   */
+  static exportLogsAsJSON(): string {
+    return JSON.stringify(GestureDetector.detectionLogs, null, 2);
+  }
+
+  /**
+   * 💾 Download detection logs as file
+   */
+  static downloadLogs(filename: string = "gesture-detection-logs.json"): void {
+    const jsonStr = GestureDetector.exportLogsAsJSON();
+    const blob = new Blob([jsonStr], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    
+    console.log(`📥 Logs downloaded as ${filename}`);
+  }
+
+  /**
+   * 🗑️ Clear all detection logs
+   */
+  static clearLogs(): void {
+    const count = GestureDetector.detectionLogs.length;
+    GestureDetector.detectionLogs = [];
+    console.log(`🗑️ Cleared ${count} log entries`);
+  }
+
+  /**
+   * 📊 Get log statistics
+   */
+  static getLogStats(): {
+    totalEntries: number;
+    byType: { [key: string]: number };
+    oldestEntry: string | null;
+    newestEntry: string | null;
+  } {
+    const byType: { [key: string]: number } = {};
+    
+    GestureDetector.detectionLogs.forEach((log) => {
+      byType[log.type] = (byType[log.type] || 0) + 1;
+    });
+
+    return {
+      totalEntries: GestureDetector.detectionLogs.length,
+      byType,
+      oldestEntry: GestureDetector.detectionLogs[0]?.timestamp || null,
+      newestEntry: GestureDetector.detectionLogs[GestureDetector.detectionLogs.length - 1]?.timestamp || null,
     };
   }
 }
