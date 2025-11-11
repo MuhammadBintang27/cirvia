@@ -10,11 +10,15 @@ export default function TestAudioPage() {
     setLogs(prev => [...prev, `[${new Date().toLocaleTimeString()}] ${message}`]);
   };
 
+  // Supabase Storage URLs
+  const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://hczgbjgcolqxejtmaffn.supabase.co';
+  const AUDIO_BUCKET = 'audio-materials';
+  
   const testAudioFiles = [
-    '/audio/modul-pengantar.mp3',
-    '/audio/modul-seri.mp3',
-    '/audio/modul-paralel.mp3',
-    '/audio/audio-konsep-dasar-listrik.mp3',
+    `${SUPABASE_URL}/storage/v1/object/public/${AUDIO_BUCKET}/modul-pengantar.mp3`,
+    `${SUPABASE_URL}/storage/v1/object/public/${AUDIO_BUCKET}/modul-seri.mp3`,
+    `${SUPABASE_URL}/storage/v1/object/public/${AUDIO_BUCKET}/modul-paralel.mp3`,
+    `${SUPABASE_URL}/storage/v1/object/public/${AUDIO_BUCKET}/audio-konsep-dasar-listrik.mp3`,
   ];
 
   const testFetch = async (url: string) => {
