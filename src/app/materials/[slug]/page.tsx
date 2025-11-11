@@ -44,14 +44,16 @@ const AudioPlayer = ({ title, description, chapters }: AudioPlayerProps) => {
   const audioFileName = getAudioFileName(title);
   const audioSrc = `/audio/${audioFileName}`;
 
-  // Debug logging
+  // Debug logging - only in browser
   React.useEffect(() => {
-    console.log('🎵 Audio Player Debug:', {
-      title,
-      audioFileName,
-      audioSrc,
-      fullPath: window.location.origin + audioSrc
-    });
+    if (typeof window !== 'undefined') {
+      console.log('🎵 Audio Player Debug:', {
+        title,
+        audioFileName,
+        audioSrc,
+        fullPath: window.location.origin + audioSrc
+      });
+    }
   }, [title, audioFileName, audioSrc]);
 
   // Handle audio load error

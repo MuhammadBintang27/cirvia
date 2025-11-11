@@ -50,7 +50,24 @@ interface LoadingOverlayProps {
 }
 
 export function LoadingOverlay({ isVisible, text = 'Memuat...' }: LoadingOverlayProps) {
+  // Hooks must be called at the top level, not conditionally
+  const [mounted, setMounted] = React.useState(false);
+  
+  React.useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // Early return after hooks
   if (!isVisible) return null;
+
+  // Show simple fallback during SSR/initial render
+  if (!mounted) {
+    return (
+      <div className="fixed inset-0 bg-gradient-to-br from-slate-900 via-blue-950 to-indigo-950 z-50 flex items-center justify-center">
+        <div className="text-white text-xl">Loading...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="fixed inset-0 bg-gradient-to-br from-slate-900 via-blue-950 to-indigo-950 z-50 flex items-center justify-center overflow-hidden">
@@ -121,8 +138,10 @@ export function LoadingOverlay({ isVisible, text = 'Memuat...' }: LoadingOverlay
                   src="/assets/illustrations/maskotchatbot.png" 
                   alt="CIRVIA Mascot" 
                   fill
+                  sizes="(max-width: 768px) 192px, (max-width: 1024px) 224px, 256px"
                   className="object-contain filter drop-shadow-2xl"
                   priority
+                  unoptimized
                 />
               </div>
             </div>
