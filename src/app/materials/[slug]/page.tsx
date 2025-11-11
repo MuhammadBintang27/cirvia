@@ -68,7 +68,7 @@ const AudioPlayer = ({ title, description, chapters }: AudioPlayerProps) => {
   // Handle audio load error
   React.useEffect(() => {
     const audio = audioRef.current;
-    if (!audio) return;
+    if (!audio || !audioSrc) return; // Don't attach listeners if no source
 
     const handleLoadedData = () => {
       console.log('✅ Audio loaded successfully:', audioSrc);
@@ -130,17 +130,43 @@ const AudioPlayer = ({ title, description, chapters }: AudioPlayerProps) => {
 
   // Handle play/pause
   const handlePlayPause = () => {
-    if (!audioRef.current || audioError) {
-      console.warn('Cannot play: audio element not ready or has error');
+    if (!audioRef.current || audioError || !audioSrc) {
+      console.warn('Cannot play: audio element not ready, has error, or no source', {
+        hasAudioRef: !!audioRef.current,
+        audioError,
+        audioSrc
+      });
       return;
     }
     
     const audio = audioRef.current;
     
+    // Check if audio has a valid source
+    if (!audio.src && !audio.currentSrc) {
+      console.error('Audio element has no source!', {
+        src: audio.src,
+        currentSrc: audio.currentSrc,
+        audioSrc
+      });
+      setAudioError(true);
+      return;
+    }
+    
     // Check if audio source is valid before attempting to play
     if (audio.readyState === 0) {
-      console.warn('Audio not ready yet, readyState:', audio.readyState);
-      setAudioError(true);
+      console.warn('Audio not ready yet, attempting to load...', {
+        readyState: audio.readyState,
+        networkState: audio.networkState
+      });
+      audio.load(); // Try to load
+      // Wait a bit and try again
+      setTimeout(() => {
+        if (audio.readyState > 0) {
+          handlePlayPause(); // Retry
+        } else {
+          setAudioError(true);
+        }
+      }, 500);
       return;
     }
     
@@ -167,7 +193,8 @@ const AudioPlayer = ({ title, description, chapters }: AudioPlayerProps) => {
               audioSrc,
               readyState: audio.readyState,
               networkState: audio.networkState,
-              currentSrc: audio.currentSrc
+              currentSrc: audio.currentSrc,
+              src: audio.src
             });
             setAudioError(true);
             setIsPlaying(false);
@@ -233,22 +260,18 @@ const AudioPlayer = ({ title, description, chapters }: AudioPlayerProps) => {
         <div className="text-2xl">🎧</div>
       </div>
 
-      <audio 
-        ref={audioRef} 
-        preload="metadata"
-        crossOrigin="anonymous"
-        onEnded={() => setIsPlaying(false)}
-        key={audioSrc}
-        style={{ display: 'none' }}
-      >
-        {audioSrc && (
-          <>
-            <source src={audioSrc} type="audio/mpeg" />
-            <source src={audioSrc} type="audio/mp3" />
-          </>
-        )}
-        Your browser does not support the audio element.
-      </audio>
+      {/* Audio Element - Only render when source is ready */}
+      {audioSrc && (
+        <audio 
+          ref={audioRef} 
+          preload="metadata"
+          onEnded={() => setIsPlaying(false)}
+          src={audioSrc}
+          style={{ display: 'none' }}
+        >
+          Your browser does not support the audio element.
+        </audio>
+      )}
 
       {/* Error Message */}
       {audioError && (
