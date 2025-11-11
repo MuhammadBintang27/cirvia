@@ -20,7 +20,8 @@ const AudioPlayer = ({ title, description, chapters }: AudioPlayerProps) => {
 
   // Map title to actual audio file names in public/audio folder
   const getAudioFileName = (title: string): string => {
-    const titleLower = title.toLowerCase();
+    // Remove "Audio: " prefix if exists and convert to lowercase
+    const titleLower = title.toLowerCase().replace(/^audio:\s*/i, '');
     
     // Mapping actual audio files in public/audio/
     const audioMap: { [key: string]: string } = {
@@ -33,12 +34,15 @@ const AudioPlayer = ({ title, description, chapters }: AudioPlayerProps) => {
     // Try exact match first
     for (const [key, fileName] of Object.entries(audioMap)) {
       if (titleLower.includes(key)) {
+        console.log(`✅ Audio match found: "${key}" -> ${fileName}`);
         return fileName;
       }
     }
 
     // Fallback: generate from title with 'audio-' prefix
-    return 'audio-' + title.toLowerCase().replace(/[^a-z0-9]+/g, '-') + '.mp3';
+    const fallbackName = 'audio-' + titleLower.replace(/[^a-z0-9]+/g, '-') + '.mp3';
+    console.warn(`⚠️ No audio match for "${titleLower}", using fallback: ${fallbackName}`);
+    return fallbackName;
   };
 
   const audioFileName = getAudioFileName(title);
@@ -48,7 +52,8 @@ const AudioPlayer = ({ title, description, chapters }: AudioPlayerProps) => {
   React.useEffect(() => {
     if (typeof window !== 'undefined') {
       console.log('🎵 Audio Player Debug:', {
-        title,
+        originalTitle: title,
+        cleanedTitle: title.toLowerCase().replace(/^audio:\s*/i, ''),
         audioFileName,
         audioSrc,
         fullPath: window.location.origin + audioSrc
@@ -62,12 +67,19 @@ const AudioPlayer = ({ title, description, chapters }: AudioPlayerProps) => {
     if (!audio) return;
 
     const handleLoadedData = () => {
+      console.log('✅ Audio loaded successfully:', audioSrc);
       setAudioLoaded(true);
       setAudioError(false);
     };
 
-    const handleError = () => {
-      console.warn(`Audio file not found: ${audioSrc}`);
+    const handleError = (e: Event) => {
+      console.error('❌ Audio load error:', {
+        audioSrc,
+        error: e,
+        audioElement: audio,
+        networkState: audio.networkState,
+        readyState: audio.readyState
+      });
       setAudioError(true);
       setAudioLoaded(false);
       setIsPlaying(false);
