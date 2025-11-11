@@ -95,21 +95,7 @@ export default function PracticumPage() {
               listrik
             </p>
 
-            {/* Stats */}
-            <div className="flex justify-center space-x-8 mb-12">
-              <div className="text-center">
-                <div className="text-3xl font-bold text-white">Virtual</div>
-                <div className="text-blue-300 text-sm">Lab Environment</div>
-              </div>
-              <div className="text-center">
-                <div className="text-3xl font-bold text-white">AI-Powered</div>
-                <div className="text-blue-300 text-sm">Gesture Control</div>
-              </div>
-              <div className="text-center">
-                <div className="text-3xl font-bold text-white">Real-time</div>
-                <div className="text-blue-300 text-sm">Calculations</div>
-              </div>
-            </div>
+        
           </div>
 
           {/* Tab Navigation */}

@@ -19,7 +19,7 @@ import { GestureDetectionLogger } from "./GestureDetectionLogger";
 <>
   {/* Your existing components */}
   <GestureDetectionLogger />
-</>
+</>;
 ```
 
 ### 2. Akses dari Browser Console
@@ -51,6 +51,7 @@ GestureDetector.clearLogs();
 ## 📊 Fitur UI Logger
 
 ### Floating Button
+
 - **Icon BarChart** di pojok kanan bawah
 - **Badge merah** menunjukkan jumlah log entries
 - **Click** untuk membuka panel
@@ -58,6 +59,7 @@ GestureDetector.clearLogs();
 ### Panel Logger
 
 #### 1. **Statistics Dashboard**
+
 ```
 ┌─────────────────────────────────┐
 │  Total Logs  │ Fingers │ Actions │
@@ -66,6 +68,7 @@ GestureDetector.clearLogs();
 ```
 
 #### 2. **Filter & Controls**
+
 - **Dropdown Filter**: All, Finger Detection, Gesture, Action
 - **Auto-refresh Toggle**: 👁️ (ON) / 👁️‍🗨️ (OFF)
 - **Refresh Button**: Manual refresh
@@ -74,12 +77,15 @@ GestureDetector.clearLogs();
 - **Clear Button** 🗑️: Clear all logs
 
 #### 3. **Log Entries**
+
 Setiap entry menampilkan:
+
 - **Timestamp**: `15:32:08.771`
 - **Type Badge**: `FINGER_DETECTION` / `GESTURE` / `ACTION`
 - **Data**: JSON formatted data
 
 **Color Coding:**
+
 - 🔵 **Blue**: Finger Detection
 - 🟢 **Green**: Gesture
 - 🟣 **Purple**: Action
@@ -91,6 +97,7 @@ Setiap entry menampilkan:
 ### 1. `finger_detection`
 
 **Contoh:**
+
 ```json
 {
   "timestamp": "2025-11-11T15:32:08.771Z",
@@ -104,6 +111,7 @@ Setiap entry menampilkan:
 ```
 
 **Thumb-specific log:**
+
 ```json
 {
   "timestamp": "2025-11-11T15:32:08.771Z",
@@ -122,6 +130,7 @@ Setiap entry menampilkan:
 ### 2. `gesture`
 
 **Contoh:**
+
 ```json
 {
   "timestamp": "2025-11-11T15:32:10.500Z",
@@ -137,6 +146,7 @@ Setiap entry menampilkan:
 ### 3. `action`
 
 **Contoh:**
+
 ```json
 {
   "timestamp": "2025-11-11T15:32:11.200Z",
@@ -154,48 +164,53 @@ Setiap entry menampilkan:
 ## 🎨 UI Features
 
 ### Auto-Refresh
+
 - **Default**: ON (updates every 1 second)
 - **Toggle**: Click 👁️ button
 - **OFF**: Manual refresh only
 
 ### Filtering
+
 ```
 All Types          ← Show all logs
 Finger Detection   ← Only finger detection logs
-Gesture           ← Only gesture logs  
+Gesture           ← Only gesture logs
 Action            ← Only action logs
 ```
 
 ### Export Options
 
 #### 1. **Copy to Clipboard** 📋
+
 - Click copy button
 - Logs copied as JSON string
 - Paste anywhere (Excel, text editor, etc.)
 
 #### 2. **Download as File** ⬇️
+
 - Click download button
 - File name: `gesture-logs-2025-11-11T15-32-08.json`
 - Open in any JSON viewer
 
 #### 3. **Console Export** (Advanced)
+
 ```javascript
 // Get raw data
 const logs = GestureDetector.getDetectionLogs();
 
 // Filter by type
-const fingerLogs = logs.filter(l => l.type === 'finger_detection');
+const fingerLogs = logs.filter((l) => l.type === "finger_detection");
 
 // Analyze thumb detections
-const thumbLogs = logs.filter(l => 
-  l.type === 'finger_detection' && l.data.finger === 'thumb'
+const thumbLogs = logs.filter(
+  (l) => l.type === "finger_detection" && l.data.finger === "thumb"
 );
 
 // Calculate average thumb ratio
-const avgRatio = thumbLogs.reduce((sum, log) => 
-  sum + log.data.ratio, 0) / thumbLogs.length;
+const avgRatio =
+  thumbLogs.reduce((sum, log) => sum + log.data.ratio, 0) / thumbLogs.length;
 
-console.log('Average thumb ratio:', avgRatio);
+console.log("Average thumb ratio:", avgRatio);
 ```
 
 ---
@@ -207,6 +222,7 @@ console.log('Average thumb ratio:', avgRatio);
 **Problem**: Ibu jari selalu terdeteksi
 
 **Steps:**
+
 1. Open logger panel
 2. Filter: "Finger Detection"
 3. Look for thumb-specific logs
@@ -215,6 +231,7 @@ console.log('Average thumb ratio:', avgRatio);
 6. Adjust thresholds in `GestureDetector.ts` if needed
 
 **Example Analysis:**
+
 ```
 👍 THUMB entries showing ratio=1.45 (threshold 1.3) ✅
    horizontalDistance=0.067 (threshold 0.05) ✅
@@ -227,6 +244,7 @@ console.log('Average thumb ratio:', avgRatio);
 ### Workflow 2: Verify Finger Count Accuracy
 
 **Steps:**
+
 1. Open logger panel
 2. Show 1 finger gesture
 3. Check log entry:
@@ -243,6 +261,7 @@ console.log('Average thumb ratio:', avgRatio);
 ### Workflow 3: Track Component Addition
 
 **Steps:**
+
 1. Enable auto-refresh
 2. Perform gesture (e.g., 3 fingers for resistor)
 3. Watch logs in real-time:
@@ -256,11 +275,13 @@ console.log('Average thumb ratio:', avgRatio);
 ## 💾 Log Storage
 
 ### Memory Management
+
 - **Max Entries**: 500 logs
 - **Auto-cleanup**: Oldest entries removed when limit reached
 - **Storage**: In-memory only (cleared on page refresh)
 
 ### Best Practices
+
 1. **Export regularly** if you need history across sessions
 2. **Clear logs** after debugging to free memory
 3. **Use filters** to reduce visual clutter
@@ -279,23 +300,24 @@ Create a script to analyze exported logs:
 const logs = JSON.parse(/* your exported JSON */);
 
 // Count finger detection accuracy
-const fingerDetections = logs.filter(l => l.type === 'finger_detection');
+const fingerDetections = logs.filter((l) => l.type === "finger_detection");
 const fingerCounts = {};
 
-fingerDetections.forEach(log => {
-  const count = log.data.fingerCount || 'unknown';
+fingerDetections.forEach((log) => {
+  const count = log.data.fingerCount || "unknown";
   fingerCounts[count] = (fingerCounts[count] || 0) + 1;
 });
 
-console.log('Finger count distribution:', fingerCounts);
+console.log("Finger count distribution:", fingerCounts);
 
 // Analyze thumb false positives
-const thumbLogs = logs.filter(l => 
-  l.data.finger === 'thumb' && l.data.isExtended === true
+const thumbLogs = logs.filter(
+  (l) => l.data.finger === "thumb" && l.data.isExtended === true
 );
 
 console.log(`Thumb detected ${thumbLogs.length} times`);
-console.log('Average ratio:', 
+console.log(
+  "Average ratio:",
   thumbLogs.reduce((s, l) => s + l.data.ratio, 0) / thumbLogs.length
 );
 ```
@@ -304,21 +326,21 @@ console.log('Average ratio:',
 
 ```typescript
 // In your test file
-import { GestureDetector } from './GestureDetector';
+import { GestureDetector } from "./GestureDetector";
 
-describe('Finger Detection', () => {
+describe("Finger Detection", () => {
   beforeEach(() => {
     GestureDetector.clearLogs();
   });
 
-  it('should detect 1 finger correctly', () => {
+  it("should detect 1 finger correctly", () => {
     // ... perform gesture ...
-    
+
     const logs = GestureDetector.getDetectionLogs();
     const lastLog = logs[logs.length - 1];
-    
+
     expect(lastLog.data.fingerCount).toBe(1);
-    expect(lastLog.data.extended).toEqual(['index']);
+    expect(lastLog.data.extended).toEqual(["index"]);
   });
 });
 ```
@@ -328,21 +350,25 @@ describe('Finger Detection', () => {
 ## 🐛 Troubleshooting
 
 ### Logger not appearing
+
 - Check if `<GestureDetectionLogger />` is imported
 - Ensure component is rendered in JSX
 - Check console for React errors
 
 ### No logs showing
+
 - Verify debug mode is enabled: `GestureDetector.setDebugMode(true)`
 - Check if gestures are being detected (console logs)
 - Try manual refresh button
 
 ### Performance issues
+
 - Disable auto-refresh if too many logs
 - Clear old logs regularly
 - Use filters to reduce displayed entries
 
 ### Export not working
+
 - Check browser console for errors
 - Verify popup blockers not interfering
 - Try "Copy" instead of "Download"
@@ -380,9 +406,9 @@ GestureDetector.getLogStats(): LogStats
 
 ```typescript
 interface LogEntry {
-  timestamp: string;  // ISO 8601 format
+  timestamp: string; // ISO 8601 format
   type: "finger_detection" | "gesture" | "action";
-  data: any;         // Type-specific data
+  data: any; // Type-specific data
 }
 
 interface LogStats {
