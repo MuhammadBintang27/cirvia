@@ -18,9 +18,41 @@ const AudioPlayer = ({ title, description, chapters }: AudioPlayerProps) => {
   const [audioLoaded, setAudioLoaded] = useState(false);
   const audioRef = React.useRef<HTMLAudioElement>(null);
 
-  // Assume audio file name is based on title, e.g. 'konsep-dasar-listrik.mp3'
-  const audioFileName = title.toLowerCase().replace(/[^a-z0-9]+/g, '-') + '.mp3';
+  // Map title to actual audio file names in public/audio folder
+  const getAudioFileName = (title: string): string => {
+    const titleLower = title.toLowerCase();
+    
+    // Mapping actual audio files in public/audio/
+    const audioMap: { [key: string]: string } = {
+      'konsep dasar listrik': 'audio-konsep-dasar-listrik.mp3',
+      'pengantar rangkaian listrik': 'modul-pengantar.mp3',
+      'rangkaian seri': 'modul-seri.mp3',
+      'rangkaian paralel': 'modul-paralel.mp3',
+    };
+
+    // Try exact match first
+    for (const [key, fileName] of Object.entries(audioMap)) {
+      if (titleLower.includes(key)) {
+        return fileName;
+      }
+    }
+
+    // Fallback: generate from title with 'audio-' prefix
+    return 'audio-' + title.toLowerCase().replace(/[^a-z0-9]+/g, '-') + '.mp3';
+  };
+
+  const audioFileName = getAudioFileName(title);
   const audioSrc = `/audio/${audioFileName}`;
+
+  // Debug logging
+  React.useEffect(() => {
+    console.log('🎵 Audio Player Debug:', {
+      title,
+      audioFileName,
+      audioSrc,
+      fullPath: window.location.origin + audioSrc
+    });
+  }, [title, audioFileName, audioSrc]);
 
   // Handle audio load error
   React.useEffect(() => {
