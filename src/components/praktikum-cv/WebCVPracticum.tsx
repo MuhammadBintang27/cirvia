@@ -6,6 +6,7 @@ import { Camera } from "@mediapipe/camera_utils";
 import { drawConnectors, drawLandmarks } from "@mediapipe/drawing_utils";
 import { GestureDetector } from "./GestureDetector";
 import { CircuitController } from "./CircuitController";
+import { CircuitComponentRenderer } from "./CircuitComponentRenderer";
 import {
   CVPracticumState,
   GestureResult,
@@ -71,6 +72,8 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
     type: ComponentType;
     position: { x: number; y: number };
     rotation: number;
+    state?: "open" | "closed"; // For switch
+    value?: number; // For resistor, lamp, battery values
   }
 
   // 🆕 Wire interface for permanent wire connections
@@ -215,6 +218,15 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
         action.componentType &&
         action.position
       ) {
+        // Set default values based on component type
+        const defaultValues: Record<ComponentType, number> = {
+          battery: 12,
+          resistor: 100,
+          lamp: 50,
+          switch: 0,
+          wire: 0,
+        };
+
         const newComponent: CircuitComponent = {
           id: `${action.componentType}_${Date.now()}`,
           type: action.componentType,
@@ -223,6 +235,8 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
             y: action.position.y * 700,
           },
           rotation: 0,
+          value: defaultValues[action.componentType],
+          state: action.componentType === "switch" ? "open" : undefined,
         };
         setComponents((prev) => {
           const updated = [...prev, newComponent];
@@ -837,6 +851,28 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
   }, [initializeHands]);
 
   /**
+   * Toggle switch state
+   */
+  const toggleSwitch = useCallback((switchId: string) => {
+    setComponents((prev) => {
+      const updated = prev.map((comp) => {
+        if (comp.id === switchId && comp.type === "switch") {
+          const newState: "open" | "closed" =
+            comp.state === "open" ? "closed" : "open";
+          console.log(`🔘 SWITCH TOGGLED: ${switchId} → ${newState}`);
+          debugLogger.log("action", `SWITCH ${newState.toUpperCase()}`, {
+            id: switchId,
+            newState,
+          });
+          return { ...comp, state: newState };
+        }
+        return comp;
+      });
+      return updated;
+    });
+  }, []);
+
+  /**
    * Render circuit components on separate canvas
    */
   useEffect(() => {
@@ -896,183 +932,32 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
       }
     });
 
-    // Draw components
+    // Draw components using realistic renderer
     components.forEach((component) => {
-      ctx.save();
-      ctx.translate(component.position.x, component.position.y);
-      ctx.rotate((component.rotation * Math.PI) / 180);
+      // Determine if component is selected
+      const isSelected = selectedComponentId === component.id;
 
-      // Draw based on type
-      switch (component.type) {
-        case "battery":
-          // Battery symbol with + and - terminals
-          // Main body
-          ctx.fillStyle = "#1E40AF";
-          ctx.fillRect(-35, -20, 70, 40);
-          ctx.strokeStyle = "#3B82F6";
-          ctx.lineWidth = 3;
-          ctx.strokeRect(-35, -20, 70, 40);
+      // Determine component state (for lamp and switch)
+      const isOn = false; // TODO: Calculate based on circuit analysis
+      const brightness = 1; // TODO: Calculate based on circuit analysis
+      const lampPower = 0; // TODO: Calculate based on circuit analysis
+      const switchState = component.state || "open";
 
-          // Positive terminal
-          ctx.fillStyle = "#FCD34D";
-          ctx.fillRect(-15, -25, 10, 10);
-          ctx.fillStyle = "#000000";
-          ctx.font = "bold 20px Arial";
-          ctx.textAlign = "center";
-          ctx.textBaseline = "middle";
-          ctx.fillText("+", -10, -20);
-
-          // Negative terminal
-          ctx.fillStyle = "#94A3B8";
-          ctx.fillRect(5, -25, 10, 10);
-          ctx.fillStyle = "#000000";
-          ctx.fillText("-", 10, -20);
-
-          // Label
-          ctx.fillStyle = "#FFFFFF";
-          ctx.font = "bold 12px Arial";
-          ctx.fillText("🔋", 0, 0);
-          break;
-
-        case "resistor":
-          // Resistor box with zigzag pattern
-          ctx.fillStyle = "#7C2D12";
-          ctx.fillRect(-40, -15, 80, 30);
-
-          // Color bands (Red, Yellow, Orange)
-          ctx.fillStyle = "#EF4444";
-          ctx.fillRect(-30, -15, 8, 30);
-          ctx.fillStyle = "#EAB308";
-          ctx.fillRect(-10, -15, 8, 30);
-          ctx.fillStyle = "#F97316";
-          ctx.fillRect(10, -15, 8, 30);
-
-          // Border
-          ctx.strokeStyle = "#92400E";
-          ctx.lineWidth = 2;
-          ctx.strokeRect(-40, -15, 80, 30);
-
-          // Terminals
-          ctx.strokeStyle = "#94A3B8";
-          ctx.lineWidth = 3;
-          ctx.beginPath();
-          ctx.moveTo(-60, 0);
-          ctx.lineTo(-40, 0);
-          ctx.moveTo(40, 0);
-          ctx.lineTo(60, 0);
-          ctx.stroke();
-
-          // Label
-          ctx.fillStyle = "#FFFFFF";
-          ctx.font = "bold 14px Arial";
-          ctx.textAlign = "center";
-          ctx.textBaseline = "middle";
-          ctx.fillText("RESISTOR", 0, 0);
-          break;
-
-        case "lamp":
-          // Lamp/bulb with glow effect
-          ctx.beginPath();
-          ctx.arc(0, 0, 25, 0, Math.PI * 2);
-          ctx.fillStyle = "#FCD34D";
-          ctx.fill();
-          ctx.strokeStyle = "#F59E0B";
-          ctx.lineWidth = 4;
-          ctx.stroke();
-
-          // Inner glow
-          ctx.beginPath();
-          ctx.arc(0, 0, 18, 0, Math.PI * 2);
-          ctx.fillStyle = "#FEF3C7";
-          ctx.fill();
-
-          // Filament
-          ctx.strokeStyle = "#92400E";
-          ctx.lineWidth = 2;
-          ctx.beginPath();
-          ctx.moveTo(-10, -10);
-          ctx.lineTo(10, 10);
-          ctx.moveTo(10, -10);
-          ctx.lineTo(-10, 10);
-          ctx.stroke();
-
-          // Label
-          ctx.fillStyle = "#000000";
-          ctx.font = "25px Arial";
-          ctx.textAlign = "center";
-          ctx.textBaseline = "middle";
-          ctx.fillText("💡", 0, 0);
-          break;
-
-        case "switch":
-          // Switch box
-          ctx.fillStyle = "#1E3A8A";
-          ctx.fillRect(-40, -20, 80, 40);
-          ctx.strokeStyle = "#3B82F6";
-          ctx.lineWidth = 3;
-          ctx.strokeRect(-40, -20, 80, 40);
-
-          // Switch lever (OFF position - angled)
-          ctx.strokeStyle = "#94A3B8";
-          ctx.lineWidth = 4;
-          ctx.beginPath();
-          ctx.moveTo(-30, 0);
-          ctx.lineTo(-10, 0);
-          ctx.lineTo(20, -12);
-          ctx.stroke();
-
-          // Terminals
-          ctx.fillStyle = "#94A3B8";
-          ctx.beginPath();
-          ctx.arc(-30, 0, 5, 0, Math.PI * 2);
-          ctx.fill();
-          ctx.beginPath();
-          ctx.arc(30, 0, 5, 0, Math.PI * 2);
-          ctx.fill();
-
-          // Label
-          ctx.fillStyle = "#EF4444";
-          ctx.font = "bold 16px Arial";
-          ctx.textAlign = "center";
-          ctx.textBaseline = "middle";
-          ctx.fillText("OFF", 0, 0);
-          break;
-
-        case "wire":
-          // Wire/cable
-          ctx.strokeStyle = "#F97316";
-          ctx.lineWidth = 6;
-          ctx.beginPath();
-          ctx.moveTo(-60, 0);
-          ctx.lineTo(60, 0);
-          ctx.stroke();
-
-          // Connectors
-          ctx.fillStyle = "#94A3B8";
-          ctx.beginPath();
-          ctx.arc(-60, 0, 5, 0, Math.PI * 2);
-          ctx.fill();
-          ctx.beginPath();
-          ctx.arc(60, 0, 5, 0, Math.PI * 2);
-          ctx.fill();
-          break;
-      }
-
-      // Component label background
-      ctx.fillStyle = "rgba(0, 0, 0, 0.7)";
-      ctx.fillRect(-45, -50, 90, 20);
-      ctx.strokeStyle = "#3B82F6";
-      ctx.lineWidth = 1;
-      ctx.strokeRect(-45, -50, 90, 20);
-
-      // Component label text
-      ctx.fillStyle = "#FFFFFF";
-      ctx.font = "bold 12px Arial";
-      ctx.textAlign = "center";
-      ctx.textBaseline = "middle";
-      ctx.fillText(component.type.toUpperCase(), 0, -40);
-
-      ctx.restore();
+      CircuitComponentRenderer.renderComponent(
+        ctx,
+        component.type,
+        component.position.x,
+        component.position.y,
+        component.rotation,
+        {
+          isSelected,
+          isMobile: false,
+          isOn,
+          brightness,
+          lampPower,
+          switchState,
+        }
+      );
     });
 
     // 🆕 Draw wire connection preview
@@ -2007,6 +1892,31 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
                 width={1200}
                 height={700}
                 className="w-full h-full cursor-crosshair"
+                onDoubleClick={(e) => {
+                  // Handle double click to toggle switch
+                  const canvas = circuitCanvasRef.current;
+                  if (!canvas) return;
+
+                  const rect = canvas.getBoundingClientRect();
+                  const scaleX = canvas.width / rect.width;
+                  const scaleY = canvas.height / rect.height;
+                  const clickX = (e.clientX - rect.left) * scaleX;
+                  const clickY = (e.clientY - rect.top) * scaleY;
+
+                  // Find switch component under click
+                  const CLICK_RADIUS = 60;
+                  const clickedSwitch = components.find((c) => {
+                    if (c.type !== "switch") return false;
+                    const dx = c.position.x - clickX;
+                    const dy = c.position.y - clickY;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+                    return distance < CLICK_RADIUS;
+                  });
+
+                  if (clickedSwitch) {
+                    toggleSwitch(clickedSwitch.id);
+                  }
+                }}
               />
               {components.length === 0 && (
                 <div className="absolute inset-0 flex items-center justify-center pointer-events-none">

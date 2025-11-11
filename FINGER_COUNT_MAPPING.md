@@ -6,13 +6,13 @@ Sistem menggunakan **tangan kiri** untuk menambahkan komponen dengan menghitung 
 
 ### 📋 Tabel Mapping
 
-| Jumlah Jari | Komponen | Icon | Gesture |
-|-------------|----------|------|---------|
-| **1** 👆 | **Battery (Baterai)** | 🔋 | Tunjukkan 1 jari (telunjuk) selama 3 detik |
-| **2** ✌️ | **Lamp (Lampu)** | 💡 | Tunjukkan 2 jari (telunjuk + tengah) selama 3 detik |
-| **3** 🤟 | **Resistor** | ⚡ | Tunjukkan 3 jari (telunjuk + tengah + manis) selama 3 detik |
-| **4** 🖖 | **Switch (Saklar)** | 🔘 | Tunjukkan 4 jari (telunjuk + tengah + manis + kelingking) selama 3 detik |
-| **5** 🖐️ | **Wire (Kabel)** | ━ | Tunjukkan 5 jari (semua jari terentang) selama 3 detik |
+| Jumlah Jari | Komponen              | Icon | Gesture                                                                  |
+| ----------- | --------------------- | ---- | ------------------------------------------------------------------------ |
+| **1** 👆    | **Battery (Baterai)** | 🔋   | Tunjukkan 1 jari (telunjuk) selama 3 detik                               |
+| **2** ✌️    | **Lamp (Lampu)**      | 💡   | Tunjukkan 2 jari (telunjuk + tengah) selama 3 detik                      |
+| **3** 🤟    | **Resistor**          | ⚡   | Tunjukkan 3 jari (telunjuk + tengah + manis) selama 3 detik              |
+| **4** 🖖    | **Switch (Saklar)**   | 🔘   | Tunjukkan 4 jari (telunjuk + tengah + manis + kelingking) selama 3 detik |
+| **5** 🖐️    | **Wire (Kabel)**      | ━    | Tunjukkan 5 jari (semua jari terentang) selama 3 detik                   |
 
 ## 🎯 Cara Menggunakan
 
@@ -37,11 +37,11 @@ Sistem menggunakan **tangan kiri** untuk menambahkan komponen dengan menghitung 
 
 ```typescript
 const componentMap: { [key: number]: ComponentType } = {
-  1: "battery",   // 🔋 Baterai
-  2: "lamp",      // 💡 Lampu
-  3: "resistor",  // ⚡ Resistor
-  4: "switch",    // 🔘 Saklar
-  5: "wire",      // ━ Kabel
+  1: "battery", // 🔋 Baterai
+  2: "lamp", // 💡 Lampu
+  3: "resistor", // ⚡ Resistor
+  4: "switch", // 🔘 Saklar
+  5: "wire", // ━ Kabel
 };
 ```
 
@@ -60,11 +60,21 @@ const componentNames: { [key: number]: string } = {
 ### File: `WebCVPracticum.tsx` (Baris 1958-1962)
 
 ```tsx
-{fingerCountSelection.fingerCount === 1 && " 🔋 Baterai"}
-{fingerCountSelection.fingerCount === 2 && " 💡 Lampu"}
-{fingerCountSelection.fingerCount === 3 && " ⚡ Resistor"}
-{fingerCountSelection.fingerCount === 4 && " 🔘 Saklar"}
-{fingerCountSelection.fingerCount === 5 && " ━ Kabel"}
+{
+  fingerCountSelection.fingerCount === 1 && " 🔋 Baterai";
+}
+{
+  fingerCountSelection.fingerCount === 2 && " 💡 Lampu";
+}
+{
+  fingerCountSelection.fingerCount === 3 && " ⚡ Resistor";
+}
+{
+  fingerCountSelection.fingerCount === 4 && " 🔘 Saklar";
+}
+{
+  fingerCountSelection.fingerCount === 5 && " ━ Kabel";
+}
 ```
 
 ## ✅ Verifikasi dari Log
@@ -73,7 +83,7 @@ Dari log debugging (`cv-practicum-debug.log`):
 
 ```
 [15:11:01.722] ACTION: ADD: resistor  ✅ (3 jari)
-[15:11:05.904] ACTION: ADD: battery   ✅ (1 jari)  
+[15:11:05.904] ACTION: ADD: battery   ✅ (1 jari)
 [15:11:11.363] ACTION: ADD: switch    ✅ (4 jari)
 [15:11:26.716] ACTION: ADD: switch    ✅ (4 jari)
 ```

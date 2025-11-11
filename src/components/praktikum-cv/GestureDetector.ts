@@ -47,9 +47,9 @@ export class GestureDetector {
       - Finger count hold: ${this.fingerCountHoldDuration}ms
       - Debug Finger Detection: ${GestureDetector.DEBUG_FINGER_DETECTION}
       - Debug Thumb Only: ${GestureDetector.DEBUG_THUMB_ONLY}`;
-    
+
     console.log(initMessage);
-    
+
     // Log to history
     GestureDetector.addLog("gesture", {
       event: "initialized",
@@ -422,31 +422,31 @@ export class GestureDetector {
       const thumbTipToWrist = Math.sqrt(
         Math.pow(tip.x - wrist.x, 2) + Math.pow(tip.y - wrist.y, 2)
       );
-      
+
       // Calculate distance from thumb MCP to wrist
       const thumbMcpToWrist = Math.sqrt(
         Math.pow(mcp.x - wrist.x, 2) + Math.pow(mcp.y - wrist.y, 2)
       );
-      
+
       // Thumb is extended if tip is significantly farther from wrist than MCP
       // Also check horizontal distance to avoid false positives
       const distanceRatio = thumbTipToWrist / thumbMcpToWrist;
       const isExtended = distanceRatio > 1.3;
       const horizontalDistance = Math.abs(tip.x - mcp.x);
       const hasHorizontalDistance = horizontalDistance > 0.05;
-      
+
       const result = isExtended && hasHorizontalDistance;
-      
+
       // 🐛 DEBUG: Log thumb detection details
       if (GestureDetector.DEBUG_FINGER_DETECTION) {
         console.log(
           `👍 THUMB Check: ` +
-          `TipToWrist=${thumbTipToWrist.toFixed(3)} | ` +
-          `McpToWrist=${thumbMcpToWrist.toFixed(3)} | ` +
-          `Ratio=${distanceRatio.toFixed(2)} (need > 1.3) | ` +
-          `HorizDist=${horizontalDistance.toFixed(3)} (need > 0.05) | ` +
-          `Extended=${isExtended} | HasHorizDist=${hasHorizontalDistance} | ` +
-          `Result=${result ? '✅ EXTENDED' : '❌ CLOSED'}`
+            `TipToWrist=${thumbTipToWrist.toFixed(3)} | ` +
+            `McpToWrist=${thumbMcpToWrist.toFixed(3)} | ` +
+            `Ratio=${distanceRatio.toFixed(2)} (need > 1.3) | ` +
+            `HorizDist=${horizontalDistance.toFixed(3)} (need > 0.05) | ` +
+            `Extended=${isExtended} | HasHorizDist=${hasHorizontalDistance} | ` +
+            `Result=${result ? "✅ EXTENDED" : "❌ CLOSED"}`
         );
       }
 
@@ -459,25 +459,30 @@ export class GestureDetector {
         horizontalDistance: parseFloat(horizontalDistance.toFixed(3)),
         isExtended: result,
       });
-      
+
       return result;
     }
 
     // For other fingers, tip should be above PIP
     const yDistance = pip.y - tip.y;
-    
+
     // 🔧 FIX: Use static threshold for consistent detection
     // Previous: 0.02 (too strict, caused false negatives)
     // Current: 0.015 (more tolerant, better for 2-finger gesture)
     const isExtended = yDistance > GestureDetector.FINGER_EXTENSION_THRESHOLD;
-    
+
     // 🐛 DEBUG: Log other finger detection (only if debug enabled and not thumb-only mode)
-    if (GestureDetector.DEBUG_FINGER_DETECTION && !GestureDetector.DEBUG_THUMB_ONLY) {
+    if (
+      GestureDetector.DEBUG_FINGER_DETECTION &&
+      !GestureDetector.DEBUG_THUMB_ONLY
+    ) {
       console.log(
         `☝️ ${finger.toUpperCase()} Check: ` +
-        `TipY=${tip.y.toFixed(3)} | PipY=${pip.y.toFixed(3)} | ` +
-        `Distance=${yDistance.toFixed(3)} (need > ${GestureDetector.FINGER_EXTENSION_THRESHOLD}) | ` +
-        `Result=${isExtended ? '✅ EXTENDED' : '❌ CLOSED'}`
+          `TipY=${tip.y.toFixed(3)} | PipY=${pip.y.toFixed(3)} | ` +
+          `Distance=${yDistance.toFixed(3)} (need > ${
+            GestureDetector.FINGER_EXTENSION_THRESHOLD
+          }) | ` +
+          `Result=${isExtended ? "✅ EXTENDED" : "❌ CLOSED"}`
       );
     }
 
@@ -492,7 +497,7 @@ export class GestureDetector {
         isExtended: isExtended,
       });
     }
-    
+
     return isExtended;
   }
 
@@ -659,7 +664,7 @@ export class GestureDetector {
     console.log("\n" + "=".repeat(70));
     console.log("🔍 COUNTING EXTENDED FINGERS:");
     console.log("=".repeat(70));
-    
+
     let count = 0;
     const extendedFingers: string[] = [];
     const closedFingers: string[] = [];
@@ -682,13 +687,24 @@ export class GestureDetector {
       const ringTip = landmarks[16]; // Ring tip
       const ringPip = landmarks[14]; // Ring PIP
       const ringYDistance = ringPip.y - ringTip.y;
-      
+
       // If ring is barely above threshold, downgrade to 2 fingers
       const TOLERANCE = 0.005; // Allow 0.5% tolerance above threshold
-      if (ringYDistance < GestureDetector.FINGER_EXTENSION_THRESHOLD + TOLERANCE) {
-        console.log(`⚠️  TOLERANCE CHECK: Ring finger borderline (${ringYDistance.toFixed(4)} < ${(GestureDetector.FINGER_EXTENSION_THRESHOLD + TOLERANCE).toFixed(4)})`);
-        console.log(`✅ CORRECTION: Treating as 2 fingers (index + middle) instead of 3`);
-        
+      if (
+        ringYDistance <
+        GestureDetector.FINGER_EXTENSION_THRESHOLD + TOLERANCE
+      ) {
+        console.log(
+          `⚠️  TOLERANCE CHECK: Ring finger borderline (${ringYDistance.toFixed(
+            4
+          )} < ${(
+            GestureDetector.FINGER_EXTENSION_THRESHOLD + TOLERANCE
+          ).toFixed(4)})`
+        );
+        console.log(
+          `✅ CORRECTION: Treating as 2 fingers (index + middle) instead of 3`
+        );
+
         count = 2;
         const ringIndex = extendedFingers.indexOf("ring");
         extendedFingers.splice(ringIndex, 1);
@@ -701,8 +717,8 @@ export class GestureDetector {
       console.log("=".repeat(70));
       console.log(
         `📊 RESULT: ${count} finger(s) detected\n` +
-        `   ✅ EXTENDED: [${extendedFingers.join(", ") || "none"}]\n` +
-        `   ❌ CLOSED:   [${closedFingers.join(", ") || "none"}]`
+          `   ✅ EXTENDED: [${extendedFingers.join(", ") || "none"}]\n` +
+          `   ❌ CLOSED:   [${closedFingers.join(", ") || "none"}]`
       );
       console.log("=".repeat(70) + "\n");
     }
@@ -835,10 +851,11 @@ export class GestureDetector {
   static setDebugMode(enabled: boolean, thumbOnly: boolean = false): void {
     GestureDetector.DEBUG_FINGER_DETECTION = enabled;
     GestureDetector.DEBUG_THUMB_ONLY = thumbOnly;
-    const message = `🐛 Debug Mode: ${enabled ? "ENABLED" : "DISABLED"}` +
+    const message =
+      `🐛 Debug Mode: ${enabled ? "ENABLED" : "DISABLED"}` +
       (enabled && thumbOnly ? " (Thumb Only)" : "");
     console.log(message);
-    
+
     GestureDetector.addLog("gesture", {
       event: "debug_mode_changed",
       enabled,
@@ -873,7 +890,9 @@ export class GestureDetector {
     GestureDetector.detectionLogs.push(logEntry);
 
     // Limit log size to prevent memory issues
-    if (GestureDetector.detectionLogs.length > GestureDetector.MAX_LOG_ENTRIES) {
+    if (
+      GestureDetector.detectionLogs.length > GestureDetector.MAX_LOG_ENTRIES
+    ) {
       GestureDetector.detectionLogs.shift(); // Remove oldest entry
     }
   }
@@ -903,7 +922,7 @@ export class GestureDetector {
     const jsonStr = GestureDetector.exportLogsAsJSON();
     const blob = new Blob([jsonStr], { type: "application/json" });
     const url = URL.createObjectURL(blob);
-    
+
     const a = document.createElement("a");
     a.href = url;
     a.download = filename;
@@ -911,7 +930,7 @@ export class GestureDetector {
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
-    
+
     console.log(`📥 Logs downloaded as ${filename}`);
   }
 
@@ -934,7 +953,7 @@ export class GestureDetector {
     newestEntry: string | null;
   } {
     const byType: { [key: string]: number } = {};
-    
+
     GestureDetector.detectionLogs.forEach((log) => {
       byType[log.type] = (byType[log.type] || 0) + 1;
     });
@@ -943,7 +962,9 @@ export class GestureDetector {
       totalEntries: GestureDetector.detectionLogs.length,
       byType,
       oldestEntry: GestureDetector.detectionLogs[0]?.timestamp || null,
-      newestEntry: GestureDetector.detectionLogs[GestureDetector.detectionLogs.length - 1]?.timestamp || null,
+      newestEntry:
+        GestureDetector.detectionLogs[GestureDetector.detectionLogs.length - 1]
+          ?.timestamp || null,
     };
   }
 }

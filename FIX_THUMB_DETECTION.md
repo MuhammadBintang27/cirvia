@@ -3,6 +3,7 @@
 ## 🐛 Masalah
 
 Sistem mendeteksi jumlah jari dengan tidak akurat:
+
 - Menunjukkan 1 jari → terbaca 2 (ibu jari + telunjuk)
 - Menunjukkan 2 jari → terbaca 3 (ibu jari + telunjuk + tengah)
 - Menunjukkan 3 jari → terbaca 4
@@ -18,6 +19,7 @@ Sistem mendeteksi jumlah jari dengan tidak akurat:
 **File:** `src/components/praktikum-cv/GestureDetector.ts`
 
 **Sebelum:**
+
 ```typescript
 // For thumb, check horizontal distance
 if (finger === "thumb") {
@@ -26,6 +28,7 @@ if (finger === "thumb") {
 ```
 
 **Sesudah:**
+
 ```typescript
 // 🔧 FIX: Better thumb detection
 if (finger === "thumb") {
@@ -33,22 +36,23 @@ if (finger === "thumb") {
   const thumbTipToWrist = Math.sqrt(
     Math.pow(tip.x - wrist.x, 2) + Math.pow(tip.y - wrist.y, 2)
   );
-  
+
   // Calculate distance from thumb MCP to wrist
   const thumbMcpToWrist = Math.sqrt(
     Math.pow(mcp.x - wrist.x, 2) + Math.pow(mcp.y - wrist.y, 2)
   );
-  
+
   // Thumb is extended if tip is significantly farther from wrist than MCP
   // Also check horizontal distance to avoid false positives
   const isExtended = thumbTipToWrist > thumbMcpToWrist * 1.3;
   const hasHorizontalDistance = Math.abs(tip.x - mcp.x) > 0.05;
-  
+
   return isExtended && hasHorizontalDistance;
 }
 ```
 
 **Penjelasan:**
+
 - Menggunakan **jarak dari ujung ibu jari ke pergelangan tangan** (wrist)
 - Membandingkan dengan jarak dari pangkal ibu jari (MCP) ke wrist
 - Ibu jari dianggap terentang jika ujungnya **30% lebih jauh** dari wrist dibanding pangkalnya
@@ -81,6 +85,7 @@ private countExtendedFingers(landmarks: HandLandmark[]): number {
 ```
 
 Sekarang console akan menampilkan jari mana saja yang terdeteksi, misalnya:
+
 ```
 🖐️ Detected 2 fingers: [thumb, index]  ❌ (seharusnya hanya index)
 🖐️ Detected 1 fingers: [index]         ✅ (benar!)
@@ -107,6 +112,7 @@ Ditambahkan panduan cara yang benar menunjukkan jari:
 ## 🧪 Cara Testing
 
 1. **Restart development server** untuk memuat perubahan:
+
    ```powershell
    npm run dev
    ```
@@ -114,6 +120,7 @@ Ditambahkan panduan cara yang benar menunjukkan jari:
 2. **Buka halaman practicum CV**
 
 3. **Test setiap gesture dengan tangan kiri:**
+
    - **1 jari (Battery):** Tunjukkan hanya telunjuk, **tekuk ibu jari ke dalam**
    - **2 jari (Lamp):** Tunjukkan telunjuk + tengah, ibu jari tetap tertekuk
    - **3 jari (Resistor):** Tunjukkan telunjuk + tengah + manis
@@ -128,8 +135,8 @@ Ditambahkan panduan cara yang benar menunjukkan jari:
 
 ## 📊 Expected Results
 
-| Gesture | Sebelum Fix | Sesudah Fix |
-|---------|-------------|-------------|
+| Gesture     | Sebelum Fix  | Sesudah Fix  |
+| ----------- | ------------ | ------------ |
 | 👆 (1 jari) | Terbaca 2 ❌ | Terbaca 1 ✅ |
 | ✌️ (2 jari) | Terbaca 3 ❌ | Terbaca 2 ✅ |
 | 🤟 (3 jari) | Terbaca 4 ❌ | Terbaca 3 ✅ |
