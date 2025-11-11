@@ -123,7 +123,8 @@ const ChatBot: React.FC<ChatBotProps> = ({ isOpen, onClose }) => {
       }
       
       setMessages(prev => [...prev, botMessage])
-      speakText(aiReply)
+      // Remove auto-speak - only speak when user clicks speaker button
+      // speakText(aiReply)
       setIsTyping(false)
     } catch (err) {
       console.error('Chat request failed:', err)

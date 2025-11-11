@@ -117,7 +117,7 @@ Keep answers concise but complete. Break down complex topics into simple steps.`
       // GEMINI REQUEST - Simple, no RAG
       const genAI = new GoogleGenerativeAI(GOOGLE_AI_KEY)
       const model = genAI.getGenerativeModel({ 
-        model: 'gemini-2.0-flash-exp',
+        model: 'gemini-2.5-flash',
         generationConfig: {
           temperature: 0.3,  // Slightly higher for more engaging responses
           maxOutputTokens: 1024

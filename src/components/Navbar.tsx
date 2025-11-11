@@ -16,6 +16,8 @@ export default function Navbar() {
   const [lastScrollY, setLastScrollY] = useState(0);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
+  const mobileDropdownRef = useRef<HTMLDivElement>(null);
+  const mobileButtonRef = useRef<HTMLButtonElement>(null);
   const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const [dropdownPosition, setDropdownPosition] = useState({ top: 0, right: 0 });
 
@@ -68,18 +70,35 @@ export default function Navbar() {
 
   // Close dropdown when clicking outside
   useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node) &&
-          buttonRef.current && !buttonRef.current.contains(event.target as Node)) {
+    const handleClickOutside = (event: MouseEvent | TouchEvent) => {
+      const target = event.target as Node;
+      
+      // Check if click is outside both desktop and mobile dropdowns/buttons
+      const clickedOutsideDesktop = dropdownRef.current && !dropdownRef.current.contains(target) &&
+                                      buttonRef.current && !buttonRef.current.contains(target);
+      
+      const clickedOutsideMobile = mobileDropdownRef.current && !mobileDropdownRef.current.contains(target) &&
+                                    mobileButtonRef.current && !mobileButtonRef.current.contains(target);
+      
+      // Only close if clicked outside BOTH (since only one is visible at a time)
+      if (clickedOutsideDesktop && clickedOutsideMobile) {
         setIsLoginDropdownOpen(false);
       }
     };
 
-    document.addEventListener('mousedown', handleClickOutside);
+    if (isLoginDropdownOpen) {
+      // Add a small delay to prevent immediate closure
+      setTimeout(() => {
+        document.addEventListener('mousedown', handleClickOutside);
+        document.addEventListener('touchstart', handleClickOutside as any);
+      }, 100);
+    }
+
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('touchstart', handleClickOutside as any);
     };
-  }, []);
+  }, [isLoginDropdownOpen]);
 
   // Update dropdown position when button position changes
   useEffect(() => {
@@ -236,8 +255,12 @@ export default function Navbar() {
                 <div className="relative">
                   <button
                     ref={buttonRef}
-                    onClick={() => setIsLoginDropdownOpen(!isLoginDropdownOpen)}
-                    className="flex items-center space-x-2 px-5 py-2 bg-gradient-to-r from-blue-500/30 to-cyan-500/30 border border-blue-400/40 text-white rounded-full font-medium hover:from-blue-500/40 hover:to-cyan-500/40 transition-all shadow-lg shadow-blue-500/20"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      console.log('Desktop button clicked, current state:', isLoginDropdownOpen);
+                      setIsLoginDropdownOpen(!isLoginDropdownOpen);
+                    }}
+                    className="flex items-center space-x-2 px-5 py-2 bg-gradient-to-r from-blue-500/30 to-cyan-500/30 border border-blue-400/40 text-white rounded-full font-medium hover:from-blue-500/40 hover:to-cyan-500/40 transition-all shadow-lg shadow-blue-500/20 cursor-pointer"
                   >
                     <LogIn className="w-4 h-4" />
                     <span className="text-sm">Login</span>
@@ -254,17 +277,23 @@ export default function Navbar() {
       {isLoginDropdownOpen && !user && (
         <div 
           ref={dropdownRef}
-          className="hidden md:block fixed w-64 bg-slate-900/95 backdrop-blur-xl border border-blue-400/30 rounded-2xl shadow-2xl z-[9999] overflow-hidden"
+          className="hidden md:block fixed w-64 bg-slate-900/98 backdrop-blur-xl border-2 border-blue-400/50 rounded-2xl shadow-2xl z-[9999] overflow-hidden"
           style={{
             top: `${dropdownPosition.top}px`,
             right: `${dropdownPosition.right}px`
           }}
+          onClick={(e) => e.stopPropagation()}
         >
           <div className="p-2">
-            <Link
+            <a
               href="/login/student"
-              onClick={() => setIsLoginDropdownOpen(false)}
-              className="flex items-center space-x-3 w-full px-4 py-3 text-left text-white/80 hover:text-white hover:bg-emerald-500/20 rounded-xl transition-all group cursor-pointer"
+              className="flex items-center space-x-3 w-full px-4 py-3 text-left text-white/80 hover:text-white hover:bg-emerald-500/20 rounded-xl transition-all group cursor-pointer no-underline"
+              onClick={(e) => {
+                console.log('Desktop Login Siswa clicked');
+                e.preventDefault();
+                setIsLoginDropdownOpen(false);
+                window.location.href = '/login/student';
+              }}
             >
               <div className="w-10 h-10 bg-emerald-500/20 rounded-xl flex items-center justify-center group-hover:bg-emerald-500/30 transition-colors border border-emerald-400/30">
                 <GraduationCap className="w-5 h-5 text-emerald-400" />
@@ -273,12 +302,17 @@ export default function Navbar() {
                 <div className="font-medium text-white">Login Sebagai Siswa</div>
                 <div className="text-xs text-emerald-200/70">Akses materi dan test</div>
               </div>
-            </Link>
+            </a>
             
-            <Link
+            <a
               href="/login"
-              onClick={() => setIsLoginDropdownOpen(false)}
-              className="flex items-center space-x-3 w-full px-4 py-3 text-left text-white/80 hover:text-white hover:bg-blue-500/20 rounded-xl transition-all group cursor-pointer"
+              className="flex items-center space-x-3 w-full px-4 py-3 text-left text-white/80 hover:text-white hover:bg-blue-500/20 rounded-xl transition-all group cursor-pointer no-underline"
+              onClick={(e) => {
+                console.log('Desktop Login Guru clicked');
+                e.preventDefault();
+                setIsLoginDropdownOpen(false);
+                window.location.href = '/login';
+              }}
             >
               <div className="w-10 h-10 bg-blue-500/20 rounded-xl flex items-center justify-center group-hover:bg-blue-500/30 transition-colors border border-blue-400/30">
                 <TeacherIcon className="w-5 h-5 text-blue-400" />
@@ -287,7 +321,7 @@ export default function Navbar() {
                 <div className="font-medium text-white">Login Sebagai Guru</div>
                 <div className="text-xs text-blue-200/70">Kelola soal dan siswa</div>
               </div>
-            </Link>
+            </a>
           </div>
         </div>
       )}
@@ -361,41 +395,133 @@ export default function Navbar() {
               <span className="text-sm font-medium">{user.name.split(' ')[0]}</span>
             </Link>
           ) : (
-            <div className="relative" ref={dropdownRef}>
-              <button
-                onClick={() => setIsLoginDropdownOpen(!isLoginDropdownOpen)}
-                className="flex items-center space-x-2 px-4 py-1.5 rounded-full bg-gradient-to-r from-blue-500 to-cyan-500 text-white shadow-lg shadow-blue-500/30 hover:shadow-blue-500/50 transition-all"
-              >
-                <LogIn className="w-4 h-4" />
-                <span className="text-sm font-medium">Login</span>
-                <ChevronDown className={`w-3 h-3 transition-transform ${isLoginDropdownOpen ? 'rotate-180' : ''}`} />
-              </button>
-
-              {/* Dropdown Menu */}
-              {isLoginDropdownOpen && (
-                <div className="absolute right-0 top-full mt-2 w-48 bg-gradient-to-br from-slate-800/95 to-slate-900/95 backdrop-blur-xl border border-blue-400/30 rounded-xl shadow-2xl overflow-hidden">
-                  <Link
-                    href="/login/student"
-                    className="flex items-center space-x-3 px-4 py-3 text-white/90 hover:bg-blue-500/20 hover:text-white transition-all border-b border-white/10"
-                    onClick={() => setIsLoginDropdownOpen(false)}
-                  >
-                    <GraduationCap className="w-5 h-5 text-emerald-400" />
-                    <span className="font-medium">Login Siswa</span>
-                  </Link>
-                  <Link
-                    href="/login"
-                    className="flex items-center space-x-3 px-4 py-3 text-white/90 hover:bg-blue-500/20 hover:text-white transition-all"
-                    onClick={() => setIsLoginDropdownOpen(false)}
-                  >
-                    <TeacherIcon className="w-5 h-5 text-blue-400" />
-                    <span className="font-medium">Login Guru</span>
-                  </Link>
-                </div>
-              )}
-            </div>
+            <button
+              ref={mobileButtonRef}
+              onClick={(e) => {
+                e.stopPropagation();
+                console.log('Mobile button clicked, current state:', isLoginDropdownOpen);
+                setIsLoginDropdownOpen(!isLoginDropdownOpen);
+              }}
+              className="flex items-center space-x-2 px-4 py-1.5 rounded-full bg-gradient-to-r from-blue-500 to-cyan-500 text-white shadow-lg shadow-blue-500/30 active:shadow-blue-500/50 transition-all active:scale-95 touch-manipulation z-[100]"
+            >
+              <LogIn className="w-4 h-4" />
+              <span className="text-sm font-medium">Login</span>
+              <ChevronDown className={`w-3 h-3 transition-transform ${isLoginDropdownOpen ? 'rotate-180' : ''}`} />
+            </button>
           )}
         </div>
       </div>
+
+      {/* Mobile Login Dropdown - Outside parent container for proper z-index */}
+      {isLoginDropdownOpen && !user && (
+        <>
+          {/* Backdrop overlay */}
+          <div 
+            className="md:hidden fixed inset-0 z-[98]"
+            style={{ backgroundColor: 'rgba(0, 0, 0, 0.3)' }}
+            onClick={() => {
+              console.log('Backdrop clicked');
+              setIsLoginDropdownOpen(false);
+            }}
+            onTouchEnd={() => {
+              console.log('Backdrop touched');
+              setIsLoginDropdownOpen(false);
+            }}
+          />
+          
+          {/* Dropdown menu */}
+          <div 
+            ref={mobileDropdownRef}
+            className="md:hidden fixed top-16 right-4 w-64 z-[99]"
+            style={{ 
+              animation: 'slideDown 0.2s ease-out',
+              backgroundColor: 'rgb(15 23 42 / 0.98)',
+              backdropFilter: 'blur(12px)',
+              border: '2px solid rgb(96 165 250 / 0.5)',
+              borderRadius: '1rem',
+              boxShadow: '0 25px 50px -12px rgb(0 0 0 / 0.5)',
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="p-2">
+              <a
+                href="/login/student"
+                className="flex items-center space-x-3 w-full px-4 py-3 rounded-xl transition-all border-b border-white/10"
+                style={{
+                  color: 'rgba(255, 255, 255, 0.9)',
+                  textDecoration: 'none',
+                  cursor: 'pointer',
+                }}
+                onClick={(e) => {
+                  console.log('Login Siswa clicked');
+                  e.preventDefault();
+                  setIsLoginDropdownOpen(false);
+                  window.location.href = '/login/student';
+                }}
+                onTouchEnd={(e) => {
+                  console.log('Login Siswa touched');
+                  e.preventDefault();
+                  setIsLoginDropdownOpen(false);
+                  setTimeout(() => {
+                    window.location.href = '/login/student';
+                  }, 100);
+                }}
+              >
+                <div 
+                  className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0"
+                  style={{
+                    backgroundColor: 'rgb(16 185 129 / 0.2)',
+                    border: '1px solid rgb(52 211 153 / 0.3)'
+                  }}
+                >
+                  <GraduationCap className="w-5 h-5 text-emerald-400" />
+                </div>
+                <div className="flex-1">
+                  <div className="font-medium text-white">Login Siswa</div>
+                  <div className="text-xs text-emerald-200/70">Akses materi & test</div>
+                </div>
+              </a>
+              <a
+                href="/login"
+                className="flex items-center space-x-3 w-full px-4 py-3 rounded-xl transition-all"
+                style={{
+                  color: 'rgba(255, 255, 255, 0.9)',
+                  textDecoration: 'none',
+                  cursor: 'pointer',
+                }}
+                onClick={(e) => {
+                  console.log('Login Guru clicked');
+                  e.preventDefault();
+                  setIsLoginDropdownOpen(false);
+                  window.location.href = '/login';
+                }}
+                onTouchEnd={(e) => {
+                  console.log('Login Guru touched');
+                  e.preventDefault();
+                  setIsLoginDropdownOpen(false);
+                  setTimeout(() => {
+                    window.location.href = '/login';
+                  }, 100);
+                }}
+              >
+                <div 
+                  className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0"
+                  style={{
+                    backgroundColor: 'rgb(59 130 246 / 0.2)',
+                    border: '1px solid rgb(96 165 250 / 0.3)'
+                  }}
+                >
+                  <TeacherIcon className="w-5 h-5 text-blue-400" />
+                </div>
+                <div className="flex-1">
+                  <div className="font-medium text-white">Login Guru</div>
+                  <div className="text-xs text-blue-200/70">Kelola soal & siswa</div>
+                </div>
+              </a>
+            </div>
+          </div>
+        </>
+      )}
 
       {/* Spacer for mobile top bar */}
       <div className="md:hidden h-14"></div>

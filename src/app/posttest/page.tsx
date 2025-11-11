@@ -106,14 +106,19 @@ const PostTestPage = () => {
   const currentQuestion = questions[quizState.currentQuestionIndex];
   const [timeElapsed, setTimeElapsed] = useState(0);
 
-  // Timer effect
+  // Timer effect - stop when quiz is completed
   useEffect(() => {
+    if (quizState.quizCompleted) {
+      // Don't run timer if quiz is completed
+      return;
+    }
+
     const timer = setInterval(() => {
       setTimeElapsed(Math.floor((Date.now() - quizState.startTime) / 1000));
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [quizState.startTime]);
+  }, [quizState.startTime, quizState.quizCompleted]);
 
   const handleAnswerSubmit = (
     selectedData: number | boolean | string[] | number[] | { [key: string]: string }, 
