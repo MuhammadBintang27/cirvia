@@ -4,6 +4,10 @@ import React, { useState } from 'react';
 import { CheckCircle, Clock, BookOpen, Volume2, Zap, ArrowLeft, ArrowRight, Play, Pause, SkipBack, SkipForward, Star, Trophy } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 
+// Supabase Storage configuration - OUTSIDE component to avoid re-creation
+const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://hczgbjgcolqxejtmaffn.supabase.co';
+const AUDIO_BUCKET = 'audio-materials';
+
 // Mock Audio Player Component
 interface AudioPlayerProps {
   title: string;
@@ -47,23 +51,15 @@ const AudioPlayer = ({ title, description, chapters }: AudioPlayerProps) => {
 
   const audioFileName = getAudioFileName(title);
   
-  // Supabase Storage URL for audio files
-  const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://hczgbjgcolqxejtmaffn.supabase.co';
-  const AUDIO_BUCKET = 'audio-materials';
-  
   // Use Supabase Storage URL instead of local public folder
   const [audioSrc, setAudioSrc] = React.useState('');
 
   // Set audio source only on client side
   React.useEffect(() => {
     if (typeof window !== 'undefined') {
-      // Use Supabase Storage URL
+      // Use Supabase Storage URL (constants now outside component)
       const src = `${SUPABASE_URL}/storage/v1/object/public/${AUDIO_BUCKET}/${audioFileName}`;
       setAudioSrc(src);
-      
-      // Safe window access - must be inside the check
-      const locationOrigin = typeof window !== 'undefined' ? window.location?.origin : '';
-      const locationHref = typeof window !== 'undefined' ? window.location?.href : '';
       
       console.log('🎵 Audio Player Debug (Supabase):', {
         originalTitle: title,
@@ -73,7 +69,6 @@ const AudioPlayer = ({ title, description, chapters }: AudioPlayerProps) => {
         supabaseUrl: SUPABASE_URL,
         bucket: AUDIO_BUCKET,
         fullPath: src,
-        windowLocation: locationHref
       });
 
       // Test if file exists by trying to fetch it
@@ -91,7 +86,7 @@ const AudioPlayer = ({ title, description, chapters }: AudioPlayerProps) => {
           console.error('❌ Audio file HEAD check failed:', err);
         });
     }
-  }, [title, audioFileName, SUPABASE_URL, AUDIO_BUCKET]);
+  }, [title, audioFileName]); // Removed SUPABASE_URL and AUDIO_BUCKET from deps
 
   // Handle audio load error
   React.useEffect(() => {
