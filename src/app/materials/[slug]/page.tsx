@@ -56,13 +56,17 @@ const AudioPlayer = ({ title, description, chapters }: AudioPlayerProps) => {
       const src = `/audio/${audioFileName}`;
       setAudioSrc(src);
       
+      // Safe window access - must be inside the check
+      const locationOrigin = typeof window !== 'undefined' ? window.location?.origin : '';
+      const locationHref = typeof window !== 'undefined' ? window.location?.href : '';
+      
       console.log('🎵 Audio Player Debug:', {
         originalTitle: title,
         cleanedTitle: title.toLowerCase().replace(/^audio:\s*/i, ''),
         audioFileName,
         audioSrc: src,
-        fullPath: window.location.origin + src,
-        windowLocation: window.location.href
+        fullPath: locationOrigin + src,
+        windowLocation: locationHref
       });
 
       // Test if file exists by trying to fetch it
@@ -231,8 +235,15 @@ const AudioPlayer = ({ title, description, chapters }: AudioPlayerProps) => {
     if (audioRef.current) {
       audioRef.current.currentTime = chapters[newChapter]?.startTime || 0;
       if (isPlaying) {
+        // Ensure audio source exists before playing
+        if (!audioRef.current.src || audioRef.current.readyState === 0) {
+          console.error('Cannot play: no valid audio source');
+          setAudioError(true);
+          setIsPlaying(false);
+          return;
+        }
         audioRef.current.play().catch((error) => {
-          console.error('Error playing audio:', error);
+          console.error('Error playing audio on chapter change:', error);
           setAudioError(true);
           setIsPlaying(false);
         });
@@ -283,6 +294,18 @@ const AudioPlayer = ({ title, description, chapters }: AudioPlayerProps) => {
           ref={audioRef} 
           preload="metadata"
           onEnded={() => setIsPlaying(false)}
+          onError={(e) => {
+            console.error('❌ Audio element error:', {
+              error: e,
+              src: audioSrc,
+              currentSrc: audioRef.current?.currentSrc,
+              networkState: audioRef.current?.networkState,
+              readyState: audioRef.current?.readyState
+            });
+            setAudioError(true);
+            setAudioLoaded(false);
+            setIsPlaying(false);
+          }}
           src={audioSrc}
           style={{ display: 'none' }}
         >
@@ -322,7 +345,20 @@ const AudioPlayer = ({ title, description, chapters }: AudioPlayerProps) => {
                 setCurrentChapter(idx);
                 if (audioRef.current) {
                   audioRef.current.currentTime = chapter.startTime;
-                  if (isPlaying) audioRef.current.play();
+                  if (isPlaying) {
+                    // Ensure audio source exists before playing
+                    if (!audioRef.current.src || audioRef.current.readyState === 0) {
+                      console.error('Cannot play: no valid audio source');
+                      setAudioError(true);
+                      setIsPlaying(false);
+                      return;
+                    }
+                    audioRef.current.play().catch((error) => {
+                      console.error('Error playing audio on chapter change:', error);
+                      setAudioError(true);
+                      setIsPlaying(false);
+                    });
+                  }
                 }
                 setProgress(0);
               }}
