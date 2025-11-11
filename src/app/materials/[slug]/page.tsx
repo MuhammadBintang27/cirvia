@@ -52,6 +52,7 @@ const AudioPlayer = ({ title, description, chapters }: AudioPlayerProps) => {
   // Set audio source only on client side
   React.useEffect(() => {
     if (typeof window !== 'undefined') {
+      // Try direct public path - Next.js serves public files from root
       const src = `/audio/${audioFileName}`;
       setAudioSrc(src);
       
@@ -60,8 +61,24 @@ const AudioPlayer = ({ title, description, chapters }: AudioPlayerProps) => {
         cleanedTitle: title.toLowerCase().replace(/^audio:\s*/i, ''),
         audioFileName,
         audioSrc: src,
-        fullPath: window.location.origin + src
+        fullPath: window.location.origin + src,
+        windowLocation: window.location.href
       });
+
+      // Test if file exists by trying to fetch it
+      fetch(src, { method: 'HEAD' })
+        .then(res => {
+          console.log('🔍 Audio file HEAD check:', {
+            url: src,
+            status: res.status,
+            contentType: res.headers.get('content-type'),
+            contentLength: res.headers.get('content-length'),
+            ok: res.ok
+          });
+        })
+        .catch(err => {
+          console.error('❌ Audio file HEAD check failed:', err);
+        });
     }
   }, [title, audioFileName]);
 
