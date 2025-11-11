@@ -697,138 +697,169 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
 
           console.log(`🎯 [TOGGLE DEBUG] Closest switch: ${switchComponent.id} at ${minDistance.toFixed(0)}px, state: ${switchComponent.state}`);
 
-          // Check if already holding this switch
-          if (
-            toggleHold.isActive &&
-            toggleHold.switchId === switchComponent.id
-          ) {
-            // Calculate hold progress
-            const elapsed = now - toggleHold.startTime!;
-            const progress = Math.min(elapsed / 3000, 1); // 3 seconds
-
-            console.log(`⏱️ [TOGGLE DEBUG] Continuing hold:`, {
-              switchId: switchComponent.id,
-              elapsed: `${elapsed}ms`,
-              progress: `${(progress * 100).toFixed(1)}%`,
-              startTime: toggleHold.startTime,
-              currentTime: now,
+          // 🔧 FIX: Use functional update to get latest toggleHold state
+          setToggleHold((prevHold) => {
+            console.log(`🔍 [TOGGLE DEBUG] Current hold state:`, {
+              isActive: prevHold.isActive,
+              switchId: prevHold.switchId,
+              progress: `${(prevHold.progress * 100).toFixed(1)}%`,
             });
 
-            setToggleHold((prev) => ({
-              ...prev,
-              progress: progress,
-            }));
+            // Check if already holding this switch
+            if (
+              prevHold.isActive &&
+              prevHold.switchId === switchComponent.id
+            ) {
+              // Calculate hold progress
+              const elapsed = now - prevHold.startTime!;
+              const progress = Math.min(elapsed / 3000, 1); // 3 seconds
 
-            console.log(
-              `🕐 TOGGLE HOLD: ${(progress * 100).toFixed(0)}% on ${
-                switchComponent.id
-              } (${elapsed}ms / 3000ms)`
-            );
-
-            // Complete toggle after 3 seconds
-            if (progress >= 1) {
-              console.log(`🎉 [TOGGLE DEBUG] Progress reached 100%! Toggling switch...`);
-              setComponents((prev) => {
-                return prev.map((comp) => {
-                  if (
-                    comp.id === switchComponent.id &&
-                    comp.type === "switch"
-                  ) {
-                    const newState: "open" | "closed" =
-                      comp.state === "open" ? "closed" : "open";
-                    console.log(
-                      `✅ SWITCH TOGGLED: ${switchComponent.id} ${comp.state} → ${newState}`
-                    );
-                    console.log(`✅ [TOGGLE DEBUG] Toggle executed successfully:`, {
-                      switchId: switchComponent.id,
-                      oldState: comp.state,
-                      newState: newState,
-                      totalHoldTime: `${elapsed}ms`,
-                    });
-                    debugLogger.log("action", "TOGGLE via THUMBS UP (3s hold)", {
-                      switchId: switchComponent.id,
-                      oldState: comp.state,
-                      newState: newState,
-                    });
-                    return { ...comp, state: newState };
-                  }
-                  return comp;
-                });
+              console.log(`⏱️ [TOGGLE DEBUG] Continuing hold:`, {
+                switchId: switchComponent.id,
+                elapsed: `${elapsed}ms`,
+                progress: `${(progress * 100).toFixed(1)}%`,
+                startTime: prevHold.startTime,
+                currentTime: now,
               });
 
-              // Reset hold state
-              console.log(`🔄 [TOGGLE DEBUG] Resetting hold state after successful toggle`);
-              setToggleHold({
+              console.log(
+                `🕐 TOGGLE HOLD: ${(progress * 100).toFixed(0)}% on ${
+                  switchComponent.id
+                } (${elapsed}ms / 3000ms)`
+              );
+
+              // Complete toggle after 3 seconds
+              if (progress >= 1) {
+                console.log(`🎉 [TOGGLE DEBUG] Progress reached 100%! Toggling switch...`);
+                
+                // 🔧 FIX: Use prevHold.switchId (not switchComponent.id from closure)
+                const targetSwitchId = prevHold.switchId;
+                
+                setComponents((prevComps) => {
+                  const updatedComps = prevComps.map((comp) => {
+                    if (
+                      comp.id === targetSwitchId &&
+                      comp.type === "switch"
+                    ) {
+                      const newState: "open" | "closed" =
+                        comp.state === "open" ? "closed" : "open";
+                      console.log(
+                        `✅ SWITCH TOGGLED: ${targetSwitchId} ${comp.state} → ${newState}`
+                      );
+                      console.log(`✅ [TOGGLE DEBUG] Toggle executed successfully:`, {
+                        switchId: targetSwitchId,
+                        oldState: comp.state,
+                        newState: newState,
+                        totalHoldTime: `${elapsed}ms`,
+                      });
+                      debugLogger.log("action", "TOGGLE via THUMBS UP (3s hold)", {
+                        switchId: targetSwitchId,
+                        oldState: comp.state,
+                        newState: newState,
+                      });
+                      return { ...comp, state: newState };
+                    }
+                    return comp;
+                  });
+                  
+                  console.log(`🔍 [TOGGLE DEBUG] Components after toggle:`, {
+                    totalComponents: updatedComps.length,
+                    switches: updatedComps.filter(c => c.type === "switch").map(c => ({
+                      id: c.id,
+                      state: c.state
+                    }))
+                  });
+                  
+                  return updatedComps;
+                });
+
+                // Reset hold state
+                console.log(`🔄 [TOGGLE DEBUG] Resetting hold state after successful toggle`);
+                return {
+                  isActive: false,
+                  switchId: null,
+                  startTime: null,
+                  progress: 0,
+                };
+              } else {
+                console.log(`⏳ [TOGGLE DEBUG] Still holding... need ${(3000 - elapsed)}ms more`);
+                // Update progress
+                return {
+                  ...prevHold,
+                  progress: progress,
+                };
+              }
+            } else {
+              // Start new hold
+              console.log(`🆕 [TOGGLE DEBUG] Starting NEW hold:`, {
+                switchId: switchComponent.id,
+                switchState: switchComponent.state,
+                position: { x: cursorX.toFixed(0), y: cursorY.toFixed(0) },
+                distance: `${minDistance.toFixed(0)}px`,
+                startTime: now,
+                previousHoldActive: prevHold.isActive,
+                previousSwitchId: prevHold.switchId,
+              });
+              console.log(
+                `👍 THUMBS UP START at (${cursorX.toFixed(0)}, ${cursorY.toFixed(
+                  0
+                )}) on switch: ${switchComponent.id} (distance: ${minDistance.toFixed(0)}px)`
+              );
+              return {
+                isActive: true,
+                switchId: switchComponent.id,
+                startTime: now,
+                progress: 0,
+              };
+            }
+          });
+        } else {
+          // No switches in circuit, reset hold
+          console.log(`⚠️ [TOGGLE DEBUG] No switches found in circuit`);
+          setToggleHold((prevHold) => {
+            if (prevHold.isActive) {
+              console.log("❌ TOGGLE HOLD CANCELLED: No switches in circuit");
+              console.log(`❌ [TOGGLE DEBUG] Cancelling hold:`, {
+                previousSwitchId: prevHold.switchId,
+                wasActive: prevHold.isActive,
+                reason: "No switches in circuit",
+              });
+              return {
                 isActive: false,
                 switchId: null,
                 startTime: null,
                 progress: 0,
-              });
-            } else {
-              console.log(`⏳ [TOGGLE DEBUG] Still holding... need ${(3000 - elapsed)}ms more`);
+              };
             }
-          } else {
-            // Start new hold
-            console.log(`🆕 [TOGGLE DEBUG] Starting NEW hold:`, {
-              switchId: switchComponent.id,
-              switchState: switchComponent.state,
-              position: { x: cursorX.toFixed(0), y: cursorY.toFixed(0) },
-              distance: `${minDistance.toFixed(0)}px`,
-              startTime: now,
-              previousHoldActive: toggleHold.isActive,
-              previousSwitchId: toggleHold.switchId,
-            });
-            console.log(
-              `👍 THUMBS UP START at (${cursorX.toFixed(0)}, ${cursorY.toFixed(
-                0
-              )}) on switch: ${switchComponent.id} (distance: ${minDistance.toFixed(0)}px)`
-            );
-            setToggleHold({
-              isActive: true,
-              switchId: switchComponent.id,
-              startTime: now,
-              progress: 0,
-            });
-          }
-        } else {
-          // No switches in circuit, reset hold
-          console.log(`⚠️ [TOGGLE DEBUG] No switches found in circuit`);
-          if (toggleHold.isActive) {
-            console.log("❌ TOGGLE HOLD CANCELLED: No switches in circuit");
-            console.log(`❌ [TOGGLE DEBUG] Cancelling hold:`, {
-              previousSwitchId: toggleHold.switchId,
-              wasActive: toggleHold.isActive,
-              reason: "No switches in circuit",
-            });
-            setToggleHold({
-              isActive: false,
-              switchId: null,
-              startTime: null,
-              progress: 0,
-            });
-          }
+            return prevHold;
+          });
         }
         return;
       }
 
       // 🆕 Reset toggle hold if gesture is not thumbs_up anymore
-      if (action.type !== "toggle" && toggleHold.isActive) {
-        console.log(`🔄 [TOGGLE DEBUG] Gesture changed from THUMBS_UP:`, {
-          newActionType: action.type,
-          wasSwitchId: toggleHold.switchId,
-          wasProgress: `${(toggleHold.progress * 100).toFixed(1)}%`,
-          reason: "Gesture no longer thumbs_up",
-        });
-        console.log("🔄 TOGGLE HOLD RESET: Gesture changed");
-        setToggleHold({
-          isActive: false,
-          switchId: null,
-          startTime: null,
-          progress: 0,
+      if (action.type !== "toggle") {
+        setToggleHold((prevHold) => {
+          if (prevHold.isActive) {
+            console.log(`🔄 [TOGGLE DEBUG] Gesture changed from THUMBS_UP:`, {
+              newActionType: action.type,
+              wasSwitchId: prevHold.switchId,
+              wasProgress: `${(prevHold.progress * 100).toFixed(1)}%`,
+              reason: "Gesture no longer thumbs_up",
+            });
+            console.log("🔄 TOGGLE HOLD RESET: Gesture changed");
+            return {
+              isActive: false,
+              switchId: null,
+              startTime: null,
+              progress: 0,
+            };
+          }
+          return prevHold;
         });
       }
     },
-    [components, selectedComponentId, findClosestTerminal, wireConnection.startTerminalId, toggleHold.isActive, toggleHold.switchId, toggleHold.startTime, toggleHold.progress]
+    [components, selectedComponentId, findClosestTerminal, wireConnection.startTerminalId]
   );
 
   /**
