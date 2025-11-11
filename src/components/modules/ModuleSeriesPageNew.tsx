@@ -515,8 +515,8 @@ const Section1Introduction = () => {
                   ? "bg-gradient-to-r from-gray-700 to-gray-800 text-yellow-300 border border-yellow-400/30"
                   : "bg-gradient-to-r from-yellow-400 to-orange-400 text-gray-900 hover:shadow-yellow-400/50"
               }`}>
-              <text x="600" y="160" textAnchor="middle" fill={activeLamp === 1 ? "rgba(255, 215, 0, 0.9)" : "rgba(100, 100, 100, 0.5)"} fontSize="40">💡</text>
-                      L1 
+                <span className="text-2xl mr-1">💡</span>
+                L1 
               </button>    
               <button
                 onClick={() => setActiveLamp(activeLamp === 2 ? null : 2)}
@@ -525,8 +525,8 @@ const Section1Introduction = () => {
                   ? "bg-gradient-to-r from-gray-700 to-gray-800 text-yellow-300 border border-yellow-400/30"
                   : "bg-gradient-to-r from-yellow-400 to-orange-400 text-gray-900 hover:shadow-yellow-400/50"
               }`}>
-              <text x="600" y="160" textAnchor="middle" fill={activeLamp === 2 ? "rgba(255, 215, 0, 0.9)" : "rgba(100, 100, 100, 0.5)"} fontSize="40">💡</text>
-                      L2 
+                <span className="text-2xl mr-1">💡</span>
+                L2 
               </button>
               <button
                 onClick={() => setActiveLamp(activeLamp === 3 ? null : 3)}
@@ -535,8 +535,8 @@ const Section1Introduction = () => {
                   ? "bg-gradient-to-r from-gray-700 to-gray-800 text-yellow-300 border border-yellow-400/30"
                   : "bg-gradient-to-r from-yellow-400 to-orange-400 text-gray-900 hover:shadow-yellow-400/50"
               }`}>
-              <text x="600" y="160" textAnchor="middle" fill={activeLamp === 3 ? "rgba(255, 215, 0, 0.9)" : "rgba(100, 100, 100, 0.5)"} fontSize="40">💡</text>
-                      L3 
+                <span className="text-2xl mr-1">💡</span>
+                L3 
               </button>
             </div>
           </div>

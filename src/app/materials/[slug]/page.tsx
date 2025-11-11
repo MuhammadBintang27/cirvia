@@ -72,44 +72,91 @@ const AudioPlayer = ({ title, description, chapters }: AudioPlayerProps) => {
       setAudioError(false);
     };
 
+    const handleCanPlayThrough = () => {
+      console.log('✅ Audio can play through:', audioSrc);
+      setAudioLoaded(true);
+      setAudioError(false);
+    };
+
     const handleError = (e: Event) => {
       console.error('❌ Audio load error:', {
         audioSrc,
         error: e,
         audioElement: audio,
         networkState: audio.networkState,
-        readyState: audio.readyState
+        readyState: audio.readyState,
+        currentSrc: audio.currentSrc || 'no source'
       });
       setAudioError(true);
       setAudioLoaded(false);
       setIsPlaying(false);
     };
 
+    const handleLoadStart = () => {
+      console.log('⏳ Audio loading started:', audioSrc);
+    };
+
     audio.addEventListener('loadeddata', handleLoadedData);
+    audio.addEventListener('canplaythrough', handleCanPlayThrough);
     audio.addEventListener('error', handleError);
+    audio.addEventListener('loadstart', handleLoadStart);
+
+    // Force load
+    audio.load();
 
     return () => {
       audio.removeEventListener('loadeddata', handleLoadedData);
+      audio.removeEventListener('canplaythrough', handleCanPlayThrough);
       audio.removeEventListener('error', handleError);
+      audio.removeEventListener('loadstart', handleLoadStart);
     };
   }, [audioSrc]);
 
   // Handle play/pause
   const handlePlayPause = () => {
-    if (!audioRef.current || audioError) return;
+    if (!audioRef.current || audioError) {
+      console.warn('Cannot play: audio element not ready or has error');
+      return;
+    }
+    
+    const audio = audioRef.current;
+    
+    // Check if audio source is valid before attempting to play
+    if (audio.readyState === 0) {
+      console.warn('Audio not ready yet, readyState:', audio.readyState);
+      setAudioError(true);
+      return;
+    }
     
     if (isPlaying) {
-      audioRef.current.pause();
+      audio.pause();
       setIsPlaying(false);
     } else {
-      audioRef.current.currentTime = chapters[currentChapter]?.startTime || 0;
-      audioRef.current.play()
-        .then(() => setIsPlaying(true))
-        .catch((error) => {
-          console.error('Error playing audio:', error);
-          setAudioError(true);
-          setIsPlaying(false);
-        });
+      // Set time before playing
+      audio.currentTime = chapters[currentChapter]?.startTime || 0;
+      
+      // Try to play with proper error handling
+      const playPromise = audio.play();
+      
+      if (playPromise !== undefined) {
+        playPromise
+          .then(() => {
+            console.log('✅ Audio playing successfully');
+            setIsPlaying(true);
+          })
+          .catch((error) => {
+            console.error('❌ Error playing audio:', {
+              error: error.message,
+              name: error.name,
+              audioSrc,
+              readyState: audio.readyState,
+              networkState: audio.networkState,
+              currentSrc: audio.currentSrc
+            });
+            setAudioError(true);
+            setIsPlaying(false);
+          });
+      }
     }
   };
 
@@ -170,22 +217,35 @@ const AudioPlayer = ({ title, description, chapters }: AudioPlayerProps) => {
         <div className="text-2xl">🎧</div>
       </div>
 
-      <audio ref={audioRef} preload="metadata" onEnded={() => setIsPlaying(false)}>
+      <audio 
+        ref={audioRef} 
+        preload="auto"
+        crossOrigin="anonymous"
+        onEnded={() => setIsPlaying(false)}
+        key={audioSrc}
+      >
         <source src={audioSrc} type="audio/mpeg" />
+        <source src={audioSrc} type="audio/mp3" />
         Your browser does not support the audio element.
       </audio>
 
       {/* Error Message */}
       {audioError && (
         <div className="mb-4 p-4 bg-yellow-500/20 border border-yellow-400/30 rounded-xl">
-          <div className="flex items-center space-x-2 text-yellow-300">
+          <div className="flex items-center space-x-2 text-yellow-300 mb-2">
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
             </svg>
             <p className="text-sm font-medium">
-              File audio tidak tersedia. Silakan baca materi pembelajaran di bawah.
+              File audio tidak tersedia
             </p>
           </div>
+          <p className="text-xs text-yellow-200/70 ml-7">
+            Path: {audioSrc}
+          </p>
+          <p className="text-xs text-yellow-200/70 ml-7">
+            Silakan baca materi pembelajaran di bawah atau hubungi admin.
+          </p>
         </div>
       )}
 

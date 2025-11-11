@@ -153,6 +153,7 @@ export default function Navbar() {
                     width={32} 
                     height={32} 
                     className="relative w-8 h-8"
+                    style={{ width: 'auto', height: 'auto' }}
                   />
                 </div>
                 <span className="text-xl font-bold bg-gradient-to-r from-blue-400 to-cyan-300 bg-clip-text text-transparent">
@@ -338,6 +339,7 @@ export default function Navbar() {
                 width={32} 
                 height={32} 
                 className="w-full h-full"
+                style={{ width: 'auto', height: 'auto' }}
               />
             </div>
             <span className="text-lg font-bold bg-gradient-to-r from-blue-400 to-cyan-300 bg-clip-text text-transparent">
