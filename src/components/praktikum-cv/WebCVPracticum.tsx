@@ -661,8 +661,16 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
         const cursorX = mirrorX(action.position.x) * 1200;
         const cursorY = action.position.y * 700;
 
+        console.log(`🔍 [TOGGLE DEBUG] Action detected:`, {
+          actionType: action.type,
+          position: { x: cursorX.toFixed(0), y: cursorY.toFixed(0) },
+          componentId: action.componentId,
+        });
+
         // Find ALL switches in circuit
         const switches = componentsRef.current.filter((c) => c.type === "switch");
+
+        console.log(`🔍 [TOGGLE DEBUG] Found ${switches.length} switch(es) in circuit`);
 
         if (switches.length > 0) {
           // Find CLOSEST switch (tidak perlu ada di atas saklar)
@@ -677,6 +685,7 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
               Math.pow(sw.position.x - cursorX, 2) +
                 Math.pow(sw.position.y - cursorY, 2)
             );
+            console.log(`🔍 [TOGGLE DEBUG] Distance to ${sw.id}: ${dist.toFixed(0)}px`);
             if (dist < minDistance) {
               minDistance = dist;
               closestSwitch = sw;
@@ -685,6 +694,8 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
 
           const switchComponent = closestSwitch;
           const now = Date.now();
+
+          console.log(`🎯 [TOGGLE DEBUG] Closest switch: ${switchComponent.id} at ${minDistance.toFixed(0)}px, state: ${switchComponent.state}`);
 
           // Check if already holding this switch
           if (
@@ -695,6 +706,14 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
             const elapsed = now - toggleHold.startTime!;
             const progress = Math.min(elapsed / 3000, 1); // 3 seconds
 
+            console.log(`⏱️ [TOGGLE DEBUG] Continuing hold:`, {
+              switchId: switchComponent.id,
+              elapsed: `${elapsed}ms`,
+              progress: `${(progress * 100).toFixed(1)}%`,
+              startTime: toggleHold.startTime,
+              currentTime: now,
+            });
+
             setToggleHold((prev) => ({
               ...prev,
               progress: progress,
@@ -703,11 +722,12 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
             console.log(
               `🕐 TOGGLE HOLD: ${(progress * 100).toFixed(0)}% on ${
                 switchComponent.id
-              }`
+              } (${elapsed}ms / 3000ms)`
             );
 
             // Complete toggle after 3 seconds
             if (progress >= 1) {
+              console.log(`🎉 [TOGGLE DEBUG] Progress reached 100%! Toggling switch...`);
               setComponents((prev) => {
                 return prev.map((comp) => {
                   if (
@@ -719,6 +739,12 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
                     console.log(
                       `✅ SWITCH TOGGLED: ${switchComponent.id} ${comp.state} → ${newState}`
                     );
+                    console.log(`✅ [TOGGLE DEBUG] Toggle executed successfully:`, {
+                      switchId: switchComponent.id,
+                      oldState: comp.state,
+                      newState: newState,
+                      totalHoldTime: `${elapsed}ms`,
+                    });
                     debugLogger.log("action", "TOGGLE via THUMBS UP (3s hold)", {
                       switchId: switchComponent.id,
                       oldState: comp.state,
@@ -731,19 +757,31 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
               });
 
               // Reset hold state
+              console.log(`🔄 [TOGGLE DEBUG] Resetting hold state after successful toggle`);
               setToggleHold({
                 isActive: false,
                 switchId: null,
                 startTime: null,
                 progress: 0,
               });
+            } else {
+              console.log(`⏳ [TOGGLE DEBUG] Still holding... need ${(3000 - elapsed)}ms more`);
             }
           } else {
             // Start new hold
+            console.log(`🆕 [TOGGLE DEBUG] Starting NEW hold:`, {
+              switchId: switchComponent.id,
+              switchState: switchComponent.state,
+              position: { x: cursorX.toFixed(0), y: cursorY.toFixed(0) },
+              distance: `${minDistance.toFixed(0)}px`,
+              startTime: now,
+              previousHoldActive: toggleHold.isActive,
+              previousSwitchId: toggleHold.switchId,
+            });
             console.log(
               `👍 THUMBS UP START at (${cursorX.toFixed(0)}, ${cursorY.toFixed(
                 0
-              )}) on switch: ${switchComponent.id}`
+              )}) on switch: ${switchComponent.id} (distance: ${minDistance.toFixed(0)}px)`
             );
             setToggleHold({
               isActive: true,
@@ -754,8 +792,14 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
           }
         } else {
           // No switches in circuit, reset hold
+          console.log(`⚠️ [TOGGLE DEBUG] No switches found in circuit`);
           if (toggleHold.isActive) {
             console.log("❌ TOGGLE HOLD CANCELLED: No switches in circuit");
+            console.log(`❌ [TOGGLE DEBUG] Cancelling hold:`, {
+              previousSwitchId: toggleHold.switchId,
+              wasActive: toggleHold.isActive,
+              reason: "No switches in circuit",
+            });
             setToggleHold({
               isActive: false,
               switchId: null,
@@ -769,6 +813,12 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
 
       // 🆕 Reset toggle hold if gesture is not thumbs_up anymore
       if (action.type !== "toggle" && toggleHold.isActive) {
+        console.log(`🔄 [TOGGLE DEBUG] Gesture changed from THUMBS_UP:`, {
+          newActionType: action.type,
+          wasSwitchId: toggleHold.switchId,
+          wasProgress: `${(toggleHold.progress * 100).toFixed(1)}%`,
+          reason: "Gesture no longer thumbs_up",
+        });
         console.log("🔄 TOGGLE HOLD RESET: Gesture changed");
         setToggleHold({
           isActive: false,
@@ -778,7 +828,7 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
         });
       }
     },
-    [components, selectedComponentId, findClosestTerminal, wireConnection.startTerminalId, toggleHold.isActive, toggleHold.switchId, toggleHold.startTime]
+    [components, selectedComponentId, findClosestTerminal, wireConnection.startTerminalId, toggleHold.isActive, toggleHold.switchId, toggleHold.startTime, toggleHold.progress]
   );
 
   /**

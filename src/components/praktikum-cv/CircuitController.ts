@@ -96,8 +96,24 @@ export class CircuitController {
 
         case "thumbs_up":
           // Only allow RIGHT hand for toggle switch
+          console.log(`👍 [CONTROLLER DEBUG] THUMBS_UP detected:`, {
+            gesture: gesture.name,
+            handedness: gesture.handedness,
+            position: gesture.position
+              ? {
+                  x: gesture.position.x.toFixed(3),
+                  y: gesture.position.y.toFixed(3),
+                }
+              : "no position",
+            confidence: gesture.confidence,
+            willTriggerToggle: gesture.handedness === "Right",
+          });
+          
           if (gesture.handedness === "Right") {
             action = this.handleThumbsUp(gesture);
+            console.log(`✅ [CONTROLLER DEBUG] Toggle action created for RIGHT hand`);
+          } else {
+            console.log(`❌ [CONTROLLER DEBUG] THUMBS_UP ignored - not RIGHT hand (handedness: ${gesture.handedness})`);
           }
           break;
 
