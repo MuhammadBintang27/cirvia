@@ -320,6 +320,24 @@ const AudioPlayer = ({ title, description, chapters }: AudioPlayerProps) => {
         </audio>
       )}
 
+      {/* Debug Info - Show audio source status */}
+      {audioSrc && !audioError && (
+        <div className="mb-4 p-3 bg-blue-500/10 border border-blue-400/20 rounded-xl">
+          <div className="text-xs text-blue-300 space-y-1">
+            <div className="flex items-center">
+              <span className="w-2 h-2 bg-green-400 rounded-full mr-2 animate-pulse"></span>
+              <span className="font-medium">Audio Ready from Supabase Storage</span>
+            </div>
+            <div className="text-blue-200/60 font-mono break-all">
+              {audioSrc}
+            </div>
+            {audioLoaded && (
+              <div className="text-green-400 text-xs">✓ File loaded successfully</div>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* Error Message */}
       {audioError && (
         <div className="mb-4 p-4 bg-yellow-500/20 border border-yellow-400/30 rounded-xl">
