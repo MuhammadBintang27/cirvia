@@ -133,6 +133,7 @@ const AudioPlayer = ({ title, description, chapters }: AudioPlayerProps) => {
 
     const handleLoadStart = () => {
       console.log('⏳ Audio loading started:', audioSrc);
+      setAudioLoaded(false); // Reset loaded state when loading starts
     };
 
     audio.addEventListener('loadeddata', handleLoadedData);
@@ -140,8 +141,13 @@ const AudioPlayer = ({ title, description, chapters }: AudioPlayerProps) => {
     audio.addEventListener('error', handleError);
     audio.addEventListener('loadstart', handleLoadStart);
 
-    // Force load
-    audio.load();
+    // Force load after a short delay to ensure src is set
+    setTimeout(() => {
+      if (audio.readyState === 0) {
+        console.log('🔄 Force loading audio...');
+        audio.load();
+      }
+    }, 100);
 
     return () => {
       audio.removeEventListener('loadeddata', handleLoadedData);
@@ -319,15 +325,27 @@ const AudioPlayer = ({ title, description, chapters }: AudioPlayerProps) => {
       {audioSrc && !audioError && (
         <div className="mb-4 p-3 bg-blue-500/10 border border-blue-400/20 rounded-xl">
           <div className="text-xs text-blue-300 space-y-1">
-            <div className="flex items-center">
-              <span className="w-2 h-2 bg-green-400 rounded-full mr-2 animate-pulse"></span>
-              <span className="font-medium">Audio Ready from Supabase Storage</span>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center">
+                <span className={`w-2 h-2 rounded-full mr-2 ${audioLoaded ? 'bg-green-400' : 'bg-yellow-400 animate-pulse'}`}></span>
+                <span className="font-medium">
+                  {audioLoaded ? 'Audio Ready from Supabase Storage' : 'Loading audio from Supabase...'}
+                </span>
+              </div>
+              {!audioLoaded && (
+                <div className="w-4 h-4 border-2 border-blue-400 border-t-transparent rounded-full animate-spin"></div>
+              )}
             </div>
-            <div className="text-blue-200/60 font-mono break-all">
+            <div className="text-blue-200/60 font-mono text-[10px] break-all">
               {audioSrc}
             </div>
             {audioLoaded && (
-              <div className="text-green-400 text-xs">✓ File loaded successfully</div>
+              <div className="text-green-400 text-xs flex items-center">
+                <svg className="w-3 h-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+                File loaded successfully - Ready to play
+              </div>
             )}
           </div>
         </div>
@@ -420,15 +438,23 @@ const AudioPlayer = ({ title, description, chapters }: AudioPlayerProps) => {
 
         <button 
           onClick={handlePlayPause}
-          disabled={audioError}
+          disabled={audioError || !audioLoaded || !audioSrc}
           className={`p-4 rounded-full transition-all transform ${
-            audioError
+            audioError || !audioLoaded || !audioSrc
               ? 'bg-gray-500/20 opacity-50 cursor-not-allowed'
               : 'bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 hover:scale-105'
           }`}
-          title={audioError ? 'Audio tidak tersedia' : (isPlaying ? 'Pause' : 'Play')}
+          title={
+            audioError 
+              ? 'Audio tidak tersedia' 
+              : !audioLoaded 
+                ? 'Loading audio...' 
+                : (isPlaying ? 'Pause' : 'Play')
+          }
         >
-          {isPlaying ? (
+          {!audioLoaded && audioSrc && !audioError ? (
+            <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+          ) : isPlaying ? (
             <Pause className="w-6 h-6 text-white" />
           ) : (
             <Play className="w-6 h-6 text-white" />
