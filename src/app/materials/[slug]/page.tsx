@@ -18,12 +18,12 @@ const AudioPlayer = ({ title, description, chapters }: AudioPlayerProps) => {
   const [audioLoaded, setAudioLoaded] = useState(false);
   const audioRef = React.useRef<HTMLAudioElement>(null);
 
-  // Map title to actual audio file names in public/audio folder
+  // Map title to actual audio file names in Supabase Storage
   const getAudioFileName = (title: string): string => {
     // Remove "Audio: " prefix if exists and convert to lowercase
     const titleLower = title.toLowerCase().replace(/^audio:\s*/i, '');
     
-    // Mapping actual audio files in public/audio/
+    // Mapping actual audio files in Supabase Storage bucket: audio-materials
     const audioMap: { [key: string]: string } = {
       'konsep dasar listrik': 'audio-konsep-dasar-listrik.mp3',
       'pengantar rangkaian listrik': 'modul-pengantar.mp3',
@@ -46,33 +46,40 @@ const AudioPlayer = ({ title, description, chapters }: AudioPlayerProps) => {
   };
 
   const audioFileName = getAudioFileName(title);
-  // Use absolute path for production
+  
+  // Supabase Storage URL for audio files
+  const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://hczgbjgcolqxejtmaffn.supabase.co';
+  const AUDIO_BUCKET = 'audio-materials';
+  
+  // Use Supabase Storage URL instead of local public folder
   const [audioSrc, setAudioSrc] = React.useState('');
 
   // Set audio source only on client side
   React.useEffect(() => {
     if (typeof window !== 'undefined') {
-      // Try direct public path - Next.js serves public files from root
-      const src = `/audio/${audioFileName}`;
+      // Use Supabase Storage URL
+      const src = `${SUPABASE_URL}/storage/v1/object/public/${AUDIO_BUCKET}/${audioFileName}`;
       setAudioSrc(src);
       
       // Safe window access - must be inside the check
       const locationOrigin = typeof window !== 'undefined' ? window.location?.origin : '';
       const locationHref = typeof window !== 'undefined' ? window.location?.href : '';
       
-      console.log('🎵 Audio Player Debug:', {
+      console.log('🎵 Audio Player Debug (Supabase):', {
         originalTitle: title,
         cleanedTitle: title.toLowerCase().replace(/^audio:\s*/i, ''),
         audioFileName,
         audioSrc: src,
-        fullPath: locationOrigin + src,
+        supabaseUrl: SUPABASE_URL,
+        bucket: AUDIO_BUCKET,
+        fullPath: src,
         windowLocation: locationHref
       });
 
       // Test if file exists by trying to fetch it
       fetch(src, { method: 'HEAD' })
         .then(res => {
-          console.log('🔍 Audio file HEAD check:', {
+          console.log('🔍 Audio file HEAD check (Supabase):', {
             url: src,
             status: res.status,
             contentType: res.headers.get('content-type'),
@@ -84,7 +91,7 @@ const AudioPlayer = ({ title, description, chapters }: AudioPlayerProps) => {
           console.error('❌ Audio file HEAD check failed:', err);
         });
     }
-  }, [title, audioFileName]);
+  }, [title, audioFileName, SUPABASE_URL, AUDIO_BUCKET]);
 
   // Handle audio load error
   React.useEffect(() => {
