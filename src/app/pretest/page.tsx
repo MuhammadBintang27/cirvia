@@ -3,6 +3,7 @@
 import { useState, useEffect, useMemo } from 'react'
 import { Trophy, Star, Sparkles, ArrowRight, CheckCircle, RotateCcw } from 'lucide-react'
 import Navbar from '@/components/Navbar'
+import { LoadingOverlay } from '@/components/LoadingSpinner'
 import { useStudentAuth } from '@/hooks/useStudentAuth'
 import { useAuth } from '@/contexts/AuthContext'
 import { SupabaseTestService, TestAnswerInput } from '@/lib/supabase-test-service'
@@ -604,16 +605,16 @@ export default function PretestPage() {
           {/* Question Section */}
           {/* Loading state */}
           {checkingPreviousAttempt || questionsLoading || loadingDefaults ? (
-            <div className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl rounded-2xl p-8 border border-white/20 text-center">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-500 mx-auto mb-4"></div>
-              <p className="text-white">
-                {checkingPreviousAttempt 
+            <LoadingOverlay 
+              isVisible={true} 
+              text={
+                checkingPreviousAttempt 
                   ? 'Memeriksa riwayat pre-test...' 
                   : loadingDefaults 
-                    ? 'Memuat soal default dari database...'
-                    : `Memuat soal untuk kelas ${studentClass}...`}
-              </p>
-            </div>
+                    ? 'Memuat soal dari database...'
+                    : `Memuat soal untuk kelas ${studentClass}...`
+              } 
+            />
           ) : questionsError ? (
             <div className="bg-red-500/10 border border-red-400/30 rounded-2xl p-6 text-center">
               <p className="text-red-300 mb-2">⚠️ Gagal memuat soal assignment</p>

@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/components/Toast';
+import { LoadingOverlay } from '@/components/LoadingSpinner';
 import { SupabaseTestService, StudentProgressComplete } from '@/lib/supabase-test-service';
 import Link from 'next/link';
 import { 
@@ -69,11 +70,7 @@ export default function StudentDashboard() {
   };
 
   if (loading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-950 to-indigo-900 flex items-center justify-center">
-        <div className="text-white text-xl">Memuat dashboard...</div>
-      </div>
-    );
+    return <LoadingOverlay isVisible={true} text="Memuat dashboard siswa..." />;
   }
 
   return (

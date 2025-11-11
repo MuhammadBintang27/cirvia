@@ -11,6 +11,7 @@ import {
   SkipForward
 } from 'lucide-react';
 import Navbar from '@/components/Navbar';
+import { LoadingOverlay } from '@/components/LoadingSpinner';
 import { useStudentAuth } from '@/hooks/useStudentAuth';
 import { useAuth } from '@/contexts/AuthContext';
 import { getDefaultPosttestPackage, calculateQuizScore, Question } from '@/lib/questions';
@@ -592,13 +593,14 @@ const PostTestPage = () => {
 
           {/* Question Section */}
           {loadingDefaults || questionsLoading ? (
-            <div className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl rounded-2xl p-12 border border-white/20 text-center">
-              <div className="flex flex-col items-center justify-center space-y-4">
-                <div className="w-16 h-16 border-4 border-purple-500/30 border-t-purple-500 rounded-full animate-spin"></div>
-                <p className="text-white text-xl font-bold">Memuat soal dari database...</p>
-                <p className="text-blue-200/70">Mohon tunggu sebentar</p>
-              </div>
-            </div>
+            <LoadingOverlay 
+              isVisible={true} 
+              text={
+                loadingDefaults 
+                  ? 'Memuat soal dari database...'
+                  : `Memuat soal untuk kelas ${studentClass}...`
+              }
+            />
           ) : questionsError ? (
             <div className="bg-gradient-to-br from-red-500/20 to-red-600/10 backdrop-blur-xl rounded-2xl p-12 border border-red-500/50 text-center">
               <p className="text-red-300 text-xl font-bold mb-4">⚠️ Gagal memuat soal</p>

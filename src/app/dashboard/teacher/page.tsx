@@ -4,6 +4,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
 import ExcelImport from '@/components/ExcelImport';
+import { LoadingOverlay } from '@/components/LoadingSpinner';
 import { 
   Users, 
   BookOpen, 
@@ -430,14 +431,7 @@ const TeacherDashboard = () => {
   };
 
   if (isLoading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-950 to-indigo-900 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-400 mx-auto mb-4"></div>
-          <p className="text-white">Memuat dashboard...</p>
-        </div>
-      </div>
-    );
+    return <LoadingOverlay isVisible={true} text="Memuat dashboard guru..." />;
   }
 
   return (

@@ -14,33 +14,76 @@ const AudioPlayer = ({ title, description, chapters }: AudioPlayerProps) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentChapter, setCurrentChapter] = useState(0);
   const [progress, setProgress] = useState(0);
+  const [audioError, setAudioError] = useState(false);
+  const [audioLoaded, setAudioLoaded] = useState(false);
   const audioRef = React.useRef<HTMLAudioElement>(null);
 
   // Assume audio file name is based on title, e.g. 'konsep-dasar-listrik.mp3'
   const audioFileName = title.toLowerCase().replace(/[^a-z0-9]+/g, '-') + '.mp3';
   const audioSrc = `/audio/${audioFileName}`;
 
+  // Handle audio load error
+  React.useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
+
+    const handleLoadedData = () => {
+      setAudioLoaded(true);
+      setAudioError(false);
+    };
+
+    const handleError = () => {
+      console.warn(`Audio file not found: ${audioSrc}`);
+      setAudioError(true);
+      setAudioLoaded(false);
+      setIsPlaying(false);
+    };
+
+    audio.addEventListener('loadeddata', handleLoadedData);
+    audio.addEventListener('error', handleError);
+
+    return () => {
+      audio.removeEventListener('loadeddata', handleLoadedData);
+      audio.removeEventListener('error', handleError);
+    };
+  }, [audioSrc]);
+
   // Handle play/pause
   const handlePlayPause = () => {
-    if (!audioRef.current) return;
+    if (!audioRef.current || audioError) return;
+    
     if (isPlaying) {
       audioRef.current.pause();
+      setIsPlaying(false);
     } else {
       audioRef.current.currentTime = chapters[currentChapter]?.startTime || 0;
-      audioRef.current.play();
+      audioRef.current.play()
+        .then(() => setIsPlaying(true))
+        .catch((error) => {
+          console.error('Error playing audio:', error);
+          setAudioError(true);
+          setIsPlaying(false);
+        });
     }
-    setIsPlaying(!isPlaying);
   };
 
   // Handle chapter change
   const handleChapterChange = (next: boolean) => {
+    if (audioError) return;
+    
     let newChapter = currentChapter + (next ? 1 : -1);
     if (newChapter < 0) newChapter = 0;
     if (newChapter > chapters.length - 1) newChapter = chapters.length - 1;
     setCurrentChapter(newChapter);
     if (audioRef.current) {
       audioRef.current.currentTime = chapters[newChapter]?.startTime || 0;
-      if (isPlaying) audioRef.current.play();
+      if (isPlaying) {
+        audioRef.current.play().catch((error) => {
+          console.error('Error playing audio:', error);
+          setAudioError(true);
+          setIsPlaying(false);
+        });
+      }
     }
     setProgress(0);
   };
@@ -81,7 +124,24 @@ const AudioPlayer = ({ title, description, chapters }: AudioPlayerProps) => {
         <div className="text-2xl">🎧</div>
       </div>
 
-      <audio ref={audioRef} src={audioSrc} preload="auto" onEnded={() => setIsPlaying(false)} />
+      <audio ref={audioRef} preload="metadata" onEnded={() => setIsPlaying(false)}>
+        <source src={audioSrc} type="audio/mpeg" />
+        Your browser does not support the audio element.
+      </audio>
+
+      {/* Error Message */}
+      {audioError && (
+        <div className="mb-4 p-4 bg-yellow-500/20 border border-yellow-400/30 rounded-xl">
+          <div className="flex items-center space-x-2 text-yellow-300">
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+            <p className="text-sm font-medium">
+              File audio tidak tersedia. Silakan baca materi pembelajaran di bawah.
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* Chapters List */}
       <div className="mb-4">
@@ -125,14 +185,25 @@ const AudioPlayer = ({ title, description, chapters }: AudioPlayerProps) => {
       <div className="flex items-center justify-center space-x-4 mb-4">
         <button 
           onClick={() => handleChapterChange(false)}
-          className="p-2 bg-purple-500/20 rounded-full hover:bg-purple-500/30 transition-colors"
+          disabled={audioError || currentChapter === 0}
+          className={`p-2 rounded-full transition-colors ${
+            audioError || currentChapter === 0
+              ? 'bg-purple-500/10 opacity-50 cursor-not-allowed'
+              : 'bg-purple-500/20 hover:bg-purple-500/30'
+          }`}
         >
           <SkipBack className="w-4 h-4 text-purple-300" />
         </button>
 
         <button 
           onClick={handlePlayPause}
-          className="p-4 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full hover:from-purple-600 hover:to-pink-600 transition-all transform hover:scale-105"
+          disabled={audioError}
+          className={`p-4 rounded-full transition-all transform ${
+            audioError
+              ? 'bg-gray-500/20 opacity-50 cursor-not-allowed'
+              : 'bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 hover:scale-105'
+          }`}
+          title={audioError ? 'Audio tidak tersedia' : (isPlaying ? 'Pause' : 'Play')}
         >
           {isPlaying ? (
             <Pause className="w-6 h-6 text-white" />
@@ -143,19 +214,30 @@ const AudioPlayer = ({ title, description, chapters }: AudioPlayerProps) => {
 
         <button 
           onClick={() => handleChapterChange(true)}
-          className="p-2 bg-purple-500/20 rounded-full hover:bg-purple-500/30 transition-colors"
+          disabled={audioError || currentChapter === chapters.length - 1}
+          className={`p-2 rounded-full transition-colors ${
+            audioError || currentChapter === chapters.length - 1
+              ? 'bg-purple-500/10 opacity-50 cursor-not-allowed'
+              : 'bg-purple-500/20 hover:bg-purple-500/30'
+          }`}
         >
           <SkipForward className="w-4 h-4 text-purple-300" />
         </button>
       </div>
 
       {/* Download Button */}
-      <div className="flex justify-center mt-2">
-        <a href={audioSrc} download className="flex items-center space-x-2 text-purple-300 hover:text-purple-400 text-sm py-2 px-4 rounded-lg transition-colors">
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5m0 0l5-5m-5 5V4" /></svg>
-          <span>Download Audio untuk Offline</span>
-        </a>
-      </div>
+      {!audioError && (
+        <div className="flex justify-center mt-2">
+          <a 
+            href={audioSrc} 
+            download 
+            className="flex items-center space-x-2 text-purple-300 hover:text-purple-400 text-sm py-2 px-4 rounded-lg transition-colors"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5m0 0l5-5m-5 5V4" /></svg>
+            <span>Download Audio untuk Offline</span>
+          </a>
+        </div>
+      )}
     </div>
   );
 };
