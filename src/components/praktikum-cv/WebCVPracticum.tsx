@@ -149,6 +149,10 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
     progress: 0,
   });
 
+  // 🆕 Debounce state to prevent double toggle
+  const [lastToggleTime, setLastToggleTime] = useState<number>(0);
+  const TOGGLE_DEBOUNCE_MS = 1000; // 1 second cooldown between toggles
+
   // FPS counter
   const fpsCounterRef = useRef({ frames: 0, lastTime: Date.now() });
 
@@ -730,10 +734,31 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
 
               // Complete toggle after 3 seconds
               if (progress >= 1) {
-                console.log(`🎉 [TOGGLE DEBUG] Progress reached 100%! Toggling switch...`);
+                console.log(`🎉 [TOGGLE DEBUG] Progress reached 100%! Checking debounce...`);
+                
+                // 🔧 DEBOUNCE CHECK: Prevent double toggle
+                const timeSinceLastToggle = now - lastToggleTime;
+                if (timeSinceLastToggle < TOGGLE_DEBOUNCE_MS) {
+                  console.log(
+                    `⏸️ [TOGGLE DEBUG] DEBOUNCED! Last toggle was ${timeSinceLastToggle}ms ago (need ${TOGGLE_DEBOUNCE_MS}ms cooldown)`
+                  );
+                  // Reset hold state without toggling
+                  return {
+                    isActive: false,
+                    switchId: null,
+                    startTime: null,
+                    progress: 0,
+                  };
+                }
+                
+                console.log(`✅ [TOGGLE DEBUG] Debounce check passed. Proceeding with toggle...`);
                 
                 // 🔧 FIX: Use prevHold.switchId (not switchComponent.id from closure)
                 const targetSwitchId = prevHold.switchId;
+                
+                // Update last toggle time BEFORE toggling
+                setLastToggleTime(now);
+                console.log(`⏰ [TOGGLE DEBUG] Updated lastToggleTime: ${now}`);
                 
                 setComponents((prevComps) => {
                   const updatedComps = prevComps.map((comp) => {
@@ -859,7 +884,7 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
         });
       }
     },
-    [components, selectedComponentId, findClosestTerminal, wireConnection.startTerminalId]
+    [components, selectedComponentId, findClosestTerminal, wireConnection.startTerminalId, lastToggleTime]
   );
 
   /**
