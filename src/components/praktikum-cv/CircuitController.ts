@@ -108,12 +108,16 @@ export class CircuitController {
             confidence: gesture.confidence,
             willTriggerToggle: gesture.handedness === "Right",
           });
-          
+
           if (gesture.handedness === "Right") {
             action = this.handleThumbsUp(gesture);
-            console.log(`✅ [CONTROLLER DEBUG] Toggle action created for RIGHT hand`);
+            console.log(
+              `✅ [CONTROLLER DEBUG] Toggle action created for RIGHT hand`
+            );
           } else {
-            console.log(`❌ [CONTROLLER DEBUG] THUMBS_UP ignored - not RIGHT hand (handedness: ${gesture.handedness})`);
+            console.log(
+              `❌ [CONTROLLER DEBUG] THUMBS_UP ignored - not RIGHT hand (handedness: ${gesture.handedness})`
+            );
           }
           break;
 

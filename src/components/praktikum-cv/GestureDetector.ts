@@ -527,17 +527,20 @@ export class GestureDetector {
     const middleExtended = this.isFingerExtended(landmarks, "middle");
     const ringExtended = this.isFingerExtended(landmarks, "ring");
     const pinkyExtended = this.isFingerExtended(landmarks, "pinky");
-    
+
     const otherFingersClosed =
-      !indexExtended &&
-      !middleExtended &&
-      !ringExtended &&
-      !pinkyExtended;
+      !indexExtended && !middleExtended && !ringExtended && !pinkyExtended;
 
     const isThumbsUpGesture = thumbUp && otherFingersClosed;
 
     // Debug logging
-    if (thumbUp || indexExtended || middleExtended || ringExtended || pinkyExtended) {
+    if (
+      thumbUp ||
+      indexExtended ||
+      middleExtended ||
+      ringExtended ||
+      pinkyExtended
+    ) {
       console.log(`👍 [GESTURE DETECTOR DEBUG] THUMBS_UP check:`, {
         thumbUp: thumbUp,
         thumbTipY: thumbTip.y.toFixed(3),

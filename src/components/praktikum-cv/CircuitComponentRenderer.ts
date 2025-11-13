@@ -90,7 +90,7 @@ export class CircuitComponentRenderer {
     isSelected: boolean
   ): void {
     const terminalRadius = isSelected ? 8 : 6;
-    
+
     // Left terminal (terminal A)
     ctx.beginPath();
     ctx.arc(-terminalOffset, 0, terminalRadius, 0, Math.PI * 2);

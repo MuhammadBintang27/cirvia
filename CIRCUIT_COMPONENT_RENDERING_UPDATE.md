@@ -294,7 +294,7 @@ if (switches.length > 0) {
       closestSwitch = sw;
     }
   });
-  
+
   // Start/update hold for closest switch
   // ...
 }
