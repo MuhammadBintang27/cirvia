@@ -322,6 +322,15 @@ export class GestureDetector {
     // 6. THUMBS UP
     const isThumbUp = this.isThumbsUp(landmarks);
     if (isThumbUp) {
+      console.log(`✅ [GESTURE DETECTOR] THUMBS_UP gesture CONFIRMED:`, {
+        gesture: "thumbs_up",
+        handedness: actualHandedness,
+        confidence: 0.85,
+        thumbTipPosition: {
+          x: thumbTip.x.toFixed(3),
+          y: thumbTip.y.toFixed(3),
+        },
+      });
       return this.createGestureResult(
         "thumbs_up",
         0.85,
@@ -514,13 +523,41 @@ export class GestureDetector {
     const thumbUp = thumbTip.y < thumbIP.y && thumbTip.y < wrist.y;
 
     // Other fingers closed
-    const otherFingersClosed =
-      !this.isFingerExtended(landmarks, "index") &&
-      !this.isFingerExtended(landmarks, "middle") &&
-      !this.isFingerExtended(landmarks, "ring") &&
-      !this.isFingerExtended(landmarks, "pinky");
+    const indexExtended = this.isFingerExtended(landmarks, "index");
+    const middleExtended = this.isFingerExtended(landmarks, "middle");
+    const ringExtended = this.isFingerExtended(landmarks, "ring");
+    const pinkyExtended = this.isFingerExtended(landmarks, "pinky");
 
-    return thumbUp && otherFingersClosed;
+    const otherFingersClosed =
+      !indexExtended && !middleExtended && !ringExtended && !pinkyExtended;
+
+    const isThumbsUpGesture = thumbUp && otherFingersClosed;
+
+    // Debug logging
+    if (
+      thumbUp ||
+      indexExtended ||
+      middleExtended ||
+      ringExtended ||
+      pinkyExtended
+    ) {
+      console.log(`👍 [GESTURE DETECTOR DEBUG] THUMBS_UP check:`, {
+        thumbUp: thumbUp,
+        thumbTipY: thumbTip.y.toFixed(3),
+        thumbIPY: thumbIP.y.toFixed(3),
+        wristY: wrist.y.toFixed(3),
+        fingersState: {
+          index: indexExtended ? "EXTENDED" : "closed",
+          middle: middleExtended ? "EXTENDED" : "closed",
+          ring: ringExtended ? "EXTENDED" : "closed",
+          pinky: pinkyExtended ? "EXTENDED" : "closed",
+        },
+        otherFingersClosed: otherFingersClosed,
+        result: isThumbsUpGesture ? "✅ THUMBS_UP" : "❌ NOT THUMBS_UP",
+      });
+    }
+
+    return isThumbsUpGesture;
   }
 
   /**

@@ -77,10 +77,16 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
   }
 
   // 🆕 Wire interface for permanent wire connections
+  interface WireEnd {
+    elementId: string;
+    terminalId: "a" | "b";
+  }
+
   interface WireComponent {
     id: string;
-    fromComponentId: string;
-    toComponentId: string;
+    from: WireEnd;
+    to: WireEnd;
+    current?: number;
   }
 
   const [components, setComponents] = useState<CircuitComponent[]>([]);
@@ -105,11 +111,17 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
   const [wireConnection, setWireConnection] = useState<{
     isActive: boolean;
     startComponentId: string | null;
+    startTerminalId: "a" | "b" | null;
     endPosition: { x: number; y: number } | null;
+    targetComponentId: string | null;
+    targetTerminalId: "a" | "b" | null;
   }>({
     isActive: false,
     startComponentId: null,
+    startTerminalId: null,
     endPosition: null,
+    targetComponentId: null,
+    targetTerminalId: null,
   });
 
   // Hand position state for circuit canvas
@@ -123,6 +135,40 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
   const [selectedComponentId, setSelectedComponentId] = useState<string | null>(
     null
   );
+
+  // 🆕 Toggle hold state (for 3-second hold on switch)
+  const [toggleHold, setToggleHold] = useState<{
+    isActive: boolean;
+    switchId: string | null;
+    startTime: number | null;
+    progress: number;
+  }>({
+    isActive: false,
+    switchId: null,
+    startTime: null,
+    progress: 0,
+  });
+
+  // 🆕 Debounce with useRef (synchronous, no race condition)
+  const lastToggleTimeRef = useRef<number>(0);
+  const TOGGLE_DEBOUNCE_MS = 1000; // 1 second cooldown between toggles
+
+  // 🆕 Rotate hold state (for 5-second hold with 2 fingers to rotate 90°)
+  const [rotateHold, setRotateHold] = useState<{
+    isActive: boolean;
+    componentId: string | null;
+    startTime: number | null;
+    progress: number;
+  }>({
+    isActive: false,
+    componentId: null,
+    startTime: null,
+    progress: 0,
+  });
+
+  // 🆕 Debounce for rotate
+  const lastRotateTimeRef = useRef<number>(0);
+  const ROTATE_DEBOUNCE_MS = 1000; // 1 second cooldown between rotates
 
   // FPS counter
   const fpsCounterRef = useRef({ frames: 0, lastTime: Date.now() });
@@ -201,6 +247,52 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
     ctx.fillStyle = barGradient;
     ctx.fillRect(barX, barY, (confidence / 100) * barWidth, 6);
   };
+
+  /**
+   * Find closest terminal to a given position
+   */
+  const findClosestTerminal = useCallback(
+    (componentId: string, fingerX: number, fingerY: number): "a" | "b" => {
+      const component = components.find((c) => c.id === componentId);
+      if (!component) return "a"; // Default
+
+      const terminalOffset = 52;
+      const angle = (component.rotation * Math.PI) / 180;
+
+      // Calculate both terminal positions
+      const terminals = {
+        a: {
+          x:
+            component.position.x +
+            (-terminalOffset * Math.cos(angle) - 0 * Math.sin(angle)),
+          y:
+            component.position.y +
+            (-terminalOffset * Math.sin(angle) + 0 * Math.cos(angle)),
+        },
+        b: {
+          x:
+            component.position.x +
+            (terminalOffset * Math.cos(angle) - 0 * Math.sin(angle)),
+          y:
+            component.position.y +
+            (terminalOffset * Math.sin(angle) + 0 * Math.cos(angle)),
+        },
+      };
+
+      // Calculate distances
+      const distA = Math.sqrt(
+        Math.pow(terminals.a.x - fingerX, 2) +
+          Math.pow(terminals.a.y - fingerY, 2)
+      );
+      const distB = Math.sqrt(
+        Math.pow(terminals.b.x - fingerX, 2) +
+          Math.pow(terminals.b.y - fingerY, 2)
+      );
+
+      return distA < distB ? "a" : "b";
+    },
+    [components]
+  );
 
   /**
    * Handle circuit actions from gestures
@@ -286,19 +378,33 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
 
       // 🆕 RIGHT HAND: Start wire connection (after 3-second hold)
       if (action.type === "start_wire" && action.componentId) {
+        const fingerX = action.position ? mirrorX(action.position.x) * 1200 : 0;
+        const fingerY = action.position ? action.position.y * 700 : 0;
+
+        // Detect which terminal is closest to finger
+        const startTerminal = findClosestTerminal(
+          action.componentId,
+          fingerX,
+          fingerY
+        );
+
         setWireConnection({
           isActive: true,
           startComponentId: action.componentId,
-          endPosition: action.position
-            ? {
-                x: mirrorX(action.position.x) * 1200,
-                y: action.position.y * 700,
-              }
-            : null,
+          startTerminalId: startTerminal,
+          endPosition: action.position ? { x: fingerX, y: fingerY } : null,
+          targetComponentId: null,
+          targetTerminalId: null,
         });
-        console.log(`🔌 WIRE START from component: ${action.componentId}`);
+
+        console.log(
+          `🔌 WIRE START from component: ${
+            action.componentId
+          } terminal ${startTerminal.toUpperCase()}`
+        );
         debugLogger.log("action", "WIRE START", {
           componentId: action.componentId,
+          terminal: startTerminal,
         });
         return;
       }
@@ -348,19 +454,41 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
         action.componentId &&
         action.targetComponentId
       ) {
+        const fingerX = action.position ? mirrorX(action.position.x) * 1200 : 0;
+        const fingerY = action.position ? action.position.y * 700 : 0;
+
+        // Detect which terminal is closest to finger on target component
+        const targetTerminal = findClosestTerminal(
+          action.targetComponentId,
+          fingerX,
+          fingerY
+        );
+
         console.log(
-          `🔌 WIRE COMPLETE: ${action.componentId} → ${action.targetComponentId}`
+          `🔌 WIRE COMPLETE: ${
+            action.componentId
+          }[${wireConnection.startTerminalId?.toUpperCase()}] → ${
+            action.targetComponentId
+          }[${targetTerminal.toUpperCase()}]`
         );
         debugLogger.log("action", "WIRE COMPLETE", {
           from: action.componentId,
+          fromTerminal: wireConnection.startTerminalId,
           to: action.targetComponentId,
+          toTerminal: targetTerminal,
         });
 
-        // ✅ Create permanent wire connection
+        // ✅ Create permanent wire connection using detected terminals
         const newWire: WireComponent = {
           id: `wire_${Date.now()}`,
-          fromComponentId: action.componentId,
-          toComponentId: action.targetComponentId,
+          from: {
+            elementId: action.componentId,
+            terminalId: wireConnection.startTerminalId || "b",
+          },
+          to: {
+            elementId: action.targetComponentId,
+            terminalId: targetTerminal,
+          },
         };
 
         setWires((prev) => {
@@ -377,7 +505,10 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
         setWireConnection({
           isActive: false,
           startComponentId: null,
+          startTerminalId: null,
           endPosition: null,
+          targetComponentId: null,
+          targetTerminalId: null,
         });
 
         console.log("🔄 Wire connection state reset");
@@ -546,11 +677,267 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
         return;
       }
 
-      if (action.type === "toggle" && action.componentId) {
-        console.log("⚡ TOGGLE");
+      // 👉 RIGHT HAND: Toggle switch (THUMBS UP gesture with 3-second hold)
+      if (action.type === "toggle" && action.position) {
+        const cursorX = mirrorX(action.position.x) * 1200;
+        const cursorY = action.position.y * 700;
+
+        console.log(`🔍 [TOGGLE DEBUG] Action detected:`, {
+          actionType: action.type,
+          position: { x: cursorX.toFixed(0), y: cursorY.toFixed(0) },
+          componentId: action.componentId,
+        });
+
+        // Find ALL switches in circuit
+        const switches = componentsRef.current.filter(
+          (c) => c.type === "switch"
+        );
+
+        console.log(
+          `🔍 [TOGGLE DEBUG] Found ${switches.length} switch(es) in circuit`
+        );
+
+        if (switches.length > 0) {
+          // Find CLOSEST switch (tidak perlu ada di atas saklar)
+          let closestSwitch = switches[0];
+          let minDistance = Math.sqrt(
+            Math.pow(closestSwitch.position.x - cursorX, 2) +
+              Math.pow(closestSwitch.position.y - cursorY, 2)
+          );
+
+          switches.forEach((sw) => {
+            const dist = Math.sqrt(
+              Math.pow(sw.position.x - cursorX, 2) +
+                Math.pow(sw.position.y - cursorY, 2)
+            );
+            console.log(
+              `🔍 [TOGGLE DEBUG] Distance to ${sw.id}: ${dist.toFixed(0)}px`
+            );
+            if (dist < minDistance) {
+              minDistance = dist;
+              closestSwitch = sw;
+            }
+          });
+
+          const switchComponent = closestSwitch;
+          const now = Date.now();
+
+          console.log(
+            `🎯 [TOGGLE DEBUG] Closest switch: ${
+              switchComponent.id
+            } at ${minDistance.toFixed(0)}px, state: ${switchComponent.state}`
+          );
+
+          // 🔧 FIX: Use functional update to get latest toggleHold state
+          setToggleHold((prevHold) => {
+            console.log(`🔍 [TOGGLE DEBUG] Current hold state:`, {
+              isActive: prevHold.isActive,
+              switchId: prevHold.switchId,
+              progress: `${(prevHold.progress * 100).toFixed(1)}%`,
+            });
+
+            // Check if already holding this switch
+            if (prevHold.isActive && prevHold.switchId === switchComponent.id) {
+              // Calculate hold progress
+              const elapsed = now - prevHold.startTime!;
+              const progress = Math.min(elapsed / 3000, 1); // 3 seconds
+
+              console.log(`⏱️ [TOGGLE DEBUG] Continuing hold:`, {
+                switchId: switchComponent.id,
+                elapsed: `${elapsed}ms`,
+                progress: `${(progress * 100).toFixed(1)}%`,
+                startTime: prevHold.startTime,
+                currentTime: now,
+              });
+
+              console.log(
+                `🕐 TOGGLE HOLD: ${(progress * 100).toFixed(0)}% on ${
+                  switchComponent.id
+                } (${elapsed}ms / 3000ms)`
+              );
+
+              // Complete toggle after 3 seconds
+              if (progress >= 1) {
+                console.log(
+                  `🎉 [TOGGLE DEBUG] Progress reached 100%! Checking debounce...`
+                );
+
+                // 🔧 DEBOUNCE CHECK: Use useRef for synchronous access
+                const timeSinceLastToggle = now - lastToggleTimeRef.current;
+                console.log(
+                  `🕐 [DEBOUNCE CHECK] Time since last toggle: ${timeSinceLastToggle}ms (need ${TOGGLE_DEBOUNCE_MS}ms)`
+                );
+
+                if (timeSinceLastToggle < TOGGLE_DEBOUNCE_MS) {
+                  console.log(
+                    `⏸️ [TOGGLE DEBUG] ❌ DEBOUNCED! Last toggle was ${timeSinceLastToggle}ms ago (need ${TOGGLE_DEBOUNCE_MS}ms cooldown)`
+                  );
+                  // Reset hold state without toggling
+                  return {
+                    isActive: false,
+                    switchId: null,
+                    startTime: null,
+                    progress: 0,
+                  };
+                }
+
+                console.log(
+                  `✅ [TOGGLE DEBUG] Debounce check passed. Proceeding with toggle...`
+                );
+
+                // 🔧 FIX: Use prevHold.switchId (not switchComponent.id from closure)
+                const targetSwitchId = prevHold.switchId;
+
+                // Update last toggle time IMMEDIATELY (synchronous with useRef)
+                lastToggleTimeRef.current = now;
+                console.log(
+                  `⏰ [TOGGLE DEBUG] Updated lastToggleTimeRef.current: ${now}`
+                );
+
+                setComponents((prevComps) => {
+                  const updatedComps = prevComps.map((comp) => {
+                    if (comp.id === targetSwitchId && comp.type === "switch") {
+                      const newState: "open" | "closed" =
+                        comp.state === "open" ? "closed" : "open";
+                      console.log(
+                        `✅ SWITCH TOGGLED: ${targetSwitchId} ${comp.state} → ${newState}`
+                      );
+                      console.log(
+                        `✅ [TOGGLE DEBUG] Toggle executed successfully:`,
+                        {
+                          switchId: targetSwitchId,
+                          oldState: comp.state,
+                          newState: newState,
+                          totalHoldTime: `${elapsed}ms`,
+                        }
+                      );
+                      debugLogger.log(
+                        "action",
+                        "TOGGLE via THUMBS UP (3s hold)",
+                        {
+                          switchId: targetSwitchId,
+                          oldState: comp.state,
+                          newState: newState,
+                        }
+                      );
+                      return { ...comp, state: newState };
+                    }
+                    return comp;
+                  });
+
+                  console.log(`🔍 [TOGGLE DEBUG] Components after toggle:`, {
+                    totalComponents: updatedComps.length,
+                    switches: updatedComps
+                      .filter((c) => c.type === "switch")
+                      .map((c) => ({
+                        id: c.id,
+                        state: c.state,
+                      })),
+                  });
+
+                  return updatedComps;
+                });
+
+                // Reset hold state
+                console.log(
+                  `🔄 [TOGGLE DEBUG] Resetting hold state after successful toggle`
+                );
+                return {
+                  isActive: false,
+                  switchId: null,
+                  startTime: null,
+                  progress: 0,
+                };
+              } else {
+                console.log(
+                  `⏳ [TOGGLE DEBUG] Still holding... need ${
+                    3000 - elapsed
+                  }ms more`
+                );
+                // Update progress
+                return {
+                  ...prevHold,
+                  progress: progress,
+                };
+              }
+            } else {
+              // Start new hold
+              console.log(`🆕 [TOGGLE DEBUG] Starting NEW hold:`, {
+                switchId: switchComponent.id,
+                switchState: switchComponent.state,
+                position: { x: cursorX.toFixed(0), y: cursorY.toFixed(0) },
+                distance: `${minDistance.toFixed(0)}px`,
+                startTime: now,
+                previousHoldActive: prevHold.isActive,
+                previousSwitchId: prevHold.switchId,
+              });
+              console.log(
+                `👍 THUMBS UP START at (${cursorX.toFixed(
+                  0
+                )}, ${cursorY.toFixed(0)}) on switch: ${
+                  switchComponent.id
+                } (distance: ${minDistance.toFixed(0)}px)`
+              );
+              return {
+                isActive: true,
+                switchId: switchComponent.id,
+                startTime: now,
+                progress: 0,
+              };
+            }
+          });
+        } else {
+          // No switches in circuit, reset hold
+          console.log(`⚠️ [TOGGLE DEBUG] No switches found in circuit`);
+          setToggleHold((prevHold) => {
+            if (prevHold.isActive) {
+              console.log("❌ TOGGLE HOLD CANCELLED: No switches in circuit");
+              console.log(`❌ [TOGGLE DEBUG] Cancelling hold:`, {
+                previousSwitchId: prevHold.switchId,
+                wasActive: prevHold.isActive,
+                reason: "No switches in circuit",
+              });
+              return {
+                isActive: false,
+                switchId: null,
+                startTime: null,
+                progress: 0,
+              };
+            }
+            return prevHold;
+          });
+        }
+        return;
+      }
+
+      // 🆕 Reset toggle hold if gesture is not thumbs_up anymore
+      if (action.type !== "toggle") {
+        setToggleHold((prevHold) => {
+          if (prevHold.isActive) {
+            console.log(`🔄 [TOGGLE DEBUG] Gesture changed from THUMBS_UP:`, {
+              newActionType: action.type,
+              wasSwitchId: prevHold.switchId,
+              wasProgress: `${(prevHold.progress * 100).toFixed(1)}%`,
+              reason: "Gesture no longer thumbs_up",
+            });
+            console.log("🔄 TOGGLE HOLD RESET: Gesture changed");
+            return {
+              isActive: false,
+              switchId: null,
+              startTime: null,
+              progress: 0,
+            };
+          }
+          return prevHold;
+        });
       }
     },
-    [components, selectedComponentId]
+    [
+      components,
+      selectedComponentId,
+      findClosestTerminal,
+      wireConnection.startTerminalId,
+    ]
   );
 
   /**
@@ -675,6 +1062,187 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
               gesture.metadata.componentId = undefined;
               console.log("   ❌ No component under finger");
             }
+          }
+
+          // 🆕 RIGHT HAND: Rotate 90° with PEACE gesture (2 fingers, hold 5 seconds)
+          // Handle PEACE gesture detection for rotation
+          console.log(`🔍 [PEACE CHECK] gesture.name="${gesture.name}" | gesture.handedness="${gesture.handedness}" | rawHandedness="${handedness}" | hasPosition=${!!gesture.position}`);
+          
+          const isPeaceRightHand =
+            gesture.name === "peace" &&
+            gesture.handedness === "Right" &&  // ✅ Use gesture.handedness (corrected), not raw handedness
+            gesture.position;
+
+          console.log(`🔍 [PEACE CHECK] isPeaceRightHand=${isPeaceRightHand}`);
+
+          if (isPeaceRightHand && gesture.position) {
+            const mirrorX = (x: number) => 1 - x;
+            const cursorX = mirrorX(gesture.position.x) * 1200;
+            const cursorY = gesture.position.y * 700;
+
+            console.log(`🔄 [ROTATE DEBUG] PEACE RIGHT hand detected:`, {
+              position: { x: cursorX.toFixed(0), y: cursorY.toFixed(0) },
+              gesture: "peace (2 fingers)",
+            });
+
+            // Find closest component within radius
+            const DETECTION_RADIUS = 150;
+            let closestComponent: CircuitComponent | null = null;
+            let closestDistance = DETECTION_RADIUS;
+
+            componentsRef.current.forEach((comp) => {
+              const dx = comp.position.x - cursorX;
+              const dy = comp.position.y - cursorY;
+              const distance = Math.sqrt(dx * dx + dy * dy);
+
+              if (distance < closestDistance) {
+                closestDistance = distance;
+                closestComponent = comp;
+              }
+            });
+
+            if (closestComponent) {
+              const now = Date.now();
+              const comp = closestComponent as CircuitComponent;
+
+              console.log(
+                `🎯 [ROTATE DEBUG] Closest component: ${comp.id} at ${closestDistance.toFixed(0)}px`
+              );
+
+              setRotateHold((prevHold) => {
+                // Continue existing hold
+                if (prevHold.isActive && prevHold.componentId === comp.id) {
+                  const elapsed = now - prevHold.startTime!;
+                  const progress = Math.min(elapsed / 5000, 1); // 5 seconds
+
+                  console.log(`⏱️ [ROTATE DEBUG] Continuing hold:`, {
+                    componentId: prevHold.componentId,
+                    elapsed: `${elapsed.toFixed(0)}ms`,
+                    progress: `${(progress * 100).toFixed(1)}%`,
+                  });
+
+                  // Complete rotation after 5 seconds
+                  if (progress >= 1) {
+                    console.log(
+                      `🎉 [ROTATE DEBUG] Progress reached 100%! Checking debounce...`
+                    );
+
+                    // Debounce check
+                    const timeSinceLastRotate = now - lastRotateTimeRef.current;
+                    console.log(
+                      `🕐 [DEBOUNCE CHECK] Time since last rotate: ${timeSinceLastRotate}ms`
+                    );
+
+                    if (timeSinceLastRotate < ROTATE_DEBOUNCE_MS) {
+                      console.log(
+                        `⏸️ [ROTATE DEBUG] ❌ DEBOUNCED! Last rotate was ${timeSinceLastRotate}ms ago`
+                      );
+                      return {
+                        isActive: false,
+                        componentId: null,
+                        startTime: null,
+                        progress: 0,
+                      };
+                    }
+
+                    console.log(
+                      `✅ [ROTATE DEBUG] Debounce check passed. Rotating 90°...`
+                    );
+
+                    const targetComponentId = prevHold.componentId;
+
+                    // Update last rotate time
+                    lastRotateTimeRef.current = now;
+                    console.log(
+                      `⏰ [ROTATE DEBUG] Updated lastRotateTimeRef.current: ${now}`
+                    );
+
+                    // Rotate component 90°
+                    setComponents((prevComps) => {
+                      return prevComps.map((comp) => {
+                        if (comp.id === targetComponentId) {
+                          const newRotation = (comp.rotation + 90) % 360;
+                          console.log(
+                            `🔄 COMPONENT ROTATED: ${targetComponentId} ${comp.rotation}° → ${newRotation}°`
+                          );
+                          debugLogger.log(
+                            "action",
+                            `ROTATE 90° via PEACE (5s hold)`,
+                            {
+                              id: targetComponentId,
+                              oldRotation: comp.rotation,
+                              newRotation,
+                            }
+                          );
+                          return { ...comp, rotation: newRotation };
+                        }
+                        return comp;
+                      });
+                    });
+
+                    console.log(
+                      `✅ [ROTATE DEBUG] Rotation executed successfully`
+                    );
+
+                    // Reset hold state
+                    return {
+                      isActive: false,
+                      componentId: null,
+                      startTime: null,
+                      progress: 0,
+                    };
+                  }
+
+                  // Update progress
+                  return { ...prevHold, progress };
+                } else {
+                  // Start new hold
+                  console.log(`🆕 [ROTATE DEBUG] Starting new hold:`, {
+                    componentId: comp.id,
+                    componentType: comp.type,
+                  });
+
+                  return {
+                    isActive: true,
+                    componentId: comp.id,
+                    startTime: now,
+                    progress: 0,
+                  };
+                }
+              });
+            } else {
+              // No component nearby, reset hold
+              setRotateHold((prevHold) => {
+                if (prevHold.isActive) {
+                  console.log(
+                    `🔄 [ROTATE DEBUG] Resetting hold - no component in range`
+                  );
+                  return {
+                    isActive: false,
+                    componentId: null,
+                    startTime: null,
+                    progress: 0,
+                  };
+                }
+                return prevHold;
+              });
+            }
+          } else {
+            // Reset rotate hold if not PEACE RIGHT hand
+            setRotateHold((prevHold) => {
+              if (prevHold.isActive) {
+                console.log(
+                  `🔄 [ROTATE DEBUG] Resetting hold because gesture changed`
+                );
+                return {
+                  isActive: false,
+                  componentId: null,
+                  startTime: null,
+                  progress: 0,
+                };
+              }
+              return prevHold;
+            });
           }
 
           // Smooth gesture
@@ -903,13 +1471,38 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
 
     // 🆕 Draw permanent wires FIRST (below components)
     wires.forEach((wire) => {
-      const fromComp = components.find((c) => c.id === wire.fromComponentId);
-      const toComp = components.find((c) => c.id === wire.toComponentId);
+      const fromComp = components.find((c) => c.id === wire.from.elementId);
+      const toComp = components.find((c) => c.id === wire.to.elementId);
 
       if (fromComp && toComp) {
+        // Calculate terminal positions based on rotation
+        const getTerminalPosition = (
+          comp: CircuitComponent,
+          terminalId: "a" | "b"
+        ) => {
+          const terminalOffset = 52; // Match renderer offset
+          const angle = (comp.rotation * Math.PI) / 180;
+
+          // Terminal A = left (-offset), Terminal B = right (+offset)
+          const localX = terminalId === "a" ? -terminalOffset : terminalOffset;
+          const localY = 0;
+
+          // Apply rotation
+          const rotatedX = localX * Math.cos(angle) - localY * Math.sin(angle);
+          const rotatedY = localX * Math.sin(angle) + localY * Math.cos(angle);
+
+          return {
+            x: comp.position.x + rotatedX,
+            y: comp.position.y + rotatedY,
+          };
+        };
+
+        const fromPos = getTerminalPosition(fromComp, wire.from.terminalId);
+        const toPos = getTerminalPosition(toComp, wire.to.terminalId);
+
         ctx.beginPath();
-        ctx.moveTo(fromComp.position.x, fromComp.position.y);
-        ctx.lineTo(toComp.position.x, toComp.position.y);
+        ctx.moveTo(fromPos.x, fromPos.y);
+        ctx.lineTo(toPos.x, toPos.y);
 
         // Solid line for permanent connection
         ctx.strokeStyle = "#10B981"; // Green
@@ -919,10 +1512,10 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
         ctx.stroke();
         ctx.shadowBlur = 0;
 
-        // Draw connection points (circles at endpoints)
-        [fromComp, toComp].forEach((comp) => {
+        // Draw connection points (circles at terminal positions)
+        [fromPos, toPos].forEach((pos) => {
           ctx.beginPath();
-          ctx.arc(comp.position.x, comp.position.y, 8, 0, Math.PI * 2);
+          ctx.arc(pos.x, pos.y, 8, 0, Math.PI * 2);
           ctx.fillStyle = "#10B981";
           ctx.fill();
           ctx.strokeStyle = "#FFFFFF";
@@ -1020,6 +1613,101 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
         ctx.textAlign = "left";
         ctx.textBaseline = "middle";
         ctx.fillText("FIST lagi untuk connect", cursorX + 25, cursorY - 5);
+      }
+    }
+
+    // 🆕 Draw toggle hold progress indicator
+    if (toggleHold.isActive && toggleHold.switchId) {
+      const switchComp = components.find((c) => c.id === toggleHold.switchId);
+      if (switchComp) {
+        const centerX = switchComp.position.x;
+        const centerY = switchComp.position.y;
+
+        // Progress circle
+        ctx.save();
+        ctx.translate(centerX, centerY);
+
+        // Background circle
+        ctx.beginPath();
+        ctx.arc(0, 0, 50, 0, Math.PI * 2);
+        ctx.strokeStyle = "rgba(255, 255, 255, 0.3)";
+        ctx.lineWidth = 8;
+        ctx.stroke();
+
+        // Progress arc
+        ctx.beginPath();
+        ctx.arc(
+          0,
+          0,
+          50,
+          -Math.PI / 2,
+          -Math.PI / 2 + Math.PI * 2 * toggleHold.progress
+        );
+        ctx.strokeStyle = "#10B981"; // Green
+        ctx.lineWidth = 8;
+        ctx.lineCap = "round";
+        ctx.shadowColor = "#10B981";
+        ctx.shadowBlur = 15;
+        ctx.stroke();
+        ctx.shadowBlur = 0;
+
+
+
+        ctx.restore();
+      }
+    }
+
+    // 🆕 Draw rotate hold progress indicator (2 fingers, 5 seconds)
+    if (rotateHold.isActive && rotateHold.componentId) {
+      const rotateComp = components.find((c) => c.id === rotateHold.componentId);
+      if (rotateComp) {
+        const centerX = rotateComp.position.x;
+        const centerY = rotateComp.position.y;
+
+        // Progress circle
+        ctx.save();
+        ctx.translate(centerX, centerY);
+
+        // Background circle
+        ctx.beginPath();
+        ctx.arc(0, 0, 55, 0, Math.PI * 2);
+        ctx.strokeStyle = "rgba(255, 255, 255, 0.3)";
+        ctx.lineWidth = 8;
+        ctx.stroke();
+
+        // Progress arc (Amber/Orange)
+        ctx.beginPath();
+        ctx.arc(
+          0,
+          0,
+          55,
+          -Math.PI / 2,
+          -Math.PI / 2 + Math.PI * 2 * rotateHold.progress
+        );
+        ctx.strokeStyle = "#F59E0B"; // Amber
+        ctx.lineWidth = 8;
+        ctx.lineCap = "round";
+        ctx.shadowColor = "#F59E0B";
+        ctx.shadowBlur = 15;
+        ctx.stroke();
+        ctx.shadowBlur = 0;
+
+        // Progress text
+        ctx.fillStyle = "#FFFFFF";
+        ctx.font = "bold 18px Arial";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText(
+          `${Math.round(rotateHold.progress * 100)}%`,
+          0,
+          -5
+        );
+
+        // Label
+        ctx.font = "12px Arial";
+        ctx.fillText("✌️ Hold 5s Rotate", 0, 15);
+
+        ctx.restore();
       }
     }
 
@@ -1638,7 +2326,13 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
     wireConnection,
     state.currentGesture,
     selectedComponentId,
-    wires, // 🆕 Added wires dependency
+    wires,
+    toggleHold.isActive,
+    toggleHold.switchId,
+    toggleHold.progress,
+    rotateHold.isActive,
+    rotateHold.componentId,
+    rotateHold.progress,
   ]);
 
   /**
@@ -2109,6 +2803,17 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
                   </div>
                   <div className="ml-4 text-xs text-purple-300">
                     → FIST di komponen A → DRAG ke B → FIST lagi
+                  </div>
+                  <div>
+                    👍{" "}
+                    <span className="font-semibold">THUMBS UP (HOLD 3s):</span>{" "}
+                    Toggle saklar
+                  </div>
+                  <div className="ml-4 text-xs text-green-300">
+                    → Gunakan <span className="font-bold">TANGAN KANAN</span>
+                    <br />
+                    → Acungkan jempol kapan saja
+                    <br />→ HOLD 3 detik → saklar terdekat toggle ON/OFF
                   </div>
                   <div>
                     ✋ <span className="font-semibold">BUKA TELAPAK:</span>{" "}

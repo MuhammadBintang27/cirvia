@@ -13,13 +13,81 @@ export interface LogEntry {
 
 class DebugLogger {
   private logs: LogEntry[] = [];
-  private maxLogs = 500; // Keep last 500 logs
+  private maxLogs = 1000; // Keep last 1000 logs (increased for debug)
   private isEnabled = true;
+  private originalConsoleLog: typeof console.log;
+  private originalConsoleError: typeof console.error;
+  private originalConsoleWarn: typeof console.warn;
+
+  constructor() {
+    // Store original console methods
+    this.originalConsoleLog = console.log;
+    this.originalConsoleError = console.error;
+    this.originalConsoleWarn = console.warn;
+
+    // Intercept console.log to capture all logs
+    this.interceptConsole();
+  }
 
   /**
-   * Log a message
+   * Intercept console methods to capture all logs
    */
-  log(type: LogEntry["type"], message: string, data?: any) {
+  private interceptConsole() {
+    const self = this;
+
+    console.log = function (...args: any[]) {
+      // Call original console.log
+      self.originalConsoleLog.apply(console, args);
+
+      // Store in logs
+      const message = args
+        .map((arg) =>
+          typeof arg === "object" ? JSON.stringify(arg) : String(arg)
+        )
+        .join(" ");
+
+      // Detect log type from message prefix
+      let type: LogEntry["type"] = "info";
+      if (message.includes("[GESTURE DETECTOR") || message.includes("👍")) {
+        type = "gesture";
+      } else if (
+        message.includes("[CONTROLLER DEBUG]") ||
+        message.includes("[TOGGLE DEBUG]") ||
+        message.includes("ACTION:")
+      ) {
+        type = "action";
+      } else if (message.includes("ERROR") || message.includes("❌")) {
+        type = "error";
+      }
+
+      self.addLogEntry(type, message);
+    };
+
+    console.error = function (...args: any[]) {
+      self.originalConsoleError.apply(console, args);
+      const message = args
+        .map((arg) =>
+          typeof arg === "object" ? JSON.stringify(arg) : String(arg)
+        )
+        .join(" ");
+      self.addLogEntry("error", message);
+    };
+
+    console.warn = function (...args: any[]) {
+      self.originalConsoleWarn.apply(console, args);
+      const message = args
+        .map((arg) =>
+          typeof arg === "object" ? JSON.stringify(arg) : String(arg)
+        )
+        .join(" ");
+      self.addLogEntry("info", message);
+    };
+  }
+
+  /**
+   * Add log entry to storage
+   */
+  private addLogEntry(type: LogEntry["type"], message: string, data?: any) {
     if (!this.isEnabled) return;
 
     const timestamp = Date.now();
@@ -47,15 +115,34 @@ class DebugLogger {
     if (this.logs.length > this.maxLogs) {
       this.logs.shift();
     }
+  }
 
-    // Log to console with emoji
+  /**
+   * Log a message (uses original console.log to avoid recursion)
+   */
+  log(type: LogEntry["type"], message: string, data?: any) {
+    if (!this.isEnabled) return;
+
+    // Add to storage
+    this.addLogEntry(type, message, data);
+
+    // Log to console with emoji using original method
     const emoji = this.getEmoji(type);
+    const timestamp = Date.now();
+    const date = new Date(timestamp);
+    const time = `${date.getHours().toString().padStart(2, "0")}:${date
+      .getMinutes()
+      .toString()
+      .padStart(2, "0")}:${date.getSeconds().toString().padStart(2, "0")}.${date
+      .getMilliseconds()
+      .toString()
+      .padStart(3, "0")}`;
     const consoleMessage = `${emoji} [${time}] ${message}`;
 
     if (data) {
-      console.log(consoleMessage, data);
+      this.originalConsoleLog(consoleMessage, data);
     } else {
-      console.log(consoleMessage);
+      this.originalConsoleLog(consoleMessage);
     }
   }
 
@@ -135,7 +222,17 @@ class DebugLogger {
    */
   clear() {
     this.logs = [];
-    console.log("🗑️ Logs cleared");
+    this.originalConsoleLog("🗑️ Logs cleared");
+  }
+
+  /**
+   * Restore original console methods
+   */
+  restoreConsole() {
+    console.log = this.originalConsoleLog;
+    console.error = this.originalConsoleError;
+    console.warn = this.originalConsoleWarn;
+    this.originalConsoleLog("✅ Console restored to original");
   }
 
   /**
