@@ -1066,10 +1066,14 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
 
           // 🆕 RIGHT HAND: Rotate 90° with PEACE gesture (2 fingers, hold 5 seconds)
           // Handle PEACE gesture detection for rotation
+          console.log(`🔍 [PEACE CHECK] gesture.name="${gesture.name}" | gesture.handedness="${gesture.handedness}" | rawHandedness="${handedness}" | hasPosition=${!!gesture.position}`);
+          
           const isPeaceRightHand =
             gesture.name === "peace" &&
-            handedness === "Right" &&
+            gesture.handedness === "Right" &&  // ✅ Use gesture.handedness (corrected), not raw handedness
             gesture.position;
+
+          console.log(`🔍 [PEACE CHECK] isPeaceRightHand=${isPeaceRightHand}`);
 
           if (isPeaceRightHand && gesture.position) {
             const mirrorX = (x: number) => 1 - x;
