@@ -149,8 +149,8 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
     progress: 0,
   });
 
-  // 🆕 Debounce state to prevent double toggle
-  const [lastToggleTime, setLastToggleTime] = useState<number>(0);
+  // 🆕 Debounce with useRef (synchronous, no race condition)
+  const lastToggleTimeRef = useRef<number>(0);
   const TOGGLE_DEBOUNCE_MS = 1000; // 1 second cooldown between toggles
 
   // FPS counter
@@ -736,11 +736,13 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
               if (progress >= 1) {
                 console.log(`🎉 [TOGGLE DEBUG] Progress reached 100%! Checking debounce...`);
                 
-                // 🔧 DEBOUNCE CHECK: Prevent double toggle
-                const timeSinceLastToggle = now - lastToggleTime;
+                // 🔧 DEBOUNCE CHECK: Use useRef for synchronous access
+                const timeSinceLastToggle = now - lastToggleTimeRef.current;
+                console.log(`🕐 [DEBOUNCE CHECK] Time since last toggle: ${timeSinceLastToggle}ms (need ${TOGGLE_DEBOUNCE_MS}ms)`);
+                
                 if (timeSinceLastToggle < TOGGLE_DEBOUNCE_MS) {
                   console.log(
-                    `⏸️ [TOGGLE DEBUG] DEBOUNCED! Last toggle was ${timeSinceLastToggle}ms ago (need ${TOGGLE_DEBOUNCE_MS}ms cooldown)`
+                    `⏸️ [TOGGLE DEBUG] ❌ DEBOUNCED! Last toggle was ${timeSinceLastToggle}ms ago (need ${TOGGLE_DEBOUNCE_MS}ms cooldown)`
                   );
                   // Reset hold state without toggling
                   return {
@@ -756,9 +758,9 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
                 // 🔧 FIX: Use prevHold.switchId (not switchComponent.id from closure)
                 const targetSwitchId = prevHold.switchId;
                 
-                // Update last toggle time BEFORE toggling
-                setLastToggleTime(now);
-                console.log(`⏰ [TOGGLE DEBUG] Updated lastToggleTime: ${now}`);
+                // Update last toggle time IMMEDIATELY (synchronous with useRef)
+                lastToggleTimeRef.current = now;
+                console.log(`⏰ [TOGGLE DEBUG] Updated lastToggleTimeRef.current: ${now}`);
                 
                 setComponents((prevComps) => {
                   const updatedComps = prevComps.map((comp) => {
@@ -884,7 +886,7 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
         });
       }
     },
-    [components, selectedComponentId, findClosestTerminal, wireConnection.startTerminalId, lastToggleTime]
+    [components, selectedComponentId, findClosestTerminal, wireConnection.startTerminalId]
   );
 
   /**
