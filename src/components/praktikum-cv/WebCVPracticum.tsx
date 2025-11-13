@@ -1066,11 +1066,17 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
 
           // 🆕 RIGHT HAND: Rotate 90° with PEACE gesture (2 fingers, hold 5 seconds)
           // Handle PEACE gesture detection for rotation
-          console.log(`🔍 [PEACE CHECK] gesture.name="${gesture.name}" | gesture.handedness="${gesture.handedness}" | rawHandedness="${handedness}" | hasPosition=${!!gesture.position}`);
-          
+          console.log(
+            `🔍 [PEACE CHECK] gesture.name="${
+              gesture.name
+            }" | gesture.handedness="${
+              gesture.handedness
+            }" | rawHandedness="${handedness}" | hasPosition=${!!gesture.position}`
+          );
+
           const isPeaceRightHand =
             gesture.name === "peace" &&
-            gesture.handedness === "Right" &&  // ✅ Use gesture.handedness (corrected), not raw handedness
+            gesture.handedness === "Right" && // ✅ Use gesture.handedness (corrected), not raw handedness
             gesture.position;
 
           console.log(`🔍 [PEACE CHECK] isPeaceRightHand=${isPeaceRightHand}`);
@@ -1106,7 +1112,9 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
               const comp = closestComponent as CircuitComponent;
 
               console.log(
-                `🎯 [ROTATE DEBUG] Closest component: ${comp.id} at ${closestDistance.toFixed(0)}px`
+                `🎯 [ROTATE DEBUG] Closest component: ${
+                  comp.id
+                } at ${closestDistance.toFixed(0)}px`
               );
 
               setRotateHold((prevHold) => {
@@ -1651,15 +1659,15 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
         ctx.stroke();
         ctx.shadowBlur = 0;
 
-
-
         ctx.restore();
       }
     }
 
     // 🆕 Draw rotate hold progress indicator (2 fingers, 5 seconds)
     if (rotateHold.isActive && rotateHold.componentId) {
-      const rotateComp = components.find((c) => c.id === rotateHold.componentId);
+      const rotateComp = components.find(
+        (c) => c.id === rotateHold.componentId
+      );
       if (rotateComp) {
         const centerX = rotateComp.position.x;
         const centerY = rotateComp.position.y;
@@ -1697,11 +1705,7 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
         ctx.font = "bold 18px Arial";
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
-        ctx.fillText(
-          `${Math.round(rotateHold.progress * 100)}%`,
-          0,
-          -5
-        );
+        ctx.fillText(`${Math.round(rotateHold.progress * 100)}%`, 0, -5);
 
         // Label
         ctx.font = "12px Arial";
