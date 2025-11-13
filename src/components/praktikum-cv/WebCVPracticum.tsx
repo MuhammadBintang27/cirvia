@@ -153,6 +153,23 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
   const lastToggleTimeRef = useRef<number>(0);
   const TOGGLE_DEBOUNCE_MS = 1000; // 1 second cooldown between toggles
 
+  // 🆕 Rotate hold state (for 5-second hold with 2 fingers to rotate 90°)
+  const [rotateHold, setRotateHold] = useState<{
+    isActive: boolean;
+    componentId: string | null;
+    startTime: number | null;
+    progress: number;
+  }>({
+    isActive: false,
+    componentId: null,
+    startTime: null,
+    progress: 0,
+  });
+
+  // 🆕 Debounce for rotate
+  const lastRotateTimeRef = useRef<number>(0);
+  const ROTATE_DEBOUNCE_MS = 1000; // 1 second cooldown between rotates
+
   // FPS counter
   const fpsCounterRef = useRef({ frames: 0, lastTime: Date.now() });
 
@@ -361,9 +378,7 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
 
       // 🆕 RIGHT HAND: Start wire connection (after 3-second hold)
       if (action.type === "start_wire" && action.componentId) {
-        const fingerX = action.position
-          ? mirrorX(action.position.x) * 1200
-          : 0;
+        const fingerX = action.position ? mirrorX(action.position.x) * 1200 : 0;
         const fingerY = action.position ? action.position.y * 700 : 0;
 
         // Detect which terminal is closest to finger
@@ -377,15 +392,15 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
           isActive: true,
           startComponentId: action.componentId,
           startTerminalId: startTerminal,
-          endPosition: action.position
-            ? { x: fingerX, y: fingerY }
-            : null,
+          endPosition: action.position ? { x: fingerX, y: fingerY } : null,
           targetComponentId: null,
           targetTerminalId: null,
         });
 
         console.log(
-          `🔌 WIRE START from component: ${action.componentId} terminal ${startTerminal.toUpperCase()}`
+          `🔌 WIRE START from component: ${
+            action.componentId
+          } terminal ${startTerminal.toUpperCase()}`
         );
         debugLogger.log("action", "WIRE START", {
           componentId: action.componentId,
@@ -439,9 +454,7 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
         action.componentId &&
         action.targetComponentId
       ) {
-        const fingerX = action.position
-          ? mirrorX(action.position.x) * 1200
-          : 0;
+        const fingerX = action.position ? mirrorX(action.position.x) * 1200 : 0;
         const fingerY = action.position ? action.position.y * 700 : 0;
 
         // Detect which terminal is closest to finger on target component
@@ -452,7 +465,11 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
         );
 
         console.log(
-          `🔌 WIRE COMPLETE: ${action.componentId}[${wireConnection.startTerminalId?.toUpperCase()}] → ${action.targetComponentId}[${targetTerminal.toUpperCase()}]`
+          `🔌 WIRE COMPLETE: ${
+            action.componentId
+          }[${wireConnection.startTerminalId?.toUpperCase()}] → ${
+            action.targetComponentId
+          }[${targetTerminal.toUpperCase()}]`
         );
         debugLogger.log("action", "WIRE COMPLETE", {
           from: action.componentId,
@@ -672,9 +689,13 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
         });
 
         // Find ALL switches in circuit
-        const switches = componentsRef.current.filter((c) => c.type === "switch");
+        const switches = componentsRef.current.filter(
+          (c) => c.type === "switch"
+        );
 
-        console.log(`🔍 [TOGGLE DEBUG] Found ${switches.length} switch(es) in circuit`);
+        console.log(
+          `🔍 [TOGGLE DEBUG] Found ${switches.length} switch(es) in circuit`
+        );
 
         if (switches.length > 0) {
           // Find CLOSEST switch (tidak perlu ada di atas saklar)
@@ -689,7 +710,9 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
               Math.pow(sw.position.x - cursorX, 2) +
                 Math.pow(sw.position.y - cursorY, 2)
             );
-            console.log(`🔍 [TOGGLE DEBUG] Distance to ${sw.id}: ${dist.toFixed(0)}px`);
+            console.log(
+              `🔍 [TOGGLE DEBUG] Distance to ${sw.id}: ${dist.toFixed(0)}px`
+            );
             if (dist < minDistance) {
               minDistance = dist;
               closestSwitch = sw;
@@ -699,7 +722,11 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
           const switchComponent = closestSwitch;
           const now = Date.now();
 
-          console.log(`🎯 [TOGGLE DEBUG] Closest switch: ${switchComponent.id} at ${minDistance.toFixed(0)}px, state: ${switchComponent.state}`);
+          console.log(
+            `🎯 [TOGGLE DEBUG] Closest switch: ${
+              switchComponent.id
+            } at ${minDistance.toFixed(0)}px, state: ${switchComponent.state}`
+          );
 
           // 🔧 FIX: Use functional update to get latest toggleHold state
           setToggleHold((prevHold) => {
@@ -710,10 +737,7 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
             });
 
             // Check if already holding this switch
-            if (
-              prevHold.isActive &&
-              prevHold.switchId === switchComponent.id
-            ) {
+            if (prevHold.isActive && prevHold.switchId === switchComponent.id) {
               // Calculate hold progress
               const elapsed = now - prevHold.startTime!;
               const progress = Math.min(elapsed / 3000, 1); // 3 seconds
@@ -734,12 +758,16 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
 
               // Complete toggle after 3 seconds
               if (progress >= 1) {
-                console.log(`🎉 [TOGGLE DEBUG] Progress reached 100%! Checking debounce...`);
-                
+                console.log(
+                  `🎉 [TOGGLE DEBUG] Progress reached 100%! Checking debounce...`
+                );
+
                 // 🔧 DEBOUNCE CHECK: Use useRef for synchronous access
                 const timeSinceLastToggle = now - lastToggleTimeRef.current;
-                console.log(`🕐 [DEBOUNCE CHECK] Time since last toggle: ${timeSinceLastToggle}ms (need ${TOGGLE_DEBOUNCE_MS}ms)`);
-                
+                console.log(
+                  `🕐 [DEBOUNCE CHECK] Time since last toggle: ${timeSinceLastToggle}ms (need ${TOGGLE_DEBOUNCE_MS}ms)`
+                );
+
                 if (timeSinceLastToggle < TOGGLE_DEBOUNCE_MS) {
                   console.log(
                     `⏸️ [TOGGLE DEBUG] ❌ DEBOUNCED! Last toggle was ${timeSinceLastToggle}ms ago (need ${TOGGLE_DEBOUNCE_MS}ms cooldown)`
@@ -752,56 +780,68 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
                     progress: 0,
                   };
                 }
-                
-                console.log(`✅ [TOGGLE DEBUG] Debounce check passed. Proceeding with toggle...`);
-                
+
+                console.log(
+                  `✅ [TOGGLE DEBUG] Debounce check passed. Proceeding with toggle...`
+                );
+
                 // 🔧 FIX: Use prevHold.switchId (not switchComponent.id from closure)
                 const targetSwitchId = prevHold.switchId;
-                
+
                 // Update last toggle time IMMEDIATELY (synchronous with useRef)
                 lastToggleTimeRef.current = now;
-                console.log(`⏰ [TOGGLE DEBUG] Updated lastToggleTimeRef.current: ${now}`);
-                
+                console.log(
+                  `⏰ [TOGGLE DEBUG] Updated lastToggleTimeRef.current: ${now}`
+                );
+
                 setComponents((prevComps) => {
                   const updatedComps = prevComps.map((comp) => {
-                    if (
-                      comp.id === targetSwitchId &&
-                      comp.type === "switch"
-                    ) {
+                    if (comp.id === targetSwitchId && comp.type === "switch") {
                       const newState: "open" | "closed" =
                         comp.state === "open" ? "closed" : "open";
                       console.log(
                         `✅ SWITCH TOGGLED: ${targetSwitchId} ${comp.state} → ${newState}`
                       );
-                      console.log(`✅ [TOGGLE DEBUG] Toggle executed successfully:`, {
-                        switchId: targetSwitchId,
-                        oldState: comp.state,
-                        newState: newState,
-                        totalHoldTime: `${elapsed}ms`,
-                      });
-                      debugLogger.log("action", "TOGGLE via THUMBS UP (3s hold)", {
-                        switchId: targetSwitchId,
-                        oldState: comp.state,
-                        newState: newState,
-                      });
+                      console.log(
+                        `✅ [TOGGLE DEBUG] Toggle executed successfully:`,
+                        {
+                          switchId: targetSwitchId,
+                          oldState: comp.state,
+                          newState: newState,
+                          totalHoldTime: `${elapsed}ms`,
+                        }
+                      );
+                      debugLogger.log(
+                        "action",
+                        "TOGGLE via THUMBS UP (3s hold)",
+                        {
+                          switchId: targetSwitchId,
+                          oldState: comp.state,
+                          newState: newState,
+                        }
+                      );
                       return { ...comp, state: newState };
                     }
                     return comp;
                   });
-                  
+
                   console.log(`🔍 [TOGGLE DEBUG] Components after toggle:`, {
                     totalComponents: updatedComps.length,
-                    switches: updatedComps.filter(c => c.type === "switch").map(c => ({
-                      id: c.id,
-                      state: c.state
-                    }))
+                    switches: updatedComps
+                      .filter((c) => c.type === "switch")
+                      .map((c) => ({
+                        id: c.id,
+                        state: c.state,
+                      })),
                   });
-                  
+
                   return updatedComps;
                 });
 
                 // Reset hold state
-                console.log(`🔄 [TOGGLE DEBUG] Resetting hold state after successful toggle`);
+                console.log(
+                  `🔄 [TOGGLE DEBUG] Resetting hold state after successful toggle`
+                );
                 return {
                   isActive: false,
                   switchId: null,
@@ -809,7 +849,11 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
                   progress: 0,
                 };
               } else {
-                console.log(`⏳ [TOGGLE DEBUG] Still holding... need ${(3000 - elapsed)}ms more`);
+                console.log(
+                  `⏳ [TOGGLE DEBUG] Still holding... need ${
+                    3000 - elapsed
+                  }ms more`
+                );
                 // Update progress
                 return {
                   ...prevHold,
@@ -828,9 +872,11 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
                 previousSwitchId: prevHold.switchId,
               });
               console.log(
-                `👍 THUMBS UP START at (${cursorX.toFixed(0)}, ${cursorY.toFixed(
+                `👍 THUMBS UP START at (${cursorX.toFixed(
                   0
-                )}) on switch: ${switchComponent.id} (distance: ${minDistance.toFixed(0)}px)`
+                )}, ${cursorY.toFixed(0)}) on switch: ${
+                  switchComponent.id
+                } (distance: ${minDistance.toFixed(0)}px)`
               );
               return {
                 isActive: true,
@@ -885,8 +931,197 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
           return prevHold;
         });
       }
+
+      // 🆕 RIGHT HAND: Rotate 90° with PEACE gesture (2 fingers, hold 5 seconds)
+      // PEACE = index + middle extended, ring + pinky closed
+      const isPeaceRightHand =
+        state.currentGesture?.name === "peace" &&
+        state.currentGesture?.handedness === "Right" &&
+        state.currentGesture?.position;
+
+      if (isPeaceRightHand && state.currentGesture) {
+        const cursorX = mirrorX(state.currentGesture.position!.x) * 1200;
+        const cursorY = state.currentGesture.position!.y * 700;
+
+        console.log(`🔄 [ROTATE DEBUG] PEACE RIGHT hand detected:`, {
+          position: { x: cursorX.toFixed(0), y: cursorY.toFixed(0) },
+          gesture: "peace (2 fingers)",
+        });
+
+        // Find closest component within radius
+        const DETECTION_RADIUS = 150;
+        let closestComponent: CircuitComponent | null = null;
+        let closestDistance = DETECTION_RADIUS;
+
+        componentsRef.current.forEach((comp) => {
+          const dx = comp.position.x - cursorX;
+          const dy = comp.position.y - cursorY;
+          const distance = Math.sqrt(dx * dx + dy * dy);
+
+          if (distance < closestDistance) {
+            closestDistance = distance;
+            closestComponent = comp;
+          }
+        });
+
+        if (closestComponent) {
+          const now = Date.now();
+          const comp = closestComponent as CircuitComponent;
+
+          console.log(
+            `🎯 [ROTATE DEBUG] Closest component: ${comp.id} at ${closestDistance.toFixed(0)}px`
+          );
+
+          setRotateHold((prevHold) => {
+            // Continue existing hold
+            if (
+              prevHold.isActive &&
+              prevHold.componentId === comp.id
+            ) {
+              const elapsed = now - prevHold.startTime!;
+              const progress = Math.min(elapsed / 5000, 1); // 5 seconds
+
+              console.log(`⏱️ [ROTATE DEBUG] Continuing hold:`, {
+                componentId: prevHold.componentId,
+                elapsed: `${elapsed.toFixed(0)}ms`,
+                progress: `${(progress * 100).toFixed(1)}%`,
+              });
+
+              // Complete rotation after 5 seconds
+              if (progress >= 1) {
+                console.log(
+                  `🎉 [ROTATE DEBUG] Progress reached 100%! Checking debounce...`
+                );
+
+                // Debounce check
+                const timeSinceLastRotate = now - lastRotateTimeRef.current;
+                console.log(
+                  `🕐 [DEBOUNCE CHECK] Time since last rotate: ${timeSinceLastRotate}ms`
+                );
+
+                if (timeSinceLastRotate < ROTATE_DEBOUNCE_MS) {
+                  console.log(
+                    `⏸️ [ROTATE DEBUG] ❌ DEBOUNCED! Last rotate was ${timeSinceLastRotate}ms ago`
+                  );
+                  return {
+                    isActive: false,
+                    componentId: null,
+                    startTime: null,
+                    progress: 0,
+                  };
+                }
+
+                console.log(
+                  `✅ [ROTATE DEBUG] Debounce check passed. Rotating 90°...`
+                );
+
+                const targetComponentId = prevHold.componentId;
+
+                // Update last rotate time
+                lastRotateTimeRef.current = now;
+                console.log(
+                  `⏰ [ROTATE DEBUG] Updated lastRotateTimeRef.current: ${now}`
+                );
+
+                // Rotate component 90°
+                setComponents((prevComps) => {
+                  return prevComps.map((comp) => {
+                    if (comp.id === targetComponentId) {
+                      const newRotation = (comp.rotation + 90) % 360;
+                      console.log(
+                        `🔄 COMPONENT ROTATED: ${targetComponentId} ${comp.rotation}° → ${newRotation}°`
+                      );
+                      debugLogger.log(
+                        "action",
+                        `ROTATE 90° via 2 FINGERS (5s hold)`,
+                        {
+                          id: targetComponentId,
+                          oldRotation: comp.rotation,
+                          newRotation,
+                        }
+                      );
+                      return { ...comp, rotation: newRotation };
+                    }
+                    return comp;
+                  });
+                });
+
+                console.log(
+                  `✅ [ROTATE DEBUG] Rotation executed successfully`
+                );
+
+                // Reset hold state
+                return {
+                  isActive: false,
+                  componentId: null,
+                  startTime: null,
+                  progress: 0,
+                };
+              }
+
+              return {
+                ...prevHold,
+                progress,
+              };
+            } else {
+              // Start new hold
+              console.log(`🆕 [ROTATE DEBUG] Starting NEW rotate hold:`, {
+                componentId: comp.id,
+                position: comp.position,
+                currentRotation: comp.rotation,
+                startTime: now,
+              });
+
+              return {
+                isActive: true,
+                componentId: comp.id,
+                startTime: now,
+                progress: 0,
+              };
+            }
+          });
+        } else {
+          // No component nearby, reset hold
+          setRotateHold((prevHold) => {
+            if (prevHold.isActive) {
+              console.log(
+                `🔄 [ROTATE DEBUG] Resetting hold - no component in range`
+              );
+              return {
+                isActive: false,
+                componentId: null,
+                startTime: null,
+                progress: 0,
+              };
+            }
+            return prevHold;
+          });
+        }
+      } else {
+        // Reset rotate hold if not 2 fingers RIGHT hand
+        setRotateHold((prevHold) => {
+          if (prevHold.isActive) {
+            console.log(
+              `🔄 [ROTATE DEBUG] Resetting hold because finger count or hand changed`
+            );
+            return {
+              isActive: false,
+              componentId: null,
+              startTime: null,
+              progress: 0,
+            };
+          }
+          return prevHold;
+        });
+      }
     },
-    [components, selectedComponentId, findClosestTerminal, wireConnection.startTerminalId]
+    [
+      components,
+      selectedComponentId,
+      findClosestTerminal,
+      wireConnection.startTerminalId,
+      state.currentGesture,
+    ]
   );
 
   /**
@@ -1250,15 +1485,15 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
         ) => {
           const terminalOffset = 52; // Match renderer offset
           const angle = (comp.rotation * Math.PI) / 180;
-          
+
           // Terminal A = left (-offset), Terminal B = right (+offset)
           const localX = terminalId === "a" ? -terminalOffset : terminalOffset;
           const localY = 0;
-          
+
           // Apply rotation
           const rotatedX = localX * Math.cos(angle) - localY * Math.sin(angle);
           const rotatedY = localX * Math.sin(angle) + localY * Math.cos(angle);
-          
+
           return {
             x: comp.position.x + rotatedX,
             y: comp.position.y + rotatedY,
@@ -1419,20 +1654,61 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
         ctx.stroke();
         ctx.shadowBlur = 0;
 
+
+
+        ctx.restore();
+      }
+    }
+
+    // 🆕 Draw rotate hold progress indicator (2 fingers, 5 seconds)
+    if (rotateHold.isActive && rotateHold.componentId) {
+      const rotateComp = components.find((c) => c.id === rotateHold.componentId);
+      if (rotateComp) {
+        const centerX = rotateComp.position.x;
+        const centerY = rotateComp.position.y;
+
+        // Progress circle
+        ctx.save();
+        ctx.translate(centerX, centerY);
+
+        // Background circle
+        ctx.beginPath();
+        ctx.arc(0, 0, 55, 0, Math.PI * 2);
+        ctx.strokeStyle = "rgba(255, 255, 255, 0.3)";
+        ctx.lineWidth = 8;
+        ctx.stroke();
+
+        // Progress arc (Amber/Orange)
+        ctx.beginPath();
+        ctx.arc(
+          0,
+          0,
+          55,
+          -Math.PI / 2,
+          -Math.PI / 2 + Math.PI * 2 * rotateHold.progress
+        );
+        ctx.strokeStyle = "#F59E0B"; // Amber
+        ctx.lineWidth = 8;
+        ctx.lineCap = "round";
+        ctx.shadowColor = "#F59E0B";
+        ctx.shadowBlur = 15;
+        ctx.stroke();
+        ctx.shadowBlur = 0;
+
         // Progress text
         ctx.fillStyle = "#FFFFFF";
         ctx.font = "bold 18px Arial";
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
         ctx.fillText(
-          `${Math.round(toggleHold.progress * 100)}%`,
+          `${Math.round(rotateHold.progress * 100)}%`,
           0,
           -5
         );
 
         // Label
         ctx.font = "12px Arial";
-        ctx.fillText("Hold untuk Toggle", 0, 15);
+        ctx.fillText("✌️ Hold 5s Rotate", 0, 15);
 
         ctx.restore();
       }
@@ -2057,6 +2333,9 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
     toggleHold.isActive,
     toggleHold.switchId,
     toggleHold.progress,
+    rotateHold.isActive,
+    rotateHold.componentId,
+    rotateHold.progress,
   ]);
 
   /**
@@ -2529,15 +2808,15 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
                     → FIST di komponen A → DRAG ke B → FIST lagi
                   </div>
                   <div>
-                    👍 <span className="font-semibold">THUMBS UP (HOLD 3s):</span>{" "}
+                    👍{" "}
+                    <span className="font-semibold">THUMBS UP (HOLD 3s):</span>{" "}
                     Toggle saklar
                   </div>
                   <div className="ml-4 text-xs text-green-300">
                     → Gunakan <span className="font-bold">TANGAN KANAN</span>
                     <br />
                     → Acungkan jempol kapan saja
-                    <br />
-                    → HOLD 3 detik → saklar terdekat toggle ON/OFF
+                    <br />→ HOLD 3 detik → saklar terdekat toggle ON/OFF
                   </div>
                   <div>
                     ✋ <span className="font-semibold">BUKA TELAPAK:</span>{" "}
