@@ -931,196 +931,12 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
           return prevHold;
         });
       }
-
-      // 🆕 RIGHT HAND: Rotate 90° with PEACE gesture (2 fingers, hold 5 seconds)
-      // PEACE = index + middle extended, ring + pinky closed
-      const isPeaceRightHand =
-        state.currentGesture?.name === "peace" &&
-        state.currentGesture?.handedness === "Right" &&
-        state.currentGesture?.position;
-
-      if (isPeaceRightHand && state.currentGesture) {
-        const cursorX = mirrorX(state.currentGesture.position!.x) * 1200;
-        const cursorY = state.currentGesture.position!.y * 700;
-
-        console.log(`🔄 [ROTATE DEBUG] PEACE RIGHT hand detected:`, {
-          position: { x: cursorX.toFixed(0), y: cursorY.toFixed(0) },
-          gesture: "peace (2 fingers)",
-        });
-
-        // Find closest component within radius
-        const DETECTION_RADIUS = 150;
-        let closestComponent: CircuitComponent | null = null;
-        let closestDistance = DETECTION_RADIUS;
-
-        componentsRef.current.forEach((comp) => {
-          const dx = comp.position.x - cursorX;
-          const dy = comp.position.y - cursorY;
-          const distance = Math.sqrt(dx * dx + dy * dy);
-
-          if (distance < closestDistance) {
-            closestDistance = distance;
-            closestComponent = comp;
-          }
-        });
-
-        if (closestComponent) {
-          const now = Date.now();
-          const comp = closestComponent as CircuitComponent;
-
-          console.log(
-            `🎯 [ROTATE DEBUG] Closest component: ${comp.id} at ${closestDistance.toFixed(0)}px`
-          );
-
-          setRotateHold((prevHold) => {
-            // Continue existing hold
-            if (
-              prevHold.isActive &&
-              prevHold.componentId === comp.id
-            ) {
-              const elapsed = now - prevHold.startTime!;
-              const progress = Math.min(elapsed / 5000, 1); // 5 seconds
-
-              console.log(`⏱️ [ROTATE DEBUG] Continuing hold:`, {
-                componentId: prevHold.componentId,
-                elapsed: `${elapsed.toFixed(0)}ms`,
-                progress: `${(progress * 100).toFixed(1)}%`,
-              });
-
-              // Complete rotation after 5 seconds
-              if (progress >= 1) {
-                console.log(
-                  `🎉 [ROTATE DEBUG] Progress reached 100%! Checking debounce...`
-                );
-
-                // Debounce check
-                const timeSinceLastRotate = now - lastRotateTimeRef.current;
-                console.log(
-                  `🕐 [DEBOUNCE CHECK] Time since last rotate: ${timeSinceLastRotate}ms`
-                );
-
-                if (timeSinceLastRotate < ROTATE_DEBOUNCE_MS) {
-                  console.log(
-                    `⏸️ [ROTATE DEBUG] ❌ DEBOUNCED! Last rotate was ${timeSinceLastRotate}ms ago`
-                  );
-                  return {
-                    isActive: false,
-                    componentId: null,
-                    startTime: null,
-                    progress: 0,
-                  };
-                }
-
-                console.log(
-                  `✅ [ROTATE DEBUG] Debounce check passed. Rotating 90°...`
-                );
-
-                const targetComponentId = prevHold.componentId;
-
-                // Update last rotate time
-                lastRotateTimeRef.current = now;
-                console.log(
-                  `⏰ [ROTATE DEBUG] Updated lastRotateTimeRef.current: ${now}`
-                );
-
-                // Rotate component 90°
-                setComponents((prevComps) => {
-                  return prevComps.map((comp) => {
-                    if (comp.id === targetComponentId) {
-                      const newRotation = (comp.rotation + 90) % 360;
-                      console.log(
-                        `🔄 COMPONENT ROTATED: ${targetComponentId} ${comp.rotation}° → ${newRotation}°`
-                      );
-                      debugLogger.log(
-                        "action",
-                        `ROTATE 90° via 2 FINGERS (5s hold)`,
-                        {
-                          id: targetComponentId,
-                          oldRotation: comp.rotation,
-                          newRotation,
-                        }
-                      );
-                      return { ...comp, rotation: newRotation };
-                    }
-                    return comp;
-                  });
-                });
-
-                console.log(
-                  `✅ [ROTATE DEBUG] Rotation executed successfully`
-                );
-
-                // Reset hold state
-                return {
-                  isActive: false,
-                  componentId: null,
-                  startTime: null,
-                  progress: 0,
-                };
-              }
-
-              return {
-                ...prevHold,
-                progress,
-              };
-            } else {
-              // Start new hold
-              console.log(`🆕 [ROTATE DEBUG] Starting NEW rotate hold:`, {
-                componentId: comp.id,
-                position: comp.position,
-                currentRotation: comp.rotation,
-                startTime: now,
-              });
-
-              return {
-                isActive: true,
-                componentId: comp.id,
-                startTime: now,
-                progress: 0,
-              };
-            }
-          });
-        } else {
-          // No component nearby, reset hold
-          setRotateHold((prevHold) => {
-            if (prevHold.isActive) {
-              console.log(
-                `🔄 [ROTATE DEBUG] Resetting hold - no component in range`
-              );
-              return {
-                isActive: false,
-                componentId: null,
-                startTime: null,
-                progress: 0,
-              };
-            }
-            return prevHold;
-          });
-        }
-      } else {
-        // Reset rotate hold if not 2 fingers RIGHT hand
-        setRotateHold((prevHold) => {
-          if (prevHold.isActive) {
-            console.log(
-              `🔄 [ROTATE DEBUG] Resetting hold because finger count or hand changed`
-            );
-            return {
-              isActive: false,
-              componentId: null,
-              startTime: null,
-              progress: 0,
-            };
-          }
-          return prevHold;
-        });
-      }
     },
     [
       components,
       selectedComponentId,
       findClosestTerminal,
       wireConnection.startTerminalId,
-      state.currentGesture,
     ]
   );
 
@@ -1246,6 +1062,183 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
               gesture.metadata.componentId = undefined;
               console.log("   ❌ No component under finger");
             }
+          }
+
+          // 🆕 RIGHT HAND: Rotate 90° with PEACE gesture (2 fingers, hold 5 seconds)
+          // Handle PEACE gesture detection for rotation
+          const isPeaceRightHand =
+            gesture.name === "peace" &&
+            handedness === "Right" &&
+            gesture.position;
+
+          if (isPeaceRightHand && gesture.position) {
+            const mirrorX = (x: number) => 1 - x;
+            const cursorX = mirrorX(gesture.position.x) * 1200;
+            const cursorY = gesture.position.y * 700;
+
+            console.log(`🔄 [ROTATE DEBUG] PEACE RIGHT hand detected:`, {
+              position: { x: cursorX.toFixed(0), y: cursorY.toFixed(0) },
+              gesture: "peace (2 fingers)",
+            });
+
+            // Find closest component within radius
+            const DETECTION_RADIUS = 150;
+            let closestComponent: CircuitComponent | null = null;
+            let closestDistance = DETECTION_RADIUS;
+
+            componentsRef.current.forEach((comp) => {
+              const dx = comp.position.x - cursorX;
+              const dy = comp.position.y - cursorY;
+              const distance = Math.sqrt(dx * dx + dy * dy);
+
+              if (distance < closestDistance) {
+                closestDistance = distance;
+                closestComponent = comp;
+              }
+            });
+
+            if (closestComponent) {
+              const now = Date.now();
+              const comp = closestComponent as CircuitComponent;
+
+              console.log(
+                `🎯 [ROTATE DEBUG] Closest component: ${comp.id} at ${closestDistance.toFixed(0)}px`
+              );
+
+              setRotateHold((prevHold) => {
+                // Continue existing hold
+                if (prevHold.isActive && prevHold.componentId === comp.id) {
+                  const elapsed = now - prevHold.startTime!;
+                  const progress = Math.min(elapsed / 5000, 1); // 5 seconds
+
+                  console.log(`⏱️ [ROTATE DEBUG] Continuing hold:`, {
+                    componentId: prevHold.componentId,
+                    elapsed: `${elapsed.toFixed(0)}ms`,
+                    progress: `${(progress * 100).toFixed(1)}%`,
+                  });
+
+                  // Complete rotation after 5 seconds
+                  if (progress >= 1) {
+                    console.log(
+                      `🎉 [ROTATE DEBUG] Progress reached 100%! Checking debounce...`
+                    );
+
+                    // Debounce check
+                    const timeSinceLastRotate = now - lastRotateTimeRef.current;
+                    console.log(
+                      `🕐 [DEBOUNCE CHECK] Time since last rotate: ${timeSinceLastRotate}ms`
+                    );
+
+                    if (timeSinceLastRotate < ROTATE_DEBOUNCE_MS) {
+                      console.log(
+                        `⏸️ [ROTATE DEBUG] ❌ DEBOUNCED! Last rotate was ${timeSinceLastRotate}ms ago`
+                      );
+                      return {
+                        isActive: false,
+                        componentId: null,
+                        startTime: null,
+                        progress: 0,
+                      };
+                    }
+
+                    console.log(
+                      `✅ [ROTATE DEBUG] Debounce check passed. Rotating 90°...`
+                    );
+
+                    const targetComponentId = prevHold.componentId;
+
+                    // Update last rotate time
+                    lastRotateTimeRef.current = now;
+                    console.log(
+                      `⏰ [ROTATE DEBUG] Updated lastRotateTimeRef.current: ${now}`
+                    );
+
+                    // Rotate component 90°
+                    setComponents((prevComps) => {
+                      return prevComps.map((comp) => {
+                        if (comp.id === targetComponentId) {
+                          const newRotation = (comp.rotation + 90) % 360;
+                          console.log(
+                            `🔄 COMPONENT ROTATED: ${targetComponentId} ${comp.rotation}° → ${newRotation}°`
+                          );
+                          debugLogger.log(
+                            "action",
+                            `ROTATE 90° via PEACE (5s hold)`,
+                            {
+                              id: targetComponentId,
+                              oldRotation: comp.rotation,
+                              newRotation,
+                            }
+                          );
+                          return { ...comp, rotation: newRotation };
+                        }
+                        return comp;
+                      });
+                    });
+
+                    console.log(
+                      `✅ [ROTATE DEBUG] Rotation executed successfully`
+                    );
+
+                    // Reset hold state
+                    return {
+                      isActive: false,
+                      componentId: null,
+                      startTime: null,
+                      progress: 0,
+                    };
+                  }
+
+                  // Update progress
+                  return { ...prevHold, progress };
+                } else {
+                  // Start new hold
+                  console.log(`🆕 [ROTATE DEBUG] Starting new hold:`, {
+                    componentId: comp.id,
+                    componentType: comp.type,
+                  });
+
+                  return {
+                    isActive: true,
+                    componentId: comp.id,
+                    startTime: now,
+                    progress: 0,
+                  };
+                }
+              });
+            } else {
+              // No component nearby, reset hold
+              setRotateHold((prevHold) => {
+                if (prevHold.isActive) {
+                  console.log(
+                    `🔄 [ROTATE DEBUG] Resetting hold - no component in range`
+                  );
+                  return {
+                    isActive: false,
+                    componentId: null,
+                    startTime: null,
+                    progress: 0,
+                  };
+                }
+                return prevHold;
+              });
+            }
+          } else {
+            // Reset rotate hold if not PEACE RIGHT hand
+            setRotateHold((prevHold) => {
+              if (prevHold.isActive) {
+                console.log(
+                  `🔄 [ROTATE DEBUG] Resetting hold because gesture changed`
+                );
+                return {
+                  isActive: false,
+                  componentId: null,
+                  startTime: null,
+                  progress: 0,
+                };
+              }
+              return prevHold;
+            });
           }
 
           // Smooth gesture
