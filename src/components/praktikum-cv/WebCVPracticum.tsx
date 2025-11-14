@@ -100,6 +100,17 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
     componentsRef.current = components;
   }, [components]);
 
+  // 🌊 Animation loop for wire current flow
+  useEffect(() => {
+    let animationFrame: number;
+    const animate = () => {
+      setFlowAnimation((prev) => (prev + 2) % 100);
+      animationFrame = requestAnimationFrame(animate);
+    };
+    animationFrame = requestAnimationFrame(animate);
+    return () => cancelAnimationFrame(animationFrame);
+  }, []);
+
   // NEW: Finger count selection state
   const [fingerCountSelection, setFingerCountSelection] = useState<{
     active: boolean;
@@ -170,8 +181,59 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
   const lastRotateTimeRef = useRef<number>(0);
   const ROTATE_DEBOUNCE_MS = 1000; // 1 second cooldown between rotates
 
+  // 🌊 Flow animation for wire current (like drag-n-drop)
+  const [flowAnimation, setFlowAnimation] = useState(0);
+
   // FPS counter
   const fpsCounterRef = useRef({ frames: 0, lastTime: Date.now() });
+
+  /**
+   * Analyze circuit to determine if current flows
+   * Simple analysis: check if circuit is closed and has battery
+   */
+  const analyzeCircuit = useCallback(
+    (
+      comps: CircuitComponent[],
+      wireConns: WireComponent[]
+    ): {
+      current: number;
+      hasOpenSwitch: boolean;
+      isClosed: boolean;
+    } => {
+      // Check if we have a battery
+      const hasBattery = comps.some((c) => c.type === "battery");
+      if (!hasBattery) {
+        return { current: 0, hasOpenSwitch: false, isClosed: false };
+      }
+
+      // Check if any switch is open
+      const hasOpenSwitch = comps.some(
+        (c) => c.type === "switch" && c.state === "open"
+      );
+
+      // Simple circuit closure check: all non-wire components should be connected
+      const nonWireComps = comps.filter((c) => c.type !== "wire");
+      const connectedIds = new Set<string>();
+
+      // Build connection graph from wires
+      wireConns.forEach((w) => {
+        connectedIds.add(w.from.elementId);
+        connectedIds.add(w.to.elementId);
+      });
+
+      // Check if all components are in the connection graph
+      const isClosed =
+        nonWireComps.length > 0 &&
+        nonWireComps.every((c) => connectedIds.has(c.id)) &&
+        wireConns.length >= nonWireComps.length - 1; // Need at least n-1 wires to connect n components
+
+      // Calculate simple current (if circuit is closed and no open switch)
+      const current = isClosed && !hasOpenSwitch ? 1.0 : 0;
+
+      return { current, hasOpenSwitch, isClosed };
+    },
+    []
+  );
 
   /**
    * Update FPS counter
@@ -1477,7 +1539,7 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
       ctx.stroke();
     }
 
-    // 🆕 Draw permanent wires FIRST (below components)
+    // 🆕 Draw permanent wires FIRST (below components) with Bezier curves
     wires.forEach((wire) => {
       const fromComp = components.find((c) => c.id === wire.from.elementId);
       const toComp = components.find((c) => c.id === wire.to.elementId);
@@ -1508,23 +1570,36 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
         const fromPos = getTerminalPosition(fromComp, wire.from.terminalId);
         const toPos = getTerminalPosition(toComp, wire.to.terminalId);
 
-        ctx.beginPath();
-        ctx.moveTo(fromPos.x, fromPos.y);
-        ctx.lineTo(toPos.x, toPos.y);
+        // Check if wire is selected
+        const isWireSelected =
+          selectedComponentId === fromComp.id ||
+          selectedComponentId === toComp.id;
 
-        // Solid line for permanent connection
-        ctx.strokeStyle = "#10B981"; // Green
-        ctx.lineWidth = 5;
-        ctx.shadowColor = "#10B981";
-        ctx.shadowBlur = 10;
-        ctx.stroke();
-        ctx.shadowBlur = 0;
+        // Calculate if there's current flowing
+        // TODO: Get actual circuit analysis results
+        const circuitAnalysis = analyzeCircuit(components, wires);
+        const hasCurrent =
+          circuitAnalysis.current > 0 &&
+          !circuitAnalysis.hasOpenSwitch &&
+          circuitAnalysis.isClosed;
+
+        // Use new Bezier wire renderer with animation
+        CircuitComponentRenderer.renderWireConnection(
+          ctx,
+          fromPos.x,
+          fromPos.y,
+          toPos.x,
+          toPos.y,
+          hasCurrent,
+          flowAnimation,
+          isWireSelected
+        );
 
         // Draw connection points (circles at terminal positions)
         [fromPos, toPos].forEach((pos) => {
           ctx.beginPath();
           ctx.arc(pos.x, pos.y, 8, 0, Math.PI * 2);
-          ctx.fillStyle = "#10B981";
+          ctx.fillStyle = hasCurrent ? "#10B981" : "#94a3b8";
           ctx.fill();
           ctx.strokeStyle = "#FFFFFF";
           ctx.lineWidth = 2;
@@ -2337,6 +2412,8 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
     rotateHold.isActive,
     rotateHold.componentId,
     rotateHold.progress,
+    flowAnimation,
+    analyzeCircuit,
   ]);
 
   /**
