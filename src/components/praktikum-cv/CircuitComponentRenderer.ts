@@ -407,7 +407,7 @@ export class CircuitComponentRenderer {
   }
 
   /**
-   * Render wire component
+   * Render wire component (simple straight wire for draggable component)
    */
   private static renderWire(
     ctx: CanvasRenderingContext2D,
@@ -429,6 +429,120 @@ export class CircuitComponentRenderer {
     ctx.beginPath();
     ctx.arc(terminalOffset, 0, 5, 0, Math.PI * 2);
     ctx.fill();
+  }
+
+  /**
+   * Render wire connection between two components with Bezier curve and animation
+   * Similar to drag-n-drop practicum style
+   */
+  static renderWireConnection(
+    ctx: CanvasRenderingContext2D,
+    fromX: number,
+    fromY: number,
+    toX: number,
+    toY: number,
+    hasCurrent: boolean,
+    flowAnimation: number,
+    isSelected: boolean = false
+  ): void {
+    const dx = toX - fromX;
+    const dy = toY - fromY;
+    const distance = Math.sqrt(dx * dx + dy * dy);
+
+    // Bezier control points for smooth curves
+    const controlOffset = Math.min(distance * 0.3, 80);
+    const cx1 = fromX + (dx > 0 ? controlOffset : -controlOffset);
+    const cy1 = fromY;
+    const cx2 = toX - (dx > 0 ? controlOffset : -controlOffset);
+    const cy2 = toY;
+
+    // Wire shadow for depth
+    ctx.save();
+    ctx.translate(2, 2);
+    ctx.beginPath();
+    ctx.moveTo(fromX, fromY);
+    ctx.bezierCurveTo(cx1, cy1, cx2, cy2, toX, toY);
+    ctx.strokeStyle = "rgba(0, 0, 0, 0.2)";
+    ctx.lineWidth = 7;
+    ctx.stroke();
+    ctx.restore();
+
+    // Main wire
+    ctx.beginPath();
+    ctx.moveTo(fromX, fromY);
+    ctx.bezierCurveTo(cx1, cy1, cx2, cy2, toX, toY);
+    ctx.strokeStyle = isSelected
+      ? "#3b82f6"
+      : hasCurrent
+      ? "#06b6d4"
+      : "#475569";
+    ctx.lineWidth = 6;
+
+    if (hasCurrent) {
+      ctx.shadowColor = "rgba(6, 182, 212, 0.6)";
+      ctx.shadowBlur = 10;
+    }
+    ctx.stroke();
+    ctx.shadowBlur = 0;
+
+    // Current flow animation
+    if (hasCurrent) {
+      // Animated dashed line
+      ctx.beginPath();
+      ctx.moveTo(fromX, fromY);
+      ctx.bezierCurveTo(cx1, cy1, cx2, cy2, toX, toY);
+      ctx.strokeStyle = "#fbbf24";
+      ctx.lineWidth = 3;
+      ctx.setLineDash([10, 10]);
+      ctx.lineDashOffset = -flowAnimation;
+      ctx.shadowColor = "rgba(251, 191, 36, 0.8)";
+      ctx.shadowBlur = 8;
+      ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.shadowBlur = 0;
+
+      // Electron particles along the curve
+      [0, 33, 66].forEach((offset) => {
+        const progress = ((flowAnimation + offset) % 100) / 100;
+        const point = this.getPointOnBezier(
+          { x: fromX, y: fromY },
+          { x: cx1, y: cy1 },
+          { x: cx2, y: cy2 },
+          { x: toX, y: toY },
+          progress
+        );
+
+        ctx.beginPath();
+        ctx.arc(point.x, point.y, 3, 0, Math.PI * 2);
+        ctx.fillStyle = "#fbbf24";
+        ctx.shadowColor = "rgba(251, 191, 36, 1)";
+        ctx.shadowBlur = 6;
+        ctx.fill();
+        ctx.shadowBlur = 0;
+      });
+    }
+  }
+
+  /**
+   * Get point on Bezier curve at parameter t (0 to 1)
+   */
+  private static getPointOnBezier(
+    p0: { x: number; y: number },
+    p1: { x: number; y: number },
+    p2: { x: number; y: number },
+    p3: { x: number; y: number },
+    t: number
+  ): { x: number; y: number } {
+    const u = 1 - t;
+    const tt = t * t;
+    const uu = u * u;
+    const uuu = uu * u;
+    const ttt = tt * t;
+
+    const x = uuu * p0.x + 3 * uu * t * p1.x + 3 * u * tt * p2.x + ttt * p3.x;
+    const y = uuu * p0.y + 3 * uu * t * p1.y + 3 * u * tt * p2.y + ttt * p3.y;
+
+    return { x, y };
   }
 
   /**

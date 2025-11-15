@@ -14,6 +14,7 @@ import {
   HandLandmark,
   ComponentType,
 } from "./types";
+import { analyzeCircuit } from "@/lib/circuitAnalysisCVPracticum";
 import {
   Camera as CameraIcon,
   XCircle,
@@ -100,6 +101,34 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
     componentsRef.current = components;
   }, [components]);
 
+  // 🌊 Animation loop for wire current flow
+  useEffect(() => {
+    let animationFrame: number;
+    const animate = () => {
+      setFlowAnimation((prev) => (prev + 2) % 100);
+      animationFrame = requestAnimationFrame(animate);
+    };
+    animationFrame = requestAnimationFrame(animate);
+    return () => cancelAnimationFrame(animationFrame);
+  }, []);
+
+  // 📊 Analyze circuit whenever components or wires change
+  useEffect(() => {
+    const analysis = analyzeCircuit(components as any, wires);
+    setCircuitAnalysis({
+      current: analysis.current,
+      power: analysis.power,
+      totalVoltage: analysis.totalVoltage,
+      totalResistance: analysis.totalResistance,
+      isClosed: analysis.isClosed,
+      hasOpenSwitch: analysis.hasOpenSwitch,
+      isConnected: analysis.isConnected,
+      lampPowers: analysis.lampPowers,
+      componentCurrents: analysis.componentCurrents,
+      topology: analysis.topology,
+    });
+  }, [components, wires]);
+
   // NEW: Finger count selection state
   const [fingerCountSelection, setFingerCountSelection] = useState<{
     active: boolean;
@@ -170,8 +199,89 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
   const lastRotateTimeRef = useRef<number>(0);
   const ROTATE_DEBOUNCE_MS = 1000; // 1 second cooldown between rotates
 
+  // 🌊 Flow animation for wire current (like drag-n-drop)
+  const [flowAnimation, setFlowAnimation] = useState(0);
+
+  // 📊 Circuit analysis results
+  const [circuitAnalysis, setCircuitAnalysis] = useState<{
+    current: number;
+    power: number;
+    totalVoltage: number;
+    totalResistance: number;
+    isClosed: boolean;
+    hasOpenSwitch: boolean;
+    isConnected: boolean;
+    lampPowers: Record<string, number>;
+    componentCurrents: Record<string, number>;
+    topology?: {
+      type: "series" | "parallel" | "mixed";
+      groups: any[];
+      hasParallelBranch: boolean;
+      branchNodes: string[];
+    };
+  }>({
+    current: 0,
+    power: 0,
+    totalVoltage: 0,
+    totalResistance: 0,
+    isClosed: false,
+    hasOpenSwitch: false,
+    isConnected: false,
+    lampPowers: {},
+    componentCurrents: {},
+    topology: undefined,
+  });
+
   // FPS counter
   const fpsCounterRef = useRef({ frames: 0, lastTime: Date.now() });
+
+  /**
+   * Analyze circuit to determine if current flows
+   * Simple analysis: check if circuit is closed and has battery
+   */
+  const analyzeCircuitSimple = useCallback(
+    (
+      comps: CircuitComponent[],
+      wireConns: WireComponent[]
+    ): {
+      current: number;
+      hasOpenSwitch: boolean;
+      isClosed: boolean;
+    } => {
+      // Check if we have a battery
+      const hasBattery = comps.some((c) => c.type === "battery");
+      if (!hasBattery) {
+        return { current: 0, hasOpenSwitch: false, isClosed: false };
+      }
+
+      // Check if any switch is open
+      const hasOpenSwitch = comps.some(
+        (c) => c.type === "switch" && c.state === "open"
+      );
+
+      // Simple circuit closure check: all non-wire components should be connected
+      const nonWireComps = comps.filter((c) => c.type !== "wire");
+      const connectedIds = new Set<string>();
+
+      // Build connection graph from wires
+      wireConns.forEach((w) => {
+        connectedIds.add(w.from.elementId);
+        connectedIds.add(w.to.elementId);
+      });
+
+      // Check if all components are in the connection graph
+      const isClosed =
+        nonWireComps.length > 0 &&
+        nonWireComps.every((c) => connectedIds.has(c.id)) &&
+        wireConns.length >= nonWireComps.length - 1; // Need at least n-1 wires to connect n components
+
+      // Calculate simple current (if circuit is closed and no open switch)
+      const current = isClosed && !hasOpenSwitch ? 1.0 : 0;
+
+      return { current, hasOpenSwitch, isClosed };
+    },
+    []
+  );
 
   /**
    * Update FPS counter
@@ -1477,7 +1587,7 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
       ctx.stroke();
     }
 
-    // 🆕 Draw permanent wires FIRST (below components)
+    // 🆕 Draw permanent wires FIRST (below components) with Bezier curves
     wires.forEach((wire) => {
       const fromComp = components.find((c) => c.id === wire.from.elementId);
       const toComp = components.find((c) => c.id === wire.to.elementId);
@@ -1508,23 +1618,34 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
         const fromPos = getTerminalPosition(fromComp, wire.from.terminalId);
         const toPos = getTerminalPosition(toComp, wire.to.terminalId);
 
-        ctx.beginPath();
-        ctx.moveTo(fromPos.x, fromPos.y);
-        ctx.lineTo(toPos.x, toPos.y);
+        // Check if wire is selected
+        const isWireSelected =
+          selectedComponentId === fromComp.id ||
+          selectedComponentId === toComp.id;
 
-        // Solid line for permanent connection
-        ctx.strokeStyle = "#10B981"; // Green
-        ctx.lineWidth = 5;
-        ctx.shadowColor = "#10B981";
-        ctx.shadowBlur = 10;
-        ctx.stroke();
-        ctx.shadowBlur = 0;
+        // Use circuit analysis results for current flow
+        const hasCurrent =
+          circuitAnalysis.current > 0 &&
+          !circuitAnalysis.hasOpenSwitch &&
+          circuitAnalysis.isClosed;
+
+        // Use new Bezier wire renderer with animation
+        CircuitComponentRenderer.renderWireConnection(
+          ctx,
+          fromPos.x,
+          fromPos.y,
+          toPos.x,
+          toPos.y,
+          hasCurrent,
+          flowAnimation,
+          isWireSelected
+        );
 
         // Draw connection points (circles at terminal positions)
         [fromPos, toPos].forEach((pos) => {
           ctx.beginPath();
           ctx.arc(pos.x, pos.y, 8, 0, Math.PI * 2);
-          ctx.fillStyle = "#10B981";
+          ctx.fillStyle = hasCurrent ? "#10B981" : "#94a3b8";
           ctx.fill();
           ctx.strokeStyle = "#FFFFFF";
           ctx.lineWidth = 2;
@@ -1538,10 +1659,48 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
       // Determine if component is selected
       const isSelected = selectedComponentId === component.id;
 
-      // Determine component state (for lamp and switch)
-      const isOn = false; // TODO: Calculate based on circuit analysis
-      const brightness = 1; // TODO: Calculate based on circuit analysis
-      const lampPower = 0; // TODO: Calculate based on circuit analysis
+      // Get lamp power from circuit analysis
+      const lampPower = circuitAnalysis.lampPowers[component.id] || 0;
+      const isOn =
+        circuitAnalysis.isClosed &&
+        circuitAnalysis.current > 0 &&
+        lampPower > 0.1;
+
+      // 🔆 BRIGHTNESS CALCULATION (matching drag-n-drop logic)
+      let brightness = 1; // Default 100%
+
+      if (component.type === "lamp" && isOn) {
+        const topologyType = circuitAnalysis.topology?.type;
+
+        if (
+          topologyType === "series" ||
+          !circuitAnalysis.topology?.hasParallelBranch
+        ) {
+          // SERIES: Brightness = (Battery Count) / (Lamp Count)
+          const totalBatteries = components.filter(
+            (c) => c.type === "battery"
+          ).length;
+          const totalLamps = components.filter((c) => c.type === "lamp").length;
+
+          if (totalLamps > 0) {
+            const batteryToLampRatio = totalBatteries / totalLamps;
+            brightness = Math.min(1, batteryToLampRatio); // Max 100%
+          }
+        } else {
+          // PARALLEL: Brightness based on actual power vs ideal power
+          if (component.value && component.value > 0) {
+            const idealPower =
+              (circuitAnalysis.totalVoltage * circuitAnalysis.totalVoltage) /
+              component.value;
+            if (idealPower > 0) {
+              brightness = Math.min(1, lampPower / idealPower);
+            }
+          }
+        }
+      } else {
+        brightness = 0;
+      }
+
       const switchState = component.state || "open";
 
       CircuitComponentRenderer.renderComponent(
@@ -2337,6 +2496,8 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
     rotateHold.isActive,
     rotateHold.componentId,
     rotateHold.progress,
+    flowAnimation,
+    circuitAnalysis,
   ]);
 
   /**
@@ -2639,26 +2800,76 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
               <h5 className="text-orange-400 font-bold text-sm mb-2">
                 HASIL PERHITUNGAN HUKUM OHM
               </h5>
+
+              {/* Circuit Connection Status */}
+              {!circuitAnalysis.isConnected && (
+                <div className="mb-2 p-2 bg-yellow-900/30 border border-yellow-500/50 rounded text-yellow-300 text-xs flex items-center gap-2">
+                  <span>⚠️</span>
+                  <span>
+                    Rangkaian belum lengkap - hubungkan semua komponen!
+                  </span>
+                </div>
+              )}
+
+              {/* Topology Display */}
+              {circuitAnalysis.isConnected && circuitAnalysis.topology && (
+                <div className="mb-2 p-2 bg-purple-900/30 border border-purple-400/50 rounded text-purple-300 text-xs flex items-center gap-2">
+                  <span>📊</span>
+                  <span className="font-bold">
+                    Topologi:{" "}
+                    {circuitAnalysis.topology.type === "series"
+                      ? "SERI"
+                      : circuitAnalysis.topology.type === "parallel"
+                      ? "PARALEL"
+                      : "CAMPURAN (SERI + PARALEL)"}
+                  </span>
+                  {circuitAnalysis.topology.hasParallelBranch && (
+                    <span className="text-xs">
+                      ({circuitAnalysis.topology.branchNodes.length} branch
+                      nodes)
+                    </span>
+                  )}
+                </div>
+              )}
+
               <div className="grid grid-cols-5 gap-3 text-sm">
                 <div>
                   <span className="text-blue-300">V = </span>
-                  <span className="text-white font-bold">0V</span>
+                  <span className="text-white font-bold">
+                    {circuitAnalysis.totalVoltage.toFixed(1)}V
+                  </span>
                 </div>
                 <div>
                   <span className="text-blue-300">I = </span>
-                  <span className="text-white font-bold">0A</span>
+                  <span className="text-white font-bold">
+                    {circuitAnalysis.current.toFixed(3)}A
+                  </span>
                 </div>
                 <div>
                   <span className="text-blue-300">R = </span>
-                  <span className="text-white font-bold">0Ω</span>
+                  <span className="text-white font-bold">
+                    {circuitAnalysis.totalResistance.toFixed(1)}Ω
+                  </span>
                 </div>
                 <div>
                   <span className="text-blue-300">P = </span>
-                  <span className="text-white font-bold">0W</span>
+                  <span className="text-white font-bold">
+                    {circuitAnalysis.power.toFixed(2)}W
+                  </span>
                 </div>
                 <div>
-                  <span className="text-blue-300">Rangkaian: </span>
-                  <span className="text-red-500 font-bold">OPEN</span>
+                  <span className="text-blue-300">Status: </span>
+                  <span
+                    className={`font-bold ${
+                      circuitAnalysis.isClosed && !circuitAnalysis.hasOpenSwitch
+                        ? "text-green-400"
+                        : "text-red-500"
+                    }`}
+                  >
+                    {circuitAnalysis.isClosed && !circuitAnalysis.hasOpenSwitch
+                      ? "CLOSED ✓"
+                      : "OPEN"}
+                  </span>
                 </div>
               </div>
             </div>
