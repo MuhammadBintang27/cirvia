@@ -96,7 +96,7 @@ export default function AboutPage() {
                     <div className="text-center flex flex-col h-full">
                       <div className="relative w-full aspect-square mb-6 rounded-2xl overflow-hidden border-4 border-purple-400/30 group-hover:border-purple-400/60 transition-all">
                         <Image
-                          src="/assets/team/bintang.png"
+                          src="/assets/team/ahmad.png"
                           alt="Ahmad Syah Ramadhan"
                           fill
                           className="object-cover"
@@ -122,7 +122,7 @@ export default function AboutPage() {
                     <div className="text-center flex flex-col h-full">
                       <div className="relative w-full aspect-square mb-6 rounded-2xl overflow-hidden border-4 border-emerald-400/30 group-hover:border-emerald-400/60 transition-all">
                         <Image
-                          src="/assets/team/bintang.png"
+                          src="/assets/team/husna.png"
                           alt="Alhusna Hanifah"
                           fill
                           className="object-cover"
@@ -203,12 +203,12 @@ function GallerySection() {
   const [currentIndex, setCurrentIndex] = useState(0);
 
   const galleryImages = [
-    { src: '/assets/galeri/gambar2.JPEG', title: 'Tim Pengembang CIRVIA', description: 'Kolaborasi tim dalam mengembangkan platform' },
-    { src: '/assets/galeri/gambar2.JPEG', title: 'Workshop Pembelajaran', description: 'Sesi pelatihan penggunaan CIRVIA' },
-    { src: '/assets/galeri/gambar2.JPEG', title: 'Praktikum Virtual', description: 'Siswa menggunakan fitur computer vision' },
-    { src: '/assets/galeri/gambar2.JPEG', title: 'Presentasi Project', description: 'Demonstrasi fitur-fitur unggulan' },
-    { src: '/assets/galeri/gambar2.JPEG', title: 'Sesi Diskusi', description: 'Evaluasi dan pengembangan platform' },
-    { src: '/assets/galeri/gambar2.JPEG', title: 'Testing & Quality', description: 'Pengujian kualitas pembelajaran' },
+    { src: '/assets/galeri/foto bersama.jpg', title: 'Foto Bersama Siswa', description: 'Uji Coba Penerapan bersama Siswa SMA Negeri 5 Banda Aceh' },
+    { src: '/assets/galeri/validasi materi.jpg', title: 'Validasi Materi', description: 'Uji Validasi Materi bersama Ibu Dr. Susilawati, S.Pd., M.Ed' },
+    { src: '/assets/galeri/validasi media.jpg', title: 'Validasi Media', description: 'Uji Validasi Media bersama Ibu Andriani Putri, M.Sc' },
+    { src: '/assets/galeri/validasi praktisi.jpg', title: 'Validasi Praktisi Lapangan', description: 'Uji Validasi Praktisi Lapangan bersama Cut Mardiana, S.Pd' },
+    { src: '/assets/galeri/menulis LKPD.png', title: 'Proses Pembelajaran Siswa', description: 'Dokumentasi aktivitas siswa saat mengerjakan LKPD' },
+    { src: '/assets/galeri/Praktikum virtual computer vision.png', title: 'Praktikum Virtual', description: 'Siswa melakukan praktikum rangkaian listrik dengan teknologi Computer Vision' },
   ];
 
   const nextSlide = () => {
