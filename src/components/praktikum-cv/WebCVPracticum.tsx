@@ -229,7 +229,7 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
       const fingerX = mirrorX(position.x) * 1200;
       const fingerY = position.y * 700;
 
-      // Get component position for terminal boxes
+      // Get component position
       const component = components.find(
         (c) => c.id === terminalSelection.componentId
       );
@@ -238,36 +238,37 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
       const compX = component.position.x;
       const compY = component.position.y;
 
-      // Terminal A box (left of component)
-      const boxALeft = compX - 120,
-        boxARight = compX - 20;
-      const boxATop = compY - 50,
-        boxABottom = compY + 50;
+      // Calculate terminal positions (with rotation support)
+      const getTerminalPos = (terminal: "a" | "b") => {
+        const angle = component.rotation || 0;
+        const offset = 52;
+        const terminalAngle = terminal === "a" ? angle - Math.PI : angle;
+        return {
+          x: compX + Math.cos(terminalAngle) * offset,
+          y: compY + Math.sin(terminalAngle) * offset,
+        };
+      };
 
-      // Terminal B box (right of component)
-      const boxBLeft = compX + 20,
-        boxBRight = compX + 120;
-      const boxBTop = compY - 50,
-        boxBBottom = compY + 50;
+      const terminalA = getTerminalPos("a");
+      const terminalB = getTerminalPos("b");
+
+      // Hit detection radius for terminals (larger for easier interaction)
+      const hitRadius = 35;
 
       let hoveredTerminal: "a" | "b" | null = null;
 
-      // Check if POINT is hovering Box A
-      if (
-        fingerX >= boxALeft &&
-        fingerX <= boxARight &&
-        fingerY >= boxATop &&
-        fingerY <= boxABottom
-      ) {
+      // Calculate distance to each terminal
+      const distA = Math.sqrt(
+        Math.pow(fingerX - terminalA.x, 2) + Math.pow(fingerY - terminalA.y, 2)
+      );
+      const distB = Math.sqrt(
+        Math.pow(fingerX - terminalB.x, 2) + Math.pow(fingerY - terminalB.y, 2)
+      );
+
+      // Check which terminal is being hovered (closest one within hit radius)
+      if (distA < hitRadius && distA < distB) {
         hoveredTerminal = "a";
-      }
-      // Check if POINT is hovering Box B
-      else if (
-        fingerX >= boxBLeft &&
-        fingerX <= boxBRight &&
-        fingerY >= boxBTop &&
-        fingerY <= boxBBottom
-      ) {
+      } else if (distB < hitRadius) {
         hoveredTerminal = "b";
       }
 
@@ -1977,7 +1978,7 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
       ctx.font = "bold 12px Arial";
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
-      ctx.fillText("A", terminalA.x, terminalA.y);
+      ctx.fillText("L", terminalA.x, terminalA.y);
 
       // Terminal B (Right) - Blue Circle with "B" label
       ctx.beginPath();
@@ -1992,7 +1993,7 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
       ctx.font = "bold 12px Arial";
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
-      ctx.fillText("B", terminalB.x, terminalB.y);
+      ctx.fillText("R", terminalB.x, terminalB.y);
 
       // 🆕 Optional: Draw terminal labels when component is selected
       if (isSelected) {
@@ -2005,7 +2006,7 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
 
         ctx.fillStyle = "#FFFFFF";
         ctx.font = "bold 10px Arial";
-        ctx.fillText("Terminal A", terminalA.x, terminalA.y + 25);
+        ctx.fillText("Terminal L", terminalA.x, terminalA.y + 25);
 
         // Terminal B label
         ctx.fillStyle = "rgba(59, 130, 246, 0.9)"; // Blue background
@@ -2016,7 +2017,7 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
 
         ctx.fillStyle = "#FFFFFF";
         ctx.font = "bold 10px Arial";
-        ctx.fillText("Terminal B", terminalB.x, terminalB.y + 25);
+        ctx.fillText("Terminal R", terminalB.x, terminalB.y + 25);
       }
     });
 
@@ -2174,8 +2175,14 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
       }
     }
 
-    // Draw hand landmarks on circuit canvas
-    if (handPosition && handPosition.landmarks.length > 0) {
+    // Draw hand landmarks on circuit canvas (only if hand is actively detected with gesture)
+    if (
+      handPosition &&
+      handPosition.landmarks.length > 0 &&
+      state.handDetected &&
+      state.currentGesture &&
+      state.currentGesture.name !== "unknown"
+    ) {
       const canvasWidth = canvas.width;
       const canvasHeight = canvas.height;
 
@@ -2784,7 +2791,7 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
       }
     }
 
-    // 🎯 DRAW TERMINAL SELECTION BOXES (A and B) when terminal chooser is active
+    // 🎯 DRAW ENLARGED COMPONENT WITH TERMINAL SELECTION when terminal chooser is active
     if (terminalSelection.isActive && terminalSelection.componentId) {
       const component = components.find(
         (c) => c.id === terminalSelection.componentId
@@ -2794,103 +2801,149 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
         const compY = component.position.y;
 
         // Semi-transparent overlay to dim other components
-        ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
+        ctx.fillStyle = "rgba(0, 0, 0, 0.6)";
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-        // Highlight the component being configured
-        ctx.beginPath();
-        ctx.arc(compX, compY, 60, 0, Math.PI * 2);
+        // Draw enlarged component using CircuitComponentRenderer (1.8x scale)
+        ctx.save();
+        ctx.translate(compX, compY);
+        ctx.rotate((component.rotation * Math.PI) / 180);
+        ctx.scale(1.8, 1.8); // Enlarge the component
+
+        // Calculate lamp properties for rendering
+        const lampPower = circuitAnalysis.lampPowers[component.id] || 0;
+        const isOn =
+          circuitAnalysis.isClosed &&
+          circuitAnalysis.current > 0 &&
+          lampPower > 0.1;
+        const brightness = Math.min(1, Math.max(0, lampPower / 5));
+        const switchState = component.state || "open";
+
+        // Render the component at origin (0,0) because we already translated
+        CircuitComponentRenderer.renderComponent(
+          ctx,
+          component.type,
+          0, // x position (translated)
+          0, // y position (translated)
+          0, // rotation (already rotated)
+          {
+            isSelected: true, // Highlight with selection
+            isMobile: false,
+            isOn,
+            brightness,
+            lampPower,
+            switchState,
+          }
+        );
+
+        // Add yellow glow border around component
         ctx.strokeStyle = "#FBBF24";
-        ctx.lineWidth = 4;
+        ctx.lineWidth = 3;
         ctx.shadowColor = "#FBBF24";
-        ctx.shadowBlur = 20;
-        ctx.stroke();
+        ctx.shadowBlur = 25;
+
+        // Draw glow outline based on component type
+        if (component.type === "resistor") {
+          ctx.strokeRect(-30, -10, 60, 20);
+        } else if (component.type === "battery") {
+          ctx.strokeRect(-25, -15, 50, 30);
+        } else if (component.type === "lamp") {
+          ctx.beginPath();
+          ctx.arc(0, 0, 20, 0, Math.PI * 2);
+          ctx.stroke();
+        } else if (component.type === "switch") {
+          ctx.strokeRect(-20, -8, 40, 16);
+        }
+
         ctx.shadowBlur = 0;
+        ctx.restore();
 
-        // Terminal A Box (LEFT - Red)
-        const boxALeft = compX - 120;
-        const boxATop = compY - 50;
-        const boxWidth = 100;
-        const boxHeight = 100;
+        // Calculate terminal positions (with rotation)
+        const getTerminalPos = (terminal: "a" | "b") => {
+          const angle = component.rotation || 0;
+          const offset = 52;
+          const terminalAngle = terminal === "a" ? angle - Math.PI : angle;
+          return {
+            x: compX + Math.cos(terminalAngle) * offset,
+            y: compY + Math.sin(terminalAngle) * offset,
+          };
+        };
 
-        // Box A background
+        const terminalA = getTerminalPos("a");
+        const terminalB = getTerminalPos("b");
+
+        // Draw Terminal A (LEFT) - Enlarged
         const isHoveringA = terminalHoldTimer.terminal === "a";
-        ctx.fillStyle = isHoveringA
-          ? "rgba(239, 68, 68, 0.9)"
-          : "rgba(239, 68, 68, 0.7)";
         ctx.beginPath();
-        ctx.roundRect(boxALeft, boxATop, boxWidth, boxHeight, 10);
+        ctx.arc(terminalA.x, terminalA.y, 24, 0, Math.PI * 2);
+        ctx.fillStyle = isHoveringA
+          ? "rgba(239, 68, 68, 1)"
+          : "rgba(239, 68, 68, 0.85)";
         ctx.fill();
-
-        // Box A border with pulse if hovering
         ctx.strokeStyle = "#FFFFFF";
-        ctx.lineWidth = isHoveringA ? 5 : 3;
+        ctx.lineWidth = 3;
         if (isHoveringA) {
           ctx.shadowColor = "#EF4444";
-          ctx.shadowBlur = 15;
+          ctx.shadowBlur = 25;
         }
         ctx.stroke();
         ctx.shadowBlur = 0;
 
-        // Box A label
+        // Terminal A label
         ctx.fillStyle = "#FFFFFF";
-        ctx.font = "bold 40px Arial";
+        ctx.font = "bold 18px Arial";
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
-        ctx.fillText("A", boxALeft + boxWidth / 2, boxATop + boxHeight / 2);
+        ctx.fillText("L", terminalA.x, terminalA.y);
 
-        // Box A instruction
-        ctx.font = "bold 11px Arial";
-        ctx.fillText("KIRI", boxALeft + boxWidth / 2, boxATop + boxHeight + 15);
+        // Terminal A text label
+        ctx.font = "bold 12px Arial";
+        ctx.fillStyle = "#FFFFFF";
+        ctx.shadowColor = "rgba(0, 0, 0, 0.8)";
+        ctx.shadowBlur = 8;
+        ctx.fillText("LEFT", terminalA.x, terminalA.y - 40);
+        ctx.shadowBlur = 0;
 
-        // Terminal B Box (RIGHT - Blue)
-        const boxBLeft = compX + 20;
-        const boxBTop = compY - 50;
-
-        // Box B background
+        // Draw Terminal B (RIGHT) - Enlarged
         const isHoveringB = terminalHoldTimer.terminal === "b";
-        ctx.fillStyle = isHoveringB
-          ? "rgba(59, 130, 246, 0.9)"
-          : "rgba(59, 130, 246, 0.7)";
         ctx.beginPath();
-        ctx.roundRect(boxBLeft, boxBTop, boxWidth, boxHeight, 10);
+        ctx.arc(terminalB.x, terminalB.y, 24, 0, Math.PI * 2);
+        ctx.fillStyle = isHoveringB
+          ? "rgba(59, 130, 246, 1)"
+          : "rgba(59, 130, 246, 0.85)";
         ctx.fill();
-
-        // Box B border with pulse if hovering
         ctx.strokeStyle = "#FFFFFF";
-        ctx.lineWidth = isHoveringB ? 5 : 3;
+        ctx.lineWidth = 3;
         if (isHoveringB) {
           ctx.shadowColor = "#3B82F6";
-          ctx.shadowBlur = 15;
+          ctx.shadowBlur = 25;
         }
         ctx.stroke();
         ctx.shadowBlur = 0;
 
-        // Box B label
+        // Terminal B label
         ctx.fillStyle = "#FFFFFF";
-        ctx.font = "bold 40px Arial";
+        ctx.font = "bold 18px Arial";
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
-        ctx.fillText("B", boxBLeft + boxWidth / 2, boxBTop + boxHeight / 2);
+        ctx.fillText("R", terminalB.x, terminalB.y);
 
-        // Box B instruction
-        ctx.font = "bold 11px Arial";
-        ctx.fillText(
-          "KANAN",
-          boxBLeft + boxWidth / 2,
-          boxBTop + boxHeight + 15
-        );
+        // Terminal B text label
+        ctx.font = "bold 12px Arial";
+        ctx.fillStyle = "#FFFFFF";
+        ctx.shadowColor = "rgba(0, 0, 0, 0.8)";
+        ctx.shadowBlur = 8;
+        ctx.fillText("RIGHT", terminalB.x, terminalB.y - 40);
+        ctx.shadowBlur = 0;
 
         // Draw hold progress indicator if user is holding on a terminal
         if (terminalHoldTimer.terminal && terminalHoldTimer.progress > 0) {
-          const targetBox =
-            terminalHoldTimer.terminal === "a"
-              ? { x: boxALeft + boxWidth / 2, y: boxATop + boxHeight / 2 }
-              : { x: boxBLeft + boxWidth / 2, y: boxBTop + boxHeight / 2 };
+          const targetTerminal =
+            terminalHoldTimer.terminal === "a" ? terminalA : terminalB;
 
-          // Progress circle
+          // Progress circle background
           ctx.beginPath();
-          ctx.arc(targetBox.x, targetBox.y, 55, 0, Math.PI * 2);
+          ctx.arc(targetTerminal.x, targetTerminal.y, 38, 0, Math.PI * 2);
           ctx.strokeStyle = "rgba(255, 255, 255, 0.3)";
           ctx.lineWidth = 6;
           ctx.stroke();
@@ -2899,7 +2952,13 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
           const progressAngle =
             terminalHoldTimer.progress * Math.PI * 2 - Math.PI / 2;
           ctx.beginPath();
-          ctx.arc(targetBox.x, targetBox.y, 55, -Math.PI / 2, progressAngle);
+          ctx.arc(
+            targetTerminal.x,
+            targetTerminal.y,
+            38,
+            -Math.PI / 2,
+            progressAngle
+          );
           ctx.strokeStyle = "#FCD34D"; // Yellow
           ctx.lineWidth = 8;
           ctx.shadowColor = "#FCD34D";
@@ -2907,22 +2966,25 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
           ctx.stroke();
           ctx.shadowBlur = 0;
 
-          // Progress percentage
+          // Progress percentage below terminal
           ctx.fillStyle = "#FFFFFF";
-          ctx.font = "bold 16px Arial";
+          ctx.font = "bold 14px Arial";
           ctx.textAlign = "center";
           ctx.textBaseline = "middle";
+          ctx.shadowColor = "rgba(0, 0, 0, 0.8)";
+          ctx.shadowBlur = 8;
           ctx.fillText(
             `${Math.round(terminalHoldTimer.progress * 100)}%`,
-            targetBox.x,
-            targetBox.y + 75
+            targetTerminal.x,
+            targetTerminal.y + 55
           );
+          ctx.shadowBlur = 0;
         }
 
         // Draw instruction text above component
-        ctx.fillStyle = "rgba(0, 0, 0, 0.8)";
+        ctx.fillStyle = "rgba(0, 0, 0, 0.85)";
         ctx.beginPath();
-        ctx.roundRect(compX - 150, compY - 120, 300, 40, 10);
+        ctx.roundRect(compX - 180, compY - 140, 360, 45, 10);
         ctx.fill();
 
         ctx.strokeStyle = "#FBBF24";
@@ -2936,9 +2998,9 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
         const stageText =
           terminalSelection.stage === "start" ? "AWAL" : "TUJUAN";
         ctx.fillText(
-          `☝️ Pilih Terminal ${stageText}: Tahan 2 detik`,
+          `👆 Arahkan jari ke terminal L atau R, tahan 2 detik`,
           compX,
-          compY - 100
+          compY - 117
         );
       }
     }
@@ -2947,6 +3009,7 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
     handPosition,
     wireConnection,
     state.currentGesture,
+    state.handDetected,
     terminalSelection,
     terminalHoldTimer,
     selectedComponentId,
@@ -3311,17 +3374,16 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
               </div>
             </div>
 
-            {/* 🎯 Simple Terminal Selection Instruction */}
+            {/* 🎯 Terminal Selection Instruction */}
             {terminalSelection.isActive && terminalSelection.componentId && (
               <div className="absolute top-4 left-1/2 transform -translate-x-1/2 z-50">
                 <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg px-4 py-2 border-2 border-white/30 shadow-lg">
                   <p className="text-white font-bold text-sm text-center">
-                    ☝️ Pilih Terminal{" "}
+                    👆 Terminal{" "}
                     {terminalSelection.stage === "start" ? "AWAL" : "TUJUAN"}:
-                    Arahkan jari ke{" "}
-                    <span className="text-red-300">A (KIRI)</span> atau{" "}
-                    <span className="text-blue-300">B (KANAN)</span> dan tahan 2
-                    detik
+                    Arahkan jari ke terminal{" "}
+                    <span className="text-red-300">L</span> atau{" "}
+                    <span className="text-blue-300">R</span>, tahan 2 detik
                   </p>
                 </div>
               </div>
