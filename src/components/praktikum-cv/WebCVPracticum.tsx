@@ -101,6 +101,47 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
     componentsRef.current = components;
   }, [components]);
 
+  // NEW: Finger count selection state
+  const [fingerCountSelection, setFingerCountSelection] = useState<{
+    active: boolean;
+    fingerCount: number;
+    timestamp: number;
+  } | null>(null);
+
+  // 🆕 Terminal selection state (for precise wire connections)
+  const [terminalSelection, setTerminalSelection] = useState<{
+    isActive: boolean;
+    componentId: string | null;
+    stage: "start" | "end" | null;
+    selectedTerminal: "a" | "b" | null;
+    timestamp: number;
+  }>({
+    isActive: false,
+    componentId: null,
+    stage: null,
+    selectedTerminal: null,
+    timestamp: 0,
+  });
+
+  // NEW: Wire connection state
+  const [wireConnection, setWireConnection] = useState<{
+    isActive: boolean;
+    startComponentId: string | null;
+    startTerminalId: "a" | "b" | null;
+    endPosition: { x: number; y: number } | null;
+    targetComponentId: string | null;
+    targetTerminalId: "a" | "b" | null;
+    waitingForTerminalSelection: boolean; // 🆕 Flag for terminal chooser
+  }>({
+    isActive: false,
+    startComponentId: null,
+    startTerminalId: null,
+    endPosition: null,
+    targetComponentId: null,
+    targetTerminalId: null,
+    waitingForTerminalSelection: false,
+  });
+
   // 🌊 Animation loop for wire current flow
   useEffect(() => {
     let animationFrame: number;
@@ -111,6 +152,37 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
     animationFrame = requestAnimationFrame(animate);
     return () => cancelAnimationFrame(animationFrame);
   }, []);
+
+  // ⏱️ Terminal selection timeout (5 seconds)
+  useEffect(() => {
+    if (terminalSelection.isActive) {
+      const timeout = setTimeout(() => {
+        console.log("⏱️ Terminal selection timeout - auto cancelled");
+        setTerminalSelection({
+          isActive: false,
+          componentId: null,
+          stage: null,
+          selectedTerminal: null,
+          timestamp: 0,
+        });
+
+        // Reset wire connection if waiting
+        if (wireConnection.waitingForTerminalSelection) {
+          setWireConnection({
+            isActive: false,
+            startComponentId: null,
+            startTerminalId: null,
+            endPosition: null,
+            targetComponentId: null,
+            targetTerminalId: null,
+            waitingForTerminalSelection: false,
+          });
+        }
+      }, 5000); // 5 seconds timeout
+
+      return () => clearTimeout(timeout);
+    }
+  }, [terminalSelection.isActive, wireConnection.waitingForTerminalSelection]);
 
   // 📊 Analyze circuit whenever components or wires change
   useEffect(() => {
@@ -129,29 +201,208 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
     });
   }, [components, wires]);
 
-  // NEW: Finger count selection state
-  const [fingerCountSelection, setFingerCountSelection] = useState<{
-    active: boolean;
-    fingerCount: number;
-    timestamp: number;
-  } | null>(null);
+  // ☝️ Terminal selection hold timer state
+  const [terminalHoldTimer, setTerminalHoldTimer] = useState<{
+    terminal: "a" | "b" | null;
+    startTime: number | null;
+    progress: number;
+  }>({ terminal: null, startTime: null, progress: 0 });
 
-  // NEW: Wire connection state
-  const [wireConnection, setWireConnection] = useState<{
-    isActive: boolean;
-    startComponentId: string | null;
-    startTerminalId: "a" | "b" | null;
-    endPosition: { x: number; y: number } | null;
-    targetComponentId: string | null;
-    targetTerminalId: "a" | "b" | null;
-  }>({
-    isActive: false,
-    startComponentId: null,
-    startTerminalId: null,
-    endPosition: null,
-    targetComponentId: null,
-    targetTerminalId: null,
-  });
+  // 🎯 Handle POINT + HOLD 2s for terminal selection
+  useEffect(() => {
+    if (!terminalSelection.isActive) {
+      if (terminalHoldTimer.terminal) {
+        setTerminalHoldTimer({ terminal: null, startTime: null, progress: 0 });
+      }
+      return;
+    }
+    if (!state.currentGesture) return;
+
+    const gestureName = state.currentGesture.name;
+    const handedness = state.currentGesture.handedness;
+    const position = state.currentGesture.position;
+
+    // Only detect POINT gesture from RIGHT hand
+    if (gestureName === "point" && handedness === "Right" && position) {
+      // Convert normalized position to screen coordinates
+      const mirrorX = (x: number) => 1 - x;
+      const fingerX = mirrorX(position.x) * 1200;
+      const fingerY = position.y * 700;
+
+      // Get component position for terminal boxes
+      const component = components.find(
+        (c) => c.id === terminalSelection.componentId
+      );
+      if (!component) return;
+
+      const compX = component.position.x;
+      const compY = component.position.y;
+
+      // Terminal A box (left of component)
+      const boxALeft = compX - 120,
+        boxARight = compX - 20;
+      const boxATop = compY - 50,
+        boxABottom = compY + 50;
+
+      // Terminal B box (right of component)
+      const boxBLeft = compX + 20,
+        boxBRight = compX + 120;
+      const boxBTop = compY - 50,
+        boxBBottom = compY + 50;
+
+      let hoveredTerminal: "a" | "b" | null = null;
+
+      // Check if POINT is hovering Box A
+      if (
+        fingerX >= boxALeft &&
+        fingerX <= boxARight &&
+        fingerY >= boxATop &&
+        fingerY <= boxABottom
+      ) {
+        hoveredTerminal = "a";
+      }
+      // Check if POINT is hovering Box B
+      else if (
+        fingerX >= boxBLeft &&
+        fingerX <= boxBRight &&
+        fingerY >= boxBTop &&
+        fingerY <= boxBBottom
+      ) {
+        hoveredTerminal = "b";
+      }
+
+      if (hoveredTerminal) {
+        // Start or continue hold timer
+        if (
+          terminalHoldTimer.terminal === hoveredTerminal &&
+          terminalHoldTimer.startTime
+        ) {
+          // Continue holding
+          const elapsed = Date.now() - terminalHoldTimer.startTime;
+          const progress = Math.min(elapsed / 2000, 1); // 2 seconds = 100%
+
+          setTerminalHoldTimer((prev) => ({ ...prev, progress }));
+
+          // Selection complete after 2 seconds
+          if (progress >= 1) {
+            console.log(
+              `✅ Terminal ${hoveredTerminal.toUpperCase()} selected after 2s hold`
+            );
+
+            if (terminalSelection.stage === "start") {
+              // Start terminal selected
+              setWireConnection((prev) => ({
+                ...prev,
+                startTerminalId: hoveredTerminal,
+                waitingForTerminalSelection: false,
+              }));
+
+              setTerminalSelection((prev) => ({
+                ...prev,
+                selectedTerminal: hoveredTerminal,
+                isActive: false,
+              }));
+
+              debugLogger.log(
+                "gesture",
+                `Terminal ${hoveredTerminal.toUpperCase()} Selected (Start)`,
+                {
+                  componentId: terminalSelection.componentId,
+                  terminal: hoveredTerminal.toUpperCase(),
+                }
+              );
+            } else if (terminalSelection.stage === "end") {
+              // End terminal selected - create wire
+              const endTerminal = hoveredTerminal;
+              const startComponentId = wireConnection.startComponentId;
+              const startTerminalId = wireConnection.startTerminalId;
+              const targetComponentId = terminalSelection.componentId;
+
+              if (startComponentId && startTerminalId && targetComponentId) {
+                const newWire: WireComponent = {
+                  id: `wire_${Date.now()}`,
+                  from: {
+                    elementId: startComponentId,
+                    terminalId: startTerminalId,
+                  },
+                  to: {
+                    elementId: targetComponentId,
+                    terminalId: endTerminal,
+                  },
+                };
+
+                setWires((prev) => [...prev, newWire]);
+
+                console.log(
+                  `✅ Wire created: ${startComponentId}[${startTerminalId.toUpperCase()}] → ${targetComponentId}[${endTerminal.toUpperCase()}]`
+                );
+                debugLogger.log(
+                  "action",
+                  "WIRE CREATED with Terminal Selection",
+                  { wire: newWire }
+                );
+              }
+
+              // Reset states
+              setTerminalSelection({
+                isActive: false,
+                componentId: null,
+                stage: null,
+                selectedTerminal: null,
+                timestamp: 0,
+              });
+
+              setWireConnection({
+                isActive: false,
+                startComponentId: null,
+                startTerminalId: null,
+                endPosition: null,
+                targetComponentId: null,
+                targetTerminalId: null,
+                waitingForTerminalSelection: false,
+              });
+            }
+
+            // Reset timer
+            setTerminalHoldTimer({
+              terminal: null,
+              startTime: null,
+              progress: 0,
+            });
+          }
+        } else {
+          // Start new hold timer
+          setTerminalHoldTimer({
+            terminal: hoveredTerminal,
+            startTime: Date.now(),
+            progress: 0,
+          });
+          console.log(
+            `☝️ Started HOLD timer for Terminal ${hoveredTerminal.toUpperCase()}`
+          );
+        }
+      } else {
+        // Not hovering any box - reset timer
+        if (terminalHoldTimer.terminal) {
+          setTerminalHoldTimer({
+            terminal: null,
+            startTime: null,
+            progress: 0,
+          });
+        }
+      }
+    } else {
+      // Not POINT gesture - reset timer
+      if (terminalHoldTimer.terminal) {
+        setTerminalHoldTimer({ terminal: null, startTime: null, progress: 0 });
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    state.currentGesture,
+    terminalSelection.isActive,
+    terminalSelection.componentId,
+  ]);
 
   // Hand position state for circuit canvas
   const [handPosition, setHandPosition] = useState<{
@@ -488,33 +739,35 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
 
       // 🆕 RIGHT HAND: Start wire connection (after 3-second hold)
       if (action.type === "start_wire" && action.componentId) {
-        const fingerX = action.position ? mirrorX(action.position.x) * 1200 : 0;
-        const fingerY = action.position ? action.position.y * 700 : 0;
-
-        // Detect which terminal is closest to finger
-        const startTerminal = findClosestTerminal(
-          action.componentId,
-          fingerX,
-          fingerY
+        // 🎯 NEW: Show terminal chooser instead of auto-detect
+        console.log(
+          `🔌 WIRE START - Waiting for terminal selection: ${action.componentId}`
         );
+
+        setTerminalSelection({
+          isActive: true,
+          componentId: action.componentId,
+          stage: "start",
+          selectedTerminal: null,
+          timestamp: Date.now(),
+        });
 
         setWireConnection({
           isActive: true,
           startComponentId: action.componentId,
-          startTerminalId: startTerminal,
-          endPosition: action.position ? { x: fingerX, y: fingerY } : null,
+          startTerminalId: null, // Will be set by SWIPE gesture
+          endPosition: null,
           targetComponentId: null,
           targetTerminalId: null,
+          waitingForTerminalSelection: true, // Block wire dragging until terminal selected
         });
 
         console.log(
-          `🔌 WIRE START from component: ${
-            action.componentId
-          } terminal ${startTerminal.toUpperCase()}`
+          `🎯 TERMINAL CHOOSER activated for component: ${action.componentId} (stage: start)`
         );
-        debugLogger.log("action", "WIRE START", {
+        debugLogger.log("action", "WIRE START - Terminal Chooser", {
           componentId: action.componentId,
-          terminal: startTerminal,
+          waitingForTerminalSelection: true,
         });
         return;
       }
@@ -545,15 +798,18 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
 
       // 🆕 RIGHT HAND: Wire dragging (wire follows finger)
       if (action.type === "wire_dragging" && action.position) {
-        setWireConnection((prev) => ({
-          ...prev,
-          endPosition: action.position
-            ? {
-                x: mirrorX(action.position.x) * 1200,
-                y: action.position.y * 700,
-              }
-            : prev.endPosition,
-        }));
+        // 🎯 Skip wire dragging if waiting for terminal selection
+        if (!wireConnection.waitingForTerminalSelection) {
+          setWireConnection((prev) => ({
+            ...prev,
+            endPosition: action.position
+              ? {
+                  x: mirrorX(action.position.x) * 1200,
+                  y: action.position.y * 700,
+                }
+              : prev.endPosition,
+          }));
+        }
         // No log to avoid spam
         return;
       }
@@ -564,64 +820,34 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
         action.componentId &&
         action.targetComponentId
       ) {
-        const fingerX = action.position ? mirrorX(action.position.x) * 1200 : 0;
-        const fingerY = action.position ? action.position.y * 700 : 0;
-
-        // Detect which terminal is closest to finger on target component
-        const targetTerminal = findClosestTerminal(
-          action.targetComponentId,
-          fingerX,
-          fingerY
+        // 🎯 NEW: Show terminal chooser for target component
+        console.log(
+          `🔌 WIRE COMPLETE - Waiting for END terminal selection: ${action.targetComponentId}`
         );
+
+        setTerminalSelection({
+          isActive: true,
+          componentId: action.targetComponentId,
+          stage: "end",
+          selectedTerminal: null,
+          timestamp: Date.now(),
+        });
+
+        // Keep wire connection active with target component
+        setWireConnection((prev) => ({
+          ...prev,
+          targetComponentId: action.targetComponentId || null,
+          waitingForTerminalSelection: true, // Block until terminal selected
+        }));
 
         console.log(
-          `🔌 WIRE COMPLETE: ${
-            action.componentId
-          }[${wireConnection.startTerminalId?.toUpperCase()}] → ${
-            action.targetComponentId
-          }[${targetTerminal.toUpperCase()}]`
+          `🎯 TERMINAL CHOOSER activated for target component: ${action.targetComponentId} (stage: end)`
         );
-        debugLogger.log("action", "WIRE COMPLETE", {
-          from: action.componentId,
-          fromTerminal: wireConnection.startTerminalId,
-          to: action.targetComponentId,
-          toTerminal: targetTerminal,
+        debugLogger.log("action", "WIRE COMPLETE - Terminal Chooser", {
+          startComponent: action.componentId,
+          targetComponent: action.targetComponentId,
+          waitingForTerminalSelection: true,
         });
-
-        // ✅ Create permanent wire connection using detected terminals
-        const newWire: WireComponent = {
-          id: `wire_${Date.now()}`,
-          from: {
-            elementId: action.componentId,
-            terminalId: wireConnection.startTerminalId || "b",
-          },
-          to: {
-            elementId: action.targetComponentId,
-            terminalId: targetTerminal,
-          },
-        };
-
-        setWires((prev) => {
-          const updated = [...prev, newWire];
-          console.log(`✅ WIRE SAVED: ${updated.length} total wires`);
-          debugLogger.log("action", "WIRE SAVED", {
-            wireId: newWire.id,
-            totalWires: updated.length,
-          });
-          return updated;
-        });
-
-        // ✅ Reset temporary wire connection state
-        setWireConnection({
-          isActive: false,
-          startComponentId: null,
-          startTerminalId: null,
-          endPosition: null,
-          targetComponentId: null,
-          targetTerminalId: null,
-        });
-
-        console.log("🔄 Wire connection state reset");
         return;
       }
 
@@ -1045,8 +1271,7 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
     [
       components,
       selectedComponentId,
-      findClosestTerminal,
-      wireConnection.startTerminalId,
+      wireConnection.waitingForTerminalSelection,
     ]
   );
 
@@ -1718,6 +1943,81 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
           switchState,
         }
       );
+
+      // 🆕 DRAW TERMINAL MARKERS (A and B)
+      const getTerminalPosition = (terminalId: "a" | "b") => {
+        const terminalOffset = 52;
+        const angle = (component.rotation * Math.PI) / 180;
+
+        const localX = terminalId === "a" ? -terminalOffset : terminalOffset;
+        const localY = 0;
+
+        const rotatedX = localX * Math.cos(angle) - localY * Math.sin(angle);
+        const rotatedY = localX * Math.sin(angle) + localY * Math.cos(angle);
+
+        return {
+          x: component.position.x + rotatedX,
+          y: component.position.y + rotatedY,
+        };
+      };
+
+      const terminalA = getTerminalPosition("a");
+      const terminalB = getTerminalPosition("b");
+
+      // Terminal A (Left) - Red Circle with "A" label
+      ctx.beginPath();
+      ctx.arc(terminalA.x, terminalA.y, 10, 0, Math.PI * 2);
+      ctx.fillStyle = "#EF4444"; // Red
+      ctx.fill();
+      ctx.strokeStyle = "#FFFFFF";
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      ctx.fillStyle = "#FFFFFF";
+      ctx.font = "bold 12px Arial";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText("A", terminalA.x, terminalA.y);
+
+      // Terminal B (Right) - Blue Circle with "B" label
+      ctx.beginPath();
+      ctx.arc(terminalB.x, terminalB.y, 10, 0, Math.PI * 2);
+      ctx.fillStyle = "#3B82F6"; // Blue
+      ctx.fill();
+      ctx.strokeStyle = "#FFFFFF";
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      ctx.fillStyle = "#FFFFFF";
+      ctx.font = "bold 12px Arial";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText("B", terminalB.x, terminalB.y);
+
+      // 🆕 Optional: Draw terminal labels when component is selected
+      if (isSelected) {
+        // Terminal A label
+        ctx.fillStyle = "rgba(239, 68, 68, 0.9)"; // Red background
+        ctx.fillRect(terminalA.x - 30, terminalA.y + 15, 60, 20);
+        ctx.strokeStyle = "#FFFFFF";
+        ctx.lineWidth = 1;
+        ctx.strokeRect(terminalA.x - 30, terminalA.y + 15, 60, 20);
+
+        ctx.fillStyle = "#FFFFFF";
+        ctx.font = "bold 10px Arial";
+        ctx.fillText("Terminal A", terminalA.x, terminalA.y + 25);
+
+        // Terminal B label
+        ctx.fillStyle = "rgba(59, 130, 246, 0.9)"; // Blue background
+        ctx.fillRect(terminalB.x - 30, terminalB.y + 15, 60, 20);
+        ctx.strokeStyle = "#FFFFFF";
+        ctx.lineWidth = 1;
+        ctx.strokeRect(terminalB.x - 30, terminalB.y + 15, 60, 20);
+
+        ctx.fillStyle = "#FFFFFF";
+        ctx.font = "bold 10px Arial";
+        ctx.fillText("Terminal B", terminalB.x, terminalB.y + 25);
+      }
     });
 
     // 🆕 Draw wire connection preview
@@ -2483,11 +2783,172 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
         }
       }
     }
+
+    // 🎯 DRAW TERMINAL SELECTION BOXES (A and B) when terminal chooser is active
+    if (terminalSelection.isActive && terminalSelection.componentId) {
+      const component = components.find(
+        (c) => c.id === terminalSelection.componentId
+      );
+      if (component) {
+        const compX = component.position.x;
+        const compY = component.position.y;
+
+        // Semi-transparent overlay to dim other components
+        ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        // Highlight the component being configured
+        ctx.beginPath();
+        ctx.arc(compX, compY, 60, 0, Math.PI * 2);
+        ctx.strokeStyle = "#FBBF24";
+        ctx.lineWidth = 4;
+        ctx.shadowColor = "#FBBF24";
+        ctx.shadowBlur = 20;
+        ctx.stroke();
+        ctx.shadowBlur = 0;
+
+        // Terminal A Box (LEFT - Red)
+        const boxALeft = compX - 120;
+        const boxATop = compY - 50;
+        const boxWidth = 100;
+        const boxHeight = 100;
+
+        // Box A background
+        const isHoveringA = terminalHoldTimer.terminal === "a";
+        ctx.fillStyle = isHoveringA
+          ? "rgba(239, 68, 68, 0.9)"
+          : "rgba(239, 68, 68, 0.7)";
+        ctx.beginPath();
+        ctx.roundRect(boxALeft, boxATop, boxWidth, boxHeight, 10);
+        ctx.fill();
+
+        // Box A border with pulse if hovering
+        ctx.strokeStyle = "#FFFFFF";
+        ctx.lineWidth = isHoveringA ? 5 : 3;
+        if (isHoveringA) {
+          ctx.shadowColor = "#EF4444";
+          ctx.shadowBlur = 15;
+        }
+        ctx.stroke();
+        ctx.shadowBlur = 0;
+
+        // Box A label
+        ctx.fillStyle = "#FFFFFF";
+        ctx.font = "bold 40px Arial";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText("A", boxALeft + boxWidth / 2, boxATop + boxHeight / 2);
+
+        // Box A instruction
+        ctx.font = "bold 11px Arial";
+        ctx.fillText("KIRI", boxALeft + boxWidth / 2, boxATop + boxHeight + 15);
+
+        // Terminal B Box (RIGHT - Blue)
+        const boxBLeft = compX + 20;
+        const boxBTop = compY - 50;
+
+        // Box B background
+        const isHoveringB = terminalHoldTimer.terminal === "b";
+        ctx.fillStyle = isHoveringB
+          ? "rgba(59, 130, 246, 0.9)"
+          : "rgba(59, 130, 246, 0.7)";
+        ctx.beginPath();
+        ctx.roundRect(boxBLeft, boxBTop, boxWidth, boxHeight, 10);
+        ctx.fill();
+
+        // Box B border with pulse if hovering
+        ctx.strokeStyle = "#FFFFFF";
+        ctx.lineWidth = isHoveringB ? 5 : 3;
+        if (isHoveringB) {
+          ctx.shadowColor = "#3B82F6";
+          ctx.shadowBlur = 15;
+        }
+        ctx.stroke();
+        ctx.shadowBlur = 0;
+
+        // Box B label
+        ctx.fillStyle = "#FFFFFF";
+        ctx.font = "bold 40px Arial";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText("B", boxBLeft + boxWidth / 2, boxBTop + boxHeight / 2);
+
+        // Box B instruction
+        ctx.font = "bold 11px Arial";
+        ctx.fillText(
+          "KANAN",
+          boxBLeft + boxWidth / 2,
+          boxBTop + boxHeight + 15
+        );
+
+        // Draw hold progress indicator if user is holding on a terminal
+        if (terminalHoldTimer.terminal && terminalHoldTimer.progress > 0) {
+          const targetBox =
+            terminalHoldTimer.terminal === "a"
+              ? { x: boxALeft + boxWidth / 2, y: boxATop + boxHeight / 2 }
+              : { x: boxBLeft + boxWidth / 2, y: boxBTop + boxHeight / 2 };
+
+          // Progress circle
+          ctx.beginPath();
+          ctx.arc(targetBox.x, targetBox.y, 55, 0, Math.PI * 2);
+          ctx.strokeStyle = "rgba(255, 255, 255, 0.3)";
+          ctx.lineWidth = 6;
+          ctx.stroke();
+
+          // Progress arc
+          const progressAngle =
+            terminalHoldTimer.progress * Math.PI * 2 - Math.PI / 2;
+          ctx.beginPath();
+          ctx.arc(targetBox.x, targetBox.y, 55, -Math.PI / 2, progressAngle);
+          ctx.strokeStyle = "#FCD34D"; // Yellow
+          ctx.lineWidth = 8;
+          ctx.shadowColor = "#FCD34D";
+          ctx.shadowBlur = 15;
+          ctx.stroke();
+          ctx.shadowBlur = 0;
+
+          // Progress percentage
+          ctx.fillStyle = "#FFFFFF";
+          ctx.font = "bold 16px Arial";
+          ctx.textAlign = "center";
+          ctx.textBaseline = "middle";
+          ctx.fillText(
+            `${Math.round(terminalHoldTimer.progress * 100)}%`,
+            targetBox.x,
+            targetBox.y + 75
+          );
+        }
+
+        // Draw instruction text above component
+        ctx.fillStyle = "rgba(0, 0, 0, 0.8)";
+        ctx.beginPath();
+        ctx.roundRect(compX - 150, compY - 120, 300, 40, 10);
+        ctx.fill();
+
+        ctx.strokeStyle = "#FBBF24";
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        ctx.fillStyle = "#FFFFFF";
+        ctx.font = "bold 14px Arial";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        const stageText =
+          terminalSelection.stage === "start" ? "AWAL" : "TUJUAN";
+        ctx.fillText(
+          `☝️ Pilih Terminal ${stageText}: Tahan 2 detik`,
+          compX,
+          compY - 100
+        );
+      }
+    }
   }, [
     components,
     handPosition,
     wireConnection,
     state.currentGesture,
+    terminalSelection,
+    terminalHoldTimer,
     selectedComponentId,
     wires,
     toggleHold.isActive,
@@ -2607,7 +3068,7 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
         </div>
 
         {/* Component Selection Bar */}
-        <div className="grid grid-cols-5 gap-2 mt-3">
+        <div className="grid grid-cols-4 gap-2 mt-3">
           {[
             {
               type: "battery",
@@ -2636,13 +3097,6 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
               label: "Saklar",
               fingerCount: 4,
               color: "from-green-500 to-emerald-600",
-            },
-            {
-              type: "wire",
-              icon: "━",
-              label: "Kabel",
-              fingerCount: 5,
-              color: "from-gray-500 to-gray-600",
             },
           ].map((comp) => (
             <button
@@ -2703,7 +3157,6 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
                 {fingerCountSelection.fingerCount === 2 && " 💡 Lampu"}
                 {fingerCountSelection.fingerCount === 3 && " ⚡ Resistor"}
                 {fingerCountSelection.fingerCount === 4 && " 🔘 Saklar"}
-                {fingerCountSelection.fingerCount === 5 && " ━ Kabel"}
               </div>
             </div>
           </div>
@@ -2777,22 +3230,6 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
                   }
                 }}
               />
-              {components.length === 0 && (
-                <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                  <div className="text-center bg-black/50 backdrop-blur-sm rounded-xl p-6 border border-blue-400/30">
-                    <p className="text-blue-300 font-bold mb-2">
-                      PINCH: Pilih & drag komponen dari panel atas
-                    </p>
-                    <p className="text-blue-200 text-sm">
-                      ✋ TELUNJUK: Hidupkan saklar (ON)
-                      <br />
-                      ✌️ PEACE: Matikan saklar (OFF)
-                      <br />
-                      👊 ESC: Keluar | R: Reset rangkaian
-                    </p>
-                  </div>
-                </div>
-              )}
             </div>
 
             {/* Calculation Results */}
@@ -2873,6 +3310,22 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
                 </div>
               </div>
             </div>
+
+            {/* 🎯 Simple Terminal Selection Instruction */}
+            {terminalSelection.isActive && terminalSelection.componentId && (
+              <div className="absolute top-4 left-1/2 transform -translate-x-1/2 z-50">
+                <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg px-4 py-2 border-2 border-white/30 shadow-lg">
+                  <p className="text-white font-bold text-sm text-center">
+                    ☝️ Pilih Terminal{" "}
+                    {terminalSelection.stage === "start" ? "AWAL" : "TUJUAN"}:
+                    Arahkan jari ke{" "}
+                    <span className="text-red-300">A (KIRI)</span> atau{" "}
+                    <span className="text-blue-300">B (KANAN)</span> dan tahan 2
+                    detik
+                  </p>
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
@@ -2985,7 +3438,6 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
                   <div>2️⃣ Jari = 💡 Lampu langsung muncul!</div>
                   <div>3️⃣ Jari = ⚡ Resistor langsung muncul!</div>
                   <div>4️⃣ Jari = 🔘 Saklar langsung muncul!</div>
-                  <div>5️⃣ Jari = ━ Kabel langsung muncul!</div>
                 </div>
               </div>
 
@@ -3013,11 +3465,12 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
                     Smooth rotation
                   </div>
                   <div>
-                    ✊ <span className="font-semibold">FIST + DRAG:</span> Buat
-                    koneksi wire
+                    👆 <span className="font-semibold">POINT (HOLD 3s):</span>{" "}
+                    Buat koneksi wire
                   </div>
                   <div className="ml-4 text-xs text-purple-300">
-                    → FIST di komponen A → DRAG ke B → FIST lagi
+                    → POINT di komponen A (HOLD 3s) → DRAG ke B → POINT lagi
+                    (HOLD 3s)
                   </div>
                   <div>
                     👍{" "}

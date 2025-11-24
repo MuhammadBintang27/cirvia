@@ -476,7 +476,7 @@ export class CircuitController {
         );
 
         // Check if 3-second hold on target is complete
-        if (holdDuration >= this.pointHoldDuration || holdProgress >= 1.0) {
+        if (holdDuration >= this.pointHoldDuration || currentProgress >= 1.0) {
           // ✅ COMPLETE WIRE after 3-second hold on target
           console.log(
             `✅ POINT → COMPLETE WIRE: ${this.wireStartComponent} → ${componentAtPosition} (held for ${holdDuration}ms)`
