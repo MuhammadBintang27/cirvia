@@ -2176,10 +2176,10 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
 
     // Draw hand landmarks on circuit canvas (only if hand is actively detected with gesture)
     if (
-      handPosition && 
-      handPosition.landmarks.length > 0 && 
-      state.handDetected && 
-      state.currentGesture && 
+      handPosition &&
+      handPosition.landmarks.length > 0 &&
+      state.handDetected &&
+      state.currentGesture &&
       state.currentGesture.name !== "unknown"
     ) {
       const canvasWidth = canvas.width;
