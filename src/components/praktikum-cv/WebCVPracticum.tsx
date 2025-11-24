@@ -1977,7 +1977,7 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
       ctx.font = "bold 12px Arial";
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
-      ctx.fillText("A", terminalA.x, terminalA.y);
+      ctx.fillText("L", terminalA.x, terminalA.y);
 
       // Terminal B (Right) - Blue Circle with "B" label
       ctx.beginPath();
@@ -1992,7 +1992,7 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
       ctx.font = "bold 12px Arial";
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
-      ctx.fillText("B", terminalB.x, terminalB.y);
+      ctx.fillText("R", terminalB.x, terminalB.y);
 
       // 🆕 Optional: Draw terminal labels when component is selected
       if (isSelected) {
@@ -2005,7 +2005,7 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
 
         ctx.fillStyle = "#FFFFFF";
         ctx.font = "bold 10px Arial";
-        ctx.fillText("Terminal A", terminalA.x, terminalA.y + 25);
+        ctx.fillText("Terminal L", terminalA.x, terminalA.y + 25);
 
         // Terminal B label
         ctx.fillStyle = "rgba(59, 130, 246, 0.9)"; // Blue background
@@ -2016,7 +2016,7 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
 
         ctx.fillStyle = "#FFFFFF";
         ctx.font = "bold 10px Arial";
-        ctx.fillText("Terminal B", terminalB.x, terminalB.y + 25);
+        ctx.fillText("Terminal R", terminalB.x, terminalB.y + 25);
       }
     });
 
@@ -2174,8 +2174,14 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
       }
     }
 
-    // Draw hand landmarks on circuit canvas
-    if (handPosition && handPosition.landmarks.length > 0) {
+    // Draw hand landmarks on circuit canvas (only if hand is actively detected with gesture)
+    if (
+      handPosition && 
+      handPosition.landmarks.length > 0 && 
+      state.handDetected && 
+      state.currentGesture && 
+      state.currentGesture.name !== "unknown"
+    ) {
       const canvasWidth = canvas.width;
       const canvasHeight = canvas.height;
 
@@ -2837,11 +2843,11 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
         ctx.font = "bold 40px Arial";
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
-        ctx.fillText("A", boxALeft + boxWidth / 2, boxATop + boxHeight / 2);
+        ctx.fillText("L", boxALeft + boxWidth / 2, boxATop + boxHeight / 2);
 
         // Box A instruction
         ctx.font = "bold 11px Arial";
-        ctx.fillText("KIRI", boxALeft + boxWidth / 2, boxATop + boxHeight + 15);
+        ctx.fillText("LEFT", boxALeft + boxWidth / 2, boxATop + boxHeight + 15);
 
         // Terminal B Box (RIGHT - Blue)
         const boxBLeft = compX + 20;
@@ -2871,12 +2877,12 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
         ctx.font = "bold 40px Arial";
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
-        ctx.fillText("B", boxBLeft + boxWidth / 2, boxBTop + boxHeight / 2);
+        ctx.fillText("R", boxBLeft + boxWidth / 2, boxBTop + boxHeight / 2);
 
         // Box B instruction
         ctx.font = "bold 11px Arial";
         ctx.fillText(
-          "KANAN",
+          "RIGHT",
           boxBLeft + boxWidth / 2,
           boxBTop + boxHeight + 15
         );
@@ -2947,6 +2953,7 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
     handPosition,
     wireConnection,
     state.currentGesture,
+    state.handDetected,
     terminalSelection,
     terminalHoldTimer,
     selectedComponentId,
@@ -3319,8 +3326,8 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
                     ☝️ Pilih Terminal{" "}
                     {terminalSelection.stage === "start" ? "AWAL" : "TUJUAN"}:
                     Arahkan jari ke{" "}
-                    <span className="text-red-300">A (KIRI)</span> atau{" "}
-                    <span className="text-blue-300">B (KANAN)</span> dan tahan 2
+                    <span className="text-red-300">L (LEFT)</span> atau{" "}
+                    <span className="text-blue-300">R (RIGHT)</span> dan tahan 2
                     detik
                   </p>
                 </div>
