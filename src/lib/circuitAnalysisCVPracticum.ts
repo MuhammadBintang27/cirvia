@@ -216,31 +216,99 @@ export function analyzeCircuit(
     console.log(`   → Ditemukan ${branchNodes.length} branch node(s)`);
   }
 
-  // Group elements by Y position for parallel detection
+  // Group elements by CONNECTED PATH for parallel detection
   const parallelGroups: string[][] = [];
   if (hasParallelBranch) {
-    const branchMap = new Map<number, string[]>();
+    // ⚠️ PERBAIKAN: Deteksi cabang berdasarkan path koneksi, bukan hanya posisi Y
+    // Strategi: Cari semua path berbeda dari titik percabangan pertama ke titik percabangan kedua
+
     const analyzedElements = [...resistiveElements, ...switches];
+    const visited = new Set<string>();
 
-    analyzedElements.forEach((el) => {
-      const yPos = Math.round(el.position.y / 20) * 20; // Grid 20px
-      if (!branchMap.has(yPos)) {
-        branchMap.set(yPos, []);
+    // Helper: Find all elements in the same path using DFS
+    const findPathGroup = (startElementId: string): string[] => {
+      if (visited.has(startElementId)) return [];
+
+      const group: string[] = [];
+      const stack = [startElementId];
+      const pathVisited = new Set<string>();
+
+      while (stack.length > 0) {
+        const currentId = stack.pop()!;
+        if (pathVisited.has(currentId)) continue;
+
+        pathVisited.add(currentId);
+        visited.add(currentId);
+
+        // Add element to group if it's a resistive element or switch
+        const element = components.find((c) => c.id === currentId);
+        if (
+          element &&
+          (element.type === "lamp" ||
+            element.type === "resistor" ||
+            element.type === "switch")
+        ) {
+          group.push(currentId);
+        }
+
+        // Find connected elements through wires (only within same branch)
+        const nodeA = `${currentId}-a`;
+        const nodeB = `${currentId}-b`;
+
+        [nodeA, nodeB].forEach((node) => {
+          connectionGraph.get(node)?.forEach((connectedNode) => {
+            const connectedId = connectedNode.split("-")[0];
+            const connectedComp = components.find((c) => c.id === connectedId);
+
+            // Only follow if:
+            // 1. Not visited
+            // 2. Is lamp/resistor/switch (not battery)
+            // 3. Similar Y position (same branch, tolerance 50px)
+            if (
+              !pathVisited.has(connectedId) &&
+              connectedComp &&
+              connectedComp.type !== "battery"
+            ) {
+              const currentComp = components.find((c) => c.id === currentId);
+              if (currentComp && connectedComp) {
+                const yDiff = Math.abs(
+                  currentComp.position.y - connectedComp.position.y
+                );
+
+                // If Y difference is small (< 50px), they're in the same branch
+                if (yDiff < 50) {
+                  stack.push(connectedId);
+                }
+              }
+            }
+          });
+        });
       }
-      branchMap.get(yPos)!.push(el.id);
-    });
 
-    branchMap.forEach((elementIds) => {
-      if (elementIds.length > 0) {
-        parallelGroups.push(elementIds);
+      return group;
+    };
+
+    // Find all path groups
+    analyzedElements.forEach((el) => {
+      const group = findPathGroup(el.id);
+      if (group.length > 0) {
+        parallelGroups.push(group);
       }
     });
 
     console.log(`\n📍 PARALLEL GROUPS: ${parallelGroups.length} cabang`);
     parallelGroups.forEach((group, idx) => {
-      console.log(
-        `   Cabang ${idx + 1}: [${group.map((id) => id.slice(-8)).join(", ")}]`
-      );
+      const groupInfo = group
+        .map((id) => {
+          const comp = components.find((c) => c.id === id);
+          const typeLabel =
+            comp?.type === "switch"
+              ? `switch(${comp.state})`
+              : comp?.type || "unknown";
+          return `${id.slice(-8)}:${typeLabel}`;
+        })
+        .join(", ");
+      console.log(`   Cabang ${idx + 1}: [${groupInfo}]`);
     });
   }
 
@@ -344,20 +412,35 @@ export function analyzeCircuit(
 
   if (parallelGroups.length > 0) {
     // Parallel: Each active element gets V/R current
-    activeElements.forEach((id) => {
-      const el = resistiveElements.find((e) => e.id === id);
-      if (!el) return;
+    // ⚠️ PERBAIKAN: Verifikasi ulang bahwa elemen BENAR-BENAR aktif (tidak terblokir saklar)
+    resistiveElements.forEach((el) => {
+      // Double-check: Pastikan tidak ada saklar terbuka di cabang yang sama
+      if (activeElements.includes(el.id) && !hasOpenSwitchInPath(el.id)) {
+        const elementCurrent = totalVoltage / el.value;
+        componentCurrents[el.id] = elementCurrent;
 
-      const elementCurrent = totalVoltage / el.value;
-      componentCurrents[id] = elementCurrent;
+        if (el.type === "lamp") {
+          lampPowers[el.id] = elementCurrent * elementCurrent * el.value;
+          console.log(
+            `   💡 Lampu ${el.id.slice(-8)}: HIDUP (I=${elementCurrent.toFixed(
+              3
+            )}A, P=${lampPowers[el.id].toFixed(2)}W)`
+          );
+        }
+      } else {
+        // Elemen terblokir atau tidak aktif
+        componentCurrents[el.id] = 0;
 
-      if (el.type === "lamp") {
-        lampPowers[id] = elementCurrent * elementCurrent * el.value;
-        console.log(
-          `   💡 Lampu ${id.slice(-8)}: HIDUP (I=${elementCurrent.toFixed(
-            3
-          )}A, P=${lampPowers[id].toFixed(2)}W)`
-        );
+        if (el.type === "lamp") {
+          lampPowers[el.id] = 0;
+          console.log(
+            `   💡 Lampu ${el.id.slice(-8)}: MATI (${
+              hasOpenSwitchInPath(el.id)
+                ? "saklar terbuka di cabangnya"
+                : "tidak aktif"
+            })`
+          );
+        }
       }
     });
   } else {
