@@ -79,7 +79,8 @@ export interface CircuitAction {
     | "add_direct" // NEW: Direct add from left hand
     | "wire_dragging" // NEW: Wire following finger
     | "point_hold_progress" // NEW: Hold progress feedback for starting wire (0.0 - 1.0)
-    | "wire_target_hold_progress"; // NEW: Hold progress on target component (0.0 - 1.0)
+    | "wire_target_hold_progress" // NEW: Hold progress on target component (0.0 - 1.0)
+    | "open_palm_delete"; // NEW: Delete component with left hand open palm (5 fingers + 3s hold)
   componentType?: ComponentType;
   position?: { x: number; y: number };
   componentId?: string;

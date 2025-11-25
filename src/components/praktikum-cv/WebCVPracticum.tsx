@@ -108,6 +108,19 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
     timestamp: number;
   } | null>(null);
 
+  // 🆕 Delete hold state (for 5-finger open palm delete with 3s hold)
+  const [deleteHold, setDeleteHold] = useState<{
+    isActive: boolean;
+    componentId: string | null;
+    startTime: number | null;
+    progress: number;
+  }>({
+    isActive: false,
+    componentId: null,
+    startTime: null,
+    progress: 0,
+  });
+
   // 🆕 Terminal selection state (for precise wire connections)
   const [terminalSelection, setTerminalSelection] = useState<{
     isActive: boolean;
@@ -665,6 +678,121 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
 
       // 🔄 HELPER: Mirror X coordinate untuk front camera
       const mirrorX = (x: number) => 1 - x;
+
+      // 🆕 LEFT HAND: Open palm delete (5 fingers + hold 3s)
+      if (action.type === "open_palm_delete" && action.position) {
+        const cursorX = mirrorX(action.position.x) * 1200;
+        const cursorY = action.position.y * 700;
+        const now = Date.now();
+
+        console.log(`🗑️ [DELETE DEBUG] Open palm detected at (${cursorX.toFixed(0)}, ${cursorY.toFixed(0)})`);
+        console.log(`🗑️ [DELETE DEBUG] Total components in scene: ${componentsRef.current.length}`);
+
+        // Find component under open palm (100px radius)
+        const DETECTION_RADIUS = 100;
+        const currentComponents = componentsRef.current;
+        
+        type ComponentType = typeof currentComponents[number];
+        let closestComponent: ComponentType | null = null;
+        let closestDistance = DETECTION_RADIUS;
+
+        currentComponents.forEach((comp) => {
+          const dx = comp.position.x - cursorX;
+          const dy = comp.position.y - cursorY;
+          const distance = Math.sqrt(dx * dx + dy * dy);
+          
+          console.log(`   📦 Checking ${comp.type} ${comp.id.slice(-8)}: distance = ${distance.toFixed(1)}px (limit: ${DETECTION_RADIUS}px)`);
+          
+          if (distance < closestDistance) {
+            closestDistance = distance;
+            closestComponent = comp;
+            console.log(`      ✅ New closest component found!`);
+          }
+        });
+
+        if (closestComponent) {
+          const comp = closestComponent as Exclude<ComponentType, null>; // Type-safe reference
+          console.log(`🎯 [DELETE DEBUG] Component found: ${comp.type} ${comp.id.slice(-8)} at ${closestDistance.toFixed(0)}px`);
+
+          setDeleteHold((prevHold) => {
+            // Continue existing hold on same component
+            if (prevHold.isActive && prevHold.componentId === comp.id) {
+              const elapsed = now - prevHold.startTime!;
+              const progress = Math.min(elapsed / 3000, 1); // 3 seconds
+
+              console.log(`⏱️ [DELETE DEBUG] Continuing hold: ${elapsed.toFixed(0)}ms (${(progress * 100).toFixed(1)}%)`);
+
+              // Complete deletion after 3 seconds
+              if (progress >= 1) {
+                console.log(`🎉 [DELETE DEBUG] Delete progress reached 100%!`);
+
+                // Delete component and connected wires
+                setComponents((prev) => {
+                  const filtered = prev.filter((c) => c.id !== comp.id);
+                  console.log(`🗑️ COMPONENT DELETED: ${comp.type} ${comp.id.slice(-8)}`);
+                  console.log(`   → Remaining components: ${filtered.length}`);
+                  return filtered;
+                });
+
+                // Delete connected wires
+                setWires((prev) => {
+                  const filtered = prev.filter(
+                    (w) =>
+                      w.from.elementId !== comp.id &&
+                      w.to.elementId !== comp.id
+                  );
+                  const deletedCount = prev.length - filtered.length;
+                  if (deletedCount > 0) {
+                    console.log(`🗑️ WIRES DELETED: ${deletedCount} wire(s) connected to ${comp.id.slice(-8)}`);
+                  }
+                  return filtered;
+                });
+
+                debugLogger.log("action", `DELETE via OPEN PALM (3s hold)`, {
+                  componentId: comp.id,
+                  type: comp.type,
+                });
+
+                // Reset hold state
+                return {
+                  isActive: false,
+                  componentId: null,
+                  startTime: null,
+                  progress: 0,
+                };
+              }
+
+              // Update progress
+              return { ...prevHold, progress };
+            } else {
+              // Start new hold
+              console.log(`🆕 [DELETE DEBUG] Starting new delete hold on ${comp.type} ${comp.id.slice(-8)}`);
+              return {
+                isActive: true,
+                componentId: comp.id,
+                startTime: now,
+                progress: 0,
+              };
+            }
+          });
+        } else {
+          // No component found, reset hold
+          console.log(`❌ [DELETE DEBUG] No component found under open palm`);
+          setDeleteHold((prevHold) => {
+            if (prevHold.isActive) {
+              console.log(`🔄 [DELETE DEBUG] Cancelling delete hold (no component)`);
+              return {
+                isActive: false,
+                componentId: null,
+                startTime: null,
+                progress: 0,
+              };
+            }
+            return prevHold;
+          });
+        }
+        return;
+      }
 
       // 🆕 LEFT HAND: Direct add component
       if (
@@ -1245,6 +1373,28 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
           });
         }
         return;
+      }
+
+      // 🆕 Reset delete hold if gesture is not open_palm anymore
+      if (action.type !== "open_palm_delete") {
+        setDeleteHold((prevHold) => {
+          if (prevHold.isActive) {
+            console.log(`🔄 [DELETE DEBUG] Gesture changed from OPEN_PALM:`, {
+              newActionType: action.type,
+              wasComponentId: prevHold.componentId,
+              wasProgress: `${(prevHold.progress * 100).toFixed(1)}%`,
+              reason: "Gesture no longer open_palm",
+            });
+            console.log("🔄 DELETE HOLD RESET: Gesture changed");
+            return {
+              isActive: false,
+              componentId: null,
+              startTime: null,
+              progress: 0,
+            };
+          }
+          return prevHold;
+        });
       }
 
       // 🆕 Reset toggle hold if gesture is not thumbs_up anymore
@@ -2119,6 +2269,74 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
         ctx.stroke();
         ctx.shadowBlur = 0;
 
+        ctx.restore();
+      }
+    }
+
+    // 🆕 Draw delete hold progress indicator (5 fingers open palm, 3 seconds)
+    if (deleteHold.isActive && deleteHold.componentId) {
+      const deleteComp = components.find((c) => c.id === deleteHold.componentId);
+      if (deleteComp) {
+        const centerX = deleteComp.position.x;
+        const centerY = deleteComp.position.y;
+
+        // Progress circle
+        ctx.save();
+        ctx.translate(centerX, centerY);
+
+        // Background circle (red tint)
+        ctx.beginPath();
+        ctx.arc(0, 0, 60, 0, Math.PI * 2);
+        ctx.strokeStyle = "rgba(239, 68, 68, 0.3)";
+        ctx.lineWidth = 10;
+        ctx.stroke();
+
+        // Progress arc (Red - danger)
+        ctx.beginPath();
+        ctx.arc(
+          0,
+          0,
+          60,
+          -Math.PI / 2,
+          -Math.PI / 2 + Math.PI * 2 * deleteHold.progress
+        );
+        ctx.strokeStyle = "#EF4444"; // Red
+        ctx.lineWidth = 10;
+        ctx.lineCap = "round";
+        ctx.shadowColor = "#EF4444";
+        ctx.shadowBlur = 20;
+        ctx.stroke();
+        ctx.shadowBlur = 0;
+
+        // Delete icon (🗑️) in center
+        ctx.fillStyle = "#FFFFFF";
+        ctx.font = "bold 24px Arial";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText("🗑️", 0, 0);
+
+        // Progress text
+        const progressPercent = Math.floor(deleteHold.progress * 100);
+        ctx.fillStyle = "#FFFFFF";
+        ctx.font = "bold 14px Arial";
+        ctx.fillText(`${progressPercent}%`, 0, 35);
+
+        // Component name
+        ctx.fillStyle = "#EF4444";
+        ctx.font = "bold 12px Arial";
+        ctx.fillText(deleteComp.type.toUpperCase(), 0, -40);
+
+        ctx.restore();
+
+        // Warning text below component
+        ctx.save();
+        ctx.fillStyle = "rgba(239, 68, 68, 0.9)";
+        ctx.fillRect(centerX - 80, centerY + 80, 160, 30);
+        ctx.fillStyle = "#FFFFFF";
+        ctx.font = "bold 14px Arial";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText("HOLD TO DELETE", centerX, centerY + 95);
         ctx.restore();
       }
     }
@@ -3017,6 +3235,9 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
     toggleHold.isActive,
     toggleHold.switchId,
     toggleHold.progress,
+    deleteHold.isActive,
+    deleteHold.componentId,
+    deleteHold.progress,
     rotateHold.isActive,
     rotateHold.componentId,
     rotateHold.progress,
