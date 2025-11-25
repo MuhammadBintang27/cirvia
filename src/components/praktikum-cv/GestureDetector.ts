@@ -169,16 +169,51 @@ export class GestureDetector {
       }
     }
 
-    // 2. FINGER COUNT (1-5 fingers) - ONLY FOR LEFT HAND with HOLD detection
+    // 2. CHECK FOR OPEN PALM FIRST (5 fingers) - For DELETE gesture
+    // This must be checked BEFORE finger_count to avoid conflict
     const fingerCount = this.countExtendedFingers(landmarks);
     const isHandStable = this.isHandStable(landmarks);
+    
+    // 🖐️ LEFT HAND with 5 FINGERS = OPEN PALM for DELETE
+    // Check this FIRST before finger_count logic
+    if (actualHandedness === "Left" && fingerCount === 5) {
+      const isIndexExtended = this.isFingerExtended(landmarks, "index");
+      const isMiddleExtended = this.isFingerExtended(landmarks, "middle");
+      const isRingExtended = this.isFingerExtended(landmarks, "ring");
+      const isPinkyExtended = this.isFingerExtended(landmarks, "pinky");
+      const isThumbExtended = this.isFingerExtended(landmarks, "thumb");
 
-    // ✋ LEFT HAND ONLY: Finger count untuk ADD component langsung (with 3-second hold)
+      const allFingersExtended =
+        isThumbExtended &&
+        isIndexExtended &&
+        isMiddleExtended &&
+        isRingExtended &&
+        isPinkyExtended;
+
+      if (allFingersExtended) {
+        console.log(`🖐️ [${actualHandedness}] OPEN PALM detected with ${fingerCount} fingers extended - DELETE MODE`);
+        
+        return this.createGestureResult(
+          "open_palm",
+          0.92,
+          actualHandedness,
+          landmarks,
+          palmCenter,
+          {
+            fingerCount: 5,
+          }
+        );
+      }
+    }
+
+    // 3. FINGER COUNT (1-4 fingers) - ONLY FOR LEFT HAND with HOLD detection
+    // ✋ LEFT HAND ONLY: Finger count 1-4 untuk ADD component (with 3-second hold)
     // RIGHT HAND tidak masuk sini, agar tidak conflict dengan PINCH
+    // 5 fingers already handled as open_palm above
     if (
       actualHandedness === "Left" &&
       fingerCount >= 1 &&
-      fingerCount <= 5 &&
+      fingerCount <= 4 &&
       isHandStable
     ) {
       const now = Date.now();
@@ -252,7 +287,6 @@ export class GestureDetector {
           2: "💡 LAMP",
           3: "⚡ RESISTOR",
           4: "🔘 SWITCH",
-          5: "━ WIRE",
         };
 
         console.log(
@@ -358,21 +392,30 @@ export class GestureDetector {
       );
     }
 
-    // 8. OPEN PALM (All fingers extended)
-    const allFingersExtended =
-      isIndexExtended &&
-      isMiddleExtended &&
-      this.isFingerExtended(landmarks, "ring") &&
-      this.isFingerExtended(landmarks, "pinky");
+    // 8. OPEN PALM for RIGHT HAND (all fingers extended)
+    // LEFT hand open_palm already handled above for DELETE
+    if (actualHandedness === "Right") {
+      const allFingersExtended =
+        isIndexExtended &&
+        isMiddleExtended &&
+        this.isFingerExtended(landmarks, "ring") &&
+        this.isFingerExtended(landmarks, "pinky");
 
-    if (allFingersExtended) {
-      return this.createGestureResult(
-        "open_palm",
-        0.92,
-        actualHandedness, // Use corrected handedness
-        landmarks,
-        palmCenter
-      );
+      if (allFingersExtended) {
+        const extendedFingerCount = this.countExtendedFingers(landmarks);
+        console.log(`🖐️ [${actualHandedness}] OPEN PALM detected with ${extendedFingerCount} fingers extended`);
+        
+        return this.createGestureResult(
+          "open_palm",
+          0.92,
+          actualHandedness,
+          landmarks,
+          palmCenter,
+          {
+            fingerCount: extendedFingerCount,
+          }
+        );
+      }
     }
 
     // 9. SWIPE GESTURES (Based on movement)
