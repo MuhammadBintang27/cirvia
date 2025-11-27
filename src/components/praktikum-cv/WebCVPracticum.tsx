@@ -2073,7 +2073,7 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
         circuitAnalysis.current > 0 &&
         lampPower > 0.1;
 
-      // 🔆 BRIGHTNESS CALCULATION (matching drag-n-drop logic)
+      // 🔆 BRIGHTNESS CALCULATION (considers resistors effect)
       let brightness = 1; // Default 100%
 
       if (component.type === "lamp" && isOn) {
@@ -2083,15 +2083,43 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
           topologyType === "series" ||
           !circuitAnalysis.topology?.hasParallelBranch
         ) {
-          // SERIES: Brightness = (Battery Count) / (Lamp Count)
+          // SERIES: Brightness affected by total resistance
           const totalBatteries = components.filter(
             (c) => c.type === "battery"
           ).length;
           const totalLamps = components.filter((c) => c.type === "lamp").length;
+          const totalResistors = components.filter(
+            (c) => c.type === "resistor"
+          ).length;
 
           if (totalLamps > 0) {
-            const batteryToLampRatio = totalBatteries / totalLamps;
-            brightness = Math.min(1, batteryToLampRatio); // Max 100%
+            // Calculate ideal current (without resistors)
+            const V_battery = 12; // Volts per battery
+            const R_lamp = component.value || 50; // Ohms
+            const totalVoltage = totalBatteries * V_battery;
+
+            // Total resistance in series
+            const R_battery_internal = 1; // Internal resistance per battery
+            const R_resistors = totalResistors * 100; // Each resistor = 100Ω
+            const R_lamps = totalLamps * R_lamp;
+            const R_total =
+              totalBatteries * R_battery_internal + R_lamps + R_resistors;
+
+            // Actual current with resistors
+            const I_actual = R_total > 0 ? totalVoltage / R_total : 0;
+
+            // Ideal current (without resistors, only lamps and batteries)
+            const R_ideal = totalBatteries * R_battery_internal + R_lamps;
+            const I_ideal = R_ideal > 0 ? totalVoltage / R_ideal : 0;
+
+            // Brightness = (Actual Power) / (Ideal Power)
+            // P = I² × R, so brightness = (I_actual² × R) / (I_ideal² × R) = (I_actual / I_ideal)²
+            if (I_ideal > 0) {
+              const currentRatio = I_actual / I_ideal;
+              brightness = Math.min(1, currentRatio * currentRatio); // Power ratio
+            } else {
+              brightness = 0;
+            }
           }
         } else {
           // PARALLEL: Brightness based on actual power vs ideal power
@@ -2125,6 +2153,8 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
           switchState,
         }
       );
+
+      // 🎓 Resistor info removed per user request
 
       // 🆕 DRAW TERMINAL MARKERS (A and B)
       const getTerminalPosition = (terminalId: "a" | "b") => {
@@ -3599,6 +3629,79 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
                   )}
                 </div>
               )}
+
+              {/* Resistor Effect Warning */}
+              {(() => {
+                const resistorCount = components.filter(
+                  (c) => c.type === "resistor"
+                ).length;
+                const lampCount = components.filter(
+                  (c) => c.type === "lamp"
+                ).length;
+                const isSeries =
+                  circuitAnalysis.topology?.type === "series" ||
+                  !circuitAnalysis.topology?.hasParallelBranch;
+
+                if (
+                  resistorCount > 0 &&
+                  lampCount > 0 &&
+                  isSeries &&
+                  circuitAnalysis.isConnected
+                ) {
+                  // Calculate brightness reduction
+                  const totalBatteries = components.filter(
+                    (c) => c.type === "battery"
+                  ).length;
+                  const V_battery = 12;
+                  const R_lamp = 50;
+                  const totalVoltage = totalBatteries * V_battery;
+                  const R_battery_internal = 1;
+                  const R_resistors = resistorCount * 100;
+                  const R_lamps = lampCount * R_lamp;
+                  const R_total =
+                    totalBatteries * R_battery_internal + R_lamps + R_resistors;
+                  const R_ideal = totalBatteries * R_battery_internal + R_lamps;
+
+                  const I_actual = R_total > 0 ? totalVoltage / R_total : 0;
+                  const I_ideal = R_ideal > 0 ? totalVoltage / R_ideal : 0;
+                  const brightnessPercent =
+                    I_ideal > 0
+                      ? Math.round(
+                          (I_actual / I_ideal) * (I_actual / I_ideal) * 100
+                        )
+                      : 0;
+
+                  return (
+                    <div className="mb-2 p-2 bg-orange-900/30 border border-orange-400/50 rounded text-orange-300 text-xs">
+                      <div className="flex items-center gap-2 mb-1">
+                        <span>⚠️</span>
+                        <span className="font-bold">
+                          Resistor Mengurangi Kecerahan Lampu!
+                        </span>
+                      </div>
+                      <div className="text-[10px] space-y-0.5 pl-5">
+                        <div>
+                          • Resistor: {resistorCount} × 100Ω ={" "}
+                          {resistorCount * 100}Ω
+                        </div>
+                        <div>
+                          • Hambatan Total: {R_total.toFixed(1)}Ω (tanpa
+                          resistor: {R_ideal.toFixed(1)}Ω)
+                        </div>
+                        <div>
+                          • Arus: {I_actual.toFixed(3)}A → {I_ideal.toFixed(3)}A
+                          (berkurang{" "}
+                          {((1 - I_actual / I_ideal) * 100).toFixed(1)}%)
+                        </div>
+                        <div className="text-yellow-300 font-bold">
+                          💡 Brightness: {brightnessPercent}% dari maksimal
+                        </div>
+                      </div>
+                    </div>
+                  );
+                }
+                return null;
+              })()}
 
               <div className="grid grid-cols-5 gap-3 text-sm">
                 <div>

@@ -1850,6 +1850,8 @@ export default function CircuitBuilderEnhanced() {
               >
                 🔌 {el.value}Ω
               </text>
+
+              {/* Resistor tooltip removed per user request */}
             </g>
           );
         }
@@ -1860,29 +1862,53 @@ export default function CircuitBuilderEnhanced() {
           // Lampu hanya menyala jika rangkaian tertutup DAN ada arus yang mengalir
           const isOn = calc.isClosed && calc.current > 0 && lampPower > 0.1;
 
-          // 🔆 LOGIKA BRIGHTNESS BERDASARKAN RASIO BATERAI:LAMPU
+          // 🔆 BRIGHTNESS CALCULATION (considers resistors effect)
           let brightness = 1; // Default 100%
 
           if (
             calc.topology?.type === "series" ||
             !calc.topology?.hasParallelBranch
           ) {
-            // RANGKAIAN SERI: Brightness = (Jumlah Baterai) / (Jumlah Lampu)
+            // SERIES: Brightness affected by total resistance including resistors
             const totalBatteries = elements.filter(
               (e) => e.type === "battery"
             ).length;
             const totalLamps = elements.filter((e) => e.type === "lamp").length;
+            const totalResistors = elements.filter(
+              (e) => e.type === "resistor"
+            ).length;
 
             if (totalLamps > 0) {
-              // Rasio baterai:lampu menentukan brightness
-              // 1 baterai : 1 lampu = 100%
-              // 2 baterai : 2 lampu = 100%
-              // 1 baterai : 2 lampu = 50%
-              const batteryToLampRatio = totalBatteries / totalLamps;
-              brightness = Math.min(1, batteryToLampRatio); // Max 100%
+              // Calculate ideal current (without resistors)
+              const V_battery = 12; // Volts per battery
+              const R_lamp = el.value || 50; // Ohms
+              const totalVoltage = totalBatteries * V_battery;
+
+              // Total resistance in series
+              const R_battery_internal = 1; // Internal resistance per battery
+              const R_resistors = totalResistors * 100; // Each resistor = 100Ω
+              const R_lamps = totalLamps * R_lamp;
+              const R_total =
+                totalBatteries * R_battery_internal + R_lamps + R_resistors;
+
+              // Actual current with resistors
+              const I_actual = R_total > 0 ? totalVoltage / R_total : 0;
+
+              // Ideal current (without resistors, only lamps and batteries)
+              const R_ideal = totalBatteries * R_battery_internal + R_lamps;
+              const I_ideal = R_ideal > 0 ? totalVoltage / R_ideal : 0;
+
+              // Brightness = (Actual Power) / (Ideal Power)
+              // P = I² × R, so brightness = (I_actual² × R) / (I_ideal² × R) = (I_actual / I_ideal)²
+              if (I_ideal > 0) {
+                const currentRatio = I_actual / I_ideal;
+                brightness = Math.min(1, currentRatio * currentRatio); // Power ratio
+              } else {
+                brightness = 0;
+              }
             }
           } else {
-            // RANGKAIAN PARALEL: Brightness berdasarkan daya aktual
+            // PARALLEL: Brightness based on actual power vs ideal power
             const idealPower =
               ((calc.totalV || 0) * (calc.totalV || 0)) / el.value;
             if (idealPower > 0) {
@@ -2502,6 +2528,78 @@ export default function CircuitBuilderEnhanced() {
                 </div>
               </div>
             )}
+
+            {/* Resistor Effect Warning */}
+            {(() => {
+              const resistorCount = elements.filter(
+                (e) => e.type === "resistor"
+              ).length;
+              const lampCount = elements.filter(
+                (e) => e.type === "lamp"
+              ).length;
+              const isSeries =
+                calc.topology.type === "series" ||
+                !calc.topology.hasParallelBranch;
+
+              if (
+                resistorCount > 0 &&
+                lampCount > 0 &&
+                isSeries &&
+                calc.isConnected
+              ) {
+                // Calculate brightness reduction
+                const totalBatteries = elements.filter(
+                  (e) => e.type === "battery"
+                ).length;
+                const V_battery = 12;
+                const R_lamp = 50;
+                const totalVoltage = totalBatteries * V_battery;
+                const R_battery_internal = 1;
+                const R_resistors = resistorCount * 100;
+                const R_lamps = lampCount * R_lamp;
+                const R_total =
+                  totalBatteries * R_battery_internal + R_lamps + R_resistors;
+                const R_ideal = totalBatteries * R_battery_internal + R_lamps;
+
+                const I_actual = R_total > 0 ? totalVoltage / R_total : 0;
+                const I_ideal = R_ideal > 0 ? totalVoltage / R_ideal : 0;
+                const brightnessPercent =
+                  I_ideal > 0
+                    ? Math.round(
+                        (I_actual / I_ideal) * (I_actual / I_ideal) * 100
+                      )
+                    : 0;
+
+                return (
+                  <div className="mb-3 p-3 bg-orange-900/30 border-2 border-orange-400/50 rounded-lg">
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className="text-lg">⚠️</span>
+                      <div className="text-sm font-bold text-orange-300">
+                        Resistor Mengurangi Kecerahan Lampu!
+                      </div>
+                    </div>
+                    <div className="text-xs space-y-1 pl-7 text-orange-200">
+                      <div>
+                        • Resistor: {resistorCount} × 100Ω ={" "}
+                        {resistorCount * 100}Ω
+                      </div>
+                      <div>
+                        • Hambatan Total: {R_total.toFixed(1)}Ω (tanpa resistor:{" "}
+                        {R_ideal.toFixed(1)}Ω)
+                      </div>
+                      <div>
+                        • Arus: {I_actual.toFixed(3)}A → {I_ideal.toFixed(3)}A
+                        (↓{((1 - I_actual / I_ideal) * 100).toFixed(1)}%)
+                      </div>
+                      <div className="text-yellow-300 font-bold pt-1">
+                        💡 Brightness: {brightnessPercent}% dari maksimal
+                      </div>
+                    </div>
+                  </div>
+                );
+              }
+              return null;
+            })()}
 
             <div className="flex items-center gap-2 mb-3">
               <div className="text-2xl">
