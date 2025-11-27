@@ -2379,12 +2379,6 @@ export default function CircuitBuilderEnhanced() {
             >
               ⚡ Saklar
             </button>
-            <button
-              onClick={() => addComponent("wire")}
-              className="px-3 py-2 rounded-xl bg-gradient-to-br from-slate-600 to-gray-700 text-white font-medium shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-200 text-sm"
-            >
-              🧵 Kabel
-            </button>
           </div>
 
           {/* Control Buttons */}
