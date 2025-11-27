@@ -173,7 +173,7 @@ export class GestureDetector {
     // This must be checked BEFORE finger_count to avoid conflict
     const fingerCount = this.countExtendedFingers(landmarks);
     const isHandStable = this.isHandStable(landmarks);
-    
+
     // 🖐️ LEFT HAND with 5 FINGERS = OPEN PALM for DELETE
     // Check this FIRST before finger_count logic
     if (actualHandedness === "Left" && fingerCount === 5) {
@@ -191,8 +191,10 @@ export class GestureDetector {
         isPinkyExtended;
 
       if (allFingersExtended) {
-        console.log(`🖐️ [${actualHandedness}] OPEN PALM detected with ${fingerCount} fingers extended - DELETE MODE`);
-        
+        console.log(
+          `🖐️ [${actualHandedness}] OPEN PALM detected with ${fingerCount} fingers extended - DELETE MODE`
+        );
+
         return this.createGestureResult(
           "open_palm",
           0.92,
@@ -403,8 +405,10 @@ export class GestureDetector {
 
       if (allFingersExtended) {
         const extendedFingerCount = this.countExtendedFingers(landmarks);
-        console.log(`🖐️ [${actualHandedness}] OPEN PALM detected with ${extendedFingerCount} fingers extended`);
-        
+        console.log(
+          `🖐️ [${actualHandedness}] OPEN PALM detected with ${extendedFingerCount} fingers extended`
+        );
+
         return this.createGestureResult(
           "open_palm",
           0.92,

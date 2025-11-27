@@ -52,11 +52,13 @@ export class CircuitController {
         )} | Handedness: ${gesture.handedness}`
       );
     }
-    
+
     // Debug log for open_palm
     if (gesture.name === "open_palm") {
       console.log(
-        `🖐️ [CircuitController] Processing OPEN_PALM gesture | Handedness: ${gesture.handedness} | FingerCount: ${gesture.metadata?.fingerCount || 'N/A'}`
+        `🖐️ [CircuitController] Processing OPEN_PALM gesture | Handedness: ${
+          gesture.handedness
+        } | FingerCount: ${gesture.metadata?.fingerCount || "N/A"}`
       );
     }
 
@@ -65,16 +67,21 @@ export class CircuitController {
     // 🆕 LEFT HAND ACTIONS (Component Adding & Deleting)
     if (gesture.handedness === "Left") {
       console.log(`👈 [CircuitController] LEFT hand detected: ${gesture.name}`);
-      
+
       switch (gesture.name) {
         case "finger_count":
           action = this.handleLeftHandFingerCount(gesture);
           break;
         case "open_palm":
           // LEFT hand open_palm is for DELETE with 3-second hold
-          console.log(`🗑️ [CircuitController] Calling handleLeftHandOpenPalm...`);
+          console.log(
+            `🗑️ [CircuitController] Calling handleLeftHandOpenPalm...`
+          );
           action = this.handleLeftHandOpenPalm(gesture);
-          console.log(`🗑️ [CircuitController] handleLeftHandOpenPalm returned:`, action);
+          console.log(
+            `🗑️ [CircuitController] handleLeftHandOpenPalm returned:`,
+            action
+          );
           break;
         default:
           return null; // Left hand only for finger count and open_palm
@@ -402,11 +409,9 @@ export class CircuitController {
   /**
    * 👈 LEFT HAND: Open palm (5 fingers) to DELETE component (with 3-second hold)
    */
-  private handleLeftHandOpenPalm(
-    gesture: GestureResult
-  ): CircuitAction | null {
+  private handleLeftHandOpenPalm(gesture: GestureResult): CircuitAction | null {
     const fingerCount = gesture.metadata?.fingerCount || 0;
-    
+
     console.log(
       `🗑️ [LEFT HAND] OPEN PALM detected with ${fingerCount} fingers - triggering delete action`
     );
@@ -679,9 +684,7 @@ export class CircuitController {
    * Note: DELETE is only for LEFT hand open palm (handled in WebCVPracticum directly)
    */
   private handleRightHandOpenPalm(gesture: GestureResult): CircuitAction {
-    console.log(
-      "✋ RIGHT HAND OPEN PALM - AUTO-GRAB mode (not delete)"
-    );
+    console.log("✋ RIGHT HAND OPEN PALM - AUTO-GRAB mode (not delete)");
 
     // Return move action for auto-grab behavior
     return {
