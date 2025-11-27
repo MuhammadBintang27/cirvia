@@ -4,6 +4,7 @@ import { useState } from "react";
 import CircuitBuilderEnhanced from "../../components/praktikum-drag-n-drop/CircuitBuilderEnhanced";
 import WebCVPracticum from "../../components/praktikum-cv/WebCVPracticum";
 import Navbar from "@/components/Navbar";
+import ELKPD from "@/components/ELKPD";
 import { CircuitAction, GestureResult } from "@/components/praktikum-cv/types";
 
 export default function PracticumPage() {
@@ -266,6 +267,9 @@ export default function PracticumPage() {
           )}
         </div>
       </div>
+
+      {/* E-LKPD Component - Floating Assistant */}
+      <ELKPD />
     </div>
   );
 }

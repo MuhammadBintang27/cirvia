@@ -16,7 +16,8 @@ const FloatingChatButton = () => {
     '/register',
     '/pretest',
     '/posttest',
-    '/learning-style'
+    '/learning-style',
+    '/practicum'  // E-LKPD replaces chatbot on practicum page
   ]
 
   const shouldHide = hiddenPages.some(page => pathname?.startsWith(page))

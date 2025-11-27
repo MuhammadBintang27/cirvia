@@ -28,7 +28,8 @@ import {
   ArrowUp,
   ArrowDown,
   LogOut,
-  School
+  School,
+  FileText
 } from 'lucide-react';
 import { Student } from '@/types/auth';
 import Navbar from '@/components/Navbar';
@@ -567,7 +568,7 @@ export default function StudentDashboard() {
             )}
 
             {/* Quick Actions */}
-            <div className="grid md:grid-cols-3 gap-6">
+            <div className="grid md:grid-cols-4 gap-6">
               <Link href="/materials" className="group relative">
                 <div className="absolute -inset-1 bg-gradient-to-r from-blue-500/30 to-cyan-600/30 rounded-2xl blur opacity-25 group-hover:opacity-100 transition duration-1000 group-hover:duration-200"></div>
                 <div className="relative bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl rounded-2xl p-6 border border-white/20 hover:border-white/30 transition-all duration-500 transform hover:scale-[1.02] hover:-translate-y-2">
@@ -593,6 +594,21 @@ export default function StudentDashboard() {
                   <p className="text-emerald-200/70 mb-4">Simulasi rangkaian listrik dengan hand gesture detection</p>
                   <div className="flex items-center text-emerald-300 font-medium">
                     <span>Mulai Praktikum</span>
+                    <ArrowRight className="w-4 h-4 ml-2" />
+                  </div>
+                </div>
+              </Link>
+
+              <Link href="/dashboard/student/lkpd-result" className="group relative">
+                <div className="absolute -inset-1 bg-gradient-to-r from-orange-500/30 to-amber-600/30 rounded-2xl blur opacity-25 group-hover:opacity-100 transition duration-1000 group-hover:duration-200"></div>
+                <div className="relative bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl rounded-2xl p-6 border border-white/20 hover:border-white/30 transition-all duration-500 transform hover:scale-[1.02] hover:-translate-y-2">
+                  <div className="flex items-center mb-4">
+                    <FileText className="w-8 h-8 text-orange-400 mr-3" />
+                    <h3 className="text-xl font-bold text-white">Hasil E-LKPD</h3>
+                  </div>
+                  <p className="text-orange-200/70 mb-4">Lihat hasil lembar kerja praktikum digital Anda</p>
+                  <div className="flex items-center text-orange-300 font-medium">
+                    <span>Lihat Hasil</span>
                     <ArrowRight className="w-4 h-4 ml-2" />
                   </div>
                 </div>

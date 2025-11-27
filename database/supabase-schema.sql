@@ -232,6 +232,75 @@ CREATE TABLE IF NOT EXISTS circuit_ordering_questions (
   updated_at timestamptz DEFAULT now()
 );
 
+-- Table: lkpd_data (E-LKPD - Electronic Worksheet for Practicum)
+CREATE TABLE IF NOT EXISTS lkpd_data (
+  id uuid DEFAULT uuid_generate_v4() PRIMARY KEY,
+  student_id uuid REFERENCES students(id) ON DELETE CASCADE,
+  student_name varchar(255) NOT NULL,
+  student_nis varchar(50) NOT NULL,
+  
+  -- QUANTITATIVE OBSERVATIONS (Numeric measurements)
+  -- Series Circuit - 5 Lamps
+  series_5_voltage numeric(10,2),
+  series_5_current numeric(10,4),
+  series_5_resistance numeric(10,2),
+  
+  -- Series Circuit - 2 Lamps
+  series_2_voltage numeric(10,2),
+  series_2_current numeric(10,4),
+  series_2_resistance numeric(10,2),
+  
+  -- Parallel Circuit - 5 Lamps
+  parallel_5_voltage numeric(10,2),
+  parallel_5_current numeric(10,4),
+  parallel_5_resistance numeric(10,2),
+  
+  -- Parallel Circuit - 2 Lamps
+  parallel_2_voltage numeric(10,2),
+  parallel_2_current numeric(10,4),
+  parallel_2_resistance numeric(10,2),
+  
+  -- QUALITATIVE OBSERVATIONS (Text descriptions)
+  -- Lamp Conditions when all switches ON
+  lamp_all_on_series_5 text,
+  lamp_all_on_series_2 text,
+  lamp_all_on_parallel_5 text,
+  lamp_all_on_parallel_2 text,
+  
+  -- Lamp Conditions when one switch OFF
+  lamp_one_off_series_5 text,
+  lamp_one_off_series_2 text,
+  lamp_one_off_parallel_5 text,
+  lamp_one_off_parallel_2 text,
+  
+  -- Lamp Brightness Levels
+  lamp_brightness_series_5 text,
+  lamp_brightness_series_2 text,
+  lamp_brightness_parallel_5 text,
+  lamp_brightness_parallel_2 text,
+  
+  -- Analysis answers (stored as JSONB)
+  analysis_answers jsonb DEFAULT '{}'::jsonb,
+  
+  -- Conclusion answers (stored as JSONB)
+  conclusion_answers jsonb DEFAULT '{}'::jsonb,
+  
+  -- Completion tracking
+  completed_sections text[] DEFAULT ARRAY[]::text[],
+  progress_percentage numeric(5,2) DEFAULT 0,
+  is_completed boolean DEFAULT false,
+  
+  -- Timestamps
+  started_at timestamptz DEFAULT now(),
+  completed_at timestamptz,
+  last_saved_at timestamptz DEFAULT now(),
+  created_at timestamptz DEFAULT now(),
+  updated_at timestamptz DEFAULT now(),
+  
+  -- Constraint: One LKPD per student
+  UNIQUE(student_id)
+);
+
 -- Table: question_banks
 CREATE TABLE IF NOT EXISTS question_banks (
   id uuid DEFAULT uuid_generate_v4() PRIMARY KEY,
@@ -337,6 +406,12 @@ CREATE INDEX IF NOT EXISTS idx_conceptual_questions_question_id ON conceptual_qu
 CREATE INDEX IF NOT EXISTS idx_circuit_analysis_questions_question_id ON circuit_analysis_questions(question_id);
 CREATE INDEX IF NOT EXISTS idx_circuit_ordering_questions_question_id ON circuit_ordering_questions(question_id);
 CREATE INDEX IF NOT EXISTS idx_circuit_ordering_questions_type ON circuit_ordering_questions(ordering_type);
+
+-- Indexes untuk lkpd_data
+CREATE INDEX IF NOT EXISTS idx_lkpd_data_student_id ON lkpd_data(student_id);
+CREATE INDEX IF NOT EXISTS idx_lkpd_data_completed ON lkpd_data(is_completed);
+CREATE INDEX IF NOT EXISTS idx_lkpd_data_last_saved ON lkpd_data(last_saved_at DESC);
+
 CREATE INDEX IF NOT EXISTS idx_question_banks_teacher_id ON question_banks(teacher_id);
 CREATE INDEX IF NOT EXISTS idx_question_banks_public ON question_banks(is_public);
 CREATE INDEX IF NOT EXISTS idx_custom_tests_teacher_id ON custom_tests(teacher_id);
@@ -391,6 +466,10 @@ CREATE TRIGGER update_circuit_ordering_questions_updated_at
     BEFORE UPDATE ON circuit_ordering_questions 
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
+CREATE TRIGGER update_lkpd_data_updated_at 
+    BEFORE UPDATE ON lkpd_data 
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
 CREATE TRIGGER update_question_banks_updated_at 
     BEFORE UPDATE ON question_banks 
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
@@ -420,6 +499,7 @@ ALTER TABLE circuit_questions ENABLE ROW LEVEL SECURITY;
 ALTER TABLE conceptual_questions ENABLE ROW LEVEL SECURITY;
 ALTER TABLE circuit_analysis_questions ENABLE ROW LEVEL SECURITY;
 ALTER TABLE circuit_ordering_questions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE lkpd_data ENABLE ROW LEVEL SECURITY;
 ALTER TABLE question_banks ENABLE ROW LEVEL SECURITY;
 ALTER TABLE custom_tests ENABLE ROW LEVEL SECURITY;
 ALTER TABLE custom_test_results ENABLE ROW LEVEL SECURITY;
@@ -472,6 +552,13 @@ CREATE POLICY "Teachers can manage circuit analysis questions"
 CREATE POLICY "Teachers can manage circuit ordering questions" 
   ON circuit_ordering_questions FOR ALL 
   USING (true);
+
+-- Policies for lkpd_data table
+-- Using simplified policy for custom auth system (not Supabase Auth)
+CREATE POLICY "Allow all LKPD operations" 
+  ON lkpd_data FOR ALL 
+  USING (true) 
+  WITH CHECK (true);
 
 CREATE POLICY "Teachers can view public question banks" 
   ON question_banks FOR SELECT 
@@ -588,11 +675,40 @@ COMMENT ON TABLE circuit_questions IS 'Tabel untuk menyimpan soal rangkaian list
 COMMENT ON TABLE conceptual_questions IS 'Tabel untuk menyimpan soal konseptual (TipeSoal3)';
 COMMENT ON TABLE circuit_analysis_questions IS 'Tabel untuk menyimpan soal analisis rangkaian (TipeSoal2)';
 COMMENT ON TABLE circuit_ordering_questions IS 'Tabel untuk menyimpan soal pengurutan rangkaian (TipeSoal4)';
+COMMENT ON TABLE lkpd_data IS 'Tabel untuk menyimpan data E-LKPD (Electronic Worksheet) siswa untuk praktikum rangkaian listrik - mencakup hipotesis awal, observasi kuantitatif (12 field numeric: V/I/R untuk series_5/2 dan parallel_5/2), observasi kualitatif (12 field text: kondisi lampu), pengujian hipotesis, dan kesimpulan';
 COMMENT ON TABLE question_banks IS 'Tabel untuk menyimpan kumpulan soal dalam bank soal';
 COMMENT ON TABLE custom_tests IS 'Tabel untuk menyimpan tes custom yang dibuat guru';
 COMMENT ON TABLE custom_test_results IS 'Tabel untuk menyimpan hasil tes custom siswa';
 COMMENT ON TABLE question_packages IS 'Tabel untuk menyimpan paket soal pretest/posttest';
 COMMENT ON TABLE class_packages IS 'Tabel untuk assignment paket soal ke kelas tertentu';
+
+-- LKPD Data Column Comments
+COMMENT ON COLUMN lkpd_data.analysis_answers IS 'JSONB field untuk menyimpan hipotesis awal (hypothesis) dan hasil pengujian hipotesis (hypothesis_testing)';
+COMMENT ON COLUMN lkpd_data.conclusion_answers IS 'JSONB field untuk menyimpan kesimpulan akhir praktikum (conclusion)';
+COMMENT ON COLUMN lkpd_data.series_5_voltage IS 'Tegangan total (V) pada rangkaian seri dengan 5 lampu';
+COMMENT ON COLUMN lkpd_data.series_5_current IS 'Arus total (A) pada rangkaian seri dengan 5 lampu';
+COMMENT ON COLUMN lkpd_data.series_5_resistance IS 'Hambatan total (Ω) pada rangkaian seri dengan 5 lampu';
+COMMENT ON COLUMN lkpd_data.series_2_voltage IS 'Tegangan total (V) pada rangkaian seri dengan 2 lampu';
+COMMENT ON COLUMN lkpd_data.series_2_current IS 'Arus total (A) pada rangkaian seri dengan 2 lampu';
+COMMENT ON COLUMN lkpd_data.series_2_resistance IS 'Hambatan total (Ω) pada rangkaian seri dengan 2 lampu';
+COMMENT ON COLUMN lkpd_data.parallel_5_voltage IS 'Tegangan total (V) pada rangkaian paralel dengan 5 lampu';
+COMMENT ON COLUMN lkpd_data.parallel_5_current IS 'Arus total (A) pada rangkaian paralel dengan 5 lampu';
+COMMENT ON COLUMN lkpd_data.parallel_5_resistance IS 'Hambatan total (Ω) pada rangkaian paralel dengan 5 lampu';
+COMMENT ON COLUMN lkpd_data.parallel_2_voltage IS 'Tegangan total (V) pada rangkaian paralel dengan 2 lampu';
+COMMENT ON COLUMN lkpd_data.parallel_2_current IS 'Arus total (A) pada rangkaian paralel dengan 2 lampu';
+COMMENT ON COLUMN lkpd_data.parallel_2_resistance IS 'Hambatan total (Ω) pada rangkaian paralel dengan 2 lampu';
+COMMENT ON COLUMN lkpd_data.lamp_all_on_series_5 IS 'Kondisi lampu saat semua saklar ON - rangkaian seri 5 lampu';
+COMMENT ON COLUMN lkpd_data.lamp_all_on_series_2 IS 'Kondisi lampu saat semua saklar ON - rangkaian seri 2 lampu';
+COMMENT ON COLUMN lkpd_data.lamp_all_on_parallel_5 IS 'Kondisi lampu saat semua saklar ON - rangkaian paralel 5 lampu';
+COMMENT ON COLUMN lkpd_data.lamp_all_on_parallel_2 IS 'Kondisi lampu saat semua saklar ON - rangkaian paralel 2 lampu';
+COMMENT ON COLUMN lkpd_data.lamp_one_off_series_5 IS 'Kondisi lampu saat satu saklar OFF - rangkaian seri 5 lampu';
+COMMENT ON COLUMN lkpd_data.lamp_one_off_series_2 IS 'Kondisi lampu saat satu saklar OFF - rangkaian seri 2 lampu';
+COMMENT ON COLUMN lkpd_data.lamp_one_off_parallel_5 IS 'Kondisi lampu saat satu saklar OFF - rangkaian paralel 5 lampu';
+COMMENT ON COLUMN lkpd_data.lamp_one_off_parallel_2 IS 'Kondisi lampu saat satu saklar OFF - rangkaian paralel 2 lampu';
+COMMENT ON COLUMN lkpd_data.lamp_brightness_series_5 IS 'Tingkat kecerahan lampu - rangkaian seri 5 lampu';
+COMMENT ON COLUMN lkpd_data.lamp_brightness_series_2 IS 'Tingkat kecerahan lampu - rangkaian seri 2 lampu';
+COMMENT ON COLUMN lkpd_data.lamp_brightness_parallel_5 IS 'Tingkat kecerahan lampu - rangkaian paralel 5 lampu';
+COMMENT ON COLUMN lkpd_data.lamp_brightness_parallel_2 IS 'Tingkat kecerahan lampu - rangkaian paralel 2 lampu';
 
 -- ========================================
 -- RAG (Retrieval-Augmented Generation) & AI Analysis Tables
