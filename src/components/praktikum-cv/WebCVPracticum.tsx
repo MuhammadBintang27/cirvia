@@ -685,14 +685,20 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
         const cursorY = action.position.y * 700;
         const now = Date.now();
 
-        console.log(`🗑️ [DELETE DEBUG] Open palm detected at (${cursorX.toFixed(0)}, ${cursorY.toFixed(0)})`);
-        console.log(`🗑️ [DELETE DEBUG] Total components in scene: ${componentsRef.current.length}`);
+        console.log(
+          `🗑️ [DELETE DEBUG] Open palm detected at (${cursorX.toFixed(
+            0
+          )}, ${cursorY.toFixed(0)})`
+        );
+        console.log(
+          `🗑️ [DELETE DEBUG] Total components in scene: ${componentsRef.current.length}`
+        );
 
         // Find component under open palm (100px radius)
         const DETECTION_RADIUS = 100;
         const currentComponents = componentsRef.current;
-        
-        type ComponentType = typeof currentComponents[number];
+
+        type ComponentType = (typeof currentComponents)[number];
         let closestComponent: ComponentType | null = null;
         let closestDistance = DETECTION_RADIUS;
 
@@ -700,9 +706,15 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
           const dx = comp.position.x - cursorX;
           const dy = comp.position.y - cursorY;
           const distance = Math.sqrt(dx * dx + dy * dy);
-          
-          console.log(`   📦 Checking ${comp.type} ${comp.id.slice(-8)}: distance = ${distance.toFixed(1)}px (limit: ${DETECTION_RADIUS}px)`);
-          
+
+          console.log(
+            `   📦 Checking ${comp.type} ${comp.id.slice(
+              -8
+            )}: distance = ${distance.toFixed(
+              1
+            )}px (limit: ${DETECTION_RADIUS}px)`
+          );
+
           if (distance < closestDistance) {
             closestDistance = distance;
             closestComponent = comp;
@@ -712,7 +724,11 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
 
         if (closestComponent) {
           const comp = closestComponent as Exclude<ComponentType, null>; // Type-safe reference
-          console.log(`🎯 [DELETE DEBUG] Component found: ${comp.type} ${comp.id.slice(-8)} at ${closestDistance.toFixed(0)}px`);
+          console.log(
+            `🎯 [DELETE DEBUG] Component found: ${comp.type} ${comp.id.slice(
+              -8
+            )} at ${closestDistance.toFixed(0)}px`
+          );
 
           setDeleteHold((prevHold) => {
             // Continue existing hold on same component
@@ -720,7 +736,11 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
               const elapsed = now - prevHold.startTime!;
               const progress = Math.min(elapsed / 3000, 1); // 3 seconds
 
-              console.log(`⏱️ [DELETE DEBUG] Continuing hold: ${elapsed.toFixed(0)}ms (${(progress * 100).toFixed(1)}%)`);
+              console.log(
+                `⏱️ [DELETE DEBUG] Continuing hold: ${elapsed.toFixed(0)}ms (${(
+                  progress * 100
+                ).toFixed(1)}%)`
+              );
 
               // Complete deletion after 3 seconds
               if (progress >= 1) {
@@ -729,7 +749,9 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
                 // Delete component and connected wires
                 setComponents((prev) => {
                   const filtered = prev.filter((c) => c.id !== comp.id);
-                  console.log(`🗑️ COMPONENT DELETED: ${comp.type} ${comp.id.slice(-8)}`);
+                  console.log(
+                    `🗑️ COMPONENT DELETED: ${comp.type} ${comp.id.slice(-8)}`
+                  );
                   console.log(`   → Remaining components: ${filtered.length}`);
                   return filtered;
                 });
@@ -738,12 +760,15 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
                 setWires((prev) => {
                   const filtered = prev.filter(
                     (w) =>
-                      w.from.elementId !== comp.id &&
-                      w.to.elementId !== comp.id
+                      w.from.elementId !== comp.id && w.to.elementId !== comp.id
                   );
                   const deletedCount = prev.length - filtered.length;
                   if (deletedCount > 0) {
-                    console.log(`🗑️ WIRES DELETED: ${deletedCount} wire(s) connected to ${comp.id.slice(-8)}`);
+                    console.log(
+                      `🗑️ WIRES DELETED: ${deletedCount} wire(s) connected to ${comp.id.slice(
+                        -8
+                      )}`
+                    );
                   }
                   return filtered;
                 });
@@ -766,7 +791,11 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
               return { ...prevHold, progress };
             } else {
               // Start new hold
-              console.log(`🆕 [DELETE DEBUG] Starting new delete hold on ${comp.type} ${comp.id.slice(-8)}`);
+              console.log(
+                `🆕 [DELETE DEBUG] Starting new delete hold on ${
+                  comp.type
+                } ${comp.id.slice(-8)}`
+              );
               return {
                 isActive: true,
                 componentId: comp.id,
@@ -780,7 +809,9 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
           console.log(`❌ [DELETE DEBUG] No component found under open palm`);
           setDeleteHold((prevHold) => {
             if (prevHold.isActive) {
-              console.log(`🔄 [DELETE DEBUG] Cancelling delete hold (no component)`);
+              console.log(
+                `🔄 [DELETE DEBUG] Cancelling delete hold (no component)`
+              );
               return {
                 isActive: false,
                 componentId: null,
@@ -2275,7 +2306,9 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
 
     // 🆕 Draw delete hold progress indicator (5 fingers open palm, 3 seconds)
     if (deleteHold.isActive && deleteHold.componentId) {
-      const deleteComp = components.find((c) => c.id === deleteHold.componentId);
+      const deleteComp = components.find(
+        (c) => c.id === deleteHold.componentId
+      );
       if (deleteComp) {
         const centerX = deleteComp.position.x;
         const centerY = deleteComp.position.y;
@@ -2393,7 +2426,13 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
       }
     }
 
-    // Draw hand landmarks on circuit canvas (only if hand is actively detected with gesture)
+    // Prepare hand data (draw cursors & UI first, actual hand rendering LAST for visibility)
+    let handRenderData: {
+      mirrorLandmarks: Array<{ x: number; y: number; z?: number }>;
+      canvasWidth: number;
+      canvasHeight: number;
+    } | null = null;
+
     if (
       handPosition &&
       handPosition.landmarks.length > 0 &&
@@ -2410,67 +2449,8 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
         x: 1 - lm.x, // Flip horizontal: 0.2 becomes 0.8, etc.
       }));
 
-      // Define finger connections (same as MediaPipe HAND_CONNECTIONS)
-      const connections = [
-        [0, 1],
-        [1, 2],
-        [2, 3],
-        [3, 4], // Thumb
-        [0, 5],
-        [5, 6],
-        [6, 7],
-        [7, 8], // Index
-        [0, 9],
-        [9, 10],
-        [10, 11],
-        [11, 12], // Middle
-        [0, 13],
-        [13, 14],
-        [14, 15],
-        [15, 16], // Ring
-        [0, 17],
-        [17, 18],
-        [18, 19],
-        [19, 20], // Pinky
-        [5, 9],
-        [9, 13],
-        [13, 17], // Palm
-      ];
-
-      // Draw connections
-      ctx.strokeStyle = "#00FF00";
-      ctx.lineWidth = 3;
-      ctx.shadowColor = "#00FF00";
-      ctx.shadowBlur = 10;
-
-      connections.forEach(([start, end]) => {
-        const startPoint = mirrorLandmarks[start];
-        const endPoint = mirrorLandmarks[end];
-
-        ctx.beginPath();
-        ctx.moveTo(startPoint.x * canvasWidth, startPoint.y * canvasHeight);
-        ctx.lineTo(endPoint.x * canvasWidth, endPoint.y * canvasHeight);
-        ctx.stroke();
-      });
-
-      ctx.shadowBlur = 0;
-
-      // Draw landmarks (finger joints)
-      mirrorLandmarks.forEach((landmark, index) => {
-        const x = landmark.x * canvasWidth;
-        const y = landmark.y * canvasHeight;
-
-        // Fingertips are larger
-        const radius = [4, 8, 12, 16, 20].includes(index) ? 8 : 5;
-
-        ctx.beginPath();
-        ctx.arc(x, y, radius, 0, Math.PI * 2);
-        ctx.fillStyle = "#FF0000";
-        ctx.fill();
-        ctx.strokeStyle = "#FFFFFF";
-        ctx.lineWidth = 2;
-        ctx.stroke();
-      });
+      // Store for later rendering
+      handRenderData = { mirrorLandmarks, canvasWidth, canvasHeight };
 
       // 🆕 ONLY DRAW CURSOR WHEN PINCH IS DETECTED
       const isPinchActive =
@@ -3221,6 +3201,73 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
           compY - 117
         );
       }
+    }
+
+    // 🖐️ RENDER HAND LANDMARKS LAST (always on top of everything)
+    if (handRenderData) {
+      const { mirrorLandmarks, canvasWidth, canvasHeight } = handRenderData;
+
+      // Define finger connections (same as MediaPipe HAND_CONNECTIONS)
+      const connections = [
+        [0, 1],
+        [1, 2],
+        [2, 3],
+        [3, 4], // Thumb
+        [0, 5],
+        [5, 6],
+        [6, 7],
+        [7, 8], // Index
+        [0, 9],
+        [9, 10],
+        [10, 11],
+        [11, 12], // Middle
+        [0, 13],
+        [13, 14],
+        [14, 15],
+        [15, 16], // Ring
+        [0, 17],
+        [17, 18],
+        [18, 19],
+        [19, 20], // Pinky
+        [5, 9],
+        [9, 13],
+        [13, 17], // Palm
+      ];
+
+      // Draw connections
+      ctx.strokeStyle = "#00FF00";
+      ctx.lineWidth = 3;
+      ctx.shadowColor = "#00FF00";
+      ctx.shadowBlur = 10;
+
+      connections.forEach(([start, end]) => {
+        const startPoint = mirrorLandmarks[start];
+        const endPoint = mirrorLandmarks[end];
+
+        ctx.beginPath();
+        ctx.moveTo(startPoint.x * canvasWidth, startPoint.y * canvasHeight);
+        ctx.lineTo(endPoint.x * canvasWidth, endPoint.y * canvasHeight);
+        ctx.stroke();
+      });
+
+      ctx.shadowBlur = 0;
+
+      // Draw landmarks (finger joints)
+      mirrorLandmarks.forEach((landmark, index) => {
+        const x = landmark.x * canvasWidth;
+        const y = landmark.y * canvasHeight;
+
+        // Fingertips are larger
+        const radius = [4, 8, 12, 16, 20].includes(index) ? 8 : 5;
+
+        ctx.beginPath();
+        ctx.arc(x, y, radius, 0, Math.PI * 2);
+        ctx.fillStyle = "#FF0000";
+        ctx.fill();
+        ctx.strokeStyle = "#FFFFFF";
+        ctx.lineWidth = 2;
+        ctx.stroke();
+      });
     }
   }, [
     components,
