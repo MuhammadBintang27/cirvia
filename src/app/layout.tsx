@@ -24,6 +24,10 @@ const firaCode = Fira_Code({
 export const metadata = {
   title: 'CIRVIA - Circuit Virtual Interactive Application',
   description: 'Interactive virtual learning platform for electrical circuits with computer vision hand gesture detection',
+  icons: {
+    icon: '/logo.png', // Path ke logo kamu di folder public
+    apple: '/logo.png',
+  },
 }
 
 export default function RootLayout({
