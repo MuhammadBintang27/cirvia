@@ -11,35 +11,36 @@ export default function HomePage() {
   const [isVisible, setIsVisible] = useState(false);
 
   const testimonials = [
-    {
-      name: "Rizky Pratama",
-      role: "Siswa SMA Negeri 1 Jakarta",
-      image: "/testimoni/testi1.JPG",
-      content: "CIRVIA benar-benar mengubah cara saya memahami fisika! Simulasi rangkaian listriknya sangat realistis dan mudah dipahami.",
-      tipePengguna: "Siswa",
-    },
-    {
-      name: "Dr. Sari Wijaya",
-      role: "Guru Fisika SMA",
-      image: "/testimoni/testi1.JPG",
-      content: "Platform pembelajaran terbaik yang pernah saya gunakan. Siswa jadi lebih antusias belajar fisika dengan teknologi AR ini.",
-      tipePengguna: "Guru",
-    },
-    {
-      name: "Dr. Susilawati S, Pd. M. Ed.",
-      role: "Dosen Pendidikan Fisika Universitas Syiah Kuala",
-      image: "/testimoni/testi1.JPG",
-      content: "Deteksi gerakan tangannya amazing! Praktikum jadi lebih interaktif dan engaging. Highly recommended!",
-      tipePengguna: "Validator Materi Pembelajaran",
-    },
-    {
-      name: "Andriani Putri M. Sc.",
-      role: "Dosen Universitas Syiah Kuala",
-      image: "/testimoni/testi1.JPG",
-      content: "Deteksi gerakan tangannya amazing! Praktikum jadi lebih interaktif dan engaging. Highly recommended!",
-      tipePengguna: "Validator Media Pembelajaran",
-    }
-  ];
+  {
+    name: "Rafif & Hunatul",
+    role: "Siswa SMA Negeri 5 Banda Aceh",
+    image: "/testimoni/testi1.png",
+    content: "CIRVIA benar-benar mengubah cara saya memahami fisika! Simulasi rangkaian listriknya sangat realistis dan mudah dipahami.",
+    tipePengguna: "Siswa",
+  },
+  {
+    name: "Cut Mardiana",
+    role: "Guru Fisika SMA Negeri 5 Banda Aceh",
+    image: "/testimoni/testi2.png",
+    content: "CIRVIA sangat membantu dan menjadi inovasi baru yang disukai siswa. Pembelajaran jadi lebih menarik dan praktikum lebih mudah dilakukan.",
+    tipePengguna: "Guru",
+  },
+  {
+    name: "Dr. Susilawati S, Pd. M. Ed.",
+    role: "Dosen Pendidikan Fisika Universitas Syiah Kuala",
+    image: "/testimoni/testi3.JPG",
+    content: "Aplikasi ini sangat bagus diterapkan di sekolah. Praktikum computer vision, penyesuaian gaya belajar, dan umpan balik AI membuat pembelajaran jauh lebih efektif.",
+    tipePengguna: "Validator Materi Pembelajaran",
+  },
+  {
+    name: "Andriani Putri M. Sc.",
+    role: "Dosen Universitas Syiah Kuala",
+    image: "/testimoni/testi1.JPG",
+    content: "CIRVIA sangat relevan dan menarik bagi siswa. Fitur interaktifnya membantu pembelajaran, dan akan lebih optimal dengan penjelasan fitur yang lebih jelas.",
+    tipePengguna: "Validator Media Pembelajaran",
+  }
+];
+
 
   
 

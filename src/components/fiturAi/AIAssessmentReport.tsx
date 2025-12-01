@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { 
   Brain, 
   TrendingUp, 
@@ -43,26 +43,46 @@ const AIAssessmentReport: React.FC<AIAssessmentReportProps> = ({
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [activeTab, setActiveTab] = useState<'overview' | 'learning_style' | 'progress' | 'recommendations'>('overview')
+  const loadingRef = useRef(false)
 
   useEffect(() => {
+    // Prevent double API call in React StrictMode (development)
+    if (loadingRef.current) {
+      console.log('⏭️ [AI-REPORT] Skipping duplicate load (already loading)...')
+      return
+    }
+    
+    loadingRef.current = true
+    console.log('🚀 [AI-REPORT] Starting assessment load for student:', studentId)
+    
     loadAssessment()
+    
+    // Cleanup on unmount
+    return () => {
+      console.log('🧹 [AI-REPORT] Component unmounting, resetting loading flag')
+      loadingRef.current = false
+    }
   }, [studentId])
 
   const loadAssessment = async () => {
     try {
       setLoading(true)
       setError(null)
+      console.log('📊 [AI-REPORT] Fetching assessment data...')
       const result = await AIAssessmentService.generateComprehensiveAssessment(
         studentId,
         studentName,
         studentClass
       )
+      console.log('✅ [AI-REPORT] Assessment data received successfully')
       setAssessment(result)
     } catch (err) {
-      console.error('Error loading assessment:', err)
+      console.error('❌ [AI-REPORT] Error loading assessment:', err)
       setError('Gagal memuat penilaian AI. Silakan coba lagi.')
     } finally {
       setLoading(false)
+      loadingRef.current = false
+      console.log('🏁 [AI-REPORT] Assessment load completed')
     }
   }
 

@@ -6,6 +6,10 @@
 
 import { SupabaseTestService } from './supabase-test-service'
 
+// Request deduplication cache
+const requestCache = new Map<string, Promise<any>>()
+const CACHE_TTL = 5000 // 5 seconds
+
 // Types for assessment analysis
 export interface LearningStyleResult {
   visual: number
@@ -316,9 +320,41 @@ class AIAssessmentService {
 
   /**
    * Generate comprehensive assessment with all data including detailed answers
+   * WITH REQUEST DEDUPLICATION to prevent double API calls
    */
   static async generateComprehensiveAssessment(studentId: string, studentName: string, studentClass: string): Promise<ComprehensiveAssessment> {
+    // Create cache key
+    const cacheKey = `assessment_${studentId}`
+    
+    // Check if request is already in progress
+    if (requestCache.has(cacheKey)) {
+      console.log('🔄 [AI-SERVICE] Using cached ongoing request for student:', studentId)
+      return requestCache.get(cacheKey)!
+    }
+    
+    // Create new request promise
+    const requestPromise = this._generateComprehensiveAssessmentInternal(studentId, studentName, studentClass)
+    
+    // Cache the promise
+    requestCache.set(cacheKey, requestPromise)
+    console.log('💾 [AI-SERVICE] Cached new request for student:', studentId)
+    
+    // Clear cache after TTL
+    setTimeout(() => {
+      requestCache.delete(cacheKey)
+      console.log('🧹 [AI-SERVICE] Cleared cache for student:', studentId)
+    }, CACHE_TTL)
+    
+    return requestPromise
+  }
+
+  /**
+   * Internal method for generating assessment (called by public method with caching)
+   */
+  private static async _generateComprehensiveAssessmentInternal(studentId: string, studentName: string, studentClass: string): Promise<ComprehensiveAssessment> {
     try {
+      console.log('🚀 [AI-SERVICE] Starting comprehensive assessment for:', studentName)
+      
       // Fetch all data including detailed answers
       const [learningStyleData, pretest, posttest] = await Promise.all([
         SupabaseTestService.getLearningStyleResult(studentId).catch(() => null),
@@ -713,8 +749,46 @@ class AIAssessmentService {
 
   /**
    * Call Gemini API via server-side route for real AI-powered analysis (FREE!)
+   * WITH REQUEST DEDUPLICATION
    */
   private static async callGPTForAnalysis(prompt: string, contextData: any): Promise<AIRecommendation> {
+    // Create cache key based on student ID
+    const studentId = contextData?.student?.id || 'unknown'
+    const cacheKey = `gemini_${studentId}`
+    
+    // Check if request is already in progress
+    if (requestCache.has(cacheKey)) {
+      console.log('🔄 [AI-SERVICE] GEMINI - Using cached ongoing request for student:', studentId)
+      return requestCache.get(cacheKey)!
+    }
+    
+    // Create new request promise
+    const requestPromise = this._callGPTForAnalysisInternal(prompt, contextData)
+    
+    // Cache the promise
+    requestCache.set(cacheKey, requestPromise)
+    console.log('💾 [AI-SERVICE] GEMINI - Cached new request for student:', studentId)
+    
+    // Clear cache after request completes (success or error)
+    requestPromise
+      .then(() => {
+        setTimeout(() => {
+          requestCache.delete(cacheKey)
+          console.log('🧹 [AI-SERVICE] GEMINI - Cleared cache for student:', studentId)
+        }, CACHE_TTL)
+      })
+      .catch(() => {
+        requestCache.delete(cacheKey)
+        console.log('🧹 [AI-SERVICE] GEMINI - Cleared cache (error) for student:', studentId)
+      })
+    
+    return requestPromise
+  }
+
+  /**
+   * Internal method for calling Gemini API (called by public method with caching)
+   */
+  private static async _callGPTForAnalysisInternal(prompt: string, contextData: any): Promise<AIRecommendation> {
     try {
       console.log('🤖 [AI-SERVICE] Calling Google Gemini 2.5 Flash API via server route...')
       console.log('🤖 [AI-SERVICE] Prompt length:', prompt.length, 'characters')
