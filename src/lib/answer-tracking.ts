@@ -37,7 +37,7 @@ export interface CircuitQuestion extends BaseQuestion {
   targetCurrent?: number;
   resistorSlots?: number;
   circuitType?: 'series' | 'parallel' | 'mixed';
-  correctSolution?: number[]; // ✅ Array of resistor values that form the correct answer
+  correctSolution?: number[]; // Array of resistor values that form the correct answer
 }
 
 export interface CircuitAnalysisQuestion extends BaseQuestion {
@@ -50,8 +50,8 @@ export interface CircuitAnalysisQuestion extends BaseQuestion {
   }>;
   analysisType?: string;
   circuitDiagram?: string;
-  targetLamp?: string; // ✅ ID of the broken lamp (e.g., 'L3')
-  correctStates?: { [lampId: string]: 'on' | 'off' }; // ✅ Correct lamp states after break
+  targetLamp?: string; // ID of the broken lamp (e.g., 'L3')
+  correctStates?: { [lampId: string]: 'on' | 'off' }; // Correct lamp states after break
 }
 
 export interface CircuitOrderingQuestion extends BaseQuestion {
@@ -101,7 +101,7 @@ export interface AnswerResult {
  */
 export function extractConceptualAnswer(
   question: ConceptualQuestion,
-  selectedIndexOrIds: number | string[] | null // ✅ Support both index (old) and array of IDs (new)
+  selectedIndexOrIds: number | string[] | null // Support both index (old) and array of IDs (new)
 ): AnswerResult {
   const choices = question.choices || [];
   
@@ -395,7 +395,7 @@ export function extractSimulationAnswer(
     selectedAnswer: JSON.stringify(userValues),
     correctAnswer: JSON.stringify(expected),
     isCorrect,
-    questionText: question.question || question.title || question.description || '', // ✅ FIX: Prioritize actual question text
+    questionText: question.question || question.title || question.description || '', // FIX: Prioritize actual question text
     selectedText,
     correctText: correctText.trim(),
     explanation: question.explanation || question.hint || '',
@@ -466,7 +466,7 @@ export function extractCircuitOrderingAnswer(
  */
 export function extractAnswer(
   question: Question,
-  userAnswer: number | null | string[] | number[] | { [key: string]: string | number } // ✅ Support all formats
+  userAnswer: number | null | string[] | number[] | { [key: string]: string | number } // Support all formats
 ): AnswerResult {
   switch (question.questionType) {
     case 'conceptual':

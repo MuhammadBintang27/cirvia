@@ -1,4 +1,5 @@
 'use client'
+import { Ico } from "@/components/ui/Ico";
 
 import { useRef, useEffect, useState } from 'react'
 
@@ -86,21 +87,21 @@ export default function EmbeddedCVPracticum() {
     return (
       <div className="bg-white rounded-lg shadow-lg p-6">
         <h3 className="text-xl font-bold text-gray-800 mb-4">
-          🎮 Web-Based Circuit Builder
+          Web-Based Circuit Builder
         </h3>
         <p className="text-gray-600 mb-4">
           Bangun rangkaian listrik langsung di browser dengan interface sederhana!
         </p>
         <div className="space-y-2 mb-6 text-sm text-gray-600">
-          <div>🖱️ <strong>Click buttons:</strong> Tambah komponen</div>
-          <div>📊 <strong>Real-time:</strong> Lihat perhitungan otomatis</div>
-          <div>🔧 <strong>Interactive:</strong> Bangun rangkaian dengan mudah</div>
+          <div><Ico n="mouse" /> <strong>Click buttons:</strong> Tambah komponen</div>
+          <div><Ico n="chart" /> <strong>Real-time:</strong> Lihat perhitungan otomatis</div>
+          <div><Ico n="wrench" /> <strong>Interactive:</strong> Bangun rangkaian dengan mudah</div>
         </div>
         <button
           onClick={startCV}
           className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-lg transition-colors"
         >
-          🚀 Mulai Circuit Builder
+          Mulai Circuit Builder
         </button>
       </div>
     )
@@ -111,7 +112,7 @@ export default function EmbeddedCVPracticum() {
       <div className="p-4 bg-gray-50 border-b">
         <div className="flex items-center justify-between">
           <h3 className="text-lg font-bold text-gray-800">
-            🎮 Web Circuit Builder
+            Web Circuit Builder
           </h3>
           <button
             onClick={stopCV}
@@ -134,28 +135,28 @@ export default function EmbeddedCVPracticum() {
                 onClick={() => addComponent('battery')}
                 className="flex items-center space-x-2 px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg transition-colors"
               >
-                <span>🔋</span>
+                <span><Ico n="battery" /></span>
                 <span>Add Battery</span>
               </button>
               <button
                 onClick={() => addComponent('resistor')}
                 className="flex items-center space-x-2 px-4 py-2 bg-yellow-500 hover:bg-yellow-600 text-white rounded-lg transition-colors"
               >
-                <span>🔌</span>
+                <span><Ico n="plug" /></span>
                 <span>Add Resistor</span>
               </button>
               <button
                 onClick={() => addComponent('wire')}
                 className="flex items-center space-x-2 px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded-lg transition-colors"
               >
-                <span>⚡</span>
+                <span><Ico n="zap" /></span>
                 <span>Add Wire</span>
               </button>
               <button
                 onClick={clearCircuit}
                 className="flex items-center space-x-2 px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors ml-4"
               >
-                <span>🗑️</span>
+                <span><Ico n="trash" /></span>
                 <span>Clear</span>
               </button>
             </div>
@@ -174,7 +175,7 @@ export default function EmbeddedCVPracticum() {
                   {components.map(comp => (
                     <div key={comp.id} className="p-3 bg-gray-50 rounded-lg border text-center">
                       <div className="text-2xl mb-1">
-                        {comp.type === 'battery' ? '🔋' : comp.type === 'resistor' ? '🔌' : '⚡'}
+                        {comp.type === 'battery' ? <Ico n="battery" /> : comp.type === 'resistor' ? <Ico n="plug" /> : <Ico n="zap" />}
                       </div>
                       <div className="text-sm font-medium text-gray-700 capitalize">{comp.type}</div>
                       {comp.value && (
@@ -194,7 +195,7 @@ export default function EmbeddedCVPracticum() {
         <div className="space-y-4">
           {/* Calculations */}
           <div className="bg-gray-50 rounded-lg p-4">
-            <h4 className="font-semibold text-gray-800 mb-3">📊 Perhitungan Real-time</h4>
+            <h4 className="font-semibold text-gray-800 mb-3">Perhitungan Real-time</h4>
             <div className="space-y-3">
               <div className="flex justify-between items-center p-2 bg-blue-50 rounded">
                 <span className="text-sm text-gray-600">Tegangan:</span>
@@ -217,7 +218,7 @@ export default function EmbeddedCVPracticum() {
 
           {/* Formulas */}
           <div className="bg-gray-50 rounded-lg p-4">
-            <h4 className="font-semibold text-gray-800 mb-3">📐 Rumus Fisika</h4>
+            <h4 className="font-semibold text-gray-800 mb-3">Rumus Fisika</h4>
             <div className="space-y-2 text-xs text-gray-600">
               <div className="p-2 bg-white rounded">
                 <div className="font-semibold">Hukum Ohm:</div>
@@ -236,7 +237,7 @@ export default function EmbeddedCVPracticum() {
 
           {/* Instructions */}
           <div className="bg-blue-50 rounded-lg p-4">
-            <h4 className="font-semibold text-blue-800 mb-2">💡 Cara Penggunaan</h4>
+            <h4 className="font-semibold text-blue-800 mb-2">Cara Penggunaan</h4>
             <div className="space-y-1 text-xs text-blue-700">
               <div>1. Klik tombol untuk tambah komponen</div>
               <div>2. Lihat perhitungan otomatis di panel kanan</div>

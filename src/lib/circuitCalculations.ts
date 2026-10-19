@@ -186,7 +186,7 @@ export const checkAnswer = (
   result: CircuitResult,
   targetCurrent?: number,
   targetVoltage?: number,
-  tolerance: number = 0 // ✅ NO TOLERANCE - EXACT MATCH REQUIRED
+  tolerance: number = 0 // NO TOLERANCE - EXACT MATCH REQUIRED
 ): { isCorrect: boolean; message: string; details: string } => {
   if (!result.isValid) {
     return {
@@ -209,12 +209,12 @@ export const checkAnswer = (
     const target = parseFloat(targetCurrent.toFixed(4));
     
     if (resultCurrent === target) {
-      messages.push(`✅ Benar! Arus yang dihasilkan: ${result.totalCurrent.toFixed(4)}A (target: ${targetCurrent.toFixed(4)}A)`);
+      messages.push(`Benar! Arus yang dihasilkan: ${result.totalCurrent.toFixed(4)}A (target: ${targetCurrent.toFixed(4)}A)`);
       detailsList.push(`Resistansi total: ${result.totalResistance.toFixed(2)}Ω, Daya total: ${result.totalPower.toFixed(4)}W`);
     } else {
       isCorrect = false;
       const currentDiff = Math.abs(result.totalCurrent - targetCurrent);
-      messages.push(`❌ Salah! Arus yang dihasilkan: ${result.totalCurrent.toFixed(4)}A (target: ${targetCurrent.toFixed(4)}A)`);
+      messages.push(`Salah! Arus yang dihasilkan: ${result.totalCurrent.toFixed(4)}A (target: ${targetCurrent.toFixed(4)}A)`);
       detailsList.push(`Selisih: ${currentDiff.toFixed(4)}A. Kombinasi resistor Anda tidak menghasilkan nilai yang tepat.`);
     }
   }
@@ -228,12 +228,12 @@ export const checkAnswer = (
     const target = parseFloat(targetVoltage.toFixed(4));
     
     if (resultVoltage === target) {
-      messages.push(`✅ Benar! Tegangan yang dihasilkan: ${firstVoltage.toFixed(4)}V (target: ${targetVoltage.toFixed(4)}V)`);
+      messages.push(`Benar! Tegangan yang dihasilkan: ${firstVoltage.toFixed(4)}V (target: ${targetVoltage.toFixed(4)}V)`);
       detailsList.push(`Arus rangkaian: ${result.totalCurrent.toFixed(4)}A, Resistansi total: ${result.totalResistance.toFixed(2)}Ω`);
     } else {
       isCorrect = false;
       const voltageDiff = Math.abs(firstVoltage - targetVoltage);
-      messages.push(`❌ Salah! Tegangan yang dihasilkan: ${firstVoltage.toFixed(4)}V (target: ${targetVoltage.toFixed(4)}V)`);
+      messages.push(`Salah! Tegangan yang dihasilkan: ${firstVoltage.toFixed(4)}V (target: ${targetVoltage.toFixed(4)}V)`);
       detailsList.push(`Selisih: ${voltageDiff.toFixed(4)}V. Kombinasi resistor Anda tidak menghasilkan nilai yang tepat.`);
     }
   }
@@ -305,7 +305,7 @@ export const generateSolutionSteps = (
   const steps: string[] = [];
   
   if (circuitType === 'series') {
-    steps.push('🔗 Rangkaian Seri - Langkah Penyelesaian:');
+    steps.push('Rangkaian Seri - Langkah Penyelesaian:');
     steps.push(`1. Menghitung resistansi total: Rtotal = R1 + R2 + ... = ${resistors.join(' + ')} = ${formatValue(result.totalResistance, 'Ω')}`);
     steps.push(`2. Menghitung arus total: I = V/Rtotal = ${voltage}V / ${formatValue(result.totalResistance, 'Ω')} = ${formatValue(result.totalCurrent, 'A')}`);
     steps.push(`3. Dalam rangkaian seri, arus sama di semua komponen: I = ${formatValue(result.totalCurrent, 'A')}`);
@@ -314,7 +314,7 @@ export const generateSolutionSteps = (
       steps.push(`   V${i+1} = I × R${i+1} = ${formatValue(result.totalCurrent, 'A')} × ${formatValue(r, 'Ω')} = ${formatValue(result.voltageDrops[i], 'V')}`);
     });
   } else {
-    steps.push('🔀 Rangkaian Paralel - Langkah Penyelesaian:');
+    steps.push('Rangkaian Paralel - Langkah Penyelesaian:');
     steps.push('1. Menghitung resistansi total:');
     steps.push(`   1/Rtotal = ${resistors.map((r, i) => `1/${formatValue(r, 'Ω')}`).join(' + ')}`);
     steps.push(`   Rtotal = ${formatValue(result.totalResistance, 'Ω')}`);

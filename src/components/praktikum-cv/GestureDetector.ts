@@ -39,7 +39,7 @@ export class GestureDetector {
 
   constructor() {
     // Log initialization info
-    const initMessage = `🎯 GestureDetector initialized:
+    const initMessage = `GestureDetector initialized:
       - PINCH Threshold: ${this.PINCH_THRESHOLD} (normalized)
       - At 1280px width: ${(this.PINCH_THRESHOLD * 1280).toFixed(0)}px
       - At 1920px width: ${(this.PINCH_THRESHOLD * 1920).toFixed(0)}px
@@ -78,7 +78,7 @@ export class GestureDetector {
       : handedness;
 
     console.log(
-      `👋 Hand detected: ${handedness} → Corrected: ${actualHandedness} (Camera: ${
+      `Hand detected: ${handedness} → Corrected: ${actualHandedness} (Camera: ${
         isFrontCamera ? "Front/Mirror" : "Back"
       })`
     );
@@ -134,7 +134,7 @@ export class GestureDetector {
         };
 
         console.log(
-          `✅ RIGHT HAND PINCH ACTIVE! Distance: ${thumbIndexDist.toFixed(
+          `RIGHT HAND PINCH ACTIVE! Distance: ${thumbIndexDist.toFixed(
             4
           )} (Threshold: ${this.PINCH_THRESHOLD}) at (${(
             pinchCenter.x * 1200
@@ -151,7 +151,7 @@ export class GestureDetector {
         // Log when right hand detected but not pinching
         if (thumbIndexDist < this.PINCH_THRESHOLD && allFingersExtended) {
           console.log(
-            `⚠️ RIGHT HAND - Pinch distance met (${thumbIndexDist.toFixed(
+            `RIGHT HAND - Pinch distance met (${thumbIndexDist.toFixed(
               4
             )}) but all fingers extended (open palm). Skipping PINCH.`
           );
@@ -159,7 +159,7 @@ export class GestureDetector {
           // Show both normalized and pixel equivalent for debugging
           const pixelEquivalent = (thumbIndexDist * 1280).toFixed(0);
           console.log(
-            `👉 RIGHT HAND - Not pinching. Distance: ${thumbIndexDist.toFixed(
+            `RIGHT HAND - Not pinching. Distance: ${thumbIndexDist.toFixed(
               4
             )} (${pixelEquivalent}px @ 1280w) | Need < ${
               this.PINCH_THRESHOLD
@@ -192,7 +192,7 @@ export class GestureDetector {
 
       if (allFingersExtended) {
         console.log(
-          `🖐️ [${actualHandedness}] OPEN PALM detected with ${fingerCount} fingers extended - DELETE MODE`
+          `[${actualHandedness}] OPEN PALM detected with ${fingerCount} fingers extended - DELETE MODE`
         );
 
         return this.createGestureResult(
@@ -229,7 +229,7 @@ export class GestureDetector {
         );
 
         console.log(
-          `🖐️ HOLDING ${fingerCount} fingers on ${actualHandedness} hand - ${(
+          `HOLDING ${fingerCount} fingers on ${actualHandedness} hand - ${(
             progress * 100
           ).toFixed(0)}% (${(holdDuration / 1000).toFixed(1)}s / 3s)`
         );
@@ -240,15 +240,15 @@ export class GestureDetector {
           actualHandedness === "Left"
         ) {
           const componentNames: { [key: number]: string } = {
-            1: "🔋 BATTERY",
-            2: "💡 LAMP",
-            3: "⚡ RESISTOR",
-            4: "🔘 SWITCH",
+            1: "BATTERY",
+            2: "LAMP",
+            3: "RESISTOR",
+            4: "SWITCH",
             5: "━ WIRE",
           };
 
           console.log(
-            `✅ FINGER COUNT COMPLETE! ${fingerCount} fingers (${componentNames[fingerCount]}) held for 3 seconds - ADDING COMPONENT!`
+            `FINGER COUNT COMPLETE! ${fingerCount} fingers (${componentNames[fingerCount]}) held for 3 seconds - ADDING COMPONENT!`
           );
 
           // Reset to prevent repeated triggers
@@ -285,14 +285,14 @@ export class GestureDetector {
       } else {
         // New finger count detected - start timer
         const componentNames: { [key: number]: string } = {
-          1: "🔋 BATTERY",
-          2: "💡 LAMP",
-          3: "⚡ RESISTOR",
-          4: "🔘 SWITCH",
+          1: "BATTERY",
+          2: "LAMP",
+          3: "RESISTOR",
+          4: "SWITCH",
         };
 
         console.log(
-          `🖐️ NEW FINGER COUNT: ${fingerCount} fingers (${componentNames[fingerCount]}) on ${actualHandedness} hand - Starting 3s timer`
+          `NEW FINGER COUNT: ${fingerCount} fingers (${componentNames[fingerCount]}) on ${actualHandedness} hand - Starting 3s timer`
         );
         this.fingerCountStartTime = now;
         this.lastFingerCount = fingerCount;
@@ -344,7 +344,7 @@ export class GestureDetector {
     // 5. POINT (Only index extended)
     if (isIndexExtended && !isMiddleExtended && isRingClosed && isPinkyClosed) {
       console.log(
-        `👆 POINT gesture detected | Handedness: ${actualHandedness} | Confidence: 0.90`
+        `POINT gesture detected | Handedness: ${actualHandedness} | Confidence: 0.90`
       );
       return this.createGestureResult(
         "point",
@@ -406,7 +406,7 @@ export class GestureDetector {
       if (allFingersExtended) {
         const extendedFingerCount = this.countExtendedFingers(landmarks);
         console.log(
-          `🖐️ [${actualHandedness}] OPEN PALM detected with ${extendedFingerCount} fingers extended`
+          `[${actualHandedness}] OPEN PALM detected with ${extendedFingerCount} fingers extended`
         );
 
         return this.createGestureResult(
@@ -496,13 +496,13 @@ export class GestureDetector {
       // 🐛 DEBUG: Log thumb detection details
       if (GestureDetector.DEBUG_FINGER_DETECTION) {
         console.log(
-          `👍 THUMB Check: ` +
+          `THUMB Check: ` +
             `TipToWrist=${thumbTipToWrist.toFixed(3)} | ` +
             `McpToWrist=${thumbMcpToWrist.toFixed(3)} | ` +
             `Ratio=${distanceRatio.toFixed(2)} (need > 1.3) | ` +
             `HorizDist=${horizontalDistance.toFixed(3)} (need > 0.05) | ` +
             `Extended=${isExtended} | HasHorizDist=${hasHorizontalDistance} | ` +
-            `Result=${result ? "✅ EXTENDED" : "❌ CLOSED"}`
+            `Result=${result ? "EXTENDED" : "CLOSED"}`
         );
       }
 
@@ -533,12 +533,12 @@ export class GestureDetector {
       !GestureDetector.DEBUG_THUMB_ONLY
     ) {
       console.log(
-        `☝️ ${finger.toUpperCase()} Check: ` +
+        `${finger.toUpperCase()} Check: ` +
           `TipY=${tip.y.toFixed(3)} | PipY=${pip.y.toFixed(3)} | ` +
           `Distance=${yDistance.toFixed(3)} (need > ${
             GestureDetector.FINGER_EXTENSION_THRESHOLD
           }) | ` +
-          `Result=${isExtended ? "✅ EXTENDED" : "❌ CLOSED"}`
+          `Result=${isExtended ? "EXTENDED" : "CLOSED"}`
       );
     }
 
@@ -600,7 +600,7 @@ export class GestureDetector {
           pinky: pinkyExtended ? "EXTENDED" : "closed",
         },
         otherFingersClosed: otherFingersClosed,
-        result: isThumbsUpGesture ? "✅ THUMBS_UP" : "❌ NOT THUMBS_UP",
+        result: isThumbsUpGesture ? "THUMBS_UP" : "NOT THUMBS_UP",
       });
     }
 
@@ -779,14 +779,14 @@ export class GestureDetector {
         GestureDetector.FINGER_EXTENSION_THRESHOLD + TOLERANCE
       ) {
         console.log(
-          `⚠️  TOLERANCE CHECK: Ring finger borderline (${ringYDistance.toFixed(
+          ` TOLERANCE CHECK: Ring finger borderline (${ringYDistance.toFixed(
             4
           )} < ${(
             GestureDetector.FINGER_EXTENSION_THRESHOLD + TOLERANCE
           ).toFixed(4)})`
         );
         console.log(
-          `✅ CORRECTION: Treating as 2 fingers (index + middle) instead of 3`
+          `CORRECTION: Treating as 2 fingers (index + middle) instead of 3`
         );
 
         count = 2;
@@ -800,9 +800,9 @@ export class GestureDetector {
     if (GestureDetector.DEBUG_FINGER_DETECTION) {
       console.log("=".repeat(70));
       console.log(
-        `📊 RESULT: ${count} finger(s) detected\n` +
-          `   ✅ EXTENDED: [${extendedFingers.join(", ") || "none"}]\n` +
-          `   ❌ CLOSED:   [${closedFingers.join(", ") || "none"}]`
+        `RESULT: ${count} finger(s) detected\n` +
+          `   EXTENDED: [${extendedFingers.join(", ") || "none"}]\n` +
+          `   CLOSED:   [${closedFingers.join(", ") || "none"}]`
       );
       console.log("=".repeat(70) + "\n");
     }
@@ -936,7 +936,7 @@ export class GestureDetector {
     GestureDetector.DEBUG_FINGER_DETECTION = enabled;
     GestureDetector.DEBUG_THUMB_ONLY = thumbOnly;
     const message =
-      `🐛 Debug Mode: ${enabled ? "ENABLED" : "DISABLED"}` +
+      `Debug Mode: ${enabled ? "ENABLED" : "DISABLED"}` +
       (enabled && thumbOnly ? " (Thumb Only)" : "");
     console.log(message);
 

@@ -1,4 +1,5 @@
 'use client';
+import { Ico } from "@/components/ui/Ico";
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
@@ -423,10 +424,10 @@ const TeacherDashboard = () => {
 
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty) {
-      case 'easy': return 'bg-green-500/20 text-green-300 border border-green-400/30';
-      case 'medium': return 'bg-yellow-500/20 text-yellow-300 border border-yellow-400/30';
-      case 'hard': return 'bg-red-500/20 text-red-300 border border-red-400/30';
-      default: return 'bg-gray-500/20 text-gray-300 border border-gray-400/30';
+      case 'easy': return 'bg-mint-soft text-emerald-700 border-2 border-ink';
+      case 'medium': return 'bg-lamp-soft text-amber-700 border-2 border-ink';
+      case 'hard': return 'bg-coral-soft text-red-600 border-2 border-ink';
+      default: return 'bg-ink/20 text-muted border-2 border-ink';
     }
   };
 
@@ -435,24 +436,24 @@ const TeacherDashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-950 to-indigo-900">
+    <div className="min-h-screen bg-transparent">
       {/* Header */}
-      <div className="border-b border-white/10 bg-white/5 backdrop-blur-xl sticky top-0 z-50">
+      <div className="border-b border-ink/20 bg-paper sticky top-0 z-50">
         <div className="container mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
-              <div className="flex items-center justify-center w-10 h-10 bg-gradient-to-br from-blue-500/20 to-indigo-600/20 rounded-xl border border-blue-400/30">
-                <GraduationCap className="w-6 h-6 text-blue-400" />
+              <div className="flex items-center justify-center w-10 h-10 bg-brand-soft rounded-xl border-2 border-ink">
+                <GraduationCap className="w-6 h-6 text-brand" />
               </div>
               <div>
-                <h1 className="text-xl font-bold text-white">Dashboard Guru</h1>
-                <p className="text-blue-200/80 text-sm">Selamat datang, {teacher?.name}</p>
+                <h1 className="text-xl font-bold text-ink">Dashboard Guru</h1>
+                <p className="text-muted text-sm">Selamat datang, {teacher?.name}</p>
               </div>
             </div>
             
             <button
               onClick={handleLogout}
-              className="flex items-center px-4 py-2 bg-red-500/20 hover:bg-red-500/30 border border-red-400/30 rounded-xl text-red-300 hover:text-white transition-all"
+              className="flex items-center px-4 py-2 bg-coral-soft border-2 border-ink rounded-xl text-red-600 hover:text-ink transition-all"
             >
               <LogOut className="w-4 h-4 mr-2" />
               Logout
@@ -465,7 +466,7 @@ const TeacherDashboard = () => {
         <div className="grid lg:grid-cols-4 gap-8">
           {/* Sidebar */}
           <div className="lg:col-span-1">
-            <div className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl rounded-2xl p-6 border border-white/20 sticky top-24">
+            <div className="bg-paper rounded-2xl p-6 border-2 border-ink sticky top-24">
               <nav className="space-y-2">
                 {[
                   { id: 'overview', label: 'Overview', icon: BarChart3 },
@@ -483,8 +484,8 @@ const TeacherDashboard = () => {
                       onClick={() => setActiveTab(tab.id)}
                       className={`w-full flex items-center px-4 py-3 rounded-xl text-left transition-all ${
                         activeTab === tab.id
-                          ? 'bg-blue-500/20 text-blue-300 border border-blue-400/30'
-                          : 'text-blue-200/70 hover:bg-white/5 hover:text-blue-300'
+                          ? 'bg-brand-soft text-brand border-2 border-ink'
+                          : 'text-muted hover:bg-lamp-soft hover:text-brand'
                       }`}
                     >
                       <Icon className="w-5 h-5 mr-3" />
@@ -503,75 +504,75 @@ const TeacherDashboard = () => {
                 {/* Stats Cards */}
                 <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
                   {/* Total Students Card */}
-                  <div className="bg-gradient-to-br from-blue-500/20 to-blue-600/20 backdrop-blur-xl rounded-2xl p-6 border border-blue-400/30 h-full flex flex-col">
+                  <div className="bg-brand-soft rounded-2xl p-6 border-2 border-ink h-full flex flex-col">
                     <div className="flex items-center justify-between mb-4">
-                      <div className="w-12 h-12 bg-blue-500/20 rounded-full flex items-center justify-center">
-                        <Users className="w-6 h-6 text-blue-400" />
+                      <div className="w-12 h-12 bg-paper border-2 border-ink rounded-full flex items-center justify-center">
+                        <Users className="w-6 h-6 text-brand" />
                       </div>
-                      <span className="text-3xl font-bold text-white">{stats.totalStudents}</span>
+                      <span className="text-3xl font-bold text-ink">{stats.totalStudents}</span>
                     </div>
                     <div className="flex-grow">
-                      <p className="text-blue-200 font-semibold text-lg mb-1">Total Siswa</p>
-                      <p className="text-blue-200/70 text-sm">
+                      <p className="text-muted font-semibold text-lg mb-1">Total Siswa</p>
+                      <p className="text-muted text-sm">
                         {students.filter(s => s.progress?.preTestScore !== undefined).length} telah mengikuti pre-test
                       </p>
                     </div>
                   </div>
                   
                   {/* Total Classes Card */}
-                  <div className="bg-gradient-to-br from-emerald-500/20 to-emerald-600/20 backdrop-blur-xl rounded-2xl p-6 border border-emerald-400/30 h-full flex flex-col">
+                  <div className="bg-mint-soft rounded-2xl p-6 border-2 border-ink h-full flex flex-col">
                     <div className="flex items-center justify-between mb-4">
-                      <div className="w-12 h-12 bg-emerald-500/20 rounded-full flex items-center justify-center">
-                        <BookOpen className="w-6 h-6 text-emerald-400" />
+                      <div className="w-12 h-12 bg-paper border-2 border-ink rounded-full flex items-center justify-center">
+                        <BookOpen className="w-6 h-6 text-emerald-700" />
                       </div>
-                      <span className="text-3xl font-bold text-white">{stats.totalClasses}</span>
+                      <span className="text-3xl font-bold text-ink">{stats.totalClasses}</span>
                     </div>
                     <div className="flex-grow">
-                      <p className="text-emerald-200 font-semibold text-lg mb-1">Total Kelas</p>
-                      <p className="text-emerald-200/70 text-sm">
+                      <p className="text-ink font-semibold text-lg mb-1">Total Kelas</p>
+                      <p className="text-muted text-sm">
                         {classes.length > 0 ? `Kelas: ${classes.join(', ')}` : 'Belum ada kelas aktif'}
                       </p>
                     </div>
                   </div>
                   
                   {/* Pre-Test Average Card */}
-                  <div className="bg-gradient-to-br from-yellow-500/20 to-yellow-600/20 backdrop-blur-xl rounded-2xl p-6 border border-yellow-400/30 h-full flex flex-col">
+                  <div className="bg-lamp-soft rounded-2xl p-6 border-2 border-ink h-full flex flex-col">
                     <div className="flex items-center justify-between mb-4">
-                      <div className="w-12 h-12 bg-yellow-500/20 rounded-full flex items-center justify-center">
-                        <Trophy className="w-6 h-6 text-yellow-400" />
+                      <div className="w-12 h-12 bg-paper border-2 border-ink rounded-full flex items-center justify-center">
+                        <Trophy className="w-6 h-6 text-amber-700" />
                       </div>
                       <div className="text-right">
-                        <span className="text-3xl font-bold text-white">{Math.round(stats.averagePreTest || 0)}</span>
-                        <span className="text-yellow-200 text-lg">%</span>
+                        <span className="text-3xl font-bold text-ink">{Math.round(stats.averagePreTest || 0)}</span>
+                        <span className="text-amber-700 text-lg">%</span>
                       </div>
                     </div>
                     <div className="flex-grow">
-                      <p className="text-yellow-200 font-semibold text-lg mb-1">Rata-rata Pre-Test</p>
-                      <p className="text-yellow-200/70 text-sm">
+                      <p className="text-ink font-semibold text-lg mb-1">Rata-rata Pre-Test</p>
+                      <p className="text-muted text-sm">
                         {students.filter(s => s.progress?.preTestScore !== undefined).length} dari {stats.totalStudents} siswa
                       </p>
                     </div>
                   </div>
                   
                   {/* Post-Test Average & Improvement Card */}
-                  <div className="bg-gradient-to-br from-purple-500/20 to-purple-600/20 backdrop-blur-xl rounded-2xl p-6 border border-purple-400/30 h-full flex flex-col">
+                  <div className="bg-purple-100 rounded-2xl p-6 border-2 border-ink h-full flex flex-col">
                     <div className="flex items-center justify-between mb-4">
-                      <div className="w-12 h-12 bg-purple-500/20 rounded-full flex items-center justify-center">
-                        <TrendingUp className="w-6 h-6 text-purple-400" />
+                      <div className="w-12 h-12 bg-paper border-2 border-ink rounded-full flex items-center justify-center">
+                        <TrendingUp className="w-6 h-6 text-purple-700" />
                       </div>
                       <div className="text-right">
-                        <span className="text-3xl font-bold text-white">{Math.round(stats.averagePostTest || 0)}</span>
-                        <span className="text-purple-200 text-lg">%</span>
+                        <span className="text-3xl font-bold text-ink">{Math.round(stats.averagePostTest || 0)}</span>
+                        <span className="text-muted text-lg">%</span>
                       </div>
                     </div>
                     <div className="flex-grow">
-                      <p className="text-purple-200 font-semibold text-lg mb-1">Rata-rata Post-Test</p>
+                      <p className="text-muted font-semibold text-lg mb-1">Rata-rata Post-Test</p>
                       <div className="flex items-center space-x-2">
-                        <p className="text-purple-200/70 text-sm">
+                        <p className="text-muted text-sm">
                           {students.filter(s => s.progress?.postTestScore !== undefined).length} siswa selesai
                         </p>
                         {stats.averagePostTest > stats.averagePreTest && (
-                          <div className="flex items-center text-green-400 text-xs">
+                          <div className="flex items-center text-emerald-700 text-xs">
                             <TrendingUp className="w-3 h-3 mr-1" />
                             +{Math.round(stats.averagePostTest - stats.averagePreTest)}%
                           </div>
@@ -583,30 +584,30 @@ const TeacherDashboard = () => {
 
                 {/* Learning Style Statistics */}
                 {learningStyleStats && (
-                  <div className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl rounded-2xl p-6 border border-white/20">
+                  <div className="bg-paper rounded-2xl p-6 border-2 border-ink">
                     <div className="flex items-center mb-6">
-                      <div className="w-12 h-12 bg-purple-500/20 rounded-full flex items-center justify-center mr-4">
-                        <Brain className="w-6 h-6 text-purple-400" />
+                      <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center mr-4">
+                        <Brain className="w-6 h-6 text-purple-700" />
                       </div>
                       <div>
-                        <h3 className="text-xl font-bold text-white">Statistik Gaya Belajar Kelas</h3>
-                        <p className="text-white/70">Distribusi gaya belajar siswa di kelas Anda</p>
+                        <h3 className="text-xl font-bold text-ink">Statistik Gaya Belajar Kelas</h3>
+                        <p className="text-muted">Distribusi gaya belajar siswa di kelas Anda</p>
                       </div>
                     </div>
                     
                     <div className="grid md:grid-cols-3 gap-6">
                       {/* Visual Learners */}
-                      <div className="bg-blue-500/10 rounded-xl p-4 border border-blue-400/30">
+                      <div className="bg-brand-soft rounded-xl p-4 border-2 border-ink">
                         <div className="flex items-center mb-3">
-                          <Eye className="w-8 h-8 text-blue-400 mr-3" />
+                          <Eye className="w-8 h-8 text-brand mr-3" />
                           <div>
-                            <h4 className="text-lg font-bold text-white">{learningStyleStats.visual}</h4>
-                            <p className="text-blue-200/70 text-sm">Visual Learners</p>
+                            <h4 className="text-lg font-bold text-ink">{learningStyleStats.visual}</h4>
+                            <p className="text-muted text-sm">Visual Learners</p>
                           </div>
                         </div>
-                        <div className="w-full bg-white/10 rounded-full h-2">
+                        <div className="w-full bg-paper rounded-full h-2">
                           <div 
-                            className="bg-gradient-to-r from-blue-500 to-cyan-500 h-2 rounded-full"
+                            className="bg-brand h-2 rounded-full"
                             style={{ 
                               width: `${Math.round((learningStyleStats.visual / (learningStyleStats.visual + learningStyleStats.auditory + learningStyleStats.kinesthetic)) * 100)}%` 
                             }}
@@ -615,17 +616,17 @@ const TeacherDashboard = () => {
                       </div>
 
                       {/* Auditory Learners */}
-                      <div className="bg-purple-500/10 rounded-xl p-4 border border-purple-400/30">
+                      <div className="bg-purple-100 rounded-xl p-4 border-2 border-ink">
                         <div className="flex items-center mb-3">
-                          <Ear className="w-8 h-8 text-purple-400 mr-3" />
+                          <Ear className="w-8 h-8 text-purple-700 mr-3" />
                           <div>
-                            <h4 className="text-lg font-bold text-white">{learningStyleStats.auditory}</h4>
-                            <p className="text-purple-200/70 text-sm">Auditory Learners</p>
+                            <h4 className="text-lg font-bold text-ink">{learningStyleStats.auditory}</h4>
+                            <p className="text-muted text-sm">Auditory Learners</p>
                           </div>
                         </div>
-                        <div className="w-full bg-white/10 rounded-full h-2">
+                        <div className="w-full bg-paper rounded-full h-2">
                           <div 
-                            className="bg-gradient-to-r from-purple-500 to-pink-500 h-2 rounded-full"
+                            className="bg-purple-500 h-2 rounded-full"
                             style={{ 
                               width: `${Math.round((learningStyleStats.auditory / (learningStyleStats.visual + learningStyleStats.auditory + learningStyleStats.kinesthetic)) * 100)}%` 
                             }}
@@ -634,17 +635,17 @@ const TeacherDashboard = () => {
                       </div>
 
                       {/* Kinesthetic Learners */}
-                      <div className="bg-emerald-500/10 rounded-xl p-4 border border-emerald-400/30">
+                      <div className="bg-mint-soft rounded-xl p-4 border-2 border-ink">
                         <div className="flex items-center mb-3">
-                          <Hand className="w-8 h-8 text-emerald-400 mr-3" />
+                          <Hand className="w-8 h-8 text-emerald-700 mr-3" />
                           <div>
-                            <h4 className="text-lg font-bold text-white">{learningStyleStats.kinesthetic}</h4>
-                            <p className="text-emerald-200/70 text-sm">Kinesthetic Learners</p>
+                            <h4 className="text-lg font-bold text-ink">{learningStyleStats.kinesthetic}</h4>
+                            <p className="text-emerald-700 text-sm">Kinesthetic Learners</p>
                           </div>
                         </div>
-                        <div className="w-full bg-white/10 rounded-full h-2">
+                        <div className="w-full bg-paper rounded-full h-2">
                           <div 
-                            className="bg-gradient-to-r from-emerald-500 to-teal-500 h-2 rounded-full"
+                            className="bg-mint h-2 rounded-full"
                             style={{ 
                               width: `${Math.round((learningStyleStats.kinesthetic / (learningStyleStats.visual + learningStyleStats.auditory + learningStyleStats.kinesthetic)) * 100)}%` 
                             }}
@@ -656,56 +657,56 @@ const TeacherDashboard = () => {
                 )}
 
                 {/* Quick Actions */}
-                <div className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl rounded-2xl p-6 border border-white/20">
+                <div className="bg-paper rounded-2xl p-6 border-2 border-ink">
                   <div className="flex items-center mb-6">
-                    <div className="w-10 h-10 bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-full flex items-center justify-center mr-3">
-                      <Settings className="w-5 h-5 text-blue-400" />
+                    <div className="w-10 h-10 bg-brand-soft rounded-full flex items-center justify-center mr-3">
+                      <Settings className="w-5 h-5 text-brand" />
                     </div>
                     <div>
-                      <h3 className="text-xl font-bold text-white">Aksi Cepat</h3>
-                      <p className="text-white/70 text-sm">Kelola pembelajaran dengan mudah</p>
+                      <h3 className="text-xl font-bold text-ink">Aksi Cepat</h3>
+                      <p className="text-muted text-sm">Kelola pembelajaran dengan mudah</p>
                     </div>
                   </div>
                   <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
                     <button
                       onClick={() => setActiveTab('students')}
-                      className="flex flex-col items-center p-4 bg-blue-500/20 hover:bg-blue-500/30 border border-blue-400/30 rounded-xl text-blue-300 hover:text-white transition-all group"
+                      className="flex flex-col items-center p-4 bg-brand-soft border-2 border-ink rounded-xl text-ink transition-transform hover:-translate-y-0.5 group"
                     >
-                      <div className="w-10 h-10 bg-blue-500/20 rounded-full flex items-center justify-center mb-3 group-hover:bg-blue-500/30 transition-colors">
+                      <div className="w-10 h-10 bg-paper border-2 border-ink rounded-full flex items-center justify-center mb-3 transition-colors">
                         <Plus className="w-5 h-5" />
                       </div>
                       <span className="font-medium">Tambah Siswa</span>
-                      <span className="text-xs text-blue-200/70 mt-1">Daftarkan siswa baru</span>
+                      <span className="text-xs text-muted mt-1">Daftarkan siswa baru</span>
                     </button>
                     <button
                       onClick={() => setShowExcelImport(true)}
-                      className="flex flex-col items-center p-4 bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-400/30 rounded-xl text-emerald-300 hover:text-white transition-all group"
+                      className="flex flex-col items-center p-4 bg-mint-soft border-2 border-ink rounded-xl text-ink transition-transform hover:-translate-y-0.5 group"
                     >
-                      <div className="w-10 h-10 bg-emerald-500/20 rounded-full flex items-center justify-center mb-3 group-hover:bg-emerald-500/30 transition-colors">
+                      <div className="w-10 h-10 bg-paper border-2 border-ink rounded-full flex items-center justify-center mb-3 transition-colors">
                         <Upload className="w-5 h-5" />
                       </div>
                       <span className="font-medium">Import Excel</span>
-                      <span className="text-xs text-emerald-200/70 mt-1">Import data siswa</span>
+                      <span className="text-xs text-emerald-700 mt-1">Import data siswa</span>
                     </button>
                     <button
                       onClick={() => setActiveTab('questions')}
-                      className="flex flex-col items-center p-4 bg-purple-500/20 hover:bg-purple-500/30 border border-purple-400/30 rounded-xl text-purple-300 hover:text-white transition-all group"
+                      className="flex flex-col items-center p-4 bg-purple-100 border-2 border-ink rounded-xl text-ink transition-transform hover:-translate-y-0.5 group"
                     >
-                      <div className="w-10 h-10 bg-purple-500/20 rounded-full flex items-center justify-center mb-3 group-hover:bg-purple-500/30 transition-colors">
+                      <div className="w-10 h-10 bg-paper border-2 border-ink rounded-full flex items-center justify-center mb-3 transition-colors">
                         <FileSpreadsheet className="w-5 h-5" />
                       </div>
                       <span className="font-medium">Kelola Soal</span>
-                      <span className="text-xs text-purple-200/70 mt-1">{questions.length} soal tersedia</span>
+                      <span className="text-xs text-muted mt-1">{questions.length} soal tersedia</span>
                     </button>
                     <button
                       onClick={() => setActiveTab('packages')}
-                      className="flex flex-col items-center p-4 bg-yellow-500/20 hover:bg-yellow-500/30 border border-yellow-400/30 rounded-xl text-yellow-300 hover:text-white transition-all group"
+                      className="flex flex-col items-center p-4 bg-lamp-soft border-2 border-ink rounded-xl text-ink transition-transform hover:-translate-y-0.5 group"
                     >
-                      <div className="w-10 h-10 bg-yellow-500/20 rounded-full flex items-center justify-center mb-3 group-hover:bg-yellow-500/30 transition-colors">
+                      <div className="w-10 h-10 bg-paper border-2 border-ink rounded-full flex items-center justify-center mb-3 transition-colors">
                         <BookOpen className="w-5 h-5" />
                       </div>
                       <span className="font-medium">Paket Soal</span>
-                      <span className="text-xs text-yellow-200/70 mt-1">Atur ujian</span>
+                      <span className="text-xs text-muted mt-1">Atur ujian</span>
                     </button>
                   </div>
                 </div>
@@ -713,14 +714,14 @@ const TeacherDashboard = () => {
                 {/* Recent Activity & Performance Overview */}
                 <div className="grid lg:grid-cols-2 gap-6">
                   {/* Recent Student Activity */}
-                  <div className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl rounded-2xl p-6 border border-white/20">
+                  <div className="bg-paper rounded-2xl p-6 border-2 border-ink">
                     <div className="flex items-center mb-6">
-                      <div className="w-10 h-10 bg-gradient-to-br from-green-500/20 to-blue-500/20 rounded-full flex items-center justify-center mr-3">
-                        <Clock className="w-5 h-5 text-green-400" />
+                      <div className="w-10 h-10 bg-mint-soft rounded-full flex items-center justify-center mr-3">
+                        <Clock className="w-5 h-5 text-emerald-700" />
                       </div>
                       <div>
-                        <h3 className="text-xl font-bold text-white">Aktivitas Terbaru</h3>
-                        <p className="text-white/70 text-sm">Progress pembelajaran siswa</p>
+                        <h3 className="text-xl font-bold text-ink">Aktivitas Terbaru</h3>
+                        <p className="text-muted text-sm">Progress pembelajaran siswa</p>
                       </div>
                     </div>
                     <div className="space-y-3">
@@ -730,37 +731,37 @@ const TeacherDashboard = () => {
                         const hasLearningStyle = studentsLearningStyle[student.id];
                         
                         let activityText = "Baru mendaftar";
-                        let activityColor = "text-blue-300";
+                        let activityColor = "text-brand";
                         let activityIcon = Users;
                         
                         if (hasPostTest) {
                           activityText = `Post-test: ${student.progress?.postTestScore}%`;
-                          activityColor = "text-purple-300";
+                          activityColor = "text-purple-700";
                           activityIcon = Trophy;
                         } else if (hasPreTest) {
                           activityText = `Pre-test: ${student.progress?.preTestScore}%`;
-                          activityColor = "text-yellow-300";
+                          activityColor = "text-amber-700";
                           activityIcon = GraduationCap;
                         } else if (hasLearningStyle) {
                           activityText = `Tes gaya belajar selesai`;
-                          activityColor = "text-emerald-300";
+                          activityColor = "text-emerald-700";
                           activityIcon = Brain;
                         }
                         
                         const ActivityIcon = activityIcon;
                         
                         return (
-                          <div key={student.id} className="flex items-center justify-between p-3 bg-white/5 rounded-xl border border-white/10 hover:bg-white/10 transition-colors">
+                          <div key={student.id} className="flex items-center justify-between p-3 bg-paper rounded-xl border border-ink/20 hover:bg-lamp-soft transition-colors">
                             <div className="flex items-center space-x-3">
-                              <div className="w-10 h-10 bg-gradient-to-br from-blue-500/20 to-indigo-600/20 rounded-full flex items-center justify-center">
-                                <span className="text-blue-400 text-sm font-bold">{student.name.charAt(0)}</span>
+                              <div className="w-10 h-10 bg-brand-soft rounded-full flex items-center justify-center">
+                                <span className="text-brand text-sm font-bold">{student.name.charAt(0)}</span>
                               </div>
                               <div>
-                                <p className="text-white font-medium">{student.name}</p>
+                                <p className="text-ink font-medium">{student.name}</p>
                                 <div className="flex items-center space-x-2">
-                                  <span className="text-blue-200/70 text-xs">{student.class}</span>
+                                  <span className="text-muted text-xs">{student.class}</span>
                                   {hasLearningStyle && (
-                                    <span className="text-xs px-2 py-0.5 bg-purple-500/20 text-purple-300 rounded-full border border-purple-400/30">
+                                    <span className="text-xs px-2 py-0.5 bg-purple-100 text-purple-700 rounded-full border-2 border-ink">
                                       {studentsLearningStyle[student.id].primaryStyle}
                                     </span>
                                   )}
@@ -768,10 +769,10 @@ const TeacherDashboard = () => {
                               </div>
                             </div>
                             <div className="text-right flex items-center space-x-2">
-                              <ActivityIcon className="w-4 h-4 text-blue-400" />
+                              <ActivityIcon className="w-4 h-4 text-brand" />
                               <div>
                                 <p className={`text-sm font-medium ${activityColor}`}>{activityText}</p>
-                                <p className="text-blue-200/50 text-xs">
+                                <p className="text-muted text-xs">
                                   {index === 0 ? "Baru saja" : `${index + 1} hari lalu`}
                                 </p>
                               </div>
@@ -781,23 +782,23 @@ const TeacherDashboard = () => {
                       })}
                       {students.length === 0 && (
                         <div className="text-center py-8">
-                          <Users className="w-12 h-12 text-blue-400/50 mx-auto mb-3" />
-                          <p className="text-blue-200/70">Belum ada siswa yang terdaftar</p>
-                          <p className="text-blue-200/50 text-sm mt-1">Mulai dengan menambahkan siswa pertama</p>
+                          <Users className="w-12 h-12 text-brand mx-auto mb-3" />
+                          <p className="text-muted">Belum ada siswa yang terdaftar</p>
+                          <p className="text-muted text-sm mt-1">Mulai dengan menambahkan siswa pertama</p>
                         </div>
                       )}
                     </div>
                   </div>
 
                   {/* Class Performance Summary */}
-                  <div className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl rounded-2xl p-6 border border-white/20">
+                  <div className="bg-paper rounded-2xl p-6 border-2 border-ink">
                     <div className="flex items-center mb-6">
-                      <div className="w-10 h-10 bg-gradient-to-br from-orange-500/20 to-red-500/20 rounded-full flex items-center justify-center mr-3">
-                        <BarChart3 className="w-5 h-5 text-orange-400" />
+                      <div className="w-10 h-10 bg-lamp-soft rounded-full flex items-center justify-center mr-3">
+                        <BarChart3 className="w-5 h-5 text-amber-700" />
                       </div>
                       <div>
-                        <h3 className="text-xl font-bold text-white">Ringkasan Kelas</h3>
-                        <p className="text-white/70 text-sm">Analisis performa pembelajaran</p>
+                        <h3 className="text-xl font-bold text-ink">Ringkasan Kelas</h3>
+                        <p className="text-muted text-sm">Analisis performa pembelajaran</p>
                       </div>
                     </div>
                     
@@ -815,25 +816,25 @@ const TeacherDashboard = () => {
                           .reduce((sum, s) => sum + (s.progress?.postTestScore || 0), 0) / Math.max(postTestCompleted, 1);
                         
                         return (
-                          <div key={className} className="p-4 bg-white/5 rounded-xl border border-white/10">
+                          <div key={className} className="p-4 bg-paper rounded-xl border border-ink/20">
                             <div className="flex items-center justify-between mb-3">
-                              <h4 className="text-white font-semibold">{className}</h4>
-                              <span className="text-blue-300 text-sm font-medium">{classStudents.length} siswa</span>
+                              <h4 className="text-ink font-semibold">{className}</h4>
+                              <span className="text-brand text-sm font-medium">{classStudents.length} siswa</span>
                             </div>
                             
                             <div className="grid grid-cols-2 gap-4 text-sm">
-                              <div className="text-center p-2 bg-yellow-500/10 rounded-lg border border-yellow-400/20">
-                                <p className="text-yellow-300 font-bold text-lg">{Math.round(avgPreTest || 0)}%</p>
-                                <p className="text-yellow-200/70 text-xs">Pre-Test ({preTestCompleted}/{classStudents.length})</p>
+                              <div className="text-center p-3 bg-lamp-soft rounded-lg">
+                                <p className="text-amber-700 font-bold text-lg">{Math.round(avgPreTest || 0)}%</p>
+                                <p className="text-amber-700 text-xs">Pre-Test ({preTestCompleted}/{classStudents.length})</p>
                               </div>
-                              <div className="text-center p-2 bg-purple-500/10 rounded-lg border border-purple-400/20">
-                                <p className="text-purple-300 font-bold text-lg">{Math.round(avgPostTest || 0)}%</p>
-                                <p className="text-purple-200/70 text-xs">Post-Test ({postTestCompleted}/{classStudents.length})</p>
+                              <div className="text-center p-3 bg-purple-100 rounded-lg">
+                                <p className="text-purple-700 font-bold text-lg">{Math.round(avgPostTest || 0)}%</p>
+                                <p className="text-muted text-xs">Post-Test ({postTestCompleted}/{classStudents.length})</p>
                               </div>
                             </div>
                             
                             {avgPostTest > avgPreTest && avgPreTest > 0 && (
-                              <div className="mt-2 flex items-center justify-center text-green-400 text-xs">
+                              <div className="mt-2 flex items-center justify-center text-emerald-700 text-xs">
                                 <TrendingUp className="w-3 h-3 mr-1" />
                                 Peningkatan +{Math.round(avgPostTest - avgPreTest)}%
                               </div>
@@ -842,9 +843,9 @@ const TeacherDashboard = () => {
                         );
                       }) : (
                         <div className="text-center py-6">
-                          <BookOpen className="w-10 h-10 text-blue-400/50 mx-auto mb-3" />
-                          <p className="text-blue-200/70">Belum ada kelas aktif</p>
-                          <p className="text-blue-200/50 text-sm">Kelas akan muncul setelah menambahkan siswa</p>
+                          <BookOpen className="w-10 h-10 text-brand mx-auto mb-3" />
+                          <p className="text-muted">Belum ada kelas aktif</p>
+                          <p className="text-muted text-sm">Kelas akan muncul setelah menambahkan siswa</p>
                         </div>
                       )}
                     </div>
@@ -857,18 +858,18 @@ const TeacherDashboard = () => {
               <div className="space-y-6">
                 {/* Header Actions */}
                 <div className="flex flex-col md:flex-row md:items-center justify-between space-y-4 md:space-y-0">
-                  <h2 className="text-2xl font-bold text-white">Kelola Siswa</h2>
+                  <h2 className="text-2xl font-bold text-ink">Kelola Siswa</h2>
                   <div className="flex space-x-3">
                     <button
                       onClick={() => setShowAddStudent(!showAddStudent)}
-                      className="flex items-center px-4 py-2 bg-blue-500/20 hover:bg-blue-500/30 border border-blue-400/30 rounded-xl text-blue-300 hover:text-white transition-all"
+                      className="flex items-center px-4 py-2 bg-brand-soft border-2 border-ink rounded-xl text-brand hover:text-ink transition-all"
                     >
                       <Plus className="w-4 h-4 mr-2" />
                       Tambah Siswa
                     </button>
                     <button 
                       onClick={() => setShowExcelImport(true)}
-                      className="flex items-center px-4 py-2 bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-400/30 rounded-xl text-emerald-300 hover:text-white transition-all"
+                      className="flex items-center px-4 py-2 bg-mint-soft border-2 border-ink rounded-xl text-emerald-700 hover:text-ink transition-all"
                     >
                       <FileSpreadsheet className="w-4 h-4 mr-2" />
                       Import Excel
@@ -877,17 +878,17 @@ const TeacherDashboard = () => {
                 </div>
 
                 {/* Filters */}
-                <div className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl rounded-2xl p-6 border border-white/20">
+                <div className="bg-paper rounded-2xl p-6 border-2 border-ink">
                   <div className="flex flex-col md:flex-row md:items-center space-y-4 md:space-y-0 md:space-x-4">
                     <div className="flex-1">
                       <div className="relative">
-                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-blue-400" />
+                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-brand" />
                         <input
                           type="text"
                           placeholder="Cari nama atau NIS..."
                           value={searchTerm}
                           onChange={(e) => setSearchTerm(e.target.value)}
-                          className="w-full pl-10 pr-4 py-2 bg-white/10 border border-white/20 rounded-xl text-white placeholder-blue-200/50 focus:border-blue-400 focus:outline-none"
+                          className="w-full pl-10 pr-4 py-2 bg-paper border-2 border-ink rounded-xl text-ink placeholder-muted focus:border-ink focus:outline-none"
                         />
                       </div>
                     </div>
@@ -895,11 +896,11 @@ const TeacherDashboard = () => {
                       <select
                         value={selectedClass}
                         onChange={(e) => setSelectedClass(e.target.value)}
-                        className="w-full px-4 py-2 bg-white/10 border border-white/20 rounded-xl text-white focus:border-blue-400 focus:outline-none"
+                        className="w-full px-4 py-2 bg-paper border-2 border-ink rounded-xl text-ink focus:border-ink focus:outline-none"
                       >
                         <option value="">Semua Kelas</option>
                         {classes.map((className) => (
-                          <option key={className} value={className} className="bg-slate-800">
+                          <option key={className} value={className} className="bg-paper">
                             {className}
                           </option>
                         ))}
@@ -910,8 +911,8 @@ const TeacherDashboard = () => {
 
                 {/* Add Student Form */}
                 {showAddStudent && (
-                  <div className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl rounded-2xl p-6 border border-white/20">
-                    <h3 className="text-lg font-bold text-white mb-4">Tambah Siswa Baru</h3>
+                  <div className="bg-paper rounded-2xl p-6 border-2 border-ink">
+                    <h3 className="text-lg font-bold text-ink mb-4">Tambah Siswa Baru</h3>
                     <form onSubmit={handleAddStudent}>
                       <div className="grid md:grid-cols-2 gap-4 mb-4">
                         <input
@@ -919,7 +920,7 @@ const TeacherDashboard = () => {
                           placeholder="Nama lengkap siswa *"
                           value={newStudentForm.name}
                           onChange={(e) => setNewStudentForm({...newStudentForm, name: e.target.value})}
-                          className="px-4 py-2.5 bg-white/10 border border-white/20 rounded-xl text-white placeholder-blue-200/50 focus:border-blue-400 focus:outline-none"
+                          className="px-4 py-2.5 bg-paper border-2 border-ink rounded-xl text-ink placeholder-muted focus:border-ink focus:outline-none"
                           required
                         />
                         <input
@@ -927,7 +928,7 @@ const TeacherDashboard = () => {
                           placeholder="Nomor Induk Siswa (NIS) *"
                           value={newStudentForm.nis}
                           onChange={(e) => setNewStudentForm({...newStudentForm, nis: e.target.value})}
-                          className="px-4 py-2.5 bg-white/10 border border-white/20 rounded-xl text-white placeholder-blue-200/50 focus:border-blue-400 focus:outline-none"
+                          className="px-4 py-2.5 bg-paper border-2 border-ink rounded-xl text-ink placeholder-muted focus:border-ink focus:outline-none"
                           required
                         />
                         <input
@@ -935,7 +936,7 @@ const TeacherDashboard = () => {
                           placeholder="Kelas (contoh: X-IPA-1) *"
                           value={newStudentForm.class}
                           onChange={(e) => setNewStudentForm({...newStudentForm, class: e.target.value})}
-                          className="px-4 py-2.5 bg-white/10 border border-white/20 rounded-xl text-white placeholder-blue-200/50 focus:border-blue-400 focus:outline-none"
+                          className="px-4 py-2.5 bg-paper border-2 border-ink rounded-xl text-ink placeholder-muted focus:border-ink focus:outline-none"
                           required
                         />
                         <input
@@ -943,20 +944,20 @@ const TeacherDashboard = () => {
                           placeholder="Email (opsional)"
                           value={newStudentForm.email}
                           onChange={(e) => setNewStudentForm({...newStudentForm, email: e.target.value})}
-                          className="px-4 py-2.5 bg-white/10 border border-white/20 rounded-xl text-white placeholder-blue-200/50 focus:border-blue-400 focus:outline-none"
+                          className="px-4 py-2.5 bg-paper border-2 border-ink rounded-xl text-ink placeholder-muted focus:border-ink focus:outline-none"
                         />
                         <input
                           type="tel"
                           placeholder="Nomor Telepon (opsional)"
                           value={newStudentForm.phoneNumber}
                           onChange={(e) => setNewStudentForm({...newStudentForm, phoneNumber: e.target.value})}
-                          className="px-4 py-2.5 bg-white/10 border border-white/20 rounded-xl text-white placeholder-blue-200/50 focus:border-blue-400 focus:outline-none"
+                          className="px-4 py-2.5 bg-paper border-2 border-ink rounded-xl text-ink placeholder-muted focus:border-ink focus:outline-none"
                         />
                       </div>
                       <div className="flex space-x-3">
                         <button 
                           type="submit"
-                          className="px-6 py-2.5 bg-blue-500/20 hover:bg-blue-500/30 border border-blue-400/30 rounded-xl text-blue-300 hover:text-white transition-all font-medium"
+                          className="px-6 py-2.5 bg-brand-soft border-2 border-ink rounded-xl text-brand hover:text-ink transition-all font-medium"
                         >
                           Simpan Siswa
                         </button>
@@ -973,7 +974,7 @@ const TeacherDashboard = () => {
                               phoneNumber: ''
                             });
                           }}
-                          className="px-6 py-2.5 bg-gray-500/20 hover:bg-gray-500/30 border border-gray-400/30 rounded-xl text-gray-300 hover:text-white transition-all font-medium"
+                          className="px-6 py-2.5 bg-ink/20 hover:bg-ink/30 border-2 border-ink rounded-xl text-muted hover:text-ink transition-all font-medium"
                         >
                           Batal
                         </button>
@@ -983,52 +984,52 @@ const TeacherDashboard = () => {
                 )}
 
                 {/* Students Table */}
-                <div className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl rounded-2xl border border-white/20 overflow-hidden">
+                <div className="bg-paper rounded-2xl border-2 border-ink overflow-hidden">
                   <div className="overflow-x-auto">
                     <table className="w-full">
-                      <thead className="bg-white/5 border-b border-white/10">
+                      <thead className="bg-paper border-b border-ink/20">
                         <tr>
-                          <th className="px-6 py-4 text-left text-sm font-medium text-blue-200 uppercase tracking-wider">Siswa</th>
-                          <th className="px-6 py-4 text-left text-sm font-medium text-blue-200 uppercase tracking-wider">NIS</th>
-                          <th className="px-6 py-4 text-left text-sm font-medium text-blue-200 uppercase tracking-wider">Kelas</th>
-                          <th className="px-6 py-4 text-left text-sm font-medium text-blue-200 uppercase tracking-wider">Pre-Test</th>
-                          <th className="px-6 py-4 text-left text-sm font-medium text-blue-200 uppercase tracking-wider">Post-Test</th>
-                          <th className="px-6 py-4 text-left text-sm font-medium text-blue-200 uppercase tracking-wider">Gaya Belajar</th>
-                          <th className="px-6 py-4 text-left text-sm font-medium text-blue-200 uppercase tracking-wider">Aksi</th>
+                          <th className="px-6 py-4 text-left text-sm font-medium text-muted uppercase tracking-wider">Siswa</th>
+                          <th className="px-6 py-4 text-left text-sm font-medium text-muted uppercase tracking-wider">NIS</th>
+                          <th className="px-6 py-4 text-left text-sm font-medium text-muted uppercase tracking-wider">Kelas</th>
+                          <th className="px-6 py-4 text-left text-sm font-medium text-muted uppercase tracking-wider">Pre-Test</th>
+                          <th className="px-6 py-4 text-left text-sm font-medium text-muted uppercase tracking-wider">Post-Test</th>
+                          <th className="px-6 py-4 text-left text-sm font-medium text-muted uppercase tracking-wider">Gaya Belajar</th>
+                          <th className="px-6 py-4 text-left text-sm font-medium text-muted uppercase tracking-wider">Aksi</th>
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-white/10">
+                      <tbody className="divide-y divide-ink/15">
                         {filteredStudents.map((student) => (
-                          <tr key={student.id} className="hover:bg-white/5">
+                          <tr key={student.id} className="hover:bg-lamp-soft">
                             <td className="px-6 py-4">
                               <div className="flex items-center">
-                                <div className="w-8 h-8 bg-gradient-to-br from-blue-500/20 to-indigo-600/20 rounded-full flex items-center justify-center mr-3">
-                                  <span className="text-blue-400 text-sm font-bold">{student.name.charAt(0)}</span>
+                                <div className="w-8 h-8 bg-brand-soft rounded-full flex items-center justify-center mr-3">
+                                  <span className="text-brand text-sm font-bold">{student.name.charAt(0)}</span>
                                 </div>
                                 <div>
-                                  <p className="text-white font-medium">{student.name}</p>
-                                  {student.email && <p className="text-blue-200/70 text-sm">{student.email}</p>}
+                                  <p className="text-ink font-medium">{student.name}</p>
+                                  {student.email && <p className="text-muted text-sm">{student.email}</p>}
                                 </div>
                               </div>
                             </td>
-                            <td className="px-6 py-4 text-white">{student.nis}</td>
+                            <td className="px-6 py-4 text-ink">{student.nis}</td>
                             <td className="px-6 py-4">
-                              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-500/20 text-blue-300 border border-blue-400/30">
+                              <span className="inline-flex items-center whitespace-nowrap px-3 py-1 rounded-full text-xs font-semibold bg-brand-soft text-brand border-2 border-ink">
                                 {student.class}
                               </span>
                             </td>
-                            <td className="px-6 py-4 text-white">
+                            <td className="px-6 py-4 text-ink">
                               {student.progress?.preTestScore !== undefined ? (
-                                <span className="text-emerald-300 font-bold">{student.progress.preTestScore}%</span>
+                                <span className="text-emerald-700 font-bold">{student.progress.preTestScore}%</span>
                               ) : (
-                                <span className="text-gray-400">-</span>
+                                <span className="text-muted">-</span>
                               )}
                             </td>
-                            <td className="px-6 py-4 text-white">
+                            <td className="px-6 py-4 text-ink">
                               {student.progress?.postTestScore !== undefined ? (
-                                <span className="text-purple-300 font-bold">{student.progress.postTestScore}%</span>
+                                <span className="text-purple-700 font-bold">{student.progress.postTestScore}%</span>
                               ) : (
-                                <span className="text-gray-400">-</span>
+                                <span className="text-muted">-</span>
                               )}
                             </td>
                             <td className="px-6 py-4">
@@ -1036,46 +1037,46 @@ const TeacherDashboard = () => {
                                 <div className="flex items-center">
                                   {studentsLearningStyle[student.id].primaryStyle === 'visual' && (
                                     <div className="flex items-center">
-                                      <Eye className="w-4 h-4 text-blue-400 mr-2" />
-                                      <span className="text-blue-300 text-sm font-medium">Visual</span>
+                                      <Eye className="w-4 h-4 text-brand mr-2" />
+                                      <span className="text-brand text-sm font-medium">Visual</span>
                                     </div>
                                   )}
                                   {studentsLearningStyle[student.id].primaryStyle === 'auditory' && (
                                     <div className="flex items-center">
-                                      <Ear className="w-4 h-4 text-purple-400 mr-2" />
-                                      <span className="text-purple-300 text-sm font-medium">Auditory</span>
+                                      <Ear className="w-4 h-4 text-purple-700 mr-2" />
+                                      <span className="text-purple-700 text-sm font-medium">Auditory</span>
                                     </div>
                                   )}
                                   {studentsLearningStyle[student.id].primaryStyle === 'kinesthetic' && (
                                     <div className="flex items-center">
-                                      <Hand className="w-4 h-4 text-emerald-400 mr-2" />
-                                      <span className="text-emerald-300 text-sm font-medium">Kinesthetic</span>
+                                      <Hand className="w-4 h-4 text-emerald-700 mr-2" />
+                                      <span className="text-emerald-700 text-sm font-medium">Kinesthetic</span>
                                     </div>
                                   )}
                                 </div>
                               ) : (
-                                <span className="text-gray-400 text-sm">Belum tes</span>
+                                <span className="text-muted text-sm">Belum tes</span>
                               )}
                             </td>
                             <td className="px-6 py-4">
                               <div className="flex space-x-2">
                                 <button 
                                   onClick={() => handleViewStudent(student)}
-                                  className="p-1.5 bg-blue-500/20 hover:bg-blue-500/30 border border-blue-400/30 rounded-lg text-blue-300 hover:text-white transition-all"
+                                  className="p-1.5 bg-brand-soft border-2 border-ink rounded-lg text-brand hover:text-ink transition-all"
                                   title="Lihat Detail"
                                 >
                                   <Eye className="w-4 h-4" />
                                 </button>
                                 <button 
                                   onClick={() => handleEditStudent(student)}
-                                  className="p-1.5 bg-yellow-500/20 hover:bg-yellow-500/30 border border-yellow-400/30 rounded-lg text-yellow-300 hover:text-white transition-all"
+                                  className="p-1.5 bg-lamp-soft border-2 border-ink rounded-lg text-amber-700 hover:text-ink transition-all"
                                   title="Edit Data"
                                 >
                                   <Edit className="w-4 h-4" />
                                 </button>
                                 <button 
                                   onClick={() => handleDeleteStudent(student)}
-                                  className="p-1.5 bg-red-500/20 hover:bg-red-500/30 border border-red-400/30 rounded-lg text-red-300 hover:text-white transition-all"
+                                  className="p-1.5 bg-coral-soft border-2 border-ink rounded-lg text-red-600 hover:text-ink transition-all"
                                   title="Hapus Siswa"
                                 >
                                   <Trash2 className="w-4 h-4" />
@@ -1090,9 +1091,9 @@ const TeacherDashboard = () => {
                   
                   {filteredStudents.length === 0 && (
                     <div className="text-center py-12">
-                      <Users className="w-12 h-12 text-blue-400/50 mx-auto mb-4" />
-                      <p className="text-blue-200/70 text-lg">Belum ada siswa</p>
-                      <p className="text-blue-200/50 text-sm">Tambahkan siswa untuk mulai mengelola pembelajaran</p>
+                      <Users className="w-12 h-12 text-brand mx-auto mb-4" />
+                      <p className="text-muted text-lg">Belum ada siswa</p>
+                      <p className="text-muted text-sm">Tambahkan siswa untuk mulai mengelola pembelajaran</p>
                     </div>
                   )}
                 </div>
@@ -1102,7 +1103,7 @@ const TeacherDashboard = () => {
             {activeTab === 'questions' && (
               <div className="space-y-6">
                 {questionView === 'create' || questionView === 'edit' ? (
-                  <div className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl rounded-2xl p-6 border border-white/20">
+                  <div className="bg-paper rounded-2xl p-6 border-2 border-ink">
                     <TeacherQuestionForm
                       onSubmit={handleSubmitQuestion}
                       onCancel={() => setQuestionView('list')}
@@ -1113,9 +1114,9 @@ const TeacherDashboard = () => {
                   <>
                     {/* Header Actions */}
                     <div className="flex flex-col md:flex-row md:items-center justify-between space-y-4 md:space-y-0">
-                      <h2 className="text-2xl font-bold text-white">Kelola Soal</h2>
+                      <h2 className="text-2xl font-bold text-ink">Kelola Soal</h2>
                       <div className="flex space-x-3">
-                        <label className="flex items-center px-4 py-2 bg-blue-500/20 hover:bg-blue-500/30 border border-blue-400/30 rounded-xl text-blue-300 hover:text-white transition-all cursor-pointer">
+                        <label className="flex items-center px-4 py-2 bg-brand-soft border-2 border-ink rounded-xl text-brand hover:text-ink transition-all cursor-pointer">
                           <Upload className="w-4 h-4 mr-2" />
                           Import Soal
                           <input
@@ -1128,14 +1129,14 @@ const TeacherDashboard = () => {
                         <button
                           onClick={handleExportQuestions}
                           disabled={questions.length === 0}
-                          className="flex items-center px-4 py-2 bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-400/30 rounded-xl text-emerald-300 hover:text-white transition-all disabled:opacity-50"
+                          className="flex items-center px-4 py-2 bg-mint-soft border-2 border-ink rounded-xl text-emerald-700 hover:text-ink transition-all disabled:opacity-50"
                         >
                           <Download className="w-4 h-4 mr-2" />
                           Export ({questions.length})
                         </button>
                         <button
                           onClick={handleCreateQuestion}
-                          className="flex items-center px-4 py-2 bg-purple-500/20 hover:bg-purple-500/30 border border-purple-400/30 rounded-xl text-purple-300 hover:text-white transition-all"
+                          className="flex items-center px-4 py-2 bg-purple-100 border-2 border-ink rounded-xl text-purple-700 hover:text-ink transition-all"
                         >
                           <Plus className="w-4 h-4 mr-2" />
                           Buat Soal Baru
@@ -1145,104 +1146,104 @@ const TeacherDashboard = () => {
 
                     {/* Statistics */}
                     <div className="grid md:grid-cols-4 gap-6">
-                      <div className="bg-gradient-to-br from-blue-500/20 to-blue-600/20 backdrop-blur-xl rounded-2xl p-6 border border-blue-400/30">
+                      <div className="bg-brand-soft rounded-2xl p-6 border-2 border-ink">
                         <div className="flex items-center justify-between mb-4">
-                          <FileSpreadsheet className="w-8 h-8 text-blue-400" />
-                          <span className="text-2xl font-bold text-white">{questions.length}</span>
+                          <FileSpreadsheet className="w-8 h-8 text-brand" />
+                          <span className="text-2xl font-bold text-ink">{questions.length}</span>
                         </div>
-                        <p className="text-blue-200 font-medium">Total Soal</p>
+                        <p className="text-muted font-medium">Total Soal</p>
                       </div>
                       
-                      <div className="bg-gradient-to-br from-emerald-500/20 to-emerald-600/20 backdrop-blur-xl rounded-2xl p-6 border border-emerald-400/30">
+                      <div className="bg-mint-soft rounded-2xl p-6 border-2 border-ink">
                         <div className="flex items-center justify-between mb-4">
-                          <Settings className="w-8 h-8 text-emerald-400" />
-                          <span className="text-2xl font-bold text-white">
+                          <Settings className="w-8 h-8 text-emerald-700" />
+                          <span className="text-2xl font-bold text-ink">
                             {questions.filter(q => q.questionType === 'circuit').length}
                           </span>
                         </div>
-                        <p className="text-emerald-200 font-medium">Konstruksi Rangkaian</p>
+                        <p className="text-emerald-700 font-medium">Konstruksi Rangkaian</p>
                       </div>
                       
-                      <div className="bg-gradient-to-br from-yellow-500/20 to-yellow-600/20 backdrop-blur-xl rounded-2xl p-6 border border-yellow-400/30">
+                      <div className="bg-lamp-soft rounded-2xl p-6 border-2 border-ink">
                         <div className="flex items-center justify-between mb-4">
-                          <Brain className="w-8 h-8 text-yellow-400" />
-                          <span className="text-2xl font-bold text-white">
+                          <Brain className="w-8 h-8 text-amber-700" />
+                          <span className="text-2xl font-bold text-ink">
                             {questions.filter(q => q.questionType === 'conceptual').length}
                           </span>
                         </div>
-                        <p className="text-yellow-200 font-medium">Konseptual</p>
+                        <p className="text-amber-700 font-medium">Konseptual</p>
                       </div>
                       
-                      <div className="bg-gradient-to-br from-purple-500/20 to-purple-600/20 backdrop-blur-xl rounded-2xl p-6 border border-purple-400/30">
+                      <div className="bg-purple-100 rounded-2xl p-6 border-2 border-ink">
                         <div className="flex items-center justify-between mb-4">
-                          <Search className="w-8 h-8 text-purple-400" />
-                          <span className="text-2xl font-bold text-white">
+                          <Search className="w-8 h-8 text-purple-700" />
+                          <span className="text-2xl font-bold text-ink">
                             {questions.filter(q => q.questionType === 'circuitAnalysis').length}
                           </span>
                         </div>
-                        <p className="text-purple-200 font-medium">Analisis Rangkaian</p>
+                        <p className="text-muted font-medium">Analisis Rangkaian</p>
                       </div>
                     </div>
 
                     {/* Questions List */}
-                    <div className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl rounded-2xl border border-white/20">
+                    <div className="bg-paper rounded-2xl border-2 border-ink">
                       {questions.length === 0 ? (
                         <div className="p-12 text-center">
-                          <div className="text-blue-400/50 text-6xl mb-4">📝</div>
-                          <h3 className="text-lg font-medium text-white mb-2">Belum ada soal</h3>
-                          <p className="text-blue-200/70 mb-4">
+                          <div className="text-brand text-6xl mb-4"><Ico n="file" /></div>
+                          <h3 className="text-lg font-medium text-ink mb-2">Belum ada soal</h3>
+                          <p className="text-muted mb-4">
                             Mulai membuat soal pertama untuk pembelajaran rangkaian listrik
                           </p>
                           <button
                             onClick={handleCreateQuestion}
-                            className="px-6 py-3 bg-purple-500/20 hover:bg-purple-500/30 border border-purple-400/30 rounded-xl text-purple-300 hover:text-white transition-all"
+                            className="px-6 py-3 bg-purple-100 border-2 border-ink rounded-xl text-purple-700 hover:text-ink transition-all"
                           >
                             Buat Soal Pertama
                           </button>
                         </div>
                       ) : (
-                        <div className="divide-y divide-white/10">
+                        <div className="divide-y divide-ink/15">
                           {questions.map((question) => (
-                            <div key={question.id} className="p-6 hover:bg-white/5 transition-colors">
+                            <div key={question.id} className="p-6 hover:bg-lamp-soft transition-colors">
                               <div className="flex items-start justify-between">
                                 <div className="flex-1">
                                   <div className="flex items-center space-x-3 mb-2">
-                                    <h3 className="text-lg font-medium text-white">
+                                    <h3 className="text-lg font-medium text-ink">
                                       {question.title}
                                     </h3>
-                                    <span className="text-xs bg-blue-500/20 text-blue-300 px-2 py-1 rounded-full border border-blue-400/30">
+                                    <span className="text-xs bg-brand-soft text-brand px-2 py-1 rounded-full border-2 border-ink">
                                       {getQuestionTypeLabel(question.questionType)}
                                     </span>
                                     <span className={`text-xs px-2 py-1 rounded-full ${getDifficultyColor(question.difficulty)}`}>
                                       {question.difficulty.toUpperCase()}
                                     </span>
                                   </div>
-                                  <p className="text-blue-200/70 text-sm mb-3 line-clamp-3">
+                                  <p className="text-muted text-sm mb-3 line-clamp-3">
                                     {question.description}
                                   </p>
                                   
                                   {/* Question-specific details */}
-                                  <div className="text-xs text-blue-200/50 space-x-4">
+                                  <div className="text-xs text-muted space-x-4">
                                     {question.questionType === 'circuit' && (
                                       <>
-                                        <span>🔧 {(question as any).circuitType}</span>
-                                        <span>⚡ {(question as any).voltage}V</span>
+                                        <span><Ico n="wrench" /> {(question as any).circuitType}</span>
+                                        <span><Ico n="zap" /> {(question as any).voltage}V</span>
                                         {(question as any).targetCurrent && (
-                                          <span>🎯 {(question as any).targetCurrent}A</span>
+                                          <span><Ico n="target" /> {(question as any).targetCurrent}A</span>
                                         )}
                                       </>
                                     )}
                                     
                                     {question.questionType === 'conceptual' && (
-                                      <span>💡 {(question as any).choices?.length || 0} pilihan jawaban</span>
+                                      <span><Ico n="lightbulb" /> {(question as any).choices?.length || 0} pilihan jawaban</span>
                                     )}
                                     
                                     {question.questionType === 'circuitAnalysis' && (
-                                      <span>🔍 Target: {(question as any).targetLamp}</span>
+                                      <span><Ico n="search" /> Target: {(question as any).targetLamp}</span>
                                     )}
                                     
                                     {question.questionType === 'circuitOrdering' && (
-                                      <span>📊 {(question as any).circuits?.length || 0} rangkaian</span>
+                                      <span><Ico n="chart" /> {(question as any).circuits?.length || 0} rangkaian</span>
                                     )}
                                   </div>
                                 </div>
@@ -1250,13 +1251,13 @@ const TeacherDashboard = () => {
                                 <div className="flex space-x-2 ml-4">
                                   <button
                                     onClick={() => handleEditQuestion(question)}
-                                    className="p-1.5 bg-blue-500/20 hover:bg-blue-500/30 border border-blue-400/30 rounded-lg text-blue-300 hover:text-white transition-all"
+                                    className="p-1.5 bg-brand-soft border-2 border-ink rounded-lg text-brand hover:text-ink transition-all"
                                   >
                                     <Edit className="w-4 h-4" />
                                   </button>
                                   <button
                                     onClick={() => handleDeleteQuestion(question.id)}
-                                    className="p-1.5 bg-red-500/20 hover:bg-red-500/30 border border-red-400/30 rounded-lg text-red-300 hover:text-white transition-all"
+                                    className="p-1.5 bg-coral-soft border-2 border-ink rounded-lg text-red-600 hover:text-ink transition-all"
                                   >
                                     <Trash2 className="w-4 h-4" />
                                   </button>
@@ -1275,9 +1276,9 @@ const TeacherDashboard = () => {
             {/* Other tabs content can be added here */}
             {activeTab === 'materials' && (
               <div className="text-center py-12">
-                <BookOpen className="w-16 h-16 text-blue-400/50 mx-auto mb-4" />
-                <h3 className="text-xl font-bold text-white mb-2">Kelola Materi</h3>
-                <p className="text-blue-200/70">Fitur ini akan segera hadir</p>
+                <BookOpen className="w-16 h-16 text-brand mx-auto mb-4" />
+                <h3 className="text-xl font-bold text-ink mb-2">Kelola Materi</h3>
+                <p className="text-muted">Fitur ini akan segera hadir</p>
               </div>
             )}
 
@@ -1297,9 +1298,9 @@ const TeacherDashboard = () => {
 
             {activeTab === 'settings' && (
               <div className="text-center py-12">
-                <Settings className="w-16 h-16 text-blue-400/50 mx-auto mb-4" />
-                <h3 className="text-xl font-bold text-white mb-2">Pengaturan</h3>
-                <p className="text-blue-200/70">Fitur ini akan segera hadir</p>
+                <Settings className="w-16 h-16 text-brand mx-auto mb-4" />
+                <h3 className="text-xl font-bold text-ink mb-2">Pengaturan</h3>
+                <p className="text-muted">Fitur ini akan segera hadir</p>
               </div>
             )}
           </div>
@@ -1316,30 +1317,30 @@ const TeacherDashboard = () => {
 
       {/* Student Detail Modal */}
       {showStudentDetail && viewingStudent && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-gradient-to-br from-slate-900 via-blue-950 to-indigo-900 rounded-2xl border border-white/20 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-paper rounded-2xl border-2 border-ink max-w-2xl w-full max-h-[90vh] overflow-y-auto">
             <div className="p-6">
               <div className="flex items-center justify-between mb-6">
-                <h3 className="text-2xl font-bold text-white">Detail Siswa</h3>
+                <h3 className="text-2xl font-bold text-ink">Detail Siswa</h3>
                 <button
                   onClick={() => setShowStudentDetail(false)}
-                  className="p-2 bg-white/10 hover:bg-white/20 rounded-lg text-white transition-all"
+                  className="p-2 bg-paper hover:bg-lamp-soft rounded-lg text-ink transition-all"
                 >
-                  ✕
+                  <Ico n="x" />
                 </button>
               </div>
 
               <div className="space-y-6">
                 {/* Student Info */}
-                <div className="bg-gradient-to-br from-white/10 to-white/5 rounded-xl p-6 border border-white/20">
+                <div className="bg-paper rounded-xl p-6 border-2 border-ink">
                   <div className="flex items-center mb-6">
-                    <div className="w-20 h-20 bg-gradient-to-br from-blue-500/20 to-indigo-600/20 rounded-full flex items-center justify-center mr-4">
-                      <span className="text-blue-400 text-3xl font-bold">{viewingStudent.name.charAt(0)}</span>
+                    <div className="w-20 h-20 bg-brand-soft rounded-full flex items-center justify-center mr-4">
+                      <span className="text-brand text-3xl font-bold">{viewingStudent.name.charAt(0)}</span>
                     </div>
                     <div>
-                      <h4 className="text-2xl font-bold text-white">{viewingStudent.name}</h4>
-                      <p className="text-blue-200/70">NIS: {viewingStudent.nis}</p>
-                      <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-500/20 text-blue-300 border border-blue-400/30 mt-2">
+                      <h4 className="text-2xl font-bold text-ink">{viewingStudent.name}</h4>
+                      <p className="text-muted">NIS: {viewingStudent.nis}</p>
+                      <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-brand-soft text-brand border-2 border-ink mt-2">
                         {viewingStudent.class}
                       </span>
                     </div>
@@ -1347,45 +1348,45 @@ const TeacherDashboard = () => {
 
                   <div className="grid md:grid-cols-2 gap-4">
                     <div>
-                      <p className="text-blue-200/70 text-sm mb-1">Email</p>
-                      <p className="text-white font-medium">{viewingStudent.email || '-'}</p>
+                      <p className="text-muted text-sm mb-1">Email</p>
+                      <p className="text-ink font-medium">{viewingStudent.email || '-'}</p>
                     </div>
                     <div>
-                      <p className="text-blue-200/70 text-sm mb-1">Nomor Telepon</p>
-                      <p className="text-white font-medium">{viewingStudent.phoneNumber || '-'}</p>
+                      <p className="text-muted text-sm mb-1">Nomor Telepon</p>
+                      <p className="text-ink font-medium">{viewingStudent.phoneNumber || '-'}</p>
                     </div>
                   </div>
                 </div>
 
                 {/* Learning Style */}
                 {studentsLearningStyle[viewingStudent.id] && (
-                  <div className="bg-gradient-to-br from-white/10 to-white/5 rounded-xl p-6 border border-white/20">
-                    <h5 className="text-lg font-bold text-white mb-4">Gaya Belajar</h5>
+                  <div className="bg-paper rounded-xl p-6 border-2 border-ink">
+                    <h5 className="text-lg font-bold text-ink mb-4">Gaya Belajar</h5>
                     <div className="flex items-center space-x-4">
                       {studentsLearningStyle[viewingStudent.id].primaryStyle === 'visual' && (
                         <>
-                          <Eye className="w-8 h-8 text-blue-400" />
+                          <Eye className="w-8 h-8 text-brand" />
                           <div>
-                            <p className="text-white font-bold text-xl">Visual Learner</p>
-                            <p className="text-blue-200/70 text-sm">Belajar lebih baik dengan gambar dan diagram</p>
+                            <p className="text-ink font-bold text-xl">Visual Learner</p>
+                            <p className="text-muted text-sm">Belajar lebih baik dengan gambar dan diagram</p>
                           </div>
                         </>
                       )}
                       {studentsLearningStyle[viewingStudent.id].primaryStyle === 'auditory' && (
                         <>
-                          <Ear className="w-8 h-8 text-purple-400" />
+                          <Ear className="w-8 h-8 text-purple-700" />
                           <div>
-                            <p className="text-white font-bold text-xl">Auditory Learner</p>
-                            <p className="text-purple-200/70 text-sm">Belajar lebih baik dengan mendengar</p>
+                            <p className="text-ink font-bold text-xl">Auditory Learner</p>
+                            <p className="text-muted text-sm">Belajar lebih baik dengan mendengar</p>
                           </div>
                         </>
                       )}
                       {studentsLearningStyle[viewingStudent.id].primaryStyle === 'kinesthetic' && (
                         <>
-                          <Hand className="w-8 h-8 text-emerald-400" />
+                          <Hand className="w-8 h-8 text-emerald-700" />
                           <div>
-                            <p className="text-white font-bold text-xl">Kinesthetic Learner</p>
-                            <p className="text-emerald-200/70 text-sm">Belajar lebih baik dengan praktik langsung</p>
+                            <p className="text-ink font-bold text-xl">Kinesthetic Learner</p>
+                            <p className="text-emerald-700 text-sm">Belajar lebih baik dengan praktik langsung</p>
                           </div>
                         </>
                       )}
@@ -1394,38 +1395,38 @@ const TeacherDashboard = () => {
                 )}
 
                 {/* Progress */}
-                <div className="bg-gradient-to-br from-white/10 to-white/5 rounded-xl p-6 border border-white/20">
-                  <h5 className="text-lg font-bold text-white mb-4">Progress Pembelajaran</h5>
+                <div className="bg-paper rounded-xl p-6 border-2 border-ink">
+                  <h5 className="text-lg font-bold text-ink mb-4">Progress Pembelajaran</h5>
                   <div className="grid md:grid-cols-2 gap-4">
-                    <div className="bg-yellow-500/10 rounded-lg p-4 border border-yellow-400/30">
+                    <div className="bg-lamp-soft rounded-lg p-4 border-2 border-ink">
                       <div className="flex items-center justify-between mb-2">
-                        <span className="text-yellow-200 text-sm">Pre-Test</span>
-                        <Trophy className="w-5 h-5 text-yellow-400" />
+                        <span className="text-amber-700 text-sm">Pre-Test</span>
+                        <Trophy className="w-5 h-5 text-amber-700" />
                       </div>
-                      <p className="text-3xl font-bold text-yellow-300">
+                      <p className="text-3xl font-bold text-amber-700">
                         {viewingStudent.progress?.preTestScore !== undefined ? `${viewingStudent.progress.preTestScore}%` : '-'}
                       </p>
-                      <p className="text-yellow-200/70 text-xs mt-1">
+                      <p className="text-amber-700 text-xs mt-1">
                         {viewingStudent.progress?.preTestScore !== undefined ? 'Selesai' : 'Belum mengerjakan'}
                       </p>
                     </div>
-                    <div className="bg-purple-500/10 rounded-lg p-4 border border-purple-400/30">
+                    <div className="bg-purple-100 rounded-lg p-4 border-2 border-ink">
                       <div className="flex items-center justify-between mb-2">
-                        <span className="text-purple-200 text-sm">Post-Test</span>
-                        <Trophy className="w-5 h-5 text-purple-400" />
+                        <span className="text-muted text-sm">Post-Test</span>
+                        <Trophy className="w-5 h-5 text-purple-700" />
                       </div>
-                      <p className="text-3xl font-bold text-purple-300">
+                      <p className="text-3xl font-bold text-purple-700">
                         {viewingStudent.progress?.postTestScore !== undefined ? `${viewingStudent.progress.postTestScore}%` : '-'}
                       </p>
-                      <p className="text-purple-200/70 text-xs mt-1">
+                      <p className="text-muted text-xs mt-1">
                         {viewingStudent.progress?.postTestScore !== undefined ? 'Selesai' : 'Belum mengerjakan'}
                       </p>
                     </div>
                   </div>
 
                   {viewingStudent.progress?.preTestScore !== undefined && viewingStudent.progress?.postTestScore !== undefined && (
-                    <div className="mt-4 p-3 bg-green-500/10 rounded-lg border border-green-400/30">
-                      <div className="flex items-center justify-center text-green-400">
+                    <div className="mt-4 p-3 bg-mint-soft rounded-lg border-2 border-ink">
+                      <div className="flex items-center justify-center text-emerald-700">
                         <TrendingUp className="w-5 h-5 mr-2" />
                         <span className="font-bold">
                           Peningkatan: +{Math.round((viewingStudent.progress.postTestScore || 0) - (viewingStudent.progress.preTestScore || 0))}%
@@ -1442,13 +1443,13 @@ const TeacherDashboard = () => {
                     setShowStudentDetail(false);
                     handleEditStudent(viewingStudent);
                   }}
-                  className="px-6 py-2 bg-blue-500/20 hover:bg-blue-500/30 border border-blue-400/30 rounded-xl text-blue-300 hover:text-white transition-all"
+                  className="px-6 py-2 bg-brand-soft border-2 border-ink rounded-xl text-brand hover:text-ink transition-all"
                 >
                   Edit Data
                 </button>
                 <button
                   onClick={() => setShowStudentDetail(false)}
-                  className="px-6 py-2 bg-gray-500/20 hover:bg-gray-500/30 border border-gray-400/30 rounded-xl text-gray-300 hover:text-white transition-all"
+                  className="px-6 py-2 bg-ink/20 hover:bg-ink/30 border-2 border-ink rounded-xl text-muted hover:text-ink transition-all"
                 >
                   Tutup
                 </button>
@@ -1460,16 +1461,16 @@ const TeacherDashboard = () => {
 
       {/* Edit Student Modal */}
       {showEditStudent && editingStudent && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-gradient-to-br from-slate-900 via-blue-950 to-indigo-900 rounded-2xl border border-white/20 max-w-2xl w-full">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-paper rounded-2xl border-2 border-ink max-w-2xl w-full">
             <div className="p-6">
               <div className="flex items-center justify-between mb-6">
-                <h3 className="text-2xl font-bold text-white">Edit Data Siswa</h3>
+                <h3 className="text-2xl font-bold text-ink">Edit Data Siswa</h3>
                 <button
                   onClick={() => setShowEditStudent(false)}
-                  className="p-2 bg-white/10 hover:bg-white/20 rounded-lg text-white transition-all"
+                  className="p-2 bg-paper hover:bg-lamp-soft rounded-lg text-ink transition-all"
                 >
-                  ✕
+                  <Ico n="x" />
                 </button>
               </div>
 
@@ -1479,52 +1480,52 @@ const TeacherDashboard = () => {
               }} className="space-y-4">
                 <div className="grid md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-blue-200 mb-2">Nama Lengkap *</label>
+                    <label className="block text-sm font-medium text-muted mb-2">Nama Lengkap *</label>
                     <input
                       type="text"
                       value={editingStudent.name}
                       onChange={(e) => setEditingStudent({...editingStudent, name: e.target.value})}
-                      className="w-full px-4 py-2.5 bg-white/10 border border-white/20 rounded-xl text-white placeholder-blue-200/50 focus:border-blue-400 focus:outline-none"
+                      className="w-full px-4 py-2.5 bg-paper border-2 border-ink rounded-xl text-ink placeholder-muted focus:border-ink focus:outline-none"
                       required
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-blue-200 mb-2">NIS *</label>
+                    <label className="block text-sm font-medium text-muted mb-2">NIS *</label>
                     <input
                       type="text"
                       value={editingStudent.nis}
                       onChange={(e) => setEditingStudent({...editingStudent, nis: e.target.value})}
-                      className="w-full px-4 py-2.5 bg-white/10 border border-white/20 rounded-xl text-white placeholder-blue-200/50 focus:border-blue-400 focus:outline-none"
+                      className="w-full px-4 py-2.5 bg-paper border-2 border-ink rounded-xl text-ink placeholder-muted focus:border-ink focus:outline-none"
                       required
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-blue-200 mb-2">Kelas *</label>
+                    <label className="block text-sm font-medium text-muted mb-2">Kelas *</label>
                     <input
                       type="text"
                       value={editingStudent.class}
                       onChange={(e) => setEditingStudent({...editingStudent, class: e.target.value})}
                       placeholder="Contoh: X-IPA-1"
-                      className="w-full px-4 py-2.5 bg-white/10 border border-white/20 rounded-xl text-white placeholder-blue-200/50 focus:border-blue-400 focus:outline-none"
+                      className="w-full px-4 py-2.5 bg-paper border-2 border-ink rounded-xl text-ink placeholder-muted focus:border-ink focus:outline-none"
                       required
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-blue-200 mb-2">Email</label>
+                    <label className="block text-sm font-medium text-muted mb-2">Email</label>
                     <input
                       type="email"
                       value={editingStudent.email || ''}
                       onChange={(e) => setEditingStudent({...editingStudent, email: e.target.value})}
-                      className="w-full px-4 py-2.5 bg-white/10 border border-white/20 rounded-xl text-white placeholder-blue-200/50 focus:border-blue-400 focus:outline-none"
+                      className="w-full px-4 py-2.5 bg-paper border-2 border-ink rounded-xl text-ink placeholder-muted focus:border-ink focus:outline-none"
                     />
                   </div>
                   <div className="md:col-span-2">
-                    <label className="block text-sm font-medium text-blue-200 mb-2">Nomor Telepon</label>
+                    <label className="block text-sm font-medium text-muted mb-2">Nomor Telepon</label>
                     <input
                       type="tel"
                       value={editingStudent.phoneNumber || ''}
                       onChange={(e) => setEditingStudent({...editingStudent, phoneNumber: e.target.value})}
-                      className="w-full px-4 py-2.5 bg-white/10 border border-white/20 rounded-xl text-white placeholder-blue-200/50 focus:border-blue-400 focus:outline-none"
+                      className="w-full px-4 py-2.5 bg-paper border-2 border-ink rounded-xl text-ink placeholder-muted focus:border-ink focus:outline-none"
                     />
                   </div>
                 </div>
@@ -1533,13 +1534,13 @@ const TeacherDashboard = () => {
                   <button
                     type="button"
                     onClick={() => setShowEditStudent(false)}
-                    className="px-6 py-2 bg-gray-500/20 hover:bg-gray-500/30 border border-gray-400/30 rounded-xl text-gray-300 hover:text-white transition-all"
+                    className="px-6 py-2 bg-ink/20 hover:bg-ink/30 border-2 border-ink rounded-xl text-muted hover:text-ink transition-all"
                   >
                     Batal
                   </button>
                   <button
                     type="submit"
-                    className="px-6 py-2 bg-blue-500/20 hover:bg-blue-500/30 border border-blue-400/30 rounded-xl text-blue-300 hover:text-white transition-all"
+                    className="px-6 py-2 bg-brand-soft border-2 border-ink rounded-xl text-brand hover:text-ink transition-all"
                   >
                     Simpan Perubahan
                   </button>

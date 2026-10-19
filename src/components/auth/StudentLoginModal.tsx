@@ -139,7 +139,7 @@ const StudentLoginModal: React.FC<StudentLoginModalProps> = ({
 
             {/* Demo Credentials */}
             <div className="bg-gradient-to-r from-amber-500/10 to-orange-500/10 rounded-xl p-3 border border-amber-400/30">
-              <p className="text-amber-300 text-sm font-medium mb-1">💡 Demo Credentials:</p>
+              <p className="text-amber-300 text-sm font-medium mb-1">Demo Credentials:</p>
               <p className="text-amber-200/80 text-xs">
                 Nama: Ahmad Budi | NIS: 220001
               </p>

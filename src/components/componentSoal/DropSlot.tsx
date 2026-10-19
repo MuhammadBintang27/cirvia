@@ -57,12 +57,12 @@ const DropSlot: React.FC<DropSlotProps> = ({
         relative w-full rounded-2xl border-2 border-dashed
         transition-all duration-300 flex items-center justify-center
         ${isDragOver 
-          ? 'border-cyan-400 bg-cyan-400/10 scale-105' 
+          ? 'border-ink bg-brand-soft scale-105' 
           : circuitId 
-            ? 'border-white/30 bg-white/5' 
-            : 'border-white/20 bg-white/5 hover:border-white/40'
+            ? 'border-ink bg-paper' 
+            : 'border-ink bg-paper hover:border-ink'
         }
-        ${isActive ? 'ring-2 ring-cyan-400 ring-opacity-50' : ''}
+        ${isActive ? 'ring-2 ring-brand ring-opacity-50' : ''}
         ${className || 'min-h-[120px]'}
       `}
       onDrop={handleDrop}
@@ -74,7 +74,7 @@ const DropSlot: React.FC<DropSlotProps> = ({
       aria-label={`Slot ${slotNumber}${circuitId ? `, berisi rangkaian ${circuitId}` : ', kosong'}`}
     >
       {/* Slot Number */}
-      <div className="absolute top-2 left-2 w-8 h-8 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
+      <div className="absolute top-2 left-2 w-8 h-8 bg-purple-500 rounded-full flex items-center justify-center">
         <span className="text-white font-bold text-sm">{slotNumber}</span>
       </div>
 
@@ -82,10 +82,10 @@ const DropSlot: React.FC<DropSlotProps> = ({
       {circuitId && (
         <button
           onClick={handleRemove}
-          className="absolute top-2 right-2 w-6 h-6 bg-red-500/80 hover:bg-red-500 rounded-full flex items-center justify-center transition-colors"
+          className="absolute top-2 right-2 w-6 h-6 bg-coral-soft hover:bg-coral rounded-full flex items-center justify-center transition-colors"
           aria-label={`Hapus rangkaian ${circuitId} dari slot ${slotNumber}`}
         >
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-white">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-ink">
             <line x1="18" y1="6" x2="6" y2="18"></line>
             <line x1="6" y1="6" x2="18" y2="18"></line>
           </svg>
@@ -100,12 +100,12 @@ const DropSlot: React.FC<DropSlotProps> = ({
       ) : (
         <div className="text-center">
           {isDragOver ? (
-            <div className="text-cyan-400">
+            <div className="text-brand">
               <ChevronDown className="w-8 h-8 mx-auto animate-bounce" />
               <span className="text-sm font-medium">Lepas di sini</span>
             </div>
           ) : (
-            <div className="text-white/40">
+            <div className="text-muted">
               <Plus className="w-8 h-8 mx-auto" />
               <span className="text-sm">Slot {slotNumber}</span>
             </div>

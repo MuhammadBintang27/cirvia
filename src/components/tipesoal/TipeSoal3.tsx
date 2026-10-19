@@ -68,8 +68,8 @@ const TipeSoal3: React.FC<TipeSoal3Props> = ({ question, onAnswer }) => {
     
     // ✅ VALIDASI KETAT: Tidak boleh kosong dan harus exact match dengan correctAnswers
     const isCorrect = 
-      selectedIds.length > 0 && // ✅ WAJIB: Minimal harus pilih 1 jawaban
-      selectedIds.length === question.correctAnswers.length && // ✅ Jumlah harus sama
+      selectedIds.length > 0 && // WAJIB: Minimal harus pilih 1 jawaban
+      selectedIds.length === question.correctAnswers.length && // Jumlah harus sama
       selectedIds.every(id => question.correctAnswers.includes(id)) && // ✅ Semua pilihan harus benar
       question.correctAnswers.every(id => selectedIds.includes(id)); // ✅ Semua jawaban benar harus dipilih
 
@@ -110,15 +110,15 @@ const TipeSoal3: React.FC<TipeSoal3Props> = ({ question, onAnswer }) => {
     <div className="max-w-6xl mx-auto p-6 space-y-8">
       {/* Question Header */}
       <div className="text-center space-y-4">
-        <h2 className="text-3xl font-bold text-white mb-2">
+        <h2 className="text-3xl font-bold text-ink mb-2">
           Soal Konseptual
         </h2>
-        <div className="bg-gradient-to-br from-blue-500/10 to-purple-500/10 backdrop-blur-xl rounded-2xl p-6 border border-blue-400/30">
-          <h3 className="text-xl font-semibold text-white mb-4">
+        <div className="bg-brand-soft rounded-2xl p-6 border-2 border-ink">
+          <h3 className="text-xl font-semibold text-ink mb-4">
             {question.question}
           </h3>
           {question.description && (
-            <p className="text-blue-200/80 text-sm mb-4">
+            <p className="text-muted text-sm mb-4">
               {question.description}
             </p>
           )}
@@ -126,15 +126,15 @@ const TipeSoal3: React.FC<TipeSoal3Props> = ({ question, onAnswer }) => {
           {/* Hint Button */}
           <button
             onClick={() => setState(prev => ({ ...prev, showHint: !prev.showHint }))}
-            className="flex items-center px-4 py-2 bg-gradient-to-r from-yellow-500/20 to-amber-500/20 rounded-xl border border-yellow-400/30 text-yellow-300 hover:bg-yellow-500/30 transition-all"
+            className="flex items-center px-4 py-2 bg-lamp-soft rounded-xl border-2 border-ink text-amber-700 hover:bg-lamp-soft transition-all"
           >
             <Lightbulb className="w-4 h-4 mr-2" />
             {state.showHint ? 'Sembunyikan Hint' : 'Tampilkan Hint'}
           </button>
 
           {state.showHint && question.hint && (
-            <div className="mt-4 p-4 bg-gradient-to-r from-yellow-500/10 to-amber-500/10 rounded-xl border border-yellow-400/30">
-              <p className="text-yellow-200">{question.hint}</p>
+            <div className="mt-4 p-4 bg-lamp-soft rounded-xl border-2 border-ink">
+              <p className="text-amber-700">{question.hint}</p>
             </div>
           )}
         </div>
@@ -145,8 +145,8 @@ const TipeSoal3: React.FC<TipeSoal3Props> = ({ question, onAnswer }) => {
           {/* Left Panel - Available Choices */}
           <div className="space-y-4">
             <div className="flex items-center justify-between">
-              <h3 className="text-xl font-bold text-white flex items-center">
-                <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white text-sm font-bold mr-3">
+              <h3 className="text-xl font-bold text-ink flex items-center">
+                <div className="w-8 h-8 bg-brand rounded-full flex items-center justify-center text-white text-sm font-bold mr-3">
                   ?
                 </div>
                 Pilihan Jawaban
@@ -160,8 +160,8 @@ const TipeSoal3: React.FC<TipeSoal3Props> = ({ question, onAnswer }) => {
                   {...provided.droppableProps}
                   className={`space-y-3 p-4 rounded-xl border-2 border-dashed transition-colors min-h-[400px] ${
                     snapshot.isDraggingOver
-                      ? 'border-blue-400 bg-blue-500/10'
-                      : 'border-white/20 bg-white/5'
+                      ? 'border-ink bg-brand-soft'
+                      : 'border-ink bg-paper'
                   }`}
                 >
                   {state.availableChoices.map((choice, index) => (
@@ -176,26 +176,26 @@ const TipeSoal3: React.FC<TipeSoal3Props> = ({ question, onAnswer }) => {
                           ref={provided.innerRef}
                           {...provided.draggableProps}
                           {...provided.dragHandleProps}
-                          className={`bg-gradient-to-r from-white/10 to-white/5 backdrop-blur-xl rounded-lg p-4 border cursor-grab active:cursor-grabbing transition-all duration-200 ${
+                          className={`bg-paper rounded-lg p-4 border cursor-grab active:cursor-grabbing transition-all duration-200 ${
                             snapshot.isDragging
-                              ? 'scale-105 shadow-2xl border-blue-400/50 bg-blue-500/20'
+                              ? 'scale-105 shadow-hard border-ink bg-brand-soft'
                               : state.showResult && choice.isCorrect
-                              ? 'border-green-400/60 bg-green-500/20'
+                              ? 'border-ink bg-mint-soft'
                               : state.showResult && !choice.isCorrect && state.selectedAnswers.some(sa => sa.id === choice.id)
-                              ? 'border-red-400/60 bg-red-500/20'
-                              : 'border-white/20 hover:border-blue-400/40 hover:bg-blue-500/10'
+                              ? 'border-ink bg-coral-soft'
+                              : 'border-ink hover:border-ink hover:bg-brand-soft'
                           }`}
                         >
                           <div className="flex items-center justify-between">
-                            <p className="text-white font-medium flex-1">
+                            <p className="text-ink font-medium flex-1">
                               {choice.text}
                             </p>
                             {state.showResult && (
                               <div className="ml-3">
                                 {choice.isCorrect ? (
-                                  <Check className="w-5 h-5 text-green-400" />
+                                  <Check className="w-5 h-5 text-emerald-700" />
                                 ) : (
-                                  <X className="w-5 h-5 text-red-400" />
+                                  <X className="w-5 h-5 text-red-600" />
                                 )}
                               </div>
                             )}
@@ -203,9 +203,9 @@ const TipeSoal3: React.FC<TipeSoal3Props> = ({ question, onAnswer }) => {
                           
                           {!state.showResult && (
                             <div className="mt-2 flex space-x-1 opacity-60">
-                              <div className="w-1 h-1 bg-white/40 rounded-full"></div>
-                              <div className="w-1 h-1 bg-white/40 rounded-full"></div>
-                              <div className="w-1 h-1 bg-white/40 rounded-full"></div>
+                              <div className="w-1 h-1 bg-paper rounded-full"></div>
+                              <div className="w-1 h-1 bg-paper rounded-full"></div>
+                              <div className="w-1 h-1 bg-paper rounded-full"></div>
                             </div>
                           )}
                         </div>
@@ -215,7 +215,7 @@ const TipeSoal3: React.FC<TipeSoal3Props> = ({ question, onAnswer }) => {
                   {provided.placeholder}
                   
                   {state.availableChoices.length === 0 && (
-                    <div className="flex items-center justify-center h-32 text-white/40">
+                    <div className="flex items-center justify-center h-32 text-muted">
                       <p>Semua pilihan telah dipindahkan</p>
                     </div>
                   )}
@@ -227,15 +227,15 @@ const TipeSoal3: React.FC<TipeSoal3Props> = ({ question, onAnswer }) => {
           {/* Right Panel - Answer Area */}
           <div className="space-y-4">
             <div className="flex items-center justify-between">
-              <h3 className="text-xl font-bold text-white flex items-center">
-                <Target className="w-5 h-5 mr-2 text-green-400" />
+              <h3 className="text-xl font-bold text-ink flex items-center">
+                <Target className="w-5 h-5 mr-2 text-emerald-700" />
                 Jawaban yang Benar
               </h3>
               
               {state.selectedAnswers.length > 0 && !state.showResult && (
                 <button
                   onClick={handleReset}
-                  className="flex items-center px-3 py-1 bg-red-500/20 hover:bg-red-500/30 rounded-lg border border-red-400/30 text-red-300 text-sm transition-all"
+                  className="flex items-center px-3 py-1 bg-coral-soft hover:bg-coral-soft rounded-lg border-2 border-ink text-red-600 text-sm transition-all"
                 >
                   <RotateCcw className="w-4 h-4 mr-1" />
                   Reset
@@ -250,12 +250,12 @@ const TipeSoal3: React.FC<TipeSoal3Props> = ({ question, onAnswer }) => {
                   {...provided.droppableProps}
                   className={`space-y-3 p-4 rounded-xl border-2 border-dashed transition-colors min-h-[400px] ${
                     snapshot.isDraggingOver
-                      ? 'border-green-400 bg-green-500/10'
+                      ? 'border-ink bg-mint-soft'
                       : state.showResult && state.isCorrect
-                      ? 'border-green-400/60 bg-green-500/10'
+                      ? 'border-ink bg-mint-soft'
                       : state.showResult && !state.isCorrect
-                      ? 'border-red-400/60 bg-red-500/10'
-                      : 'border-white/20 bg-white/5'
+                      ? 'border-ink bg-coral-soft'
+                      : 'border-ink bg-paper'
                   }`}
                 >
                   {state.selectedAnswers.map((answer, index) => (
@@ -270,26 +270,26 @@ const TipeSoal3: React.FC<TipeSoal3Props> = ({ question, onAnswer }) => {
                           ref={provided.innerRef}
                           {...provided.draggableProps}
                           {...provided.dragHandleProps}
-                          className={`bg-gradient-to-r backdrop-blur-xl rounded-lg p-4 border cursor-grab active:cursor-grabbing transition-all duration-200 ${
+                          className={`rounded-lg p-4 border cursor-grab active:cursor-grabbing transition-all duration-200 ${
                             snapshot.isDragging
-                              ? 'scale-105 shadow-2xl border-green-400/50 bg-green-500/20'
+                              ? 'scale-105 shadow-hard border-ink bg-mint-soft'
                               : state.showResult && answer.isCorrect
-                              ? 'border-green-400/60 bg-green-500/20 from-green-500/10 to-green-600/5'
+                              ? 'border-ink bg-mint-soft bg-mint-soft'
                               : state.showResult && !answer.isCorrect
-                              ? 'border-red-400/60 bg-red-500/20 from-red-500/10 to-red-600/5'
-                              : 'border-green-400/40 bg-green-500/10 from-green-500/10 to-green-600/5 hover:border-green-400/60'
+                              ? 'border-ink bg-coral-soft bg-coral-soft'
+                              : 'border-ink bg-mint-soft bg-mint-soft hover:border-ink'
                           }`}
                         >
                           <div className="flex items-center justify-between">
-                            <p className="text-white font-medium flex-1">
+                            <p className="text-ink font-medium flex-1">
                               {answer.text}
                             </p>
                             {state.showResult && (
                               <div className="ml-3">
                                 {answer.isCorrect ? (
-                                  <Check className="w-5 h-5 text-green-400" />
+                                  <Check className="w-5 h-5 text-emerald-700" />
                                 ) : (
-                                  <X className="w-5 h-5 text-red-400" />
+                                  <X className="w-5 h-5 text-red-600" />
                                 )}
                               </div>
                             )}
@@ -301,7 +301,7 @@ const TipeSoal3: React.FC<TipeSoal3Props> = ({ question, onAnswer }) => {
                   {provided.placeholder}
                   
                   {state.selectedAnswers.length === 0 && (
-                    <div className="flex flex-col items-center justify-center h-32 text-white/40">
+                    <div className="flex flex-col items-center justify-center h-32 text-muted">
                       <Target className="w-8 h-8 mb-2" />
                       <p>Seret pilihan jawaban yang benar ke sini</p>
                     </div>
@@ -319,7 +319,7 @@ const TipeSoal3: React.FC<TipeSoal3Props> = ({ question, onAnswer }) => {
           <button
             onClick={handleSubmit}
             disabled={!canSubmit}
-            className="flex items-center px-8 py-4 bg-gradient-to-r from-purple-500 to-pink-600 text-white rounded-2xl font-bold text-lg hover:from-purple-600 hover:to-pink-700 transition-all transform hover:scale-105 shadow-2xl disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+            className="flex items-center px-8 py-4 bg-purple-500 border-2 border-ink text-white rounded-2xl font-bold text-lg hover:bg-purple-500 transition-all transform shadow-hard disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
           >
             <CheckCircle className="w-5 h-5 mr-2" />
             Submit Jawaban
@@ -331,19 +331,19 @@ const TipeSoal3: React.FC<TipeSoal3Props> = ({ question, onAnswer }) => {
       {state.showResult && (
         <div className="space-y-6">
           {/* Result Status */}
-          <div className={`bg-gradient-to-br backdrop-blur-xl rounded-2xl p-8 border ${
+          <div className={`rounded-2xl p-8 border ${
             state.isCorrect 
-              ? 'from-green-500/10 to-emerald-500/10 border-green-400/30' 
-              : 'from-red-500/10 to-pink-500/10 border-red-400/30'
+              ? 'bg-mint-soft border-ink' 
+              : 'bg-coral-soft border-ink'
           }`}>
             <div className="flex items-center justify-center mb-6">
               {state.isCorrect ? (
-                <div className="flex items-center text-green-400">
+                <div className="flex items-center text-emerald-700">
                   <CheckCircle className="w-8 h-8 mr-3" />
                   <span className="text-2xl font-bold">Benar!</span>
                 </div>
               ) : (
-                <div className="flex items-center text-red-400">
+                <div className="flex items-center text-red-600">
                   <X className="w-8 h-8 mr-3" />
                   <span className="text-2xl font-bold">Kurang Tepat</span>
                 </div>
@@ -351,13 +351,13 @@ const TipeSoal3: React.FC<TipeSoal3Props> = ({ question, onAnswer }) => {
             </div>
 
             {/* Correct Answers Display */}
-            <div className="bg-white/5 rounded-lg p-4 mb-4">
-              <h4 className="text-white font-semibold mb-3">Jawaban yang Benar:</h4>
+            <div className="bg-paper rounded-lg p-4 mb-4">
+              <h4 className="text-ink font-semibold mb-3">Jawaban yang Benar:</h4>
               <div className="space-y-2">
                 {question.choices
                   .filter(choice => choice.isCorrect)
                   .map((correctChoice, index) => (
-                    <div key={correctChoice.id} className="flex items-center text-green-300">
+                    <div key={correctChoice.id} className="flex items-center text-emerald-700">
                       <Check className="w-4 h-4 mr-2" />
                       <span>{correctChoice.text}</span>
                     </div>
@@ -368,9 +368,9 @@ const TipeSoal3: React.FC<TipeSoal3Props> = ({ question, onAnswer }) => {
 
             {/* Explanation */}
             {question.explanation && (
-              <div className="bg-blue-500/10 rounded-lg p-4 border border-blue-400/30">
-                <h4 className="text-blue-300 font-semibold mb-2">Penjelasan:</h4>
-                <p className="text-white/80">{question.explanation}</p>
+              <div className="bg-brand-soft rounded-lg p-4 border-2 border-ink">
+                <h4 className="text-brand font-semibold mb-2">Penjelasan:</h4>
+                <p className="text-ink">{question.explanation}</p>
               </div>
             )}
           </div>

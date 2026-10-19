@@ -1,6 +1,7 @@
 "use client";
+import { Ico } from "@/components/ui/Ico";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import CircuitBuilderEnhanced from "../../components/praktikum-drag-n-drop/CircuitBuilderEnhanced";
 import WebCVPracticum from "../../components/praktikum-cv/WebCVPracticum";
 import Navbar from "@/components/Navbar";
@@ -10,6 +11,11 @@ import { CircuitAction, GestureResult } from "@/components/praktikum-cv/types";
 export default function PracticumPage() {
   // Tab state
   const [activeTab, setActiveTab] = useState<"drag-drop" | "cv">("drag-drop");
+
+  // /practicum?mode=cv membuka tab Computer Vision langsung
+  useEffect(() => {
+    if (new URLSearchParams(window.location.search).get("mode") === "cv") setActiveTab("cv");
+  }, []);
 
   /**
    * Handle circuit actions from CV gestures
@@ -40,18 +46,18 @@ export default function PracticumPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-950 to-indigo-900 relative overflow-hidden">
+    <div className="min-h-screen bg-transparent relative">
       {/* Animated Background Elements - Matching Landing Page */}
       <div className="absolute inset-0">
-        <div className="absolute top-20 left-10 w-72 h-72 bg-blue-500/10 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute top-40 right-20 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
-        <div className="absolute bottom-20 left-1/3 w-80 h-80 bg-indigo-500/10 rounded-full blur-3xl animate-pulse delay-2000"></div>
+        <div className="absolute top-20 left-10 w-72 h-72 bg-brand-soft rounded-full hidden animate-pulse"></div>
+        <div className="absolute top-40 right-20 w-96 h-96 bg-brand-soft rounded-full hidden animate-pulse delay-1000"></div>
+        <div className="absolute bottom-20 left-1/3 w-80 h-80 bg-brand-soft rounded-full hidden animate-pulse delay-2000"></div>
 
         {/* Floating particles */}
         {[...Array(20)].map((_, i) => (
           <div
             key={i}
-            className="absolute w-1 h-1 bg-blue-400/30 rounded-full animate-ping"
+            className="absolute w-1 h-1 bg-brand-soft rounded-full hidden"
             style={{
               left: `${Math.random() * 100}%`,
               top: `${Math.random() * 100}%`,
@@ -71,26 +77,26 @@ export default function PracticumPage() {
           <div className="text-center mb-16">
             {/* Main Icon */}
             <div className="relative mb-8">
-              <div className="inline-flex items-center justify-center w-32 h-32 rounded-full bg-gradient-to-br from-blue-500/20 to-indigo-600/20 backdrop-blur-xl border border-white/20 shadow-2xl">
-                <div className="absolute inset-0 rounded-full bg-gradient-to-br from-blue-400/10 to-purple-600/10 animate-pulse"></div>
-                <div className="absolute inset-2 rounded-full bg-gradient-to-br from-cyan-400/5 to-blue-500/5 animate-pulse delay-500"></div>
-                <span className="text-6xl relative z-10">🔬</span>
+              <div className="inline-flex items-center justify-center w-32 h-32 rounded-full bg-brand-soft border-2 border-ink shadow-hard">
+                <div className="absolute inset-0 rounded-full bg-brand-soft hidden"></div>
+                <div className="absolute inset-2 rounded-full bg-brand-soft hidden delay-500"></div>
+                <span className="text-6xl relative z-10"><Ico n="microscope" /></span>
               </div>
-              <div className="absolute -inset-4 bg-gradient-to-r from-blue-500/20 via-purple-500/20 to-indigo-500/20 rounded-full blur-xl animate-pulse"></div>
+              <div className="absolute -inset-4 bg-brand-soft rounded-full hidden animate-pulse"></div>
             </div>
 
             {/* Title */}
             <h1 className="text-6xl md:text-7xl font-black mb-6 leading-tight">
-              <span className="bg-gradient-to-r from-white via-blue-200 to-cyan-300 bg-clip-text text-transparent drop-shadow-2xl">
+              <span className="text-ink">
                 Praktikum
               </span>
               <br />
-              <span className="bg-gradient-to-r from-cyan-300 via-blue-400 to-indigo-400 bg-clip-text text-transparent">
+              <span className="text-ink">
                 Rangkaian Listrik
               </span>
             </h1>
 
-            <p className="text-xl text-blue-200/90 max-w-4xl mx-auto leading-relaxed mb-8">
+            <p className="text-xl text-muted max-w-4xl mx-auto leading-relaxed mb-8">
               Laboratorium virtual interaktif dengan teknologi computer vision
               dan simulasi real-time untuk eksplorasi mendalam konsep rangkaian
               listrik
@@ -101,26 +107,26 @@ export default function PracticumPage() {
 
           {/* Tab Navigation */}
           <div className="flex justify-center mb-12">
-            <div className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/20 p-2 inline-flex">
+            <div className="bg-paper rounded-2xl shadow-hard border-2 border-ink p-2 inline-flex">
               <button
                 onClick={() => setActiveTab("drag-drop")}
-                className={`px-8 py-3 rounded-xl font-bold text-lg transition-all duration-300 transform hover:scale-105 ${
+                className={`px-8 py-3 rounded-xl font-bold text-lg transition-all duration-300 transform ${
                   activeTab === "drag-drop"
-                    ? "bg-gradient-to-r from-blue-500 to-cyan-400 text-white shadow-lg shadow-blue-500/25"
-                    : "text-blue-200/80 hover:text-white hover:bg-white/10"
+                    ? "bg-brand text-white"
+                    : "text-muted hover:text-ink hover:bg-lamp-soft"
                 }`}
               >
-                🖱️ Drag & Drop Mode
+                Drag & Drop Mode
               </button>
               <button
                 onClick={() => setActiveTab("cv")}
-                className={`px-8 py-3 rounded-xl font-bold text-lg transition-all duration-300 transform hover:scale-105 ${
+                className={`px-8 py-3 rounded-xl font-bold text-lg transition-all duration-300 transform ${
                   activeTab === "cv"
-                    ? "bg-gradient-to-r from-blue-500 to-cyan-400 text-white shadow-lg shadow-blue-500/25"
-                    : "text-blue-200/80 hover:text-white hover:bg-white/10"
+                    ? "bg-brand text-white"
+                    : "text-muted hover:text-ink hover:bg-lamp-soft"
                 }`}
               >
-                👋 Computer Vision Mode
+                Computer Vision Mode
               </button>
             </div>
           </div>
@@ -130,41 +136,44 @@ export default function PracticumPage() {
             <div className="max-w-6xl mx-auto">
               {/* Feature Introduction */}
               <div className="mb-8">
-                <div className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl rounded-2xl p-8 border border-white/20 shadow-2xl">
+                <div className="bg-paper rounded-2xl p-8 border-2 border-ink shadow-hard">
                   <div className="flex items-center mb-6">
-                    <div className="flex items-center justify-center w-16 h-16 bg-gradient-to-br from-blue-500/20 to-cyan-600/20 rounded-2xl mr-4">
-                      <span className="text-2xl">🌐</span>
+                    <div className="flex items-center justify-center w-16 h-16 bg-brand-soft rounded-2xl mr-4">
+                      <span className="text-2xl"><Ico n="globe" /></span>
                     </div>
                     <div>
-                      <h3 className="text-2xl font-bold text-white">
+                      <h3 className="text-2xl font-bold text-ink">
                         Interactive Web Laboratory
                       </h3>
-                      <p className="text-blue-200/80">
+                      <p className="text-muted">
                         Simulasi rangkaian listrik dengan interface drag & drop
                       </p>
                     </div>
                   </div>
 
                   {/* Circuit Builder */}
-                  <CircuitBuilderEnhanced />
+                  {/* bangku kerja tetap gelap: komponennya digambar untuk latar gelap */}
+                  <div className="rounded-2xl border-2 border-ink bg-[#14172B] p-3 sm:p-4">
+                    <CircuitBuilderEnhanced />
+                  </div>
 
                   {/* Enhanced Tips */}
-                  <div className="mt-6 p-6 bg-gradient-to-r from-blue-500/10 to-cyan-500/10 rounded-xl border border-blue-400/30">
-                    <h4 className="text-white font-bold mb-3 flex items-center">
-                      <span className="text-xl mr-2">💡</span>
+                  <div className="mt-6 p-6 bg-brand-soft rounded-xl border-2 border-ink">
+                    <h4 className="text-ink font-bold mb-3 flex items-center">
+                      <span className="text-xl mr-2"><Ico n="lightbulb" /></span>
                       Panduan Penggunaan
                     </h4>
-                    <div className="grid md:grid-cols-2 gap-4 text-blue-200/90 text-sm">
+                    <div className="grid md:grid-cols-2 gap-4 text-muted text-sm">
                       <ul className="space-y-2">
                         <li className="flex items-start">
-                          <span className="text-cyan-400 mr-2">•</span>
+                          <span className="text-brand mr-2">•</span>
                           <span>
                             Gunakan toolbar untuk menambah komponen baru ke
                             canvas
                           </span>
                         </li>
                         <li className="flex items-start">
-                          <span className="text-cyan-400 mr-2">•</span>
+                          <span className="text-brand mr-2">•</span>
                           <span>
                             Aktifkan &quot;Mode Koneksi&quot; untuk menarik
                             kabel antar terminal
@@ -173,13 +182,13 @@ export default function PracticumPage() {
                       </ul>
                       <ul className="space-y-2">
                         <li className="flex items-start">
-                          <span className="text-cyan-400 mr-2">•</span>
+                          <span className="text-brand mr-2">•</span>
                           <span>
                             Double-click saklar untuk membuka/menutup rangkaian
                           </span>
                         </li>
                         <li className="flex items-start">
-                          <span className="text-cyan-400 mr-2">•</span>
+                          <span className="text-brand mr-2">•</span>
                           <span>
                             Pilih komponen lalu gunakan rotasi untuk mengatur
                             posisi
@@ -198,16 +207,16 @@ export default function PracticumPage() {
             <div className="max-w-6xl mx-auto">
               {/* AI-Powered Laboratory Section */}
               <div className="mb-8">
-                <div className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl rounded-2xl p-8 border border-white/20 shadow-2xl">
+                <div className="bg-paper rounded-2xl p-8 border-2 border-ink shadow-hard">
                   <div className="flex items-center mb-6">
-                    <div className="flex items-center justify-center w-16 h-16 bg-gradient-to-br from-purple-500/20 to-blue-600/20 rounded-2xl mr-4">
-                      <span className="text-2xl">👋</span>
+                    <div className="flex items-center justify-center w-16 h-16 bg-purple-100 rounded-2xl mr-4">
+                      <span className="text-2xl"><Ico n="hand" /></span>
                     </div>
                     <div>
-                      <h3 className="text-2xl font-bold text-white">
+                      <h3 className="text-2xl font-bold text-ink">
                         Computer Vision Hand Gesture Control
                       </h3>
-                      <p className="text-blue-200/80">
+                      <p className="text-muted">
                         Kontrol rangkaian listrik menggunakan gesture tangan
                         dengan teknologi MediaPipe AI
                       </p>
@@ -215,28 +224,30 @@ export default function PracticumPage() {
                   </div>
 
                   {/* Web CV Practicum Component */}
-                  <WebCVPracticum
-                    onCircuitAction={handleCircuitAction}
-                    onGestureDetected={handleGestureDetected}
-                  />
+                  <div className="rounded-2xl border-2 border-ink bg-[#14172B] p-3 sm:p-4">
+                    <WebCVPracticum
+                      onCircuitAction={handleCircuitAction}
+                      onGestureDetected={handleGestureDetected}
+                    />
+                  </div>
 
                   {/* Enhanced Tips */}
-                  <div className="mt-6 p-6 bg-gradient-to-r from-purple-500/10 to-blue-500/10 rounded-xl border border-purple-400/30">
-                    <h4 className="text-white font-bold mb-3 flex items-center">
-                      <span className="text-xl mr-2">�</span>
+                  <div className="mt-6 p-6 bg-purple-100 rounded-xl border-2 border-ink">
+                    <h4 className="text-ink font-bold mb-3 flex items-center">
+                      <span className="text-xl mr-2"><Ico n="lightbulb" /></span>
                       Tips Penggunaan
                     </h4>
-                    <div className="grid md:grid-cols-2 gap-4 text-blue-200/90 text-sm">
+                    <div className="grid md:grid-cols-2 gap-4 text-muted text-sm">
                       <ul className="space-y-2">
                         <li className="flex items-start">
-                          <span className="text-purple-400 mr-2">•</span>
+                          <span className="text-purple-700 mr-2">•</span>
                           <span>
                             Pastikan pencahayaan ruangan cukup untuk deteksi
                             tangan optimal
                           </span>
                         </li>
                         <li className="flex items-start">
-                          <span className="text-purple-400 mr-2">•</span>
+                          <span className="text-purple-700 mr-2">•</span>
                           <span>
                             Posisikan tangan di depan kamera dengan jarak 30-60
                             cm
@@ -245,17 +256,16 @@ export default function PracticumPage() {
                       </ul>
                       <ul className="space-y-2">
                         <li className="flex items-start">
-                          <span className="text-purple-400 mr-2">•</span>
+                          <span className="text-purple-700 mr-2">•</span>
                           <span>
                             Gunakan gesture yang jelas dan stabil untuk akurasi
                             tinggi
                           </span>
                         </li>
                         <li className="flex items-start">
-                          <span className="text-purple-400 mr-2">•</span>
+                          <span className="text-purple-700 mr-2">•</span>
                           <span>
-                            Lihat panduan gesture di sebelah kanan canvas untuk
-                            referensi
+                            Lihat panduan gestur di bawah area praktikum untuk referensi
                           </span>
                         </li>
                       </ul>

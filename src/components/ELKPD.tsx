@@ -108,19 +108,19 @@ const getSectionIcon = (type: LKPDSection["type"]) => {
 const getSectionColor = (type: LKPDSection["type"]) => {
   switch (type) {
     case "objective":
-      return "from-blue-500/20 to-cyan-500/20 border-blue-400/30 text-blue-300";
+      return "bg-brand-soft border-ink text-brand";
     case "theory":
-      return "from-purple-500/20 to-indigo-500/20 border-purple-400/30 text-purple-300";
+      return "bg-purple-100 border-ink text-purple-700";
     case "procedure":
-      return "from-emerald-500/20 to-teal-500/20 border-emerald-400/30 text-emerald-300";
+      return "bg-mint-soft border-ink text-emerald-700";
     case "observation":
-      return "from-orange-500/20 to-amber-500/20 border-orange-400/30 text-orange-300";
+      return "bg-lamp-soft border-ink text-amber-700";
     case "analysis":
-      return "from-pink-500/20 to-rose-500/20 border-pink-400/30 text-pink-300";
+      return "bg-purple-100 border-ink text-purple-700";
     case "conclusion":
-      return "from-violet-500/20 to-purple-500/20 border-violet-400/30 text-violet-300";
+      return "bg-purple-100 border-ink text-purple-700";
     default:
-      return "from-gray-500/20 to-slate-500/20 border-gray-400/30 text-gray-300";
+      return "bg-ink/20 border-ink text-muted";
   }
 };
 
@@ -354,7 +354,7 @@ export default function ELKPD() {
     return (
       <button
         onClick={() => setIsOpen(true)}
-        className="fixed bottom-6 right-6 z-50 flex items-center gap-2 px-6 py-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-full shadow-2xl hover:shadow-blue-500/50 transition-all transform hover:scale-105 animate-bounce"
+        className="fixed bottom-6 right-6 z-50 flex items-center gap-2 px-6 py-4 bg-brand border-2 border-ink text-white rounded-full shadow-hard transition-all transform animate-bounce"
       >
         <FileText className="w-5 h-5" />
         <span className="font-bold">Buka E-LKPD</span>
@@ -364,10 +364,10 @@ export default function ELKPD() {
 
   if (isLoading) {
     return (
-      <div className="fixed bottom-6 right-6 z-50 w-[450px] bg-gradient-to-br from-slate-900/95 via-blue-950/95 to-indigo-900/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/20 p-8">
+      <div className="fixed bottom-6 right-6 z-50 w-[450px] bg-paper rounded-2xl shadow-hard border-2 border-ink p-8">
         <div className="flex flex-col items-center justify-center gap-4">
-          <Loader2 className="w-8 h-8 text-blue-400 animate-spin" />
-          <p className="text-white/70 text-sm">Memuat E-LKPD...</p>
+          <Loader2 className="w-8 h-8 text-brand animate-spin" />
+          <p className="text-muted text-sm">Memuat E-LKPD...</p>
         </div>
       </div>
     );
@@ -375,22 +375,22 @@ export default function ELKPD() {
 
   return (
     <div
-      className={`fixed z-50 bg-gradient-to-br from-slate-900/98 via-blue-950/98 to-indigo-900/98 rounded-2xl shadow-2xl border border-white/20 transition-all duration-300 ${
+      className={`fixed z-50 bg-paper rounded-2xl shadow-hard border-2 border-ink transition-all duration-300 ${
         isMaximized
-          ? "inset-4 backdrop-blur-sm"
-          : "bottom-6 right-6 w-[450px] max-h-[600px] backdrop-blur-xl"
+          ? "inset-4"
+          : "bottom-6 right-6 w-[450px] max-h-[600px]"
       }`}
       style={{ willChange: isMaximized ? 'auto' : 'transform' }}
     >
       {/* Header */}
-      <div className="flex items-center justify-between p-4 border-b border-white/10">
+      <div className="flex items-center justify-between p-4 border-b border-ink/20">
         <div className="flex items-center gap-3">
-          <div className="p-2 bg-gradient-to-br from-blue-500/20 to-indigo-500/20 rounded-lg">
-            <FileText className="w-6 h-6 text-blue-400" />
+          <div className="p-2 bg-brand-soft rounded-lg">
+            <FileText className="w-6 h-6 text-brand" />
           </div>
           <div>
-            <h3 className="text-white font-bold text-xl">E-LKPD Praktikum</h3>
-            <p className="text-blue-200/70 text-sm">
+            <h3 className="text-ink font-bold text-xl">E-LKPD Praktikum</h3>
+            <p className="text-muted text-sm">
               Lembar Kerja Peserta Didik Digital
             </p>
           </div>
@@ -398,7 +398,7 @@ export default function ELKPD() {
         <div className="flex items-center gap-2">
           <button
             onClick={() => setIsMaximized(!isMaximized)}
-            className="p-2 hover:bg-white/10 rounded-lg transition-colors text-blue-200 hover:text-white"
+            className="p-2 hover:bg-lamp-soft rounded-lg transition-colors text-muted hover:text-ink"
             title={isMaximized ? "Restore" : "Maximize"}
           >
             {isMaximized ? (
@@ -409,7 +409,7 @@ export default function ELKPD() {
           </button>
           <button
             onClick={() => setIsOpen(false)}
-            className="p-2 hover:bg-white/10 rounded-lg transition-colors text-blue-200 hover:text-white"
+            className="p-2 hover:bg-lamp-soft rounded-lg transition-colors text-muted hover:text-ink"
             title="Minimize"
           >
             <X className="w-4 h-4" />
@@ -418,16 +418,16 @@ export default function ELKPD() {
       </div>
 
       {/* Progress Bar */}
-      <div className="px-4 py-3 bg-white/5 border-b border-white/10">
+      <div className="px-4 py-3 bg-paper border-b border-ink/20">
         <div className="flex items-center justify-between mb-2">
-          <span className="text-sm text-blue-200/80">Progress</span>
-          <span className="text-sm font-bold text-blue-300">
+          <span className="text-sm text-muted">Progress</span>
+          <span className="text-sm font-bold text-brand">
             {completedSections.length}/{lkpdData.length}
           </span>
         </div>
-        <div className="w-full h-2 bg-white/10 rounded-full overflow-hidden">
+        <div className="w-full h-2 bg-paper rounded-full overflow-hidden">
           <div
-            className="h-full bg-gradient-to-r from-blue-500 to-cyan-400 transition-all duration-500"
+            className="h-full bg-brand transition-all duration-500"
             style={{
               width: `${(completedSections.length / lkpdData.length) * 100}%`,
             }}
@@ -451,7 +451,7 @@ export default function ELKPD() {
           return (
             <div
               key={section.id}
-              className={`bg-gradient-to-r ${getSectionColor(
+              className={`${getSectionColor(
                 section.type
               )} rounded-xl border overflow-hidden transition-all duration-300`}
             >
@@ -461,9 +461,9 @@ export default function ELKPD() {
                 onClick={() => toggleSection(section.id)}
               >
                 <div className="flex items-center gap-3 flex-1">
-                  <div className="text-white/80 scale-110">{getSectionIcon(section.type)}</div>
+                  <div className="text-ink scale-110">{getSectionIcon(section.type)}</div>
                   <div className="flex-1">
-                    <h4 className="text-white font-bold text-base">
+                    <h4 className="text-ink font-bold text-base">
                       {section.title}
                     </h4>
                   </div>
@@ -472,15 +472,15 @@ export default function ELKPD() {
                       e.stopPropagation();
                       toggleComplete(section.id);
                     }}
-                    className="text-white/60 hover:text-white transition-colors"
+                    className="text-muted hover:text-ink transition-colors"
                   >
                     {isCompleted ? (
-                      <CheckCircle2 className="w-5 h-5 text-emerald-400" />
+                      <CheckCircle2 className="w-5 h-5 text-emerald-700" />
                     ) : (
                       <Circle className="w-5 h-5" />
                     )}
                   </button>
-                  <button className="text-white/60">
+                  <button className="text-muted">
                     {isExpanded ? (
                       <ChevronUp className="w-5 h-5" />
                     ) : (
@@ -496,17 +496,17 @@ export default function ELKPD() {
                   {section.content === "hypothesis-form" ? (
                     /* Render Hypothesis Form */
                     <div className="space-y-4">
-                      <p className="text-base text-white/90 mb-4 leading-relaxed">
+                      <p className="text-base text-ink mb-4 leading-relaxed">
                         Setelah mempelajari materi interaktif di web CIRVIA yang sesuai dengan gaya belajar kalian (visual, auditori, atau kinestetik), buatlah dugaan sementara yang dapat diuji.
                       </p>
-                      <div className="bg-white/5 rounded-lg p-4 border border-white/10">
-                        <label className="block text-white/90 font-semibold mb-3 text-base">
+                      <div className="bg-paper rounded-lg p-4 border border-ink/20">
+                        <label className="block text-ink font-semibold mb-3 text-base">
                           Tuliskan Hipotesis Awal Anda tentang Rangkaian:
                         </label>
                         <textarea
                           value={hypothesisText}
                           onChange={(e) => setHypothesisText(e.target.value)}
-                          className="w-full bg-white/10 text-white px-4 py-3 rounded-lg focus:bg-white/20 focus:outline-none focus:ring-2 focus:ring-blue-400 resize-none text-base leading-relaxed"
+                          className="w-full bg-paper text-ink px-4 py-3 rounded-lg focus:bg-paper focus:outline-none focus:ring-2 focus:ring-brand resize-none text-base leading-relaxed"
                           placeholder="Tuliskan hipotesis awal Anda sebelum melakukan praktikum..."
                           rows={7}
                         />
@@ -515,17 +515,17 @@ export default function ELKPD() {
                   ) : section.content === "hypothesis-testing-form" ? (
                     /* Render Hypothesis Testing Form */
                     <div className="space-y-4">
-                      <p className="text-base text-white/90 mb-4 leading-relaxed">
+                      <p className="text-base text-ink mb-4 leading-relaxed">
                         Analisis hasil data pada tabel dan bandingkan dengan hipotesis kalian.
                       </p>
-                      <div className="bg-white/5 rounded-lg p-4 border border-white/10">
-                        <label className="block text-white/90 font-semibold mb-3 text-base">
+                      <div className="bg-paper rounded-lg p-4 border border-ink/20">
+                        <label className="block text-ink font-semibold mb-3 text-base">
                           Hasil Pengujian Hipotesis:
                         </label>
                         <textarea
                           value={hypothesisTestingText}
                           onChange={(e) => setHypothesisTestingText(e.target.value)}
-                          className="w-full bg-white/10 text-white px-4 py-3 rounded-lg focus:bg-white/20 focus:outline-none focus:ring-2 focus:ring-blue-400 resize-none text-base leading-relaxed"
+                          className="w-full bg-paper text-ink px-4 py-3 rounded-lg focus:bg-paper focus:outline-none focus:ring-2 focus:ring-brand resize-none text-base leading-relaxed"
                           placeholder="Bandingkan hasil pengamatan dengan hipotesis awal Anda..."
                           rows={7}
                         />
@@ -534,17 +534,17 @@ export default function ELKPD() {
                   ) : section.content === "conclusion-form" ? (
                     /* Render Conclusion Form */
                     <div className="space-y-4">
-                      <p className="text-base text-white/90 mb-4 leading-relaxed">
+                      <p className="text-base text-ink mb-4 leading-relaxed">
                         Setelah menganalisis hasil percobaan, tuliskan kesimpulan akhir secara ilmiah berdasarkan data dan diskusi kelompok.
                       </p>
-                      <div className="bg-white/5 rounded-lg p-4 border border-white/10">
-                        <label className="block text-white/90 font-semibold mb-2 text-sm">
+                      <div className="bg-paper rounded-lg p-4 border border-ink/20">
+                        <label className="block text-ink font-semibold mb-2 text-sm">
                           Kesimpulan:
                         </label>
                         <textarea
                           value={conclusionText}
                           onChange={(e) => setConclusionText(e.target.value)}
-                          className="w-full bg-white/10 text-white px-4 py-3 rounded-lg focus:bg-white/20 focus:outline-none focus:ring-2 focus:ring-blue-400 resize-none text-sm"
+                          className="w-full bg-paper text-ink px-4 py-3 rounded-lg focus:bg-paper focus:outline-none focus:ring-2 focus:ring-brand resize-none text-sm"
                           placeholder="Tuliskan kesimpulan akhir berdasarkan data dan diskusi kelompok..."
                           rows={8}
                         />
@@ -556,55 +556,55 @@ export default function ELKPD() {
                       <div className="overflow-x-auto">
                         <table className="w-full text-xs border-collapse">
                           <thead>
-                            <tr className="bg-gradient-to-r from-blue-600/30 to-indigo-600/30">
-                              <th className="border border-white/30 px-3 py-3 text-left text-white font-bold">Jenis Rangkaian</th>
-                              <th className="border border-white/30 px-3 py-3 text-center text-white font-bold">Seri (5 Lampu)</th>
-                              <th className="border border-white/30 px-3 py-3 text-center text-white font-bold">Seri (2 Lampu)</th>
-                              <th className="border border-white/30 px-3 py-3 text-center text-white font-bold">Paralel (5 Lampu)</th>
-                              <th className="border border-white/30 px-3 py-3 text-center text-white font-bold">Paralel (2 Lampu)</th>
+                            <tr className="bg-brand-soft">
+                              <th className="border-2 border-ink px-3 py-3 text-left text-ink font-bold">Jenis Rangkaian</th>
+                              <th className="border-2 border-ink px-3 py-3 text-center text-ink font-bold">Seri (5 Lampu)</th>
+                              <th className="border-2 border-ink px-3 py-3 text-center text-ink font-bold">Seri (2 Lampu)</th>
+                              <th className="border-2 border-ink px-3 py-3 text-center text-ink font-bold">Paralel (5 Lampu)</th>
+                              <th className="border-2 border-ink px-3 py-3 text-center text-ink font-bold">Paralel (2 Lampu)</th>
                             </tr>
                           </thead>
                           <tbody>
                             {/* Row 1: Tegangan Total */}
-                            <tr className="bg-white/5">
-                              <td className="border border-white/20 px-3 py-2 text-white/90 font-semibold">Tegangan Total (V)</td>
-                              <td className="border border-white/20 px-2 py-1">
+                            <tr className="bg-paper">
+                              <td className="border-2 border-ink px-3 py-2 text-ink font-semibold">Tegangan Total (V)</td>
+                              <td className="border-2 border-ink px-2 py-1">
                                 <input
                                   type="number"
                                   step="0.01"
                                   value={observationData.series_5_voltage}
                                   onChange={(e) => handleObservationChange('series_5_voltage', e.target.value)}
-                                  className="w-full bg-white/10 text-white text-center px-2 py-1.5 rounded focus:bg-white/20 focus:outline-none focus:ring-1 focus:ring-blue-400"
+                                  className="w-full bg-paper text-ink text-center px-2 py-1.5 rounded focus:bg-paper focus:outline-none focus:ring-1 focus:ring-brand"
                                   placeholder="0.00"
                                 />
                               </td>
-                              <td className="border border-white/20 px-2 py-1">
+                              <td className="border-2 border-ink px-2 py-1">
                                 <input
                                   type="number"
                                   step="0.01"
                                   value={observationData.series_2_voltage}
                                   onChange={(e) => handleObservationChange('series_2_voltage', e.target.value)}
-                                  className="w-full bg-white/10 text-white text-center px-2 py-1.5 rounded focus:bg-white/20 focus:outline-none focus:ring-1 focus:ring-blue-400"
+                                  className="w-full bg-paper text-ink text-center px-2 py-1.5 rounded focus:bg-paper focus:outline-none focus:ring-1 focus:ring-brand"
                                   placeholder="0.00"
                                 />
                               </td>
-                              <td className="border border-white/20 px-2 py-1">
+                              <td className="border-2 border-ink px-2 py-1">
                                 <input
                                   type="number"
                                   step="0.01"
                                   value={observationData.parallel_5_voltage}
                                   onChange={(e) => handleObservationChange('parallel_5_voltage', e.target.value)}
-                                  className="w-full bg-white/10 text-white text-center px-2 py-1.5 rounded focus:bg-white/20 focus:outline-none focus:ring-1 focus:ring-blue-400"
+                                  className="w-full bg-paper text-ink text-center px-2 py-1.5 rounded focus:bg-paper focus:outline-none focus:ring-1 focus:ring-brand"
                                   placeholder="0.00"
                                 />
                               </td>
-                              <td className="border border-white/20 px-2 py-1">
+                              <td className="border-2 border-ink px-2 py-1">
                                 <input
                                   type="number"
                                   step="0.01"
                                   value={observationData.parallel_2_voltage}
                                   onChange={(e) => handleObservationChange('parallel_2_voltage', e.target.value)}
-                                  className="w-full bg-white/10 text-white text-center px-2 py-1.5 rounded focus:bg-white/20 focus:outline-none focus:ring-1 focus:ring-blue-400"
+                                  className="w-full bg-paper text-ink text-center px-2 py-1.5 rounded focus:bg-paper focus:outline-none focus:ring-1 focus:ring-brand"
                                   placeholder="0.00"
                                 />
                               </td>
@@ -612,89 +612,89 @@ export default function ELKPD() {
 
                             {/* Row 2: Arus Total */}
                             <tr>
-                              <td className="border border-white/20 px-3 py-2 text-white/90 font-semibold">Arus Total (A)</td>
-                              <td className="border border-white/20 px-2 py-1">
+                              <td className="border-2 border-ink px-3 py-2 text-ink font-semibold">Arus Total (A)</td>
+                              <td className="border-2 border-ink px-2 py-1">
                                 <input
                                   type="number"
                                   step="0.0001"
                                   value={observationData.series_5_current}
                                   onChange={(e) => handleObservationChange('series_5_current', e.target.value)}
-                                  className="w-full bg-white/10 text-white text-center px-2 py-1.5 rounded focus:bg-white/20 focus:outline-none focus:ring-1 focus:ring-blue-400"
+                                  className="w-full bg-paper text-ink text-center px-2 py-1.5 rounded focus:bg-paper focus:outline-none focus:ring-1 focus:ring-brand"
                                   placeholder="0.0000"
                                 />
                               </td>
-                              <td className="border border-white/20 px-2 py-1">
+                              <td className="border-2 border-ink px-2 py-1">
                                 <input
                                   type="number"
                                   step="0.0001"
                                   value={observationData.series_2_current}
                                   onChange={(e) => handleObservationChange('series_2_current', e.target.value)}
-                                  className="w-full bg-white/10 text-white text-center px-2 py-1.5 rounded focus:bg-white/20 focus:outline-none focus:ring-1 focus:ring-blue-400"
+                                  className="w-full bg-paper text-ink text-center px-2 py-1.5 rounded focus:bg-paper focus:outline-none focus:ring-1 focus:ring-brand"
                                   placeholder="0.0000"
                                 />
                               </td>
-                              <td className="border border-white/20 px-2 py-1">
+                              <td className="border-2 border-ink px-2 py-1">
                                 <input
                                   type="number"
                                   step="0.0001"
                                   value={observationData.parallel_5_current}
                                   onChange={(e) => handleObservationChange('parallel_5_current', e.target.value)}
-                                  className="w-full bg-white/10 text-white text-center px-2 py-1.5 rounded focus:bg-white/20 focus:outline-none focus:ring-1 focus:ring-blue-400"
+                                  className="w-full bg-paper text-ink text-center px-2 py-1.5 rounded focus:bg-paper focus:outline-none focus:ring-1 focus:ring-brand"
                                   placeholder="0.0000"
                                 />
                               </td>
-                              <td className="border border-white/20 px-2 py-1">
+                              <td className="border-2 border-ink px-2 py-1">
                                 <input
                                   type="number"
                                   step="0.0001"
                                   value={observationData.parallel_2_current}
                                   onChange={(e) => handleObservationChange('parallel_2_current', e.target.value)}
-                                  className="w-full bg-white/10 text-white text-center px-2 py-1.5 rounded focus:bg-white/20 focus:outline-none focus:ring-1 focus:ring-blue-400"
+                                  className="w-full bg-paper text-ink text-center px-2 py-1.5 rounded focus:bg-paper focus:outline-none focus:ring-1 focus:ring-brand"
                                   placeholder="0.0000"
                                 />
                               </td>
                             </tr>
 
                             {/* Row 3: Hambatan Total */}
-                            <tr className="bg-white/5">
-                              <td className="border border-white/20 px-3 py-2 text-white/90 font-semibold">Hambatan Total (Ω)</td>
-                              <td className="border border-white/20 px-2 py-1">
+                            <tr className="bg-paper">
+                              <td className="border-2 border-ink px-3 py-2 text-ink font-semibold">Hambatan Total (Ω)</td>
+                              <td className="border-2 border-ink px-2 py-1">
                                 <input
                                   type="number"
                                   step="0.01"
                                   value={observationData.series_5_resistance}
                                   onChange={(e) => handleObservationChange('series_5_resistance', e.target.value)}
-                                  className="w-full bg-white/10 text-white text-center px-2 py-1.5 rounded focus:bg-white/20 focus:outline-none focus:ring-1 focus:ring-blue-400"
+                                  className="w-full bg-paper text-ink text-center px-2 py-1.5 rounded focus:bg-paper focus:outline-none focus:ring-1 focus:ring-brand"
                                   placeholder="0.00"
                                 />
                               </td>
-                              <td className="border border-white/20 px-2 py-1">
+                              <td className="border-2 border-ink px-2 py-1">
                                 <input
                                   type="number"
                                   step="0.01"
                                   value={observationData.series_2_resistance}
                                   onChange={(e) => handleObservationChange('series_2_resistance', e.target.value)}
-                                  className="w-full bg-white/10 text-white text-center px-2 py-1.5 rounded focus:bg-white/20 focus:outline-none focus:ring-1 focus:ring-blue-400"
+                                  className="w-full bg-paper text-ink text-center px-2 py-1.5 rounded focus:bg-paper focus:outline-none focus:ring-1 focus:ring-brand"
                                   placeholder="0.00"
                                 />
                               </td>
-                              <td className="border border-white/20 px-2 py-1">
+                              <td className="border-2 border-ink px-2 py-1">
                                 <input
                                   type="number"
                                   step="0.01"
                                   value={observationData.parallel_5_resistance}
                                   onChange={(e) => handleObservationChange('parallel_5_resistance', e.target.value)}
-                                  className="w-full bg-white/10 text-white text-center px-2 py-1.5 rounded focus:bg-white/20 focus:outline-none focus:ring-1 focus:ring-blue-400"
+                                  className="w-full bg-paper text-ink text-center px-2 py-1.5 rounded focus:bg-paper focus:outline-none focus:ring-1 focus:ring-brand"
                                   placeholder="0.00"
                                 />
                               </td>
-                              <td className="border border-white/20 px-2 py-1">
+                              <td className="border-2 border-ink px-2 py-1">
                                 <input
                                   type="number"
                                   step="0.01"
                                   value={observationData.parallel_2_resistance}
                                   onChange={(e) => handleObservationChange('parallel_2_resistance', e.target.value)}
-                                  className="w-full bg-white/10 text-white text-center px-2 py-1.5 rounded focus:bg-white/20 focus:outline-none focus:ring-1 focus:ring-blue-400"
+                                  className="w-full bg-paper text-ink text-center px-2 py-1.5 rounded focus:bg-paper focus:outline-none focus:ring-1 focus:ring-brand"
                                   placeholder="0.00"
                                 />
                               </td>
@@ -702,81 +702,81 @@ export default function ELKPD() {
 
                             {/* Row 4: Kondisi Lampu ketika semua saklar dihidupkan */}
                             <tr>
-                              <td className="border border-white/20 px-3 py-2 text-white/90 font-semibold">Kondisi Lampu ketika semua saklar dihidupkan</td>
-                              <td className="border border-white/20 px-2 py-1">
+                              <td className="border-2 border-ink px-3 py-2 text-ink font-semibold">Kondisi Lampu ketika semua saklar dihidupkan</td>
+                              <td className="border-2 border-ink px-2 py-1">
                                 <input
                                   type="text"
                                   value={observationData.lamp_all_on_series_5}
                                   onChange={(e) => handleObservationChange('lamp_all_on_series_5', e.target.value)}
-                                  className="w-full bg-white/10 text-white text-center px-2 py-1.5 rounded focus:bg-white/20 focus:outline-none focus:ring-1 focus:ring-blue-400 text-xs"
+                                  className="w-full bg-paper text-ink text-center px-2 py-1.5 rounded focus:bg-paper focus:outline-none focus:ring-1 focus:ring-brand text-xs"
                                   placeholder="Kondisi..."
                                 />
                               </td>
-                              <td className="border border-white/20 px-2 py-1">
+                              <td className="border-2 border-ink px-2 py-1">
                                 <input
                                   type="text"
                                   value={observationData.lamp_all_on_series_2}
                                   onChange={(e) => handleObservationChange('lamp_all_on_series_2', e.target.value)}
-                                  className="w-full bg-white/10 text-white text-center px-2 py-1.5 rounded focus:bg-white/20 focus:outline-none focus:ring-1 focus:ring-blue-400 text-xs"
+                                  className="w-full bg-paper text-ink text-center px-2 py-1.5 rounded focus:bg-paper focus:outline-none focus:ring-1 focus:ring-brand text-xs"
                                   placeholder="Kondisi..."
                                 />
                               </td>
-                              <td className="border border-white/20 px-2 py-1">
+                              <td className="border-2 border-ink px-2 py-1">
                                 <input
                                   type="text"
                                   value={observationData.lamp_all_on_parallel_5}
                                   onChange={(e) => handleObservationChange('lamp_all_on_parallel_5', e.target.value)}
-                                  className="w-full bg-white/10 text-white text-center px-2 py-1.5 rounded focus:bg-white/20 focus:outline-none focus:ring-1 focus:ring-blue-400 text-xs"
+                                  className="w-full bg-paper text-ink text-center px-2 py-1.5 rounded focus:bg-paper focus:outline-none focus:ring-1 focus:ring-brand text-xs"
                                   placeholder="Kondisi..."
                                 />
                               </td>
-                              <td className="border border-white/20 px-2 py-1">
+                              <td className="border-2 border-ink px-2 py-1">
                                 <input
                                   type="text"
                                   value={observationData.lamp_all_on_parallel_2}
                                   onChange={(e) => handleObservationChange('lamp_all_on_parallel_2', e.target.value)}
-                                  className="w-full bg-white/10 text-white text-center px-2 py-1.5 rounded focus:bg-white/20 focus:outline-none focus:ring-1 focus:ring-blue-400 text-xs"
+                                  className="w-full bg-paper text-ink text-center px-2 py-1.5 rounded focus:bg-paper focus:outline-none focus:ring-1 focus:ring-brand text-xs"
                                   placeholder="Kondisi..."
                                 />
                               </td>
                             </tr>
 
                             {/* Row 5: Kondisi Lampu jika salah satu saklar dimatikan */}
-                            <tr className="bg-white/5">
-                              <td className="border border-white/20 px-3 py-2 text-white/90 font-semibold">Kondisi Lampu jika salah satu saklar dimatikan</td>
-                              <td className="border border-white/20 px-2 py-1">
+                            <tr className="bg-paper">
+                              <td className="border-2 border-ink px-3 py-2 text-ink font-semibold">Kondisi Lampu jika salah satu saklar dimatikan</td>
+                              <td className="border-2 border-ink px-2 py-1">
                                 <input
                                   type="text"
                                   value={observationData.lamp_one_off_series_5}
                                   onChange={(e) => handleObservationChange('lamp_one_off_series_5', e.target.value)}
-                                  className="w-full bg-white/10 text-white text-center px-2 py-1.5 rounded focus:bg-white/20 focus:outline-none focus:ring-1 focus:ring-blue-400 text-xs"
+                                  className="w-full bg-paper text-ink text-center px-2 py-1.5 rounded focus:bg-paper focus:outline-none focus:ring-1 focus:ring-brand text-xs"
                                   placeholder="Kondisi..."
                                 />
                               </td>
-                              <td className="border border-white/20 px-2 py-1">
+                              <td className="border-2 border-ink px-2 py-1">
                                 <input
                                   type="text"
                                   value={observationData.lamp_one_off_series_2}
                                   onChange={(e) => handleObservationChange('lamp_one_off_series_2', e.target.value)}
-                                  className="w-full bg-white/10 text-white text-center px-2 py-1.5 rounded focus:bg-white/20 focus:outline-none focus:ring-1 focus:ring-blue-400 text-xs"
+                                  className="w-full bg-paper text-ink text-center px-2 py-1.5 rounded focus:bg-paper focus:outline-none focus:ring-1 focus:ring-brand text-xs"
                                   placeholder="Kondisi..."
                                 />
                               </td>
-                              <td className="border border-white/20 px-2 py-1">
+                              <td className="border-2 border-ink px-2 py-1">
                                 <input
                                   type="text"
                                   value={observationData.lamp_one_off_parallel_5}
                                   onChange={(e) => handleObservationChange('lamp_one_off_parallel_5', e.target.value)}
-                                  className="w-full bg-white/10 text-white text-center px-2 py-1.5 rounded focus:bg-white/20 focus:outline-none focus:ring-1 focus:ring-blue-400 text-xs"
+                                  className="w-full bg-paper text-ink text-center px-2 py-1.5 rounded focus:bg-paper focus:outline-none focus:ring-1 focus:ring-brand text-xs"
                                   placeholder="Kondisi..."
                                 />
                               </td>
-                              <td className="border border-white/20 px-2 py-1">
+                              <td className="border-2 border-ink px-2 py-1">
                                 <input
                                   type="text"
                                   value={observationData.lamp_one_off_parallel_2}
                                   onChange={(e) => handleObservationChange('lamp_one_off_parallel_2', e.target.value)}
-                                  className="w-full bg-white/10 text-white text-center px-2 py-1.5 rounded focus:bg-white/20 focus:outline-none focus:ring-1 focus:ring-blue-400 text-xs"
+                                  className="w-full bg-paper text-ink text-center px-2 py-1.5 rounded focus:bg-paper focus:outline-none focus:ring-1 focus:ring-brand text-xs"
                                   placeholder="Kondisi..."
                                 />
                               </td>
@@ -784,40 +784,40 @@ export default function ELKPD() {
 
                             {/* Row 6: Kondisi Tingkat Kecerahan Lampu */}
                             <tr>
-                              <td className="border border-white/20 px-3 py-2 text-white/90 font-semibold">Kondisi Tingkat Kecerahan Lampu</td>
-                              <td className="border border-white/20 px-2 py-1">
+                              <td className="border-2 border-ink px-3 py-2 text-ink font-semibold">Kondisi Tingkat Kecerahan Lampu</td>
+                              <td className="border-2 border-ink px-2 py-1">
                                 <input
                                   type="text"
                                   value={observationData.lamp_brightness_series_5}
                                   onChange={(e) => handleObservationChange('lamp_brightness_series_5', e.target.value)}
-                                  className="w-full bg-white/10 text-white text-center px-2 py-1.5 rounded focus:bg-white/20 focus:outline-none focus:ring-1 focus:ring-blue-400 text-xs"
+                                  className="w-full bg-paper text-ink text-center px-2 py-1.5 rounded focus:bg-paper focus:outline-none focus:ring-1 focus:ring-brand text-xs"
                                   placeholder="Terang/Redup..."
                                 />
                               </td>
-                              <td className="border border-white/20 px-2 py-1">
+                              <td className="border-2 border-ink px-2 py-1">
                                 <input
                                   type="text"
                                   value={observationData.lamp_brightness_series_2}
                                   onChange={(e) => handleObservationChange('lamp_brightness_series_2', e.target.value)}
-                                  className="w-full bg-white/10 text-white text-center px-2 py-1.5 rounded focus:bg-white/20 focus:outline-none focus:ring-1 focus:ring-blue-400 text-xs"
+                                  className="w-full bg-paper text-ink text-center px-2 py-1.5 rounded focus:bg-paper focus:outline-none focus:ring-1 focus:ring-brand text-xs"
                                   placeholder="Terang/Redup..."
                                 />
                               </td>
-                              <td className="border border-white/20 px-2 py-1">
+                              <td className="border-2 border-ink px-2 py-1">
                                 <input
                                   type="text"
                                   value={observationData.lamp_brightness_parallel_5}
                                   onChange={(e) => handleObservationChange('lamp_brightness_parallel_5', e.target.value)}
-                                  className="w-full bg-white/10 text-white text-center px-2 py-1.5 rounded focus:bg-white/20 focus:outline-none focus:ring-1 focus:ring-blue-400 text-xs"
+                                  className="w-full bg-paper text-ink text-center px-2 py-1.5 rounded focus:bg-paper focus:outline-none focus:ring-1 focus:ring-brand text-xs"
                                   placeholder="Terang/Redup..."
                                 />
                               </td>
-                              <td className="border border-white/20 px-2 py-1">
+                              <td className="border-2 border-ink px-2 py-1">
                                 <input
                                   type="text"
                                   value={observationData.lamp_brightness_parallel_2}
                                   onChange={(e) => handleObservationChange('lamp_brightness_parallel_2', e.target.value)}
-                                  className="w-full bg-white/10 text-white text-center px-2 py-1.5 rounded focus:bg-white/20 focus:outline-none focus:ring-1 focus:ring-blue-400 text-xs"
+                                  className="w-full bg-paper text-ink text-center px-2 py-1.5 rounded focus:bg-paper focus:outline-none focus:ring-1 focus:ring-brand text-xs"
                                   placeholder="Terang/Redup..."
                                 />
                               </td>
@@ -827,7 +827,7 @@ export default function ELKPD() {
                       </div>
 
                       {/* Auto-save indicator */}
-                      <div className="flex items-center justify-between text-xs text-white/60 mt-4">
+                      <div className="flex items-center justify-between text-xs text-muted mt-4">
                         <div className="flex items-center gap-2">
                           {isSaving ? (
                             <>
@@ -836,7 +836,7 @@ export default function ELKPD() {
                             </>
                           ) : lastSaved ? (
                             <>
-                              <CheckCircle2 className="w-3 h-3 text-emerald-400" />
+                              <CheckCircle2 className="w-3 h-3 text-emerald-700" />
                               <span>Tersimpan otomatis {lastSaved.toLocaleTimeString('id-ID')}</span>
                             </>
                           ) : (
@@ -847,7 +847,7 @@ export default function ELKPD() {
                           )}
                         </div>
                         {!user && (
-                          <span className="text-yellow-400">⚠️ Login untuk menyimpan data</span>
+                          <span className="text-amber-700">Login untuk menyimpan data</span>
                         )}
                       </div>
                     </div>
@@ -859,7 +859,7 @@ export default function ELKPD() {
                           const imagePath = item.replace('IMAGE:', '');
                           return (
                             <li key={idx} className="my-4 list-none">
-                              <div className="relative w-full max-w-md mx-auto aspect-video rounded-lg overflow-hidden border-2 border-white/20 shadow-lg bg-white/5">
+                              <div className="relative w-full max-w-md mx-auto aspect-video rounded-lg overflow-hidden border-2 border-ink bg-paper">
                                 <Image 
                                   src={imagePath} 
                                   alt="Diagram Rangkaian" 
@@ -876,16 +876,16 @@ export default function ELKPD() {
                         return (
                           <li
                             key={idx}
-                            className="flex items-start gap-3 text-base text-white/90 leading-relaxed"
+                            className="flex items-start gap-3 text-base text-ink leading-relaxed"
                           >
-                            <span className="text-blue-400 mt-1 text-lg">•</span>
+                            <span className="text-brand mt-1 text-lg">•</span>
                             <span>{item}</span>
                           </li>
                         );
                       })}
                     </ul>
                   ) : (
-                    <div className="text-sm text-white/80 whitespace-pre-line font-mono">
+                    <div className="text-sm text-ink whitespace-pre-line font-mono">
                       {section.content}
                     </div>
                   )}
@@ -897,11 +897,11 @@ export default function ELKPD() {
       </div>
 
       {/* Footer */}
-      <div className="p-4 border-t border-white/10 bg-white/5">
-        <div className="flex items-center justify-between text-xs text-blue-200/70">
-          <span>💡 Tandai selesai setiap bagian yang sudah dikerjakan</span>
+      <div className="p-4 border-t border-ink/20 bg-paper">
+        <div className="flex items-center justify-between text-xs text-muted">
+          <span>Tandai selesai setiap bagian yang sudah dikerjakan</span>
           {completedSections.length === lkpdData.length && (
-            <span className="text-emerald-400 font-bold flex items-center gap-1">
+            <span className="text-emerald-700 font-bold flex items-center gap-1">
               <CheckCircle2 className="w-4 h-4" />
               Selesai!
             </span>

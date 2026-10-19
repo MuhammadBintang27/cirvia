@@ -1,4 +1,6 @@
 "use client";
+import { Ico } from "@/components/ui/Ico";
+import { useToast } from "@/components/Toast";
 
 import React, { useRef, useEffect, useState, useCallback } from "react";
 import { Hands, Results, HAND_CONNECTIONS } from "@mediapipe/hands";
@@ -91,7 +93,7 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
   }
 
   const [components, setComponents] = useState<CircuitComponent[]>([]);
-  const componentsRef = useRef<CircuitComponent[]>([]); // 🔧 FIX: Always get latest components
+  const componentsRef = useRef<CircuitComponent[]>([]); // FIX: Always get latest components
 
   // 🆕 Permanent wire connections
   const [wires, setWires] = useState<WireComponent[]>([]);
@@ -144,7 +146,7 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
     endPosition: { x: number; y: number } | null;
     targetComponentId: string | null;
     targetTerminalId: "a" | "b" | null;
-    waitingForTerminalSelection: boolean; // 🆕 Flag for terminal chooser
+    waitingForTerminalSelection: boolean; // Flag for terminal chooser
   }>({
     isActive: false,
     startComponentId: null,
@@ -154,6 +156,47 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
     targetTerminalId: null,
     waitingForTerminalSelection: false,
   });
+
+
+  // Notifikasi sebagai toast (bukan div yang menggeser tata letak), diturunkan dari perubahan state
+  const { addToast } = useToast();
+  const prevComponentsRef = useRef<CircuitComponent[]>([]);
+  const prevWireCountRef = useRef(0);
+  const COMPONENT_LABEL: Record<string, string> = { battery: "Baterai", lamp: "Lampu", resistor: "Resistor", switch: "Saklar" };
+
+  useEffect(() => {
+    const prev = prevComponentsRef.current;
+    prevComponentsRef.current = components;
+    const notify = (title: string, type: "success" | "info" | "warning" = "success") => addToast({ type, title, duration: 2500 });
+
+    if (components.length > prev.length) {
+      const added = components.filter((c) => !prev.some((p) => p.id === c.id));
+      added.forEach((c) => notify(`${COMPONENT_LABEL[c.type] ?? "Komponen"} ditambahkan`));
+    } else if (components.length < prev.length) {
+      const removed = prev.length - components.length;
+      notify(removed === 1 ? "Komponen dihapus" : `${removed} komponen dihapus`, "warning");
+    }
+    components.forEach((c) => {
+      const before = prev.find((p) => p.id === c.id);
+      if (c.type === "switch" && before && before.state !== c.state) {
+        notify(c.state === "closed" ? "Saklar ditutup (ON)" : "Saklar dibuka (OFF)", "info");
+      }
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [components]);
+
+  useEffect(() => {
+    if (wires.length > prevWireCountRef.current) addToast({ type: "success", title: "Kabel tersambung", duration: 2500 });
+    prevWireCountRef.current = wires.length;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [wires.length]);
+
+  useEffect(() => {
+    if (wireConnection.isActive) {
+      addToast({ type: "info", title: "Membuat koneksi kabel", message: "Geser ke komponen tujuan, lalu tunjuk dan tahan lagi", duration: 4000 });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [wireConnection.isActive]);
 
   // 🌊 Animation loop for wire current flow
   useEffect(() => {
@@ -300,7 +343,7 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
           // Selection complete after 2 seconds
           if (progress >= 1) {
             console.log(
-              `✅ Terminal ${hoveredTerminal.toUpperCase()} selected after 2s hold`
+              `Terminal ${hoveredTerminal.toUpperCase()} selected after 2s hold`
             );
 
             if (terminalSelection.stage === "start") {
@@ -348,7 +391,7 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
                 setWires((prev) => [...prev, newWire]);
 
                 console.log(
-                  `✅ Wire created: ${startComponentId}[${startTerminalId.toUpperCase()}] → ${targetComponentId}[${endTerminal.toUpperCase()}]`
+                  `Wire created: ${startComponentId}[${startTerminalId.toUpperCase()}] → ${targetComponentId}[${endTerminal.toUpperCase()}]`
                 );
                 debugLogger.log(
                   "action",
@@ -392,7 +435,7 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
             progress: 0,
           });
           console.log(
-            `☝️ Started HOLD timer for Terminal ${hoveredTerminal.toUpperCase()}`
+            `Started HOLD timer for Terminal ${hoveredTerminal.toUpperCase()}`
           );
         }
       } else {
@@ -686,12 +729,12 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
         const now = Date.now();
 
         console.log(
-          `🗑️ [DELETE DEBUG] Open palm detected at (${cursorX.toFixed(
+          `[DELETE DEBUG] Open palm detected at (${cursorX.toFixed(
             0
           )}, ${cursorY.toFixed(0)})`
         );
         console.log(
-          `🗑️ [DELETE DEBUG] Total components in scene: ${componentsRef.current.length}`
+          `[DELETE DEBUG] Total components in scene: ${componentsRef.current.length}`
         );
 
         // Find component under open palm (100px radius)
@@ -708,7 +751,7 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
           const distance = Math.sqrt(dx * dx + dy * dy);
 
           console.log(
-            `   📦 Checking ${comp.type} ${comp.id.slice(
+            `   Checking ${comp.type} ${comp.id.slice(
               -8
             )}: distance = ${distance.toFixed(
               1
@@ -725,7 +768,7 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
         if (closestComponent) {
           const comp = closestComponent as Exclude<ComponentType, null>; // Type-safe reference
           console.log(
-            `🎯 [DELETE DEBUG] Component found: ${comp.type} ${comp.id.slice(
+            `[DELETE DEBUG] Component found: ${comp.type} ${comp.id.slice(
               -8
             )} at ${closestDistance.toFixed(0)}px`
           );
@@ -737,7 +780,7 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
               const progress = Math.min(elapsed / 3000, 1); // 3 seconds
 
               console.log(
-                `⏱️ [DELETE DEBUG] Continuing hold: ${elapsed.toFixed(0)}ms (${(
+                `[DELETE DEBUG] Continuing hold: ${elapsed.toFixed(0)}ms (${(
                   progress * 100
                 ).toFixed(1)}%)`
               );
@@ -750,7 +793,7 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
                 setComponents((prev) => {
                   const filtered = prev.filter((c) => c.id !== comp.id);
                   console.log(
-                    `🗑️ COMPONENT DELETED: ${comp.type} ${comp.id.slice(-8)}`
+                    `COMPONENT DELETED: ${comp.type} ${comp.id.slice(-8)}`
                   );
                   console.log(`   → Remaining components: ${filtered.length}`);
                   return filtered;
@@ -765,7 +808,7 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
                   const deletedCount = prev.length - filtered.length;
                   if (deletedCount > 0) {
                     console.log(
-                      `🗑️ WIRES DELETED: ${deletedCount} wire(s) connected to ${comp.id.slice(
+                      `WIRES DELETED: ${deletedCount} wire(s) connected to ${comp.id.slice(
                         -8
                       )}`
                     );
@@ -792,7 +835,7 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
             } else {
               // Start new hold
               console.log(
-                `🆕 [DELETE DEBUG] Starting new delete hold on ${
+                `[DELETE DEBUG] Starting new delete hold on ${
                   comp.type
                 } ${comp.id.slice(-8)}`
               );
@@ -810,7 +853,7 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
           setDeleteHold((prevHold) => {
             if (prevHold.isActive) {
               console.log(
-                `🔄 [DELETE DEBUG] Cancelling delete hold (no component)`
+                `[DELETE DEBUG] Cancelling delete hold (no component)`
               );
               return {
                 isActive: false,
@@ -844,7 +887,7 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
           id: `${action.componentType}_${Date.now()}`,
           type: action.componentType,
           position: {
-            x: mirrorX(action.position.x) * 1200, // 🔄 Mirror X
+            x: mirrorX(action.position.x) * 1200, // Mirror X
             y: action.position.y * 700,
           },
           rotation: 0,
@@ -854,7 +897,7 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
         setComponents((prev) => {
           const updated = [...prev, newComponent];
           console.log(
-            `➕ ADD: ${action.componentType} | Total components: ${updated.length}`
+            `ADD: ${action.componentType} | Total components: ${updated.length}`
           );
           debugLogger.log("action", `ADD: ${action.componentType}`, {
             id: newComponent.id,
@@ -888,7 +931,7 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
       if (action.type === "point_hold_progress" && action.position) {
         const holdProgress = action.holdProgress || 0;
         console.log(
-          `🕐 POINT HOLD: ${(holdProgress * 100).toFixed(0)}% (${
+          `POINT HOLD: ${(holdProgress * 100).toFixed(0)}% (${
             action.componentId
           })`
         );
@@ -901,7 +944,7 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
       if (action.type === "start_wire" && action.componentId) {
         // 🎯 NEW: Show terminal chooser instead of auto-detect
         console.log(
-          `🔌 WIRE START - Waiting for terminal selection: ${action.componentId}`
+          `WIRE START - Waiting for terminal selection: ${action.componentId}`
         );
 
         setTerminalSelection({
@@ -923,7 +966,7 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
         });
 
         console.log(
-          `🎯 TERMINAL CHOOSER activated for component: ${action.componentId} (stage: start)`
+          `TERMINAL CHOOSER activated for component: ${action.componentId} (stage: start)`
         );
         debugLogger.log("action", "WIRE START - Terminal Chooser", {
           componentId: action.componentId,
@@ -936,7 +979,7 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
       if (action.type === "wire_target_hold_progress" && action.position) {
         const holdProgress = action.holdProgress || 0;
         console.log(
-          `🕐 TARGET HOLD: ${(holdProgress * 100).toFixed(0)}% on target: ${
+          `TARGET HOLD: ${(holdProgress * 100).toFixed(0)}% on target: ${
             action.targetComponentId || "none"
           }`
         );
@@ -982,7 +1025,7 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
       ) {
         // 🎯 NEW: Show terminal chooser for target component
         console.log(
-          `🔌 WIRE COMPLETE - Waiting for END terminal selection: ${action.targetComponentId}`
+          `WIRE COMPLETE - Waiting for END terminal selection: ${action.targetComponentId}`
         );
 
         setTerminalSelection({
@@ -1001,7 +1044,7 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
         }));
 
         console.log(
-          `🎯 TERMINAL CHOOSER activated for target component: ${action.targetComponentId} (stage: end)`
+          `TERMINAL CHOOSER activated for target component: ${action.targetComponentId} (stage: end)`
         );
         debugLogger.log("action", "WIRE COMPLETE - Terminal Chooser", {
           startComponent: action.componentId,
@@ -1013,14 +1056,14 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
 
       // 👉 RIGHT HAND: Select component (PINCH START)
       if (action.type === "select" && action.position) {
-        const cursorX = mirrorX(action.position.x) * 1200; // 🔄 Mirror X
+        const cursorX = mirrorX(action.position.x) * 1200; // Mirror X
         const cursorY = action.position.y * 700;
 
         // 🔧 FIX: Use componentsRef.current to get latest state
         const currentComponents = componentsRef.current;
 
         console.log(
-          `🔍 SELECT at (${cursorX.toFixed(0)}, ${cursorY.toFixed(
+          `SELECT at (${cursorX.toFixed(0)}, ${cursorY.toFixed(
             0
           )}) | Components: ${currentComponents.length}`
         );
@@ -1044,7 +1087,7 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
           const dy = c.position.y - cursorY;
           const distance = Math.sqrt(dx * dx + dy * dy);
           console.log(
-            `   📦 ${c.type} at (${c.position.x.toFixed(
+            `   ${c.type} at (${c.position.x.toFixed(
               0
             )}, ${c.position.y.toFixed(0)}) → distance: ${distance.toFixed(
               1
@@ -1074,7 +1117,7 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
 
       // 👉 RIGHT HAND: Move component (PINCH HOLD - DRAG)
       if (action.type === "move" && action.position) {
-        const cursorX = mirrorX(action.position.x) * 1200; // 🔄 Mirror X
+        const cursorX = mirrorX(action.position.x) * 1200; // Mirror X
         const cursorY = action.position.y * 700;
 
         // 🔧 FIX: Use componentsRef.current to get latest state
@@ -1190,7 +1233,7 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
         );
 
         console.log(
-          `🔍 [TOGGLE DEBUG] Found ${switches.length} switch(es) in circuit`
+          `[TOGGLE DEBUG] Found ${switches.length} switch(es) in circuit`
         );
 
         if (switches.length > 0) {
@@ -1207,7 +1250,7 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
                 Math.pow(sw.position.y - cursorY, 2)
             );
             console.log(
-              `🔍 [TOGGLE DEBUG] Distance to ${sw.id}: ${dist.toFixed(0)}px`
+              `[TOGGLE DEBUG] Distance to ${sw.id}: ${dist.toFixed(0)}px`
             );
             if (dist < minDistance) {
               minDistance = dist;
@@ -1219,7 +1262,7 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
           const now = Date.now();
 
           console.log(
-            `🎯 [TOGGLE DEBUG] Closest switch: ${
+            `[TOGGLE DEBUG] Closest switch: ${
               switchComponent.id
             } at ${minDistance.toFixed(0)}px, state: ${switchComponent.state}`
           );
@@ -1247,7 +1290,7 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
               });
 
               console.log(
-                `🕐 TOGGLE HOLD: ${(progress * 100).toFixed(0)}% on ${
+                `TOGGLE HOLD: ${(progress * 100).toFixed(0)}% on ${
                   switchComponent.id
                 } (${elapsed}ms / 3000ms)`
               );
@@ -1255,18 +1298,18 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
               // Complete toggle after 3 seconds
               if (progress >= 1) {
                 console.log(
-                  `🎉 [TOGGLE DEBUG] Progress reached 100%! Checking debounce...`
+                  `[TOGGLE DEBUG] Progress reached 100%! Checking debounce...`
                 );
 
                 // 🔧 DEBOUNCE CHECK: Use useRef for synchronous access
                 const timeSinceLastToggle = now - lastToggleTimeRef.current;
                 console.log(
-                  `🕐 [DEBOUNCE CHECK] Time since last toggle: ${timeSinceLastToggle}ms (need ${TOGGLE_DEBOUNCE_MS}ms)`
+                  `[DEBOUNCE CHECK] Time since last toggle: ${timeSinceLastToggle}ms (need ${TOGGLE_DEBOUNCE_MS}ms)`
                 );
 
                 if (timeSinceLastToggle < TOGGLE_DEBOUNCE_MS) {
                   console.log(
-                    `⏸️ [TOGGLE DEBUG] ❌ DEBOUNCED! Last toggle was ${timeSinceLastToggle}ms ago (need ${TOGGLE_DEBOUNCE_MS}ms cooldown)`
+                    `[TOGGLE DEBUG] DEBOUNCED! Last toggle was ${timeSinceLastToggle}ms ago (need ${TOGGLE_DEBOUNCE_MS}ms cooldown)`
                   );
                   // Reset hold state without toggling
                   return {
@@ -1278,7 +1321,7 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
                 }
 
                 console.log(
-                  `✅ [TOGGLE DEBUG] Debounce check passed. Proceeding with toggle...`
+                  `[TOGGLE DEBUG] Debounce check passed. Proceeding with toggle...`
                 );
 
                 // 🔧 FIX: Use prevHold.switchId (not switchComponent.id from closure)
@@ -1287,7 +1330,7 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
                 // Update last toggle time IMMEDIATELY (synchronous with useRef)
                 lastToggleTimeRef.current = now;
                 console.log(
-                  `⏰ [TOGGLE DEBUG] Updated lastToggleTimeRef.current: ${now}`
+                  `[TOGGLE DEBUG] Updated lastToggleTimeRef.current: ${now}`
                 );
 
                 setComponents((prevComps) => {
@@ -1296,10 +1339,10 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
                       const newState: "open" | "closed" =
                         comp.state === "open" ? "closed" : "open";
                       console.log(
-                        `✅ SWITCH TOGGLED: ${targetSwitchId} ${comp.state} → ${newState}`
+                        `SWITCH TOGGLED: ${targetSwitchId} ${comp.state} → ${newState}`
                       );
                       console.log(
-                        `✅ [TOGGLE DEBUG] Toggle executed successfully:`,
+                        `[TOGGLE DEBUG] Toggle executed successfully:`,
                         {
                           switchId: targetSwitchId,
                           oldState: comp.state,
@@ -1336,7 +1379,7 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
 
                 // Reset hold state
                 console.log(
-                  `🔄 [TOGGLE DEBUG] Resetting hold state after successful toggle`
+                  `[TOGGLE DEBUG] Resetting hold state after successful toggle`
                 );
                 return {
                   isActive: false,
@@ -1346,7 +1389,7 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
                 };
               } else {
                 console.log(
-                  `⏳ [TOGGLE DEBUG] Still holding... need ${
+                  `[TOGGLE DEBUG] Still holding... need ${
                     3000 - elapsed
                   }ms more`
                 );
@@ -1368,7 +1411,7 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
                 previousSwitchId: prevHold.switchId,
               });
               console.log(
-                `👍 THUMBS UP START at (${cursorX.toFixed(
+                `THUMBS UP START at (${cursorX.toFixed(
                   0
                 )}, ${cursorY.toFixed(0)}) on switch: ${
                   switchComponent.id
@@ -1531,7 +1574,7 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
           const gesture = gestureDetectorRef.current.detectGesture(
             formattedLandmarks,
             handedness,
-            true // 🔄 isFrontCamera = true (laptop camera = mirror)
+            true // isFrontCamera = true (laptop camera = mirror)
           );
 
           // 🆕 Detect component at finger position (for POINT gesture)
@@ -1541,7 +1584,7 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
             const fingerY = gesture.position.y * 700;
 
             console.log(
-              `👆 POINT detected at (${fingerX.toFixed(0)}, ${fingerY.toFixed(
+              `POINT detected at (${fingerX.toFixed(0)}, ${fingerY.toFixed(
                 0
               )})`
             );
@@ -1555,7 +1598,7 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
 
               if (distance < DETECTION_RADIUS) {
                 console.log(
-                  `   ✅ Component ${c.type} at distance ${distance.toFixed(
+                  `   Component ${c.type} at distance ${distance.toFixed(
                     1
                   )}px`
                 );
@@ -1573,7 +1616,7 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
             if (componentAtFinger) {
               gesture.metadata.componentId = componentAtFinger.id;
               console.log(
-                `   🎯 Component under finger: ${componentAtFinger.type} (${componentAtFinger.id})`
+                `   Component under finger: ${componentAtFinger.type} (${componentAtFinger.id})`
               );
             } else {
               gesture.metadata.componentId = undefined;
@@ -1584,7 +1627,7 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
           // 🆕 RIGHT HAND: Rotate 90° with PEACE gesture (2 fingers, hold 5 seconds)
           // Handle PEACE gesture detection for rotation
           console.log(
-            `🔍 [PEACE CHECK] gesture.name="${
+            `[PEACE CHECK] gesture.name="${
               gesture.name
             }" | gesture.handedness="${
               gesture.handedness
@@ -1593,7 +1636,7 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
 
           const isPeaceRightHand =
             gesture.name === "peace" &&
-            gesture.handedness === "Right" && // ✅ Use gesture.handedness (corrected), not raw handedness
+            gesture.handedness === "Right" && // Use gesture.handedness (corrected), not raw handedness
             gesture.position;
 
           console.log(`🔍 [PEACE CHECK] isPeaceRightHand=${isPeaceRightHand}`);
@@ -1629,7 +1672,7 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
               const comp = closestComponent as CircuitComponent;
 
               console.log(
-                `🎯 [ROTATE DEBUG] Closest component: ${
+                `[ROTATE DEBUG] Closest component: ${
                   comp.id
                 } at ${closestDistance.toFixed(0)}px`
               );
@@ -1649,18 +1692,18 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
                   // Complete rotation after 5 seconds
                   if (progress >= 1) {
                     console.log(
-                      `🎉 [ROTATE DEBUG] Progress reached 100%! Checking debounce...`
+                      `[ROTATE DEBUG] Progress reached 100%! Checking debounce...`
                     );
 
                     // Debounce check
                     const timeSinceLastRotate = now - lastRotateTimeRef.current;
                     console.log(
-                      `🕐 [DEBOUNCE CHECK] Time since last rotate: ${timeSinceLastRotate}ms`
+                      `[DEBOUNCE CHECK] Time since last rotate: ${timeSinceLastRotate}ms`
                     );
 
                     if (timeSinceLastRotate < ROTATE_DEBOUNCE_MS) {
                       console.log(
-                        `⏸️ [ROTATE DEBUG] ❌ DEBOUNCED! Last rotate was ${timeSinceLastRotate}ms ago`
+                        `[ROTATE DEBUG] DEBOUNCED! Last rotate was ${timeSinceLastRotate}ms ago`
                       );
                       return {
                         isActive: false,
@@ -1671,7 +1714,7 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
                     }
 
                     console.log(
-                      `✅ [ROTATE DEBUG] Debounce check passed. Rotating 90°...`
+                      `[ROTATE DEBUG] Debounce check passed. Rotating 90°...`
                     );
 
                     const targetComponentId = prevHold.componentId;
@@ -1679,7 +1722,7 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
                     // Update last rotate time
                     lastRotateTimeRef.current = now;
                     console.log(
-                      `⏰ [ROTATE DEBUG] Updated lastRotateTimeRef.current: ${now}`
+                      `[ROTATE DEBUG] Updated lastRotateTimeRef.current: ${now}`
                     );
 
                     // Rotate component 90°
@@ -1688,7 +1731,7 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
                         if (comp.id === targetComponentId) {
                           const newRotation = (comp.rotation + 90) % 360;
                           console.log(
-                            `🔄 COMPONENT ROTATED: ${targetComponentId} ${comp.rotation}° → ${newRotation}°`
+                            `COMPONENT ROTATED: ${targetComponentId} ${comp.rotation}° → ${newRotation}°`
                           );
                           debugLogger.log(
                             "action",
@@ -1706,7 +1749,7 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
                     });
 
                     console.log(
-                      `✅ [ROTATE DEBUG] Rotation executed successfully`
+                      `[ROTATE DEBUG] Rotation executed successfully`
                     );
 
                     // Reset hold state
@@ -1740,7 +1783,7 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
               setRotateHold((prevHold) => {
                 if (prevHold.isActive) {
                   console.log(
-                    `🔄 [ROTATE DEBUG] Resetting hold - no component in range`
+                    `[ROTATE DEBUG] Resetting hold - no component in range`
                   );
                   return {
                     isActive: false,
@@ -1757,7 +1800,7 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
             setRotateHold((prevHold) => {
               if (prevHold.isActive) {
                 console.log(
-                  `🔄 [ROTATE DEBUG] Resetting hold because gesture changed`
+                  `[ROTATE DEBUG] Resetting hold because gesture changed`
                 );
                 return {
                   isActive: false,
@@ -1841,7 +1884,7 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
       } else {
         setState((prev) => ({ ...prev, handDetected: false }));
         setHandPosition(null);
-        setSelectedComponentId(null); // 🆕 Clear when hand not detected
+        setSelectedComponentId(null); // Clear when hand not detected
         circuitControllerRef.current.resetPinchState();
       }
 
@@ -2346,7 +2389,7 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
         ctx.font = "bold 24px Arial";
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
-        ctx.fillText("🗑️", 0, 0);
+        ctx.fillText("", 0, 0);
 
         // Progress text
         const progressPercent = Math.floor(deleteHold.progress * 100);
@@ -2420,7 +2463,7 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
 
         // Label
         ctx.font = "12px Arial";
-        ctx.fillText("✌️ Hold 5s Rotate", 0, 15);
+        ctx.fillText("Hold 5s Rotate", 0, 15);
 
         ctx.restore();
       }
@@ -2531,7 +2574,7 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
         ctx.font = "bold 11px monospace";
         ctx.textAlign = "center";
         ctx.fillText(
-          "🤏 PINCH ACTIVE",
+          "PINCH ACTIVE",
           labelX + labelWidth / 2,
           labelY + labelHeight + 17
         );
@@ -2794,7 +2837,7 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
 
           ctx.fillStyle = "#FFFFFF";
           ctx.font = "bold 12px Arial";
-          ctx.fillText("👆 POINT AT COMPONENT", fingerX, fingerY + 44);
+          ctx.fillText("POINT AT COMPONENT", fingerX, fingerY + 44);
         }
       }
     }
@@ -2956,7 +2999,7 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
         ctx.fillText(
-          "🔌 WIRE START",
+          "WIRE START",
           startComp.position.x,
           startComp.position.y - 51
         );
@@ -2981,7 +3024,7 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
           ctx.fillStyle = "#FFFFFF";
           ctx.font = "bold 12px Arial";
           ctx.fillText(
-            "👆 HOLD ON TARGET 3s",
+            "HOLD ON TARGET 3s",
             wireConnection.endPosition.x,
             wireConnection.endPosition.y + 39
           );
@@ -3196,7 +3239,7 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
         const stageText =
           terminalSelection.stage === "start" ? "AWAL" : "TUJUAN";
         ctx.fillText(
-          `👆 Arahkan jari ke terminal L atau R, tahan 2 detik`,
+          `Arahkan jari ke terminal L atau R, tahan 2 detik`,
           compX,
           compY - 117
         );
@@ -3360,7 +3403,7 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
             <XCircle className="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5" />
             <div>
               <p className="text-red-200 font-semibold text-sm">
-                ⚠️ {state.error}
+                {state.error}
               </p>
               <p className="text-red-300 text-xs mt-1">
                 Please allow camera access in your browser settings and refresh
@@ -3375,7 +3418,7 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
       <div className="bg-gradient-to-r from-slate-800 to-slate-700 rounded-xl p-3 mb-4 border border-blue-400/30">
         <div className="flex items-center justify-between">
           <h4 className="text-white font-bold text-sm flex items-center gap-2">
-            <span className="text-yellow-400">⚡</span> KOMPONEN LISTRIK
+            <span className="text-yellow-400"><Ico n="zap" /></span> KOMPONEN LISTRIK
           </h4>
           <div className="flex gap-3">
             {!state.isActive ? (
@@ -3403,28 +3446,28 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
           {[
             {
               type: "battery",
-              icon: "🔋",
+              icon: "battery",
               label: "Baterai",
               fingerCount: 1,
               color: "from-blue-500 to-blue-600",
             },
             {
               type: "lamp",
-              icon: "💡",
+              icon: "lightbulb",
               label: "Lampu",
               fingerCount: 2,
               color: "from-yellow-500 to-orange-500",
             },
             {
               type: "resistor",
-              icon: "⚡",
+              icon: "zap",
               label: "Resistor",
               fingerCount: 3,
               color: "from-orange-500 to-red-500",
             },
             {
               type: "switch",
-              icon: "🔘",
+              icon: "switch",
               label: "Saklar",
               fingerCount: 4,
               color: "from-green-500 to-emerald-600",
@@ -3456,13 +3499,13 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
               `}
             >
               <div className="text-center">
-                <div className="text-3xl mb-1">{comp.icon}</div>
+                <div className="text-3xl mb-1"><Ico n={comp.icon} /></div>
                 <div className="text-white text-xs font-bold uppercase">
                   {comp.label}
                 </div>
                 {/* NEW: Finger count indicator */}
                 <div className="text-cyan-400 text-xs mt-1 font-bold">
-                  {comp.fingerCount} 👆
+                  {comp.fingerCount} 
                 </div>
               </div>
               {state.selectedComponentType === comp.type && (
@@ -3474,39 +3517,6 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
           ))}
         </div>
 
-        {/* NEW: Left Hand - Component Added Feedback (Success) */}
-        {fingerCountSelection && (
-          <div className="mt-3 bg-gradient-to-r from-green-500 to-emerald-600 rounded-lg p-3 border-2 border-white animate-pulse">
-            <div className="text-center text-white">
-              <div className="text-2xl mb-1">✅</div>
-              <div className="text-sm font-bold">
-                {fingerCountSelection.fingerCount} Jari - Komponen Ditambahkan!
-              </div>
-              <div className="text-xs mt-1">
-                Tangan Kiri:
-                {fingerCountSelection.fingerCount === 1 && " 🔋 Baterai"}
-                {fingerCountSelection.fingerCount === 2 && " 💡 Lampu"}
-                {fingerCountSelection.fingerCount === 3 && " ⚡ Resistor"}
-                {fingerCountSelection.fingerCount === 4 && " 🔘 Saklar"}
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* NEW: Right Hand - Wire Connection Feedback */}
-        {wireConnection.isActive && (
-          <div className="mt-3 bg-gradient-to-r from-yellow-500 to-orange-600 rounded-lg p-3 border-2 border-white animate-pulse">
-            <div className="text-center text-white">
-              <div className="text-2xl mb-1">👉🔌</div>
-              <div className="text-sm font-bold">
-                Sedang Membuat Koneksi Wire
-              </div>
-              <div className="text-xs mt-1">
-                Drag ke komponen tujuan, lalu FIST lagi
-              </div>
-            </div>
-          </div>
-        )}
       </div>
 
       {/* Main Layout: Circuit Area + Camera */}
@@ -3516,7 +3526,7 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
           <div className="bg-gradient-to-br from-slate-800 to-slate-900 rounded-xl p-3 border border-blue-400/30">
             <div className="flex items-center justify-between mb-3">
               <h4 className="text-white font-bold text-sm flex items-center gap-2">
-                <span className="text-orange-400">🔧</span> AREA PRAKTIKUM
+                <span className="text-orange-400"><Ico n="wrench" /></span> AREA PRAKTIKUM
               </h4>
               <div className="flex items-center gap-3 text-xs">
                 <div className="text-blue-300">
@@ -3572,7 +3582,7 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
               {/* Circuit Connection Status */}
               {!circuitAnalysis.isConnected && (
                 <div className="mb-2 p-2 bg-yellow-900/30 border border-yellow-500/50 rounded text-yellow-300 text-xs flex items-center gap-2">
-                  <span>⚠️</span>
+                  <span><Ico n="alert" /></span>
                   <span>
                     Rangkaian belum lengkap - hubungkan semua komponen!
                   </span>
@@ -3582,7 +3592,7 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
               {/* Topology Display */}
               {circuitAnalysis.isConnected && circuitAnalysis.topology && (
                 <div className="mb-2 p-2 bg-purple-900/30 border border-purple-400/50 rounded text-purple-300 text-xs flex items-center gap-2">
-                  <span>📊</span>
+                  <span><Ico n="chart" /></span>
                   <span className="font-bold">
                     Topologi:{" "}
                     {circuitAnalysis.topology.type === "series"
@@ -3647,7 +3657,7 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
               <div className="absolute top-4 left-1/2 transform -translate-x-1/2 z-50">
                 <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg px-4 py-2 border-2 border-white/30 shadow-lg">
                   <p className="text-white font-bold text-sm text-center">
-                    👆 Terminal{" "}
+                    Terminal{" "}
                     {terminalSelection.stage === "start" ? "AWAL" : "TUJUAN"}:
                     Arahkan jari ke terminal{" "}
                     <span className="text-red-300">L</span> atau{" "}
@@ -3724,7 +3734,7 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
                   <button
                     onClick={() => {
                       debugLogger.clear();
-                      alert("✅ Logs cleared");
+                      alert("Logs cleared");
                     }}
                     className="bg-red-600/90 hover:bg-red-700 text-white px-2 py-1 rounded text-xs font-semibold flex items-center gap-1 transition-colors"
                     title="Clear logs"
@@ -3752,99 +3762,21 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
             )}
           </div>
 
-          {/* Gesture Guide Panel */}
-          <div className="bg-slate-800 rounded-xl p-3 border border-purple-400/30">
-            <h5 className="text-white font-bold text-xs mb-2 flex items-center gap-1">
-              <span>🖐️</span> PANDUAN 2 TANGAN
-            </h5>
-            <div className="space-y-1.5 text-xs">
-              {/* LEFT HAND: Component Adder */}
-              <div className="bg-gradient-to-r from-blue-500/20 to-cyan-500/20 border border-blue-400/50 rounded p-2 mb-2">
-                <div className="text-blue-300 font-bold mb-1 flex items-center gap-1">
-                  👈 TANGAN KIRI (Tambah Komponen):
-                </div>
-                <div className="space-y-0.5 text-blue-200">
-                  <div>1️⃣ Jari = 🔋 Baterai langsung muncul!</div>
-                  <div>2️⃣ Jari = 💡 Lampu langsung muncul!</div>
-                  <div>3️⃣ Jari = ⚡ Resistor langsung muncul!</div>
-                  <div>4️⃣ Jari = 🔘 Saklar langsung muncul!</div>
-                </div>
-              </div>
-
-              {/* RIGHT HAND: Component Manipulator */}
-              <div className="bg-gradient-to-r from-purple-500/20 to-pink-500/20 border border-purple-400/50 rounded p-2">
-                <div className="text-purple-300 font-bold mb-1 flex items-center gap-1">
-                  👉 TANGAN KANAN (Manipulasi):
-                </div>
-                <div className="space-y-0.5 text-purple-200">
-                  <div>
-                    🤏 <span className="font-semibold">PINCH (Jepit):</span>{" "}
-                    Drag & Drop komponen
-                  </div>
-                  <div className="ml-4 text-xs text-cyan-300">
-                    → Jepit (ibu jari + telunjuk dekat) di atas komponen
-                    <br />
-                    → Tahan PINCH, gerakkan tangan = komponen ikut!
-                    <br />→ Lepas PINCH = DROP komponen
-                  </div>
-                  <div>
-                    ✌️ <span className="font-semibold">PEACE:</span> Rotate 90°
-                  </div>
-                  <div>
-                    🔄 <span className="font-semibold">PUTAR TANGAN:</span>{" "}
-                    Smooth rotation
-                  </div>
-                  <div>
-                    👆 <span className="font-semibold">POINT (HOLD 3s):</span>{" "}
-                    Buat koneksi wire
-                  </div>
-                  <div className="ml-4 text-xs text-purple-300">
-                    → POINT di komponen A (HOLD 3s) → DRAG ke B → POINT lagi
-                    (HOLD 3s)
-                  </div>
-                  <div>
-                    👍{" "}
-                    <span className="font-semibold">THUMBS UP (HOLD 3s):</span>{" "}
-                    Toggle saklar
-                  </div>
-                  <div className="ml-4 text-xs text-green-300">
-                    → Gunakan <span className="font-bold">TANGAN KANAN</span>
-                    <br />
-                    → Acungkan jempol kapan saja
-                    <br />→ HOLD 3 detik → saklar terdekat toggle ON/OFF
-                  </div>
-                  <div>
-                    ✋ <span className="font-semibold">BUKA TELAPAK:</span>{" "}
-                    Delete komponen
-                  </div>
-                </div>
-              </div>
-
-              <div className="flex items-start gap-2 text-gray-300 text-xs mt-2 pt-2 border-t border-gray-600">
-                <span className="text-yellow-400">�</span>
-                <div>
-                  <span className="font-semibold text-yellow-400">TIP:</span>{" "}
-                  Gunakan tangan kiri untuk add, tangan kanan untuk manipulate!
-                </div>
-              </div>
-            </div>
-          </div>
-
           {/* Current Gesture Indicator */}
           {state.currentGesture && state.currentGesture.name !== "unknown" && (
             <div className="mt-3 bg-gradient-to-r from-purple-600 to-pink-600 rounded-lg p-3 border-2 border-white/30 animate-pulse">
               <div className="text-center">
                 <div className="text-3xl mb-1">
-                  {state.currentGesture.name === "pinch" && "🤏"}
-                  {state.currentGesture.name === "point" && "☝️"}
-                  {state.currentGesture.name === "peace" && "✌️"}
-                  {state.currentGesture.name === "grab" && "✊"}
-                  {state.currentGesture.name === "open_palm" && "✋"}
-                  {state.currentGesture.name === "thumbs_up" && "👍"}
-                  {state.currentGesture.name === "swipe_left" && "👈"}
-                  {state.currentGesture.name === "swipe_right" && "👉"}
-                  {state.currentGesture.name === "finger_count" && "🖐️"}
-                  {state.currentGesture.name === "rotate" && "🔄"}
+                  {state.currentGesture.name === "pinch" && <Ico n="hand" />}
+                  {state.currentGesture.name === "point" && <Ico n="pointer" />}
+                  {state.currentGesture.name === "peace" && <Ico n="hand" />}
+                  {state.currentGesture.name === "grab" && <Ico n="grab" />}
+                  {state.currentGesture.name === "open_palm" && <Ico n="hand" />}
+                  {state.currentGesture.name === "thumbs_up" && <Ico n="thumbs-up" />}
+                  {state.currentGesture.name === "swipe_left" && <Ico n="pointer" />}
+                  {state.currentGesture.name === "swipe_right" && <Ico n="pointer" />}
+                  {state.currentGesture.name === "finger_count" && <Ico n="hand" />}
+                  {state.currentGesture.name === "rotate" && <Ico n="refresh" />}
                 </div>
                 <div className="text-white font-bold text-sm uppercase">
                   {state.currentGesture.name.replace("_", " ")}
@@ -3854,7 +3786,7 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
                 <div className="text-white/80 text-xs mt-1">
                   <div>
                     Hand: {state.currentGesture.handedness}
-                    {state.currentGesture.handedness === "Left" ? " 👈" : " 👉"}
+                    {state.currentGesture.handedness === "Left" ? " " : " "}
                   </div>
                   <div>
                     Confidence:{" "}
@@ -3866,6 +3798,67 @@ const WebCVPracticum: React.FC<WebCVPracticumProps> = ({
           )}
         </div>
       </div>
+
+      {/* Panduan gestur: selebar bangku kerja, bisa dilipat */}
+      <details open className="group mt-4 rounded-xl border border-white/15 bg-slate-800/70">
+        <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-4 py-3">
+          <span className="flex items-center gap-2 text-sm font-bold text-white">
+            <Ico n="hand" /> Panduan gestur
+          </span>
+          <span className="flex items-center gap-3 text-xs text-slate-300">
+            <span className="hidden sm:inline">Tangan kiri menambah, tangan kanan mengatur</span>
+            <span className="rounded border border-white/20 px-2 py-0.5 font-mono group-open:hidden">buka</span>
+            <span className="hidden rounded border border-white/20 px-2 py-0.5 font-mono group-open:inline">tutup</span>
+          </span>
+        </summary>
+
+        <div className="grid gap-5 border-t border-white/10 p-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,2.2fr)]">
+          {/* Tangan kiri */}
+          <div>
+            <h5 className="mb-3 font-mono text-xs uppercase tracking-wider text-sky-300">Tangan kiri · tambah komponen</h5>
+            <ul className="space-y-2">
+              {[
+                { n: 1, icon: "battery", label: "Baterai" },
+                { n: 2, icon: "lightbulb", label: "Lampu" },
+                { n: 3, icon: "zap", label: "Resistor" },
+                { n: 4, icon: "switch", label: "Saklar" },
+              ].map((row) => (
+                <li key={row.n} className="flex items-center gap-3 rounded-lg bg-white/5 px-3 py-2 text-sm text-white">
+                  <span className="grid h-7 w-7 flex-none place-items-center rounded-full bg-[#FFC93C] font-bold text-[#1B1B2F]">{row.n}</span>
+                  <span className="text-slate-300">jari</span>
+                  <span className="ml-auto flex items-center gap-2 font-semibold">
+                    <Ico n={row.icon} /> {row.label}
+                  </span>
+                </li>
+              ))}
+            </ul>
+            <p className="mt-3 text-xs text-slate-400">Acungkan jumlah jari, komponen langsung muncul di area praktikum.</p>
+          </div>
+
+          {/* Tangan kanan */}
+          <div>
+            <h5 className="mb-3 font-mono text-xs uppercase tracking-wider text-fuchsia-300">Tangan kanan · atur rangkaian</h5>
+            <ul className="grid gap-2 sm:grid-cols-2">
+              {[
+                { icon: "hand", gesture: "Jepit", action: "Pindahkan komponen", hint: "Dekatkan ibu jari dan telunjuk di atas komponen, gerakkan tangan, lalu lepas." },
+                { icon: "pointer", gesture: "Tunjuk · tahan 3 dtk", action: "Sambungkan kabel", hint: "Tunjuk komponen A sampai terkunci, geser ke komponen B, lalu tunjuk dan tahan lagi." },
+                { icon: "thumbs-up", gesture: "Jempol · tahan 3 dtk", action: "Nyalakan atau matikan saklar", hint: "Saklar yang paling dekat berubah ON/OFF." },
+                { icon: "rotate-cw", gesture: "Peace", action: "Putar 90°", hint: "Untuk putaran halus, putar pergelangan tangan." },
+                { icon: "trash", gesture: "Buka telapak", action: "Hapus komponen", hint: "Arahkan telapak terbuka ke komponen yang ingin dihapus." },
+              ].map((row) => (
+                <li key={row.gesture} className="rounded-lg bg-white/5 px-3 py-2.5">
+                  <div className="flex items-center gap-2 text-sm font-semibold text-white">
+                    <span className="text-[#FFC93C]"><Ico n={row.icon} /></span>
+                    {row.action}
+                  </div>
+                  <div className="mt-1 font-mono text-[11px] uppercase tracking-wide text-fuchsia-200">{row.gesture}</div>
+                  <p className="mt-1 text-xs leading-relaxed text-slate-400">{row.hint}</p>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      </details>
     </div>
   );
 };

@@ -91,8 +91,8 @@ const TeacherRegister: React.FC<TeacherRegisterProps> = ({ onSwitchToLogin }) =>
     <>
       {/* Form Header */}
       <header className="mb-5">
-        <h1 className="text-2xl font-bold text-gray-900">Daftar Akun Guru</h1>
-        <p className="text-sm text-gray-600 mt-1">Buat akun untuk mengelola pembelajaran siswa</p>
+        <h1 className="text-2xl font-bold text-ink">Daftar Akun Guru</h1>
+        <p className="text-sm text-muted mt-1">Buat akun untuk mengelola pembelajaran siswa</p>
       </header>
 
       {/* Form */}
@@ -101,11 +101,11 @@ const TeacherRegister: React.FC<TeacherRegisterProps> = ({ onSwitchToLogin }) =>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* Name Field */}
           <div>
-            <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1.5">
-              Nama Lengkap <span className="text-red-500">*</span>
+            <label htmlFor="name" className="block text-sm font-medium text-ink mb-1.5">
+              Nama Lengkap <span className="text-red-600">*</span>
             </label>
             <div className="relative">
-              <User className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+              <User className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted" />
               <input
                 id="name"
                 type="text"
@@ -113,7 +113,7 @@ const TeacherRegister: React.FC<TeacherRegisterProps> = ({ onSwitchToLogin }) =>
                 value={formData.name}
                 onChange={handleChange}
                 aria-invalid={error ? 'true' : 'false'}
-                className="w-full pl-9 pr-3 py-2.5 text-sm border border-gray-300 rounded-xl text-gray-900 placeholder-gray-400 focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500/20 transition-all"
+                className="w-full pl-9 pr-3 py-2.5 text-sm border-2 border-ink/15 rounded-xl text-ink placeholder-muted focus:border-ink focus:outline-none focus:ring-4 focus:ring-brand/25 transition-all"
                 placeholder="Nama lengkap"
                 required
               />
@@ -122,11 +122,11 @@ const TeacherRegister: React.FC<TeacherRegisterProps> = ({ onSwitchToLogin }) =>
 
           {/* Email Field */}
           <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1.5">
-              Email <span className="text-red-500">*</span>
+            <label htmlFor="email" className="block text-sm font-medium text-ink mb-1.5">
+              Email <span className="text-red-600">*</span>
             </label>
             <div className="relative">
-              <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+              <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted" />
               <input
                 id="email"
                 type="email"
@@ -134,7 +134,7 @@ const TeacherRegister: React.FC<TeacherRegisterProps> = ({ onSwitchToLogin }) =>
                 value={formData.email}
                 onChange={handleChange}
                 aria-invalid={error ? 'true' : 'false'}
-                className="w-full pl-9 pr-3 py-2.5 text-sm border border-gray-300 rounded-xl text-gray-900 placeholder-gray-400 focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500/20 transition-all"
+                className="w-full pl-9 pr-3 py-2.5 text-sm border-2 border-ink/15 rounded-xl text-ink placeholder-muted focus:border-ink focus:outline-none focus:ring-4 focus:ring-brand/25 transition-all"
                 placeholder="guru@sekolah.sch.id"
                 required
               />
@@ -143,11 +143,11 @@ const TeacherRegister: React.FC<TeacherRegisterProps> = ({ onSwitchToLogin }) =>
 
           {/* Password Field */}
           <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1.5">
-              Password <span className="text-red-500">*</span>
+            <label htmlFor="password" className="block text-sm font-medium text-ink mb-1.5">
+              Password <span className="text-red-600">*</span>
             </label>
             <div className="relative">
-              <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+              <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted" />
               <input
                 id="password"
                 type={showPassword ? 'text' : 'password'}
@@ -155,14 +155,14 @@ const TeacherRegister: React.FC<TeacherRegisterProps> = ({ onSwitchToLogin }) =>
                 value={formData.password}
                 onChange={handleChange}
                 aria-invalid={error ? 'true' : 'false'}
-                className="w-full pl-9 pr-10 py-2.5 text-sm border border-gray-300 rounded-xl text-gray-900 placeholder-gray-400 focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500/20 transition-all"
+                className="w-full pl-9 pr-10 py-2.5 text-sm border-2 border-ink/15 rounded-xl text-ink placeholder-muted focus:border-ink focus:outline-none focus:ring-4 focus:ring-brand/25 transition-all"
                 placeholder="Min. 6 karakter"
                 required
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-2.5 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                className="absolute right-2.5 top-1/2 transform -translate-y-1/2 text-muted hover:text-muted transition-colors"
                 aria-label={showPassword ? 'Sembunyikan password' : 'Tampilkan password'}
               >
                 {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -177,11 +177,11 @@ const TeacherRegister: React.FC<TeacherRegisterProps> = ({ onSwitchToLogin }) =>
                       className={`h-1 w-5 rounded-full ${
                         level <= passwordStrength.strength
                           ? passwordStrength.strength === 1
-                            ? 'bg-red-500'
+                            ? 'bg-coral'
                             : passwordStrength.strength === 2
-                            ? 'bg-yellow-500'
-                            : 'bg-green-500'
-                          : 'bg-gray-200'
+                            ? 'bg-lamp'
+                            : 'bg-mint'
+                          : 'bg-ink/10'
                       }`}
                     ></div>
                   ))}
@@ -195,11 +195,11 @@ const TeacherRegister: React.FC<TeacherRegisterProps> = ({ onSwitchToLogin }) =>
 
           {/* Confirm Password Field */}
           <div>
-            <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-1.5">
-              Konfirmasi Password <span className="text-red-500">*</span>
+            <label htmlFor="confirmPassword" className="block text-sm font-medium text-ink mb-1.5">
+              Konfirmasi Password <span className="text-red-600">*</span>
             </label>
             <div className="relative">
-              <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+              <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted" />
               <input
                 id="confirmPassword"
                 type={showConfirmPassword ? 'text' : 'password'}
@@ -207,14 +207,14 @@ const TeacherRegister: React.FC<TeacherRegisterProps> = ({ onSwitchToLogin }) =>
                 value={formData.confirmPassword}
                 onChange={handleChange}
                 aria-invalid={error ? 'true' : 'false'}
-                className="w-full pl-9 pr-10 py-2.5 text-sm border border-gray-300 rounded-xl text-gray-900 placeholder-gray-400 focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500/20 transition-all"
+                className="w-full pl-9 pr-10 py-2.5 text-sm border-2 border-ink/15 rounded-xl text-ink placeholder-muted focus:border-ink focus:outline-none focus:ring-4 focus:ring-brand/25 transition-all"
                 placeholder="Ulangi password"
                 required
               />
               <button
                 type="button"
                 onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                className="absolute right-2.5 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                className="absolute right-2.5 top-1/2 transform -translate-y-1/2 text-muted hover:text-muted transition-colors"
                 aria-label={showConfirmPassword ? 'Sembunyikan password' : 'Tampilkan password'}
               >
                 {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -239,18 +239,18 @@ const TeacherRegister: React.FC<TeacherRegisterProps> = ({ onSwitchToLogin }) =>
 
           {/* Phone Number Field (Optional) */}
           <div>
-            <label htmlFor="phoneNumber" className="block text-sm font-medium text-gray-700 mb-1.5">
+            <label htmlFor="phoneNumber" className="block text-sm font-medium text-ink mb-1.5">
               Nomor Telepon
             </label>
             <div className="relative">
-              <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+              <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted" />
               <input
                 id="phoneNumber"
                 type="tel"
                 name="phoneNumber"
                 value={formData.phoneNumber}
                 onChange={handleChange}
-                className="w-full pl-9 pr-3 py-2.5 text-sm border border-gray-300 rounded-xl text-gray-900 placeholder-gray-400 focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500/20 transition-all"
+                className="w-full pl-9 pr-3 py-2.5 text-sm border-2 border-ink/15 rounded-xl text-ink placeholder-muted focus:border-ink focus:outline-none focus:ring-4 focus:ring-brand/25 transition-all"
                 placeholder="08123456789"
               />
             </div>
@@ -258,18 +258,18 @@ const TeacherRegister: React.FC<TeacherRegisterProps> = ({ onSwitchToLogin }) =>
 
           {/* School Field (Optional) */}
           <div>
-            <label htmlFor="school" className="block text-sm font-medium text-gray-700 mb-1.5">
+            <label htmlFor="school" className="block text-sm font-medium text-ink mb-1.5">
               Nama Sekolah
             </label>
             <div className="relative">
-              <School className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+              <School className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted" />
               <input
                 id="school"
                 type="text"
                 name="school"
                 value={formData.school}
                 onChange={handleChange}
-                className="w-full pl-9 pr-3 py-2.5 text-sm border border-gray-300 rounded-xl text-gray-900 placeholder-gray-400 focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500/20 transition-all"
+                className="w-full pl-9 pr-3 py-2.5 text-sm border-2 border-ink/15 rounded-xl text-ink placeholder-muted focus:border-ink focus:outline-none focus:ring-4 focus:ring-brand/25 transition-all"
                 placeholder="SMA Negeri 1"
               />
             </div>
@@ -278,7 +278,7 @@ const TeacherRegister: React.FC<TeacherRegisterProps> = ({ onSwitchToLogin }) =>
 
         {/* Error Message */}
         {error && (
-          <div className="bg-red-50 border border-red-200 rounded-xl p-2.5 flex items-start" role="alert">
+          <div className="bg-coral-soft border-2 border-ink rounded-xl p-2.5 flex items-start" role="alert">
             <AlertCircle className="w-3.5 h-3.5 text-red-600 mr-2 flex-shrink-0 mt-0.5" />
             <p className="text-red-700 text-xs">{error}</p>
           </div>
@@ -288,7 +288,7 @@ const TeacherRegister: React.FC<TeacherRegisterProps> = ({ onSwitchToLogin }) =>
         <button
           type="submit"
           disabled={isLoading}
-          className="w-full py-3 px-6 rounded-xl font-semibold text-sm text-white bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 transition-all transform hover:scale-[1.01] disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none shadow-lg shadow-purple-500/30"
+          className="btn btn-primary w-full disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {isLoading ? (
             <span className="flex items-center justify-center">
@@ -305,12 +305,12 @@ const TeacherRegister: React.FC<TeacherRegisterProps> = ({ onSwitchToLogin }) =>
 
         {/* Login Link */}
         <div className="text-center pt-1">
-          <p className="text-xs text-gray-600">
+          <p className="text-xs text-muted">
             Sudah punya akun?{' '}
             <button
               type="button"
               onClick={onSwitchToLogin}
-              className="text-purple-600 hover:text-purple-700 font-medium hover:underline"
+              className="text-brand font-bold hover:underline"
             >
               Login di sini
             </button>

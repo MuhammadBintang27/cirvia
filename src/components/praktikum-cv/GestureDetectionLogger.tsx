@@ -1,4 +1,5 @@
 "use client";
+import { Ico } from "@/components/ui/Ico";
 
 import React, { useState, useEffect } from "react";
 import { GestureDetector } from "./GestureDetector";
@@ -135,7 +136,7 @@ export const GestureDetectionLogger: React.FC = () => {
               onClick={() => setIsExpanded(false)}
               className="hover:bg-white/20 rounded p-1 transition-colors"
             >
-              ✕
+              <Ico n="x" />
             </button>
           </div>
 
@@ -194,14 +195,14 @@ export const GestureDetectionLogger: React.FC = () => {
                 onClick={refreshLogs}
                 className="flex-1 px-3 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg text-sm font-medium transition-colors"
               >
-                🔄 Refresh
+                Refresh
               </button>
               <button
                 onClick={handleCopyJSON}
                 className="px-3 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded-lg text-sm font-medium transition-colors"
                 title="Copy as JSON"
               >
-                📋
+                <Ico n="clipboard" />
               </button>
               <button
                 onClick={handleDownload}

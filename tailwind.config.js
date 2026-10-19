@@ -8,10 +8,25 @@ module.exports = {
   theme: {
     extend: {
       fontFamily: {
-        sans: ['var(--font-poppins)', 'system-ui', 'sans-serif'],
+        sans: ['var(--font-body)', 'var(--font-emoji)', 'system-ui', 'sans-serif'],
+        display: ['var(--font-display)', 'var(--font-emoji)', 'system-ui', 'sans-serif'],
         mono: ['var(--font-fira-code)', 'monospace'],
       },
+      boxShadow: {
+        hard: '4px 4px 0 #1B1B2F',
+        key: '0 5px 0 #1B1B2F',
+        'key-sm': '0 3px 0 #1B1B2F',
+      },
       colors: {
+        // CIRVIA design tokens (neo-playful). primary/secondary below are legacy, used by unmigrated pages.
+        cream: '#FFF6E5',
+        paper: '#FFFFFF',
+        ink: '#1B1B2F',
+        muted: '#5B5B73',
+        brand: { DEFAULT: '#2F5BFF', soft: '#DDE5FF' },
+        lamp: { DEFAULT: '#FFC93C', soft: '#FFF0BF' },
+        coral: { DEFAULT: '#FF6B5B', soft: '#FFE0DB' },
+        mint: { DEFAULT: '#3DD6A0', soft: '#D5F7EA' },
         primary: {
           50: '#eff6ff',
           100: '#dbeafe',

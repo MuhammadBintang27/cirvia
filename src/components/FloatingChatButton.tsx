@@ -68,12 +68,12 @@ const FloatingChatButton = () => {
         >
           {isOpen ? (
             /* Close button saat chat dibuka */
-            <div className="w-full h-full bg-gradient-to-br from-purple-500 via-blue-500 to-cyan-500 rounded-full shadow-2xl border-2 border-white/20 flex items-center justify-center">
+            <div className="w-full h-full bg-purple-500 rounded-full shadow-hard border-2 border-ink flex items-center justify-center">
               <span className="text-2xl md:text-3xl text-white transform rotate-45 transition-transform duration-300">+</span>
             </div>
           ) : (
             /* Maskot CIRVIA langsung */
-            <div className="relative w-full h-full transition-transform duration-300 drop-shadow-2xl">
+            <div className="relative w-full h-full transition-transform duration-300">
               <Image
                 src="/assets/illustrations/maskotAyunan.png"
                 alt="CIRVIA Maskot"
@@ -87,9 +87,9 @@ const FloatingChatButton = () => {
         
         {/* Tooltip - Hidden on mobile */}
         {!isOpen && (
-          <div className="hidden md:block absolute bottom-full right-0 mb-3 px-3 py-2 bg-gradient-to-r from-slate-800/90 to-slate-700/90 backdrop-blur-xl text-white text-sm rounded-lg border border-white/20 shadow-xl opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-2 group-hover:translate-y-0 pointer-events-none whitespace-nowrap">
-            <span className="font-medium">💬 Chat dengan CIRVIA AI</span>
-            <div className="absolute top-full right-4 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-slate-700"></div>
+          <div className="hidden md:block absolute bottom-full right-0 mb-3 px-3 py-2 bg-paper text-ink text-sm rounded-lg border-2 border-ink opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-2 pointer-events-none whitespace-nowrap">
+            <span className="font-medium">Chat dengan CIRVIA AI</span>
+            <div className="absolute top-full right-4 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-ink"></div>
           </div>
         )}
       </div>

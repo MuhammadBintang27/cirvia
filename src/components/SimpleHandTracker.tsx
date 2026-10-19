@@ -221,8 +221,8 @@ const SimpleHandTracker: React.FC<SimpleHandTrackerProps> = ({
           {/* Overlay Info */}
           <div className="absolute top-4 left-4 bg-black bg-opacity-70 text-white p-3 rounded">
             <div className="text-sm space-y-1">
-              <div>Status: {isActive ? '🟢 Active' : '🔴 Inactive'}</div>
-              <div>Motion: {motionDetected ? '🟡 Detected' : '🔵 Still'}</div>
+              <div>Status: {isActive ? 'Active' : 'Inactive'}</div>
+              <div>Motion: {motionDetected ? 'Detected' : 'Still'}</div>
               <div>Gesture: <span className="font-bold text-green-400">{currentGesture}</span></div>
             </div>
           </div>
@@ -230,7 +230,7 @@ const SimpleHandTracker: React.FC<SimpleHandTrackerProps> = ({
           {/* Instructions */}
           <div className="absolute bottom-4 left-4 right-4 bg-black bg-opacity-70 text-white p-3 rounded">
             <p className="text-sm text-center">
-              💡 Move your hand in front of the camera to trigger gesture detection
+              Move your hand in front of the camera to trigger gesture detection
             </p>
           </div>
         </div>
@@ -243,25 +243,25 @@ const SimpleHandTracker: React.FC<SimpleHandTrackerProps> = ({
               onClick={() => simulateGesture('point')}
               className="bg-blue-500 text-white px-3 py-2 rounded text-sm hover:bg-blue-600 transition-colors"
             >
-              👆 Point
+              Point
             </button>
             <button
               onClick={() => simulateGesture('open_palm')}
               className="bg-green-500 text-white px-3 py-2 rounded text-sm hover:bg-green-600 transition-colors"
             >
-              ✋ Open Palm
+              Open Palm
             </button>
             <button
               onClick={() => simulateGesture('fist')}
               className="bg-red-500 text-white px-3 py-2 rounded text-sm hover:bg-red-600 transition-colors"
             >
-              ✊ Fist
+              Fist
             </button>
             <button
               onClick={() => simulateGesture('wave')}
               className="bg-purple-500 text-white px-3 py-2 rounded text-sm hover:bg-purple-600 transition-colors"
             >
-              👋 Wave
+              Wave
             </button>
           </div>
         </div>
@@ -271,19 +271,19 @@ const SimpleHandTracker: React.FC<SimpleHandTrackerProps> = ({
           <h4 className="font-semibold text-gray-800 mb-3">Gesture Commands:</h4>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
             <div className={`p-3 rounded-lg border-2 transition-all ${currentGesture === 'point' ? 'border-blue-400 bg-blue-50' : 'border-gray-200'}`}>
-              <div className="font-medium text-blue-600">👆 Point / Small Motion</div>
+              <div className="font-medium text-blue-600">Point / Small Motion</div>
               <div className="text-gray-600">Select circuit element</div>
             </div>
             <div className={`p-3 rounded-lg border-2 transition-all ${currentGesture === 'open_palm' ? 'border-green-400 bg-green-50' : 'border-gray-200'}`}>
-              <div className="font-medium text-green-600">✋ Open Palm / Large Motion</div>
+              <div className="font-medium text-green-600">Open Palm / Large Motion</div>
               <div className="text-gray-600">Add new resistor</div>
             </div>
             <div className={`p-3 rounded-lg border-2 transition-all ${currentGesture === 'fist' ? 'border-red-400 bg-red-50' : 'border-gray-200'}`}>
-              <div className="font-medium text-red-600">✊ Fist</div>
+              <div className="font-medium text-red-600">Fist</div>
               <div className="text-gray-600">Delete selected element</div>
             </div>
             <div className={`p-3 rounded-lg border-2 transition-all ${currentGesture === 'wave' ? 'border-purple-400 bg-purple-50' : 'border-gray-200'}`}>
-              <div className="font-medium text-purple-600">👋 Wave / Fast Motion</div>
+              <div className="font-medium text-purple-600">Wave / Fast Motion</div>
               <div className="text-gray-600">Reset circuit</div>
             </div>
           </div>

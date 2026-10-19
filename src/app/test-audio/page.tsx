@@ -25,11 +25,11 @@ export default function TestAudioPage() {
     addLog(`Testing fetch: ${url}`);
     try {
       const response = await fetch(url, { method: 'HEAD' });
-      addLog(`✅ Status: ${response.status} ${response.statusText}`);
+      addLog(`Status: ${response.status} ${response.statusText}`);
       addLog(`   Content-Type: ${response.headers.get('content-type')}`);
       addLog(`   Content-Length: ${response.headers.get('content-length')} bytes`);
     } catch (error) {
-      addLog(`❌ Fetch error: ${error}`);
+      addLog(`Fetch error: ${error}`);
     }
   };
 
@@ -43,18 +43,18 @@ export default function TestAudioPage() {
       addLog(`   networkState: ${audioRef.current.networkState}`);
       
       audioRef.current.play()
-        .then(() => addLog(`✅ Playing successfully`))
-        .catch(err => addLog(`❌ Play error: ${err.name} - ${err.message}`));
+        .then(() => addLog(`Playing successfully`))
+        .catch(err => addLog(`Play error: ${err.name} - ${err.message}`));
     }
   };
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white p-8">
+    <div className="min-h-screen bg-transparent text-ink p-8">
       <div className="max-w-4xl mx-auto">
-        <h1 className="text-3xl font-bold mb-8">🔊 Audio Test Page</h1>
+        <h1 className="text-3xl font-bold mb-8">Audio Test Page</h1>
 
         {/* Environment Info */}
-        <div className="bg-gray-800 rounded-lg p-6 mb-6">
+        <div className="bg-paper rounded-lg p-6 mb-6">
           <h2 className="text-xl font-bold mb-4">Environment Info</h2>
           <div className="space-y-2 text-sm font-mono">
             <div>Location: {typeof window !== 'undefined' ? window.location.href : 'SSR'}</div>
@@ -64,23 +64,23 @@ export default function TestAudioPage() {
         </div>
 
         {/* Test Controls */}
-        <div className="bg-gray-800 rounded-lg p-6 mb-6">
+        <div className="bg-paper rounded-lg p-6 mb-6">
           <h2 className="text-xl font-bold mb-4">Test Controls</h2>
           <div className="space-y-4">
             {testAudioFiles.map(file => (
               <div key={file} className="flex gap-4 items-center">
-                <code className="flex-1 text-sm bg-gray-700 px-3 py-2 rounded">
+                <code className="flex-1 text-sm bg-paper px-3 py-2 rounded">
                   {file}
                 </code>
                 <button
                   onClick={() => testFetch(file)}
-                  className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded"
+                  className="px-4 py-2 bg-brand border-2 border-ink hover:bg-brand rounded"
                 >
                   Fetch Test
                 </button>
                 <button
                   onClick={() => testPlay(file)}
-                  className="px-4 py-2 bg-green-600 hover:bg-green-700 rounded"
+                  className="px-4 py-2 bg-mint border-2 border-ink hover:bg-mint rounded"
                 >
                   Play Test
                 </button>
@@ -93,22 +93,22 @@ export default function TestAudioPage() {
         <audio ref={audioRef} controls className="w-full mb-6" />
 
         {/* Logs */}
-        <div className="bg-gray-800 rounded-lg p-6">
+        <div className="bg-paper rounded-lg p-6">
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-xl font-bold">Logs</h2>
             <button
               onClick={() => setLogs([])}
-              className="px-4 py-2 bg-red-600 hover:bg-red-700 rounded text-sm"
+              className="px-4 py-2 bg-coral border-2 border-ink hover:bg-coral rounded text-sm"
             >
               Clear Logs
             </button>
           </div>
           <div className="bg-black rounded p-4 h-96 overflow-y-auto font-mono text-sm">
             {logs.length === 0 ? (
-              <div className="text-gray-500">No logs yet. Click buttons to test.</div>
+              <div className="text-muted">No logs yet. Click buttons to test.</div>
             ) : (
               logs.map((log, i) => (
-                <div key={i} className={log.includes('❌') ? 'text-red-400' : log.includes('✅') ? 'text-green-400' : 'text-gray-300'}>
+                <div key={i} className={log.includes('❌') ? 'text-red-600' : log.includes('✅') ? 'text-emerald-700' : 'text-muted'}>
                   {log}
                 </div>
               ))
@@ -117,9 +117,9 @@ export default function TestAudioPage() {
         </div>
 
         {/* Direct Link Test */}
-        <div className="bg-gray-800 rounded-lg p-6 mt-6">
+        <div className="bg-paper rounded-lg p-6 mt-6">
           <h2 className="text-xl font-bold mb-4">Direct Link Test</h2>
-          <p className="text-gray-400 mb-4">Try opening these links directly in a new tab:</p>
+          <p className="text-muted mb-4">Try opening these links directly in a new tab:</p>
           <div className="space-y-2">
             {testAudioFiles.map(file => (
               <div key={file}>
@@ -127,7 +127,7 @@ export default function TestAudioPage() {
                   href={file}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-blue-400 hover:text-blue-300 underline text-sm font-mono"
+                  className="text-brand hover:text-brand underline text-sm font-mono"
                 >
                   {typeof window !== 'undefined' ? window.location.origin : ''}{file}
                 </a>

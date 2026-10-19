@@ -1,4 +1,5 @@
 'use client'
+import { Ico } from "@/components/ui/Ico";
 
 import React from 'react';
 import { Zap, Lightbulb, Route, Share2, Battery, Cpu } from 'lucide-react';
@@ -61,26 +62,26 @@ const UnifiedCircuitCard: React.FC<UnifiedCircuitCardProps> = ({
     switch (brightnessLevel) {
       case 'high': return { 
         label: 'Terang', 
-        color: 'text-yellow-400', 
-        glow: 'shadow-yellow-400/50',
+        color: 'text-amber-700', 
+        glow: '',
         fillColor: '#FCD34D'
       };
       case 'medium': return { 
         label: 'Sedang', 
-        color: 'text-orange-400', 
-        glow: 'shadow-orange-400/50',
+        color: 'text-amber-700', 
+        glow: '',
         fillColor: '#FB923C'
       };
       case 'low': return { 
         label: 'Redup', 
-        color: 'text-red-400', 
-        glow: 'shadow-red-400/50',
+        color: 'text-red-600', 
+        glow: '',
         fillColor: '#EF4444'
       };
       default: return {
         label: 'Normal',
-        color: 'text-yellow-400',
-        glow: 'shadow-yellow-400/50',
+        color: 'text-amber-700',
+        glow: '',
         fillColor: '#fbbf24'
       };
     }
@@ -90,52 +91,52 @@ const UnifiedCircuitCard: React.FC<UnifiedCircuitCardProps> = ({
   const getBrightnessGlow = () => {
     switch (circuit.brightnessLevel) {
       case 'high':
-        return 'bg-yellow-400/20 shadow-[0_0_25px_rgba(255,255,0,0.4)]';
+        return 'bg-lamp-soft shadow-[0_0_25px_rgba(255,255,0,0.4)]';
       case 'medium':
-        return 'bg-orange-400/15 shadow-[0_0_20px_rgba(255,165,0,0.3)]';
+        return 'bg-lamp-soft shadow-[0_0_20px_rgba(255,165,0,0.3)]';
       case 'low':
-        return 'bg-red-400/10 shadow-[0_0_15px_rgba(255,0,0,0.2)]';
+        return 'bg-coral-soft shadow-[0_0_15px_rgba(255,0,0,0.2)]';
       default:
-        return 'bg-gray-400/10';
+        return 'bg-ink/20';
     }
   };
 
   const getBrightnessBorder = () => {
     switch (circuit.brightnessLevel) {
       case 'high':
-        return 'border-2 border-yellow-400/60';
+        return 'border-2 border-ink';
       case 'medium':
-        return 'border-2 border-orange-400/60';
+        return 'border-2 border-ink';
       case 'low':
-        return 'border-2 border-red-400/60';
+        return 'border-2 border-ink';
       default:
-        return 'border border-gray-400/30';
+        return 'border-2 border-ink';
     }
   };
 
   const getBrightnessBackground = () => {
     switch (circuit.brightnessLevel) {
       case 'high':
-        return 'bg-gradient-to-br from-yellow-400/30 to-yellow-600/10';
+        return 'bg-lamp-soft';
       case 'medium':
-        return 'bg-gradient-to-br from-orange-400/30 to-orange-600/10';
+        return 'bg-lamp-soft';
       case 'low':
-        return 'bg-gradient-to-br from-red-400/30 to-red-600/10';
+        return 'bg-coral-soft';
       default:
-        return 'bg-gradient-to-br from-gray-400/20 to-gray-600/10';
+        return 'bg-ink/20';
     }
   };
 
   const getBrightnessTextColor = () => {
     switch (circuit.brightnessLevel) {
       case 'high':
-        return 'text-yellow-200 font-bold';
+        return 'text-amber-700 font-bold';
       case 'medium':
-        return 'text-orange-200 font-semibold';
+        return 'text-amber-700 font-semibold';
       case 'low':
-        return 'text-red-200';
+        return 'text-red-600';
       default:
-        return 'text-gray-200';
+        return 'text-muted';
     }
   };
 
@@ -155,13 +156,13 @@ const UnifiedCircuitCard: React.FC<UnifiedCircuitCardProps> = ({
   const getBrightnessIcon = () => {
     switch (circuit.brightnessLevel) {
       case 'high':
-        return <span className="text-yellow-300 text-lg">🔆</span>;
+        return <span className="text-amber-700 text-lg"><Ico n="sun" /></span>;
       case 'medium':
-        return <span className="text-orange-300 text-lg">💡</span>;
+        return <span className="text-amber-700 text-lg"><Ico n="lightbulb" /></span>;
       case 'low':
-        return <span className="text-red-300 text-lg">🌑</span>;
+        return <span className="text-red-600 text-lg"><Ico n="moon" /></span>;
       default:
-        return <span className="text-gray-300 text-lg">❓</span>;
+        return <span className="text-muted text-lg"><Ico n="help" /></span>;
     }
   };
 
@@ -244,8 +245,8 @@ const UnifiedCircuitCard: React.FC<UnifiedCircuitCardProps> = ({
   const values = calculateCircuitValues();
   const brightnessInfo = getBrightnessInfo(circuit.brightnessLevel) || {
     label: 'Normal',
-    color: 'text-yellow-400',
-    glow: 'shadow-yellow-400/50',
+    color: 'text-amber-700',
+    glow: '',
     fillColor: '#fbbf24'
   };
 
@@ -302,7 +303,7 @@ const UnifiedCircuitCard: React.FC<UnifiedCircuitCardProps> = ({
         <rect x={x+width*0.5} y={y} width="2" height={height} fill={bands.multiplier}/>
         <rect x={x+width*0.75} y={y} width="2" height={height} fill={bands.tolerance}/>
         
-        <text x={x+width/2} y={y-5} fill="white" fontSize="8" textAnchor="middle" fontWeight="bold">{resistor.id}</text>
+        <text x={x+width/2} y={y-5} fill="#1B1B2F" fontSize="8" textAnchor="middle" fontWeight="bold">{resistor.id}</text>
         <text x={x+width/2} y={y+height+12} fill="#a78bfa" fontSize="6" textAnchor="middle">{resistor.value}Ω</text>
       </g>
     );
@@ -347,7 +348,7 @@ const UnifiedCircuitCard: React.FC<UnifiedCircuitCardProps> = ({
           <circle cx={x} cy={y} r={radius+8} fill={`url(#${glowId})`} opacity="0.6" className="animate-pulse"/>
         )}
         
-        <text x={x} y={y+radius+15} fill="white" fontSize="7" textAnchor="middle" fontWeight="bold">{lamp.id}</text>
+        <text x={x} y={y+radius+15} fill="#1B1B2F" fontSize="7" textAnchor="middle" fontWeight="bold">{lamp.id}</text>
 
       </g>
     );
@@ -832,10 +833,10 @@ const UnifiedCircuitCard: React.FC<UnifiedCircuitCardProps> = ({
   return (
     <div
       className={`
-        relative backdrop-blur-xl rounded-2xl cursor-grab active:cursor-grabbing
-        transition-all duration-300 hover:scale-105 hover:shadow-2xl
+        relative rounded-2xl cursor-grab active:cursor-grabbing
+        transition-all duration-300
         ${isDragging ? 'opacity-50 scale-95' : ''}
-        ${showBrightness ? `${getBrightnessGlow()} ${getBrightnessBorder()} ${getBrightnessBackground()}` : 'bg-gradient-to-br from-white/10 to-white/5 border border-white/20'}
+        ${showBrightness ? `${getBrightnessGlow()} ${getBrightnessBorder()} ${getBrightnessBackground()}` : 'bg-paper border-2 border-ink'}
         ${className.includes('compact-mode') ? 'p-3' : className.includes('full-size') ? 'p-8' : 'p-6'}
         ${className}
       `}
@@ -849,9 +850,9 @@ const UnifiedCircuitCard: React.FC<UnifiedCircuitCardProps> = ({
       {/* Header with Template Type */}
       <div className={`flex items-center justify-between ${className.includes('compact-mode') ? 'mb-2' : 'mb-4'}`}>
         <div className="flex items-center space-x-2">
-          <div className={`flex items-center bg-gradient-to-r from-blue-500/20 to-purple-500/20 rounded-lg border border-blue-400/30 ${className.includes('compact-mode') ? 'px-2 py-0.5' : 'px-3 py-1'}`}>
+          <div className={`flex items-center bg-brand-soft rounded-lg border-2 border-ink ${className.includes('compact-mode') ? 'px-2 py-0.5' : 'px-3 py-1'}`}>
             {getTemplateIcon(circuit.template)}
-            <span className={`text-blue-300 ml-2 font-medium ${className.includes('compact-mode') ? 'text-xs' : 'text-xs'}`}>
+            <span className={`text-brand ml-2 font-medium ${className.includes('compact-mode') ? 'text-xs' : 'text-xs'}`}>
               {getTemplateName(circuit.template)}
             </span>
           </div>
@@ -859,12 +860,12 @@ const UnifiedCircuitCard: React.FC<UnifiedCircuitCardProps> = ({
           {/* Component count badges */}
           <div className="flex space-x-1">
             {circuit.resistors.length > 0 && (
-              <div className={`bg-purple-500/20 rounded text-purple-300 ${className.includes('compact-mode') ? 'px-1 py-0.5 text-xs' : 'px-2 py-1 text-xs'}`}>
+              <div className={`bg-purple-100 rounded text-purple-700 ${className.includes('compact-mode') ? 'px-1 py-0.5 text-xs' : 'px-2 py-1 text-xs'}`}>
                 {circuit.resistors.length}R
               </div>
             )}
             {circuit.lamps.length > 0 && (
-              <div className={`bg-yellow-500/20 rounded text-yellow-300 ${className.includes('compact-mode') ? 'px-1 py-0.5 text-xs' : 'px-2 py-1 text-xs'}`}>
+              <div className={`bg-lamp-soft rounded text-amber-700 ${className.includes('compact-mode') ? 'px-1 py-0.5 text-xs' : 'px-2 py-1 text-xs'}`}>
                 {circuit.lamps.length}L
               </div>
             )}
@@ -872,7 +873,7 @@ const UnifiedCircuitCard: React.FC<UnifiedCircuitCardProps> = ({
         </div>
         
         {/* Circuit ID Badge */}
-        <div className={`bg-gradient-to-br from-purple-500 to-pink-600 rounded-full flex items-center justify-center ${className.includes('compact-mode') ? 'w-6 h-6' : 'w-8 h-8'}`}>
+        <div className={`bg-purple-500 rounded-full flex items-center justify-center ${className.includes('compact-mode') ? 'w-6 h-6' : 'w-8 h-8'}`}>
           <span className={`text-white font-bold ${className.includes('compact-mode') ? 'text-xs' : 'text-sm'}`}>{circuit.id}</span>
         </div>
       </div>
@@ -880,13 +881,13 @@ const UnifiedCircuitCard: React.FC<UnifiedCircuitCardProps> = ({
       {/* Main Content - Horizontal Layout */}
       <div className={`flex ${className.includes('full-size') ? 'gap-6' : className.includes('compact-mode') ? 'gap-2' : 'gap-4'}`}>
         {/* Left: Circuit Diagram */}
-        <div className={`flex-1 rounded-xl border ${showBrightness ? `${getBrightnessGlow()} ${getBrightnessBorder()}` : 'border-white/20'} ${className.includes('compact-mode') ? 'p-2' : className.includes('full-size') ? 'p-4' : 'p-3'}`}>
+        <div className={`flex-1 rounded-xl border-2 ${showBrightness ? `${getBrightnessGlow()} ${getBrightnessBorder()}` : 'border-ink'} ${className.includes('compact-mode') ? 'p-2' : className.includes('full-size') ? 'p-4' : 'p-3'}`}>
           {renderCircuitSVG()}
           
           {/* Brightness Indicator Overlay */}
           {showBrightness && (
             <div className="absolute top-2 right-2">
-              <div className={`flex items-center space-x-1 px-2 py-1 rounded-full backdrop-blur-sm border ${getBrightnessBackground()} ${getBrightnessBorder()}`}>
+              <div className={`flex items-center space-x-1 px-2 py-1 rounded-full border ${getBrightnessBackground()} ${getBrightnessBorder()}`}>
                 {getBrightnessIcon()}
                 <span className={`text-xs font-bold ${getBrightnessTextColor()}`}>
                   {getBrightnessLabel()}
@@ -898,18 +899,18 @@ const UnifiedCircuitCard: React.FC<UnifiedCircuitCardProps> = ({
 
         {/* Right: Circuit Information */}
         <div className={`flex-shrink-0 ${className.includes('full-size') ? 'w-48' : className.includes('compact-mode') ? 'w-32' : 'w-40'} space-y-2`}>
-          <h3 className={`text-white font-bold ${className.includes('compact-mode') ? 'text-xs' : className.includes('full-size') ? 'text-lg' : 'text-sm'}`}>{circuit.name}</h3>
+          <h3 className={`text-ink font-bold ${className.includes('compact-mode') ? 'text-xs' : className.includes('full-size') ? 'text-lg' : 'text-sm'}`}>{circuit.name}</h3>
           
           {/* Circuit Description - show only for full-size */}
           {circuit.description && className.includes('full-size') && (
-            <p className="text-blue-200/80 text-xs">{circuit.description}</p>
+            <p className="text-muted text-xs">{circuit.description}</p>
           )}
           
           {/* Technical Specifications */}
           <div className={`space-y-2 text-xs ${className.includes('compact-mode') ? 'text-xs' : ''}`}>
             <div className="space-y-1">
-              <div className="text-white/60">Tegangan:</div>
-              <div className="text-green-400 font-bold">{circuit.battery.voltage}V</div>
+              <div className="text-muted">Tegangan:</div>
+              <div className="text-emerald-700 font-bold">{circuit.battery.voltage}V</div>
             </div>
             
             
@@ -917,8 +918,8 @@ const UnifiedCircuitCard: React.FC<UnifiedCircuitCardProps> = ({
 
           {/* Component Count */}
           {!className.includes('compact-mode') && (
-            <div className="pt-2 border-t border-white/10">
-              <div className="text-xs text-white/60">
+            <div className="pt-2 border-t border-ink/20">
+              <div className="text-xs text-muted">
                 {circuit.resistors.length}R • {circuit.lamps.length}L
               </div>
             </div>
@@ -927,11 +928,11 @@ const UnifiedCircuitCard: React.FC<UnifiedCircuitCardProps> = ({
       </div>
 
       {/* Drag Handle Indicator */}
-      <div className="absolute top-2 left-2 text-white/40">
+      <div className="absolute top-2 left-2 text-muted">
         <div className="flex space-x-1">
-          <div className="w-1 h-1 bg-white/40 rounded-full"></div>
-          <div className="w-1 h-1 bg-white/40 rounded-full"></div>
-          <div className="w-1 h-1 bg-white/40 rounded-full"></div>
+          <div className="w-1 h-1 bg-paper rounded-full"></div>
+          <div className="w-1 h-1 bg-paper rounded-full"></div>
+          <div className="w-1 h-1 bg-paper rounded-full"></div>
         </div>
       </div>
     </div>

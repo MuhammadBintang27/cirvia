@@ -1,4 +1,5 @@
 'use client';
+import { Ico } from "@/components/ui/Ico";
 
 import React, { useState, useEffect } from 'react';
 import { Question } from '@/lib/questions';
@@ -182,19 +183,19 @@ export default function QuestionPackageManager({ teacherId, questions }: Questio
 
   const getPackageTypeColor = (type: string) => {
     const colors: Record<string, string> = {
-      pretest: 'bg-blue-500/20 text-blue-300 border-blue-400/30',
-      posttest: 'bg-green-500/20 text-green-300 border-green-400/30',
-      practice: 'bg-yellow-500/20 text-yellow-300 border-yellow-400/30',
-      quiz: 'bg-purple-500/20 text-purple-300 border-purple-400/30'
+      pretest: 'bg-brand-soft text-brand border-ink',
+      posttest: 'bg-mint-soft text-emerald-700 border-ink',
+      practice: 'bg-lamp-soft text-amber-700 border-ink',
+      quiz: 'bg-purple-100 text-purple-700 border-ink'
     };
-    return colors[type] || 'bg-gray-500/20 text-gray-300 border-gray-400/30';
+    return colors[type] || 'bg-ink/20 text-muted border-ink';
   };
 
   if (loading) {
     return (
       <div className="flex items-center justify-center p-8">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
-        <span className="ml-2 text-gray-300">Memuat paket soal...</span>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-ink"></div>
+        <span className="ml-2 text-muted">Memuat paket soal...</span>
       </div>
     );
   }
@@ -204,17 +205,17 @@ export default function QuestionPackageManager({ teacherId, questions }: Questio
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h2 className="text-2xl font-bold text-white flex items-center">
+          <h2 className="text-2xl font-bold text-ink flex items-center">
             <Package className="w-6 h-6 mr-2" />
             Kelola Paket Soal
           </h2>
-          <p className="text-gray-400 mt-1">
+          <p className="text-muted mt-1">
             Buat dan kelola paket soal untuk pretest, posttest, dan latihan
           </p>
         </div>
         <button
           onClick={() => setShowCreateForm(true)}
-          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center transition-colors"
+          className="bg-brand border-2 border-ink hover:bg-brand text-white px-4 py-2 rounded-lg flex items-center transition-colors"
         >
           <Plus className="w-4 h-4 mr-2" />
           Buat Paket Baru
@@ -224,7 +225,7 @@ export default function QuestionPackageManager({ teacherId, questions }: Questio
       {/* Package List */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {packages.map((pkg) => (
-          <div key={pkg.id} className="bg-gray-800/50 backdrop-blur-xl border border-gray-700/50 rounded-xl p-6">
+          <div key={pkg.id} className="bg-paper border-2 border-ink rounded-xl p-6">
             {/* Package Header */}
             <div className="flex justify-between items-start mb-4">
               <div className="flex-1">
@@ -233,26 +234,26 @@ export default function QuestionPackageManager({ teacherId, questions }: Questio
                     {getPackageTypeLabel(pkg.package_type)}
                   </span>
                   {pkg.is_default && (
-                    <span className="ml-2 px-2 py-1 text-xs font-medium rounded-full bg-orange-500/20 text-orange-300 border border-orange-400/30">
+                    <span className="ml-2 px-2 py-1 text-xs font-medium rounded-full bg-lamp-soft text-amber-700 border-2 border-ink">
                       Default
                     </span>
                   )}
                 </div>
-                <h3 className="font-semibold text-white text-lg">{pkg.name}</h3>
+                <h3 className="font-semibold text-ink text-lg">{pkg.name}</h3>
                 {pkg.description && (
-                  <p className="text-gray-400 text-sm mt-1">{pkg.description}</p>
+                  <p className="text-muted text-sm mt-1">{pkg.description}</p>
                 )}
               </div>
             </div>
 
             {/* Package Stats */}
             <div className="space-y-2 mb-4">
-              <div className="flex items-center text-gray-300 text-sm">
+              <div className="flex items-center text-muted text-sm">
                 <FileText className="w-4 h-4 mr-2" />
                 <span>{pkg.question_ids.length} soal</span>
               </div>
               {pkg.time_limit && (
-                <div className="flex items-center text-gray-300 text-sm">
+                <div className="flex items-center text-muted text-sm">
                   <Clock className="w-4 h-4 mr-2" />
                   <span>{pkg.time_limit} menit</span>
                 </div>
@@ -263,7 +264,7 @@ export default function QuestionPackageManager({ teacherId, questions }: Questio
             <div className="flex space-x-2">
               <button
                 onClick={() => handleEdit(pkg)}
-                className="flex-1 bg-blue-600/20 hover:bg-blue-600/30 text-blue-300 px-3 py-2 rounded-lg text-sm font-medium transition-colors flex items-center justify-center"
+                className="flex-1 bg-brand-soft hover:bg-brand-soft text-brand px-3 py-2 rounded-lg text-sm font-medium transition-colors flex items-center justify-center"
               >
                 <Edit className="w-4 h-4 mr-1" />
                 Edit
@@ -271,7 +272,7 @@ export default function QuestionPackageManager({ teacherId, questions }: Questio
               {!pkg.is_default && (
                 <button
                   onClick={() => handleDelete(pkg)}
-                  className="flex-1 bg-red-600/20 hover:bg-red-600/30 text-red-300 px-3 py-2 rounded-lg text-sm font-medium transition-colors flex items-center justify-center"
+                  className="flex-1 bg-coral-soft hover:bg-coral-soft text-red-600 px-3 py-2 rounded-lg text-sm font-medium transition-colors flex items-center justify-center"
                 >
                   <Trash2 className="w-4 h-4 mr-1" />
                   Hapus
@@ -284,17 +285,17 @@ export default function QuestionPackageManager({ teacherId, questions }: Questio
 
       {/* Create/Edit Form Modal */}
       {showCreateForm && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-gray-800 rounded-xl border border-gray-700 p-6 w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div className="bg-paper rounded-xl border-2 border-ink p-6 w-full max-w-4xl max-h-[90vh] overflow-y-auto">
             <div className="flex justify-between items-center mb-6">
-              <h3 className="text-xl font-bold text-white">
+              <h3 className="text-xl font-bold text-ink">
                 {editingPackage ? 'Edit Paket Soal' : 'Buat Paket Soal Baru'}
               </h3>
               <button
                 onClick={resetForm}
-                className="text-gray-400 hover:text-white"
+                className="text-muted hover:text-ink"
               >
-                ✕
+                <Ico n="x" />
               </button>
             </div>
 
@@ -302,27 +303,27 @@ export default function QuestionPackageManager({ teacherId, questions }: Questio
               {/* Basic Info */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                  <label className="block text-sm font-medium text-muted mb-2">
                     Nama Paket
                   </label>
                   <input
                     type="text"
                     value={formData.name}
                     onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
-                    className="w-full bg-gray-700/50 border border-gray-600 rounded-lg px-3 py-2 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full bg-paper border-2 border-ink rounded-lg px-3 py-2 text-ink placeholder-muted focus:outline-none focus:ring-2 focus:ring-brand"
                     placeholder="Masukkan nama paket"
                     required
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                  <label className="block text-sm font-medium text-muted mb-2">
                     Tipe Paket
                   </label>
                   <select
                     value={formData.package_type}
                     onChange={(e) => setFormData(prev => ({ ...prev, package_type: e.target.value as any }))}
-                    className="w-full bg-gray-700/50 border border-gray-600 rounded-lg px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full bg-paper border-2 border-ink rounded-lg px-3 py-2 text-ink focus:outline-none focus:ring-2 focus:ring-brand"
                     disabled={editingPackage?.is_default}
                   >
                     <option value="pretest">Pre-Test</option>
@@ -334,27 +335,27 @@ export default function QuestionPackageManager({ teacherId, questions }: Questio
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
+                <label className="block text-sm font-medium text-muted mb-2">
                   Deskripsi
                 </label>
                 <textarea
                   value={formData.description}
                   onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-                  className="w-full bg-gray-700/50 border border-gray-600 rounded-lg px-3 py-2 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full bg-paper border-2 border-ink rounded-lg px-3 py-2 text-ink placeholder-muted focus:outline-none focus:ring-2 focus:ring-brand"
                   placeholder="Deskripsi paket (opsional)"
                   rows={3}
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
+                <label className="block text-sm font-medium text-muted mb-2">
                   Batas Waktu (menit)
                 </label>
                 <input
                   type="number"
                   value={formData.time_limit}
                   onChange={(e) => setFormData(prev => ({ ...prev, time_limit: parseInt(e.target.value) || 30 }))}
-                  className="w-full bg-gray-700/50 border border-gray-600 rounded-lg px-3 py-2 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full bg-paper border-2 border-ink rounded-lg px-3 py-2 text-ink placeholder-muted focus:outline-none focus:ring-2 focus:ring-brand"
                   min="1"
                   max="180"
                 />
@@ -362,29 +363,29 @@ export default function QuestionPackageManager({ teacherId, questions }: Questio
 
               {/* Question Selection */}
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-4">
+                <label className="block text-sm font-medium text-muted mb-4">
                   Pilih Soal ({formData.question_ids.length} dipilih)
                 </label>
-                <div className="max-h-64 overflow-y-auto space-y-2 border border-gray-600 rounded-lg p-4">
+                <div className="max-h-64 overflow-y-auto space-y-2 border-2 border-ink rounded-lg p-4">
                   {questions.map((question) => (
-                    <div key={question.id} className="flex items-start space-x-3 p-3 bg-gray-700/30 rounded-lg">
+                    <div key={question.id} className="flex items-start space-x-3 p-3 bg-paper rounded-lg">
                       <input
                         type="checkbox"
                         checked={formData.question_ids.includes(String(question.id))}
                         onChange={() => toggleQuestionSelection(String(question.id))}
-                        className="mt-1 rounded border-gray-600 bg-gray-700 text-blue-500 focus:ring-blue-500"
+                        className="mt-1 rounded border-ink bg-paper text-brand focus:ring-brand"
                       />
                       <div className="flex-1">
                         <div className="flex items-center space-x-2 mb-1">
-                          <span className="text-xs px-2 py-1 bg-blue-500/20 text-blue-300 rounded-full">
+                          <span className="text-xs px-2 py-1 bg-brand-soft text-brand rounded-full">
                             {question.questionType}
                           </span>
-                          <span className="text-xs px-2 py-1 bg-gray-600/50 text-gray-300 rounded-full">
+                          <span className="text-xs px-2 py-1 bg-ink/20 text-muted rounded-full">
                             {question.difficulty}
                           </span>
                         </div>
-                        <p className="text-white text-sm font-medium">{question.title}</p>
-                        <p className="text-gray-400 text-xs mt-1 line-clamp-2">{question.description}</p>
+                        <p className="text-ink text-sm font-medium">{question.title}</p>
+                        <p className="text-muted text-xs mt-1 line-clamp-2">{question.description}</p>
                       </div>
                     </div>
                   ))}
@@ -396,13 +397,13 @@ export default function QuestionPackageManager({ teacherId, questions }: Questio
                 <button
                   type="button"
                   onClick={resetForm}
-                  className="flex-1 bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
+                  className="flex-1 bg-ink/20 hover:bg-paper text-ink px-4 py-2 rounded-lg font-medium transition-colors"
                 >
                   Batal
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
+                  className="flex-1 bg-brand border-2 border-ink hover:bg-brand text-white px-4 py-2 rounded-lg font-medium transition-colors"
                 >
                   {editingPackage ? 'Perbarui Paket' : 'Buat Paket'}
                 </button>

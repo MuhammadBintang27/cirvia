@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { Ico } from '@/components/ui/Ico';
 
 export interface Toast {
   id: string;
@@ -57,7 +58,7 @@ function ToastContainer({ toasts, onRemove }: { toasts: Toast[]; onRemove: (id: 
   if (toasts.length === 0) return null;
 
   return (
-    <div className="fixed top-4 right-4 z-50 space-y-2">
+    <div className="fixed top-20 right-4 z-[60] space-y-2" role="status" aria-live="polite">
       {toasts.map((toast) => (
         <ToastItem key={toast.id} toast={toast} onRemove={onRemove} />
       ))}
@@ -80,45 +81,32 @@ function ToastItem({ toast, onRemove }: { toast: Toast; onRemove: (id: string) =
   const getToastStyles = () => {
     switch (toast.type) {
       case 'success':
-        return 'bg-emerald-500/20 border-emerald-400/30 text-emerald-100';
+        return 'bg-mint-soft border-ink text-emerald-700';
       case 'error':
-        return 'bg-red-500/20 border-red-400/30 text-red-100';
+        return 'bg-coral-soft border-ink text-red-600';
       case 'warning':
-        return 'bg-yellow-500/20 border-yellow-400/30 text-yellow-100';
+        return 'bg-lamp-soft border-ink text-amber-700';
       case 'info':
-        return 'bg-blue-500/20 border-blue-400/30 text-blue-100';
+        return 'bg-brand-soft border-ink text-muted';
       default:
-        return 'bg-gray-500/20 border-gray-400/30 text-gray-100';
+        return 'bg-ink/20 border-ink text-muted';
     }
   };
 
-  const getIcon = () => {
-    switch (toast.type) {
-      case 'success':
-        return '✓';
-      case 'error':
-        return '✕';
-      case 'warning':
-        return '⚠';
-      case 'info':
-        return 'ℹ';
-      default:
-        return '•';
-    }
-  };
+  const icon = { success: "check", error: "x", warning: "alert", info: "message" }[toast.type] ?? "message";
 
   return (
     <div
       className={`
         ${getToastStyles()}
-        backdrop-blur-xl border rounded-xl p-4 max-w-sm shadow-lg
+        border-2 rounded-xl p-4 max-w-sm shadow-hard
         transform transition-all duration-300 ease-in-out
         ${isVisible ? 'translate-x-0 opacity-100' : 'translate-x-full opacity-0'}
       `}
     >
       <div className="flex items-start justify-between">
         <div className="flex items-start space-x-3">
-          <span className="text-lg font-bold">{getIcon()}</span>
+          <span className="text-lg text-ink"><Ico n={icon} /></span>
           <div className="flex-1">
             <h4 className="font-semibold">{toast.title}</h4>
             {toast.message && (

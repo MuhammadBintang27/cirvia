@@ -1,4 +1,5 @@
 'use client'
+import { Ico } from "@/components/ui/Ico";
 
 import { useState, useEffect, useRef } from 'react'
 import { 
@@ -97,41 +98,41 @@ const AIAssessmentReport: React.FC<AIAssessmentReportProps> = ({
 
   const getLearningStyleColor = (style: string) => {
     switch (style) {
-      case 'visual': return 'from-blue-500/20 to-cyan-500/20 border-blue-400/30'
-      case 'auditory': return 'from-purple-500/20 to-pink-500/20 border-purple-400/30'
-      case 'kinesthetic': return 'from-emerald-500/20 to-teal-500/20 border-emerald-400/30'
-      default: return 'from-gray-500/20 to-slate-500/20 border-gray-400/30'
+      case 'visual': return 'bg-brand-soft border-ink'
+      case 'auditory': return 'bg-purple-100 border-ink'
+      case 'kinesthetic': return 'bg-mint-soft border-ink'
+      default: return 'bg-ink/20 border-ink'
     }
   }
 
   const getProgressColor = (analysis: ProgressAnalysis | null) => {
-    if (!analysis) return 'from-gray-500/20 to-slate-500/20 border-gray-400/30'
+    if (!analysis) return 'bg-ink/20 border-ink'
     
     switch (analysis.learningEffectiveness) {
-      case 'excellent': return 'from-green-500/20 to-emerald-500/20 border-green-400/30'
-      case 'good': return 'from-blue-500/20 to-cyan-500/20 border-blue-400/30'
-      case 'fair': return 'from-yellow-500/20 to-orange-500/20 border-yellow-400/30'
-      case 'needs_improvement': return 'from-red-500/20 to-pink-500/20 border-red-400/30'
-      default: return 'from-gray-500/20 to-slate-500/20 border-gray-400/30'
+      case 'excellent': return 'bg-mint-soft border-ink'
+      case 'good': return 'bg-brand-soft border-ink'
+      case 'fair': return 'bg-lamp-soft border-ink'
+      case 'needs_improvement': return 'bg-coral-soft border-ink'
+      default: return 'bg-ink/20 border-ink'
     }
   }
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
-      case 'high': return 'bg-red-500/20 text-red-300 border-red-400/30'
-      case 'medium': return 'bg-yellow-500/20 text-yellow-300 border-yellow-400/30'
-      case 'low': return 'bg-green-500/20 text-green-300 border-green-400/30'
-      default: return 'bg-gray-500/20 text-gray-300 border-gray-400/30'
+      case 'high': return 'bg-coral-soft text-red-600 border-ink'
+      case 'medium': return 'bg-lamp-soft text-amber-700 border-ink'
+      case 'low': return 'bg-mint-soft text-emerald-700 border-ink'
+      default: return 'bg-ink/20 text-muted border-ink'
     }
   }
 
   if (loading) {
     return (
-      <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center">
-        <div className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl rounded-2xl p-8 border border-white/20 text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-400 mx-auto mb-4"></div>
-          <h3 className="text-xl font-bold text-white mb-2">Analyzing Your Learning Data</h3>
-          <p className="text-purple-200/70">AI sedang menganalisis hasil pembelajaran Anda...</p>
+      <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center">
+        <div className="bg-paper rounded-2xl p-8 border-2 border-ink text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-ink mx-auto mb-4"></div>
+          <h3 className="text-xl font-bold text-ink mb-2">Analyzing Your Learning Data</h3>
+          <p className="text-muted">AI sedang menganalisis hasil pembelajaran Anda...</p>
         </div>
       </div>
     )
@@ -139,22 +140,22 @@ const AIAssessmentReport: React.FC<AIAssessmentReportProps> = ({
 
   if (error || !assessment) {
     return (
-      <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center">
-        <div className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl rounded-2xl p-8 border border-white/20 text-center">
-          <AlertCircle className="w-16 h-16 text-red-400 mx-auto mb-4" />
-          <h3 className="text-xl font-bold text-white mb-2">Error</h3>
-          <p className="text-red-200/70 mb-4">{error}</p>
+      <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center">
+        <div className="bg-paper rounded-2xl p-8 border-2 border-ink text-center">
+          <AlertCircle className="w-16 h-16 text-red-600 mx-auto mb-4" />
+          <h3 className="text-xl font-bold text-ink mb-2">Error</h3>
+          <p className="text-red-600 mb-4">{error}</p>
           <div className="flex gap-3 justify-center">
             <button
               onClick={loadAssessment}
-              className="px-4 py-2 bg-purple-500 hover:bg-purple-600 text-white rounded-lg transition-colors"
+              className="px-4 py-2 bg-purple-500 border-2 border-ink hover:bg-purple-500 text-white rounded-lg transition-colors"
             >
               Coba Lagi
             </button>
             {onClose && (
               <button
                 onClick={onClose}
-                className="px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded-lg transition-colors"
+                className="px-4 py-2 bg-ink/20 hover:bg-ink/30 text-ink rounded-lg transition-colors"
               >
                 Tutup
               </button>
@@ -166,24 +167,24 @@ const AIAssessmentReport: React.FC<AIAssessmentReportProps> = ({
   }
 
   return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 overflow-y-auto">
+    <div className="fixed inset-0 bg-black/50 z-50 overflow-y-auto">
       <div className="min-h-screen py-8 px-4">
         <div className="max-w-6xl mx-auto">
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="bg-gradient-to-br from-slate-900/95 via-blue-950/95 to-indigo-900/95 backdrop-blur-xl rounded-2xl border border-white/20 overflow-hidden"
+            className="bg-paper rounded-2xl border-2 border-ink overflow-hidden"
           >
             {/* Header */}
-            <div className="relative p-6 bg-gradient-to-r from-purple-500/20 to-cyan-500/20 border-b border-white/10">
+            <div className="relative p-6 bg-purple-100 border-b border-ink/20">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-4">
-                  <div className="w-16 h-16 bg-gradient-to-br from-purple-500/30 to-cyan-500/30 rounded-xl flex items-center justify-center backdrop-blur-sm border border-white/20">
-                    <Brain className="w-8 h-8 text-white" />
+                  <div className="w-16 h-16 bg-purple-100 rounded-xl flex items-center justify-center border-2 border-ink">
+                    <Brain className="w-8 h-8 text-ink" />
                   </div>
                   <div>
-                    <h1 className="text-3xl font-black text-white mb-1">AI Assessment Report</h1>
-                    <p className="text-purple-200/80">
+                    <h1 className="text-3xl font-black text-ink mb-1">AI Assessment Report</h1>
+                    <p className="text-muted">
                       Analisis Pembelajaran untuk <strong>{studentName}</strong> - Kelas {studentClass}
                     </p>
                   </div>
@@ -191,17 +192,17 @@ const AIAssessmentReport: React.FC<AIAssessmentReportProps> = ({
                 
                 {/* Overall Rating Badge */}
                 <div className="text-center">
-                  <div className="text-4xl mb-2">{assessment.overallRating.badge}</div>
-                  <div className="text-2xl font-bold text-white">{assessment.overallRating.score}/100</div>
-                  <div className="text-sm text-purple-200/70 capitalize">{assessment.overallRating.level}</div>
+                  <div className="text-4xl mb-2"><Ico n={assessment.overallRating.badge} /></div>
+                  <div className="text-2xl font-bold text-ink">{assessment.overallRating.score}/100</div>
+                  <div className="text-sm text-muted capitalize">{assessment.overallRating.level}</div>
                 </div>
                 
                 {onClose && (
                   <button
                     onClick={onClose}
-                    className="p-2 hover:bg-white/10 rounded-full transition-colors"
+                    className="p-2 hover:bg-lamp-soft rounded-full transition-colors"
                   >
-                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-6 h-6 text-ink" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                     </svg>
                   </button>
@@ -210,7 +211,7 @@ const AIAssessmentReport: React.FC<AIAssessmentReportProps> = ({
             </div>
 
             {/* Navigation Tabs */}
-            <div className="flex border-b border-white/10">
+            <div className="flex border-b border-ink/20">
               {[
                 { id: 'overview', label: 'Overview', icon: BarChart3 },
                 { id: 'learning_style', label: 'Gaya Belajar', icon: Brain },
@@ -222,8 +223,8 @@ const AIAssessmentReport: React.FC<AIAssessmentReportProps> = ({
                   onClick={() => setActiveTab(tab.id as any)}
                   className={`flex-1 flex items-center justify-center space-x-2 py-4 px-2 border-b-2 transition-colors ${
                     activeTab === tab.id
-                      ? 'border-purple-400 bg-purple-500/10 text-purple-300'
-                      : 'border-transparent text-white/60 hover:text-white/80 hover:bg-white/5'
+                      ? 'border-ink bg-purple-100 text-purple-700'
+                      : 'border-transparent text-muted hover:text-ink hover:bg-lamp-soft'
                   }`}
                 >
                   <tab.icon className="w-4 h-4" />
@@ -238,12 +239,12 @@ const AIAssessmentReport: React.FC<AIAssessmentReportProps> = ({
                 <div className="space-y-6">
                   {/* Quick Stats */}
                   <div className="grid md:grid-cols-4 gap-4">
-                    <div className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl rounded-xl p-4 border border-white/20 text-center">
+                    <div className="bg-paper rounded-xl p-4 border-2 border-ink text-center">
                       <div className="text-2xl mb-2">
                         {assessment.learningStyle ? getLearningStyleIcon(assessment.learningStyle.primaryStyle) : <Brain className="w-6 h-6 mx-auto" />}
                       </div>
-                      <div className="text-sm text-white/70 mb-1">Gaya Belajar</div>
-                      <div className="font-bold text-white">
+                      <div className="text-sm text-muted mb-1">Gaya Belajar</div>
+                      <div className="font-bold text-ink">
                         {assessment.learningStyle ? 
                           assessment.learningStyle.primaryStyle.charAt(0).toUpperCase() + assessment.learningStyle.primaryStyle.slice(1) :
                           'Belum Tes'
@@ -251,26 +252,26 @@ const AIAssessmentReport: React.FC<AIAssessmentReportProps> = ({
                       </div>
                     </div>
 
-                    <div className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl rounded-xl p-4 border border-white/20 text-center">
-                      <CheckCircle className="w-6 h-6 text-green-400 mx-auto mb-2" />
-                      <div className="text-sm text-white/70 mb-1">Pre-Test</div>
-                      <div className="font-bold text-white">
+                    <div className="bg-paper rounded-xl p-4 border-2 border-ink text-center">
+                      <CheckCircle className="w-6 h-6 text-emerald-700 mx-auto mb-2" />
+                      <div className="text-sm text-muted mb-1">Pre-Test</div>
+                      <div className="font-bold text-ink">
                         {assessment.pretest ? `${assessment.pretest.percentage}%` : 'Belum'}
                       </div>
                     </div>
 
-                    <div className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl rounded-xl p-4 border border-white/20 text-center">
-                      <Award className="w-6 h-6 text-purple-400 mx-auto mb-2" />
-                      <div className="text-sm text-white/70 mb-1">Post-Test</div>
-                      <div className="font-bold text-white">
+                    <div className="bg-paper rounded-xl p-4 border-2 border-ink text-center">
+                      <Award className="w-6 h-6 text-purple-700 mx-auto mb-2" />
+                      <div className="text-sm text-muted mb-1">Post-Test</div>
+                      <div className="font-bold text-ink">
                         {assessment.posttest ? `${assessment.posttest.percentage}%` : 'Belum'}
                       </div>
                     </div>
 
-                    <div className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl rounded-xl p-4 border border-white/20 text-center">
-                      <TrendingUp className="w-6 h-6 text-cyan-400 mx-auto mb-2" />
-                      <div className="text-sm text-white/70 mb-1">Peningkatan</div>
-                      <div className="font-bold text-white">
+                    <div className="bg-paper rounded-xl p-4 border-2 border-ink text-center">
+                      <TrendingUp className="w-6 h-6 text-brand mx-auto mb-2" />
+                      <div className="text-sm text-muted mb-1">Peningkatan</div>
+                      <div className="font-bold text-ink">
                         {assessment.progressAnalysis ? 
                           `${assessment.progressAnalysis.improvement > 0 ? '+' : ''}${assessment.progressAnalysis.improvement.toFixed(1)}%` :
                           'N/A'
@@ -283,27 +284,27 @@ const AIAssessmentReport: React.FC<AIAssessmentReportProps> = ({
                   <div className="grid lg:grid-cols-2 gap-6">
                     {/* Learning Style Summary */}
                     {assessment.learningStyle && (
-                      <div className={`bg-gradient-to-br ${getLearningStyleColor(assessment.learningStyle.primaryStyle)} backdrop-blur-xl rounded-xl p-6 border`}>
+                      <div className={`${getLearningStyleColor(assessment.learningStyle.primaryStyle)} rounded-xl p-6 border`}>
                         <div className="flex items-center space-x-3 mb-4">
                           {getLearningStyleIcon(assessment.learningStyle.primaryStyle)}
-                          <h3 className="text-xl font-bold text-white">Gaya Belajar Dominan</h3>
+                          <h3 className="text-xl font-bold text-ink">Gaya Belajar Dominan</h3>
                         </div>
-                        <p className="text-white/90 mb-4">
+                        <p className="text-ink mb-4">
                           Anda adalah seorang <strong>{assessment.learningStyle.primaryStyle} learner</strong> dengan 
                           dominasi {assessment.learningStyle.percentages[assessment.learningStyle.primaryStyle]}%.
                         </p>
                         <div className="grid grid-cols-3 gap-2 text-center">
                           <div>
-                            <div className="text-lg font-bold text-white">{assessment.learningStyle.percentages.visual}%</div>
-                            <div className="text-xs text-white/70">Visual</div>
+                            <div className="text-lg font-bold text-ink">{assessment.learningStyle.percentages.visual}%</div>
+                            <div className="text-xs text-muted">Visual</div>
                           </div>
                           <div>
-                            <div className="text-lg font-bold text-white">{assessment.learningStyle.percentages.auditory}%</div>
-                            <div className="text-xs text-white/70">Auditory</div>
+                            <div className="text-lg font-bold text-ink">{assessment.learningStyle.percentages.auditory}%</div>
+                            <div className="text-xs text-muted">Auditory</div>
                           </div>
                           <div>
-                            <div className="text-lg font-bold text-white">{assessment.learningStyle.percentages.kinesthetic}%</div>
-                            <div className="text-xs text-white/70">Kinesthetic</div>
+                            <div className="text-lg font-bold text-ink">{assessment.learningStyle.percentages.kinesthetic}%</div>
+                            <div className="text-xs text-muted">Kinesthetic</div>
                           </div>
                         </div>
                       </div>
@@ -311,12 +312,12 @@ const AIAssessmentReport: React.FC<AIAssessmentReportProps> = ({
 
                     {/* Progress Summary */}
                     {assessment.progressAnalysis && assessment.pretest && assessment.posttest && (
-                      <div className={`bg-gradient-to-br ${getProgressColor(assessment.progressAnalysis)} backdrop-blur-xl rounded-xl p-6 border`}>
+                      <div className={`${getProgressColor(assessment.progressAnalysis)} rounded-xl p-6 border`}>
                         <div className="flex items-center space-x-3 mb-4">
                           <TrendingUp className="w-6 h-6" />
-                          <h3 className="text-xl font-bold text-white">Progress Pembelajaran</h3>
+                          <h3 className="text-xl font-bold text-ink">Progress Pembelajaran</h3>
                         </div>
-                        <p className="text-white/90 mb-4">
+                        <p className="text-ink mb-4">
                           Peningkatan <strong>{assessment.progressAnalysis.improvement.toFixed(1)}%</strong> dari 
                           pre-test ke post-test menunjukkan pembelajaran yang{' '}
                           <strong>
@@ -328,13 +329,13 @@ const AIAssessmentReport: React.FC<AIAssessmentReportProps> = ({
                         </p>
                         <div className="flex justify-between text-center">
                           <div>
-                            <div className="text-lg font-bold text-white">{assessment.pretest.percentage}%</div>
-                            <div className="text-xs text-white/70">Pre-Test</div>
+                            <div className="text-lg font-bold text-ink">{assessment.pretest.percentage}%</div>
+                            <div className="text-xs text-muted">Pre-Test</div>
                           </div>
-                          <ArrowRight className="w-6 h-6 text-white/50 self-center" />
+                          <ArrowRight className="w-6 h-6 text-muted self-center" />
                           <div>
-                            <div className="text-lg font-bold text-white">{assessment.posttest.percentage}%</div>
-                            <div className="text-xs text-white/70">Post-Test</div>
+                            <div className="text-lg font-bold text-ink">{assessment.posttest.percentage}%</div>
+                            <div className="text-xs text-muted">Post-Test</div>
                           </div>
                         </div>
                       </div>
@@ -347,16 +348,16 @@ const AIAssessmentReport: React.FC<AIAssessmentReportProps> = ({
                 <div className="space-y-6">
                   {assessment.learningStyle ? (
                     <>
-                      <div className={`bg-gradient-to-br ${getLearningStyleColor(assessment.learningStyle.primaryStyle)} backdrop-blur-xl rounded-xl p-8 border text-center`}>
-                        <div className="w-20 h-20 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-6">
+                      <div className={`${getLearningStyleColor(assessment.learningStyle.primaryStyle)} rounded-xl p-8 border text-center`}>
+                        <div className="w-20 h-20 bg-paper rounded-full flex items-center justify-center mx-auto mb-6">
                           {getLearningStyleIcon(assessment.learningStyle.primaryStyle)}
                         </div>
-                        <h2 className="text-3xl font-black text-white mb-4">
+                        <h2 className="text-3xl font-black text-ink mb-4">
                           {assessment.learningStyle.primaryStyle === 'visual' ? 'Visual Learner' :
                            assessment.learningStyle.primaryStyle === 'auditory' ? 'Auditory Learner' :
                            'Kinesthetic Learner'}
                         </h2>
-                        <p className="text-white/90 text-lg mb-6">
+                        <p className="text-ink text-lg mb-6">
                           Anda belajar paling efektif melalui{' '}
                           {assessment.learningStyle.primaryStyle === 'visual' ? 'gambar, diagram, dan representasi visual' :
                            assessment.learningStyle.primaryStyle === 'auditory' ? 'mendengar, diskusi, dan penjelasan verbal' :
@@ -366,12 +367,12 @@ const AIAssessmentReport: React.FC<AIAssessmentReportProps> = ({
                         {/* Percentage Breakdown */}
                         <div className="grid grid-cols-3 gap-4">
                           {Object.entries(assessment.learningStyle.percentages).map(([style, percentage]) => (
-                            <div key={style} className="bg-white/10 rounded-lg p-4">
-                              <div className="text-2xl font-bold text-white">{percentage}%</div>
-                              <div className="text-white/70 capitalize">{style}</div>
-                              <div className="w-full bg-white/20 rounded-full h-2 mt-2">
+                            <div key={style} className="bg-paper rounded-lg p-4">
+                              <div className="text-2xl font-bold text-ink">{percentage}%</div>
+                              <div className="text-muted capitalize">{style}</div>
+                              <div className="w-full bg-paper rounded-full h-2 mt-2">
                                 <div 
-                                  className="bg-white h-2 rounded-full transition-all duration-1000"
+                                  className="bg-paper h-2 rounded-full transition-all duration-1000"
                                   style={{ width: `${percentage}%` }}
                                 ></div>
                               </div>
@@ -384,15 +385,15 @@ const AIAssessmentReport: React.FC<AIAssessmentReportProps> = ({
                       {assessment.recommendations
                         .filter(rec => rec.type === 'learning_style')
                         .map((rec, index) => (
-                          <div key={index} className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl rounded-xl p-6 border border-white/20">
-                            <h3 className="text-xl font-bold text-white mb-4">{rec.title}</h3>
-                            <p className="text-white/80 mb-6">{rec.summary}</p>
+                          <div key={index} className="bg-paper rounded-xl p-6 border-2 border-ink">
+                            <h3 className="text-xl font-bold text-ink mb-4">{rec.title}</h3>
+                            <p className="text-ink mb-6">{rec.summary}</p>
                             
                             <div className="space-y-4">
                               {rec.recommendations.map((category, catIndex) => (
-                                <div key={catIndex} className="border border-white/10 rounded-lg p-4">
+                                <div key={catIndex} className="border border-ink/20 rounded-lg p-4">
                                   <div className="flex items-center justify-between mb-3">
-                                    <h4 className="font-semibold text-white">{category.category}</h4>
+                                    <h4 className="font-semibold text-ink">{category.category}</h4>
                                     <span className={`px-2 py-1 rounded-full text-xs border ${getPriorityColor(category.priority)}`}>
                                       {category.priority}
                                     </span>
@@ -400,8 +401,8 @@ const AIAssessmentReport: React.FC<AIAssessmentReportProps> = ({
                                   <ul className="space-y-2">
                                     {category.items.map((item, itemIndex) => (
                                       <li key={itemIndex} className="flex items-start space-x-2">
-                                        <CheckCircle className="w-4 h-4 text-green-400 mt-0.5 flex-shrink-0" />
-                                        <span className="text-white/80 text-sm">{item}</span>
+                                        <CheckCircle className="w-4 h-4 text-emerald-700 mt-0.5 flex-shrink-0" />
+                                        <span className="text-ink text-sm">{item}</span>
                                       </li>
                                     ))}
                                   </ul>
@@ -414,14 +415,14 @@ const AIAssessmentReport: React.FC<AIAssessmentReportProps> = ({
                     </>
                   ) : (
                     <div className="text-center py-12">
-                      <Brain className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-                      <h3 className="text-xl font-bold text-white mb-2">Tes Gaya Belajar Belum Dikerjakan</h3>
-                      <p className="text-gray-400 mb-6">
+                      <Brain className="w-16 h-16 text-muted mx-auto mb-4" />
+                      <h3 className="text-xl font-bold text-ink mb-2">Tes Gaya Belajar Belum Dikerjakan</h3>
+                      <p className="text-muted mb-6">
                         Kerjakan tes gaya belajar untuk mendapatkan analisis dan rekomendasi yang personal.
                       </p>
                       <button
                         onClick={() => window.location.href = '/learning-style'}
-                        className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-6 py-3 rounded-lg hover:from-purple-600 hover:to-pink-600 transition-all"
+                        className="bg-purple-500 border-2 border-ink text-white px-6 py-3 rounded-lg hover:bg-purple-500 transition-all"
                       >
                         Ikuti Tes Gaya Belajar
                       </button>
@@ -435,37 +436,37 @@ const AIAssessmentReport: React.FC<AIAssessmentReportProps> = ({
                   {assessment.pretest && assessment.posttest && assessment.progressAnalysis ? (
                     <>
                       {/* Progress Overview */}
-                      <div className={`bg-gradient-to-br ${getProgressColor(assessment.progressAnalysis)} backdrop-blur-xl rounded-xl p-8 border text-center`}>
-                        <div className="w-20 h-20 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-6">
+                      <div className={`${getProgressColor(assessment.progressAnalysis)} rounded-xl p-8 border text-center`}>
+                        <div className="w-20 h-20 bg-paper rounded-full flex items-center justify-center mx-auto mb-6">
                           <TrendingUp className="w-10 h-10" />
                         </div>
-                        <h2 className="text-3xl font-black text-white mb-4">
+                        <h2 className="text-3xl font-black text-ink mb-4">
                           Progress Analysis
                         </h2>
-                        <div className="text-6xl font-black text-white mb-2">
+                        <div className="text-6xl font-black text-ink mb-2">
                           {assessment.progressAnalysis.improvement > 0 ? '+' : ''}
                           {assessment.progressAnalysis.improvement.toFixed(1)}%
                         </div>
-                        <p className="text-white/90 text-lg mb-6">
+                        <p className="text-ink text-lg mb-6">
                           Peningkatan dari pre-test ke post-test
                         </p>
                         
                         {/* Detailed Stats */}
                         <div className="grid md:grid-cols-2 gap-6">
-                          <div className="bg-white/10 rounded-lg p-4">
-                            <h4 className="text-white font-bold mb-3">Test Scores</h4>
+                          <div className="bg-paper rounded-lg p-4">
+                            <h4 className="text-ink font-bold mb-3">Test Scores</h4>
                             <div className="space-y-2">
                               <div className="flex justify-between">
-                                <span className="text-white/70">Pre-Test:</span>
-                                <span className="text-white font-bold">{assessment.pretest.percentage}%</span>
+                                <span className="text-muted">Pre-Test:</span>
+                                <span className="text-ink font-bold">{assessment.pretest.percentage}%</span>
                               </div>
                               <div className="flex justify-between">
-                                <span className="text-white/70">Post-Test:</span>
-                                <span className="text-white font-bold">{assessment.posttest.percentage}%</span>
+                                <span className="text-muted">Post-Test:</span>
+                                <span className="text-ink font-bold">{assessment.posttest.percentage}%</span>
                               </div>
-                              <div className="flex justify-between border-t border-white/20 pt-2">
-                                <span className="text-white/70">Improvement:</span>
-                                <span className={`font-bold ${assessment.progressAnalysis.improvement > 0 ? 'text-green-400' : 'text-red-400'}`}>
+                              <div className="flex justify-between border-t border-ink pt-2">
+                                <span className="text-muted">Improvement:</span>
+                                <span className={`font-bold ${assessment.progressAnalysis.improvement > 0 ? 'text-emerald-700' : 'text-red-600'}`}>
                                   {assessment.progressAnalysis.improvement > 0 ? '+' : ''}
                                   {assessment.progressAnalysis.improvement.toFixed(1)}%
                                 </span>
@@ -473,18 +474,18 @@ const AIAssessmentReport: React.FC<AIAssessmentReportProps> = ({
                             </div>
                           </div>
 
-                          <div className="bg-white/10 rounded-lg p-4">
-                            <h4 className="text-white font-bold mb-3">Performance Metrics</h4>
+                          <div className="bg-paper rounded-lg p-4">
+                            <h4 className="text-ink font-bold mb-3">Performance Metrics</h4>
                             <div className="space-y-2">
                               <div className="flex justify-between">
-                                <span className="text-white/70">Learning Effectiveness:</span>
-                                <span className="text-white font-bold capitalize">
+                                <span className="text-muted">Learning Effectiveness:</span>
+                                <span className="text-ink font-bold capitalize">
                                   {assessment.progressAnalysis.learningEffectiveness.replace('_', ' ')}
                                 </span>
                               </div>
                               <div className="flex justify-between">
-                                <span className="text-white/70">Time Efficiency:</span>
-                                <span className="text-white font-bold capitalize">
+                                <span className="text-muted">Time Efficiency:</span>
+                                <span className="text-ink font-bold capitalize">
                                   {assessment.progressAnalysis.timeEfficiency}
                                 </span>
                               </div>
@@ -495,38 +496,38 @@ const AIAssessmentReport: React.FC<AIAssessmentReportProps> = ({
 
                       {/* Strengths and Weaknesses */}
                       <div className="grid lg:grid-cols-2 gap-6">
-                        <div className="bg-gradient-to-br from-green-500/20 to-emerald-500/20 backdrop-blur-xl rounded-xl p-6 border border-green-400/30">
+                        <div className="bg-mint-soft rounded-xl p-6 border-2 border-ink">
                           <div className="flex items-center space-x-3 mb-4">
-                            <CheckCircle className="w-6 h-6 text-green-400" />
-                            <h3 className="text-xl font-bold text-white">Strength Areas</h3>
+                            <CheckCircle className="w-6 h-6 text-emerald-700" />
+                            <h3 className="text-xl font-bold text-ink">Strength Areas</h3>
                           </div>
                           <ul className="space-y-2">
                             {assessment.progressAnalysis.strengthAreas.map((area, index) => (
                               <li key={index} className="flex items-start space-x-2">
-                                <Star className="w-4 h-4 text-green-400 mt-0.5 flex-shrink-0" />
-                                <span className="text-white/90">{area}</span>
+                                <Star className="w-4 h-4 text-emerald-700 mt-0.5 flex-shrink-0" />
+                                <span className="text-ink">{area}</span>
                               </li>
                             ))}
                             {assessment.progressAnalysis.strengthAreas.length === 0 && (
-                              <li className="text-white/70 italic">Terus tingkatkan pembelajaran untuk mengidentifikasi area kekuatan</li>
+                              <li className="text-muted italic">Terus tingkatkan pembelajaran untuk mengidentifikasi area kekuatan</li>
                             )}
                           </ul>
                         </div>
 
-                        <div className="bg-gradient-to-br from-yellow-500/20 to-orange-500/20 backdrop-blur-xl rounded-xl p-6 border border-yellow-400/30">
+                        <div className="bg-lamp-soft rounded-xl p-6 border-2 border-ink">
                           <div className="flex items-center space-x-3 mb-4">
-                            <AlertCircle className="w-6 h-6 text-yellow-400" />
-                            <h3 className="text-xl font-bold text-white">Areas for Improvement</h3>
+                            <AlertCircle className="w-6 h-6 text-amber-700" />
+                            <h3 className="text-xl font-bold text-ink">Areas for Improvement</h3>
                           </div>
                           <ul className="space-y-2">
                             {assessment.progressAnalysis.weaknessAreas.map((area, index) => (
                               <li key={index} className="flex items-start space-x-2">
-                                <Target className="w-4 h-4 text-yellow-400 mt-0.5 flex-shrink-0" />
-                                <span className="text-white/90">{area}</span>
+                                <Target className="w-4 h-4 text-amber-700 mt-0.5 flex-shrink-0" />
+                                <span className="text-ink">{area}</span>
                               </li>
                             ))}
                             {assessment.progressAnalysis.weaknessAreas.length === 0 && (
-                              <li className="text-white/70 italic">Excellent! Tidak ada area yang perlu perbaikan signifikan</li>
+                              <li className="text-muted italic">Excellent! Tidak ada area yang perlu perbaikan signifikan</li>
                             )}
                           </ul>
                         </div>
@@ -534,16 +535,16 @@ const AIAssessmentReport: React.FC<AIAssessmentReportProps> = ({
                     </>
                   ) : (
                     <div className="text-center py-12">
-                      <BarChart3 className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-                      <h3 className="text-xl font-bold text-white mb-2">Data Progress Tidak Lengkap</h3>
-                      <p className="text-gray-400 mb-6">
+                      <BarChart3 className="w-16 h-16 text-muted mx-auto mb-4" />
+                      <h3 className="text-xl font-bold text-ink mb-2">Data Progress Tidak Lengkap</h3>
+                      <p className="text-muted mb-6">
                         Kerjakan pre-test dan post-test untuk mendapatkan analisis progress yang komprehensif.
                       </p>
                       <div className="flex gap-4 justify-center">
                         {!assessment.pretest && (
                           <button
                             onClick={() => window.location.href = '/pretest'}
-                            className="bg-gradient-to-r from-green-500 to-emerald-500 text-white px-6 py-3 rounded-lg hover:from-green-600 hover:to-emerald-600 transition-all"
+                            className="bg-mint border-2 border-ink text-ink px-6 py-3 rounded-lg hover:bg-mint transition-all"
                           >
                             Kerjakan Pre-Test
                           </button>
@@ -551,7 +552,7 @@ const AIAssessmentReport: React.FC<AIAssessmentReportProps> = ({
                         {!assessment.posttest && (
                           <button
                             onClick={() => window.location.href = '/posttest'}
-                            className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-6 py-3 rounded-lg hover:from-purple-600 hover:to-pink-600 transition-all"
+                            className="bg-purple-500 border-2 border-ink text-white px-6 py-3 rounded-lg hover:bg-purple-500 transition-all"
                           >
                             Kerjakan Post-Test
                           </button>
@@ -570,22 +571,22 @@ const AIAssessmentReport: React.FC<AIAssessmentReportProps> = ({
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: index * 0.1 }}
-                      className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl rounded-xl p-6 border border-white/20"
+                      className="bg-paper rounded-xl p-6 border-2 border-ink"
                     >
                       <div className="flex items-center space-x-3 mb-4">
-                        <div className="w-10 h-10 bg-gradient-to-br from-purple-500/30 to-cyan-500/30 rounded-lg flex items-center justify-center">
-                          <Lightbulb className="w-5 h-5 text-white" />
+                        <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
+                          <Lightbulb className="w-5 h-5 text-ink" />
                         </div>
-                        <h3 className="text-xl font-bold text-white">{rec.title}</h3>
+                        <h3 className="text-xl font-bold text-ink">{rec.title}</h3>
                       </div>
                       
-                      <p className="text-white/80 mb-6">{rec.summary}</p>
+                      <p className="text-ink mb-6">{rec.summary}</p>
                       
                       <div className="space-y-4 mb-6">
                         {rec.recommendations.map((category, catIndex) => (
-                          <div key={catIndex} className="border border-white/10 rounded-lg p-4">
+                          <div key={catIndex} className="border border-ink/20 rounded-lg p-4">
                             <div className="flex items-center justify-between mb-3">
-                              <h4 className="font-semibold text-white">{category.category}</h4>
+                              <h4 className="font-semibold text-ink">{category.category}</h4>
                               <span className={`px-2 py-1 rounded-full text-xs border ${getPriorityColor(category.priority)}`}>
                                 {category.priority}
                               </span>
@@ -593,8 +594,8 @@ const AIAssessmentReport: React.FC<AIAssessmentReportProps> = ({
                             <ul className="space-y-2">
                               {category.items.map((item, itemIndex) => (
                                 <li key={itemIndex} className="flex items-start space-x-2">
-                                  <CheckCircle className="w-4 h-4 text-green-400 mt-0.5 flex-shrink-0" />
-                                  <span className="text-white/80 text-sm">{item}</span>
+                                  <CheckCircle className="w-4 h-4 text-emerald-700 mt-0.5 flex-shrink-0" />
+                                  <span className="text-ink text-sm">{item}</span>
                                 </li>
                               ))}
                             </ul>
@@ -603,14 +604,14 @@ const AIAssessmentReport: React.FC<AIAssessmentReportProps> = ({
                       </div>
 
                       {rec.nextSteps.length > 0 && (
-                        <div className="bg-white/5 rounded-lg p-4 mb-4">
-                          <h4 className="font-semibold text-white mb-3 flex items-center">
+                        <div className="bg-paper rounded-lg p-4 mb-4">
+                          <h4 className="font-semibold text-ink mb-3 flex items-center">
                             <ArrowRight className="w-4 h-4 mr-2" />
                             Next Steps
                           </h4>
                           <ul className="space-y-1">
                             {rec.nextSteps.map((step, stepIndex) => (
-                              <li key={stepIndex} className="text-white/80 text-sm">
+                              <li key={stepIndex} className="text-ink text-sm">
                                 {stepIndex + 1}. {step}
                               </li>
                             ))}
@@ -619,9 +620,9 @@ const AIAssessmentReport: React.FC<AIAssessmentReportProps> = ({
                       )}
 
                       {rec.motivationalMessage && (
-                        <div className="bg-gradient-to-r from-purple-500/20 to-pink-500/20 border border-purple-400/30 rounded-lg p-4">
-                          <p className="text-center text-white/90 italic">
-                            💪 {rec.motivationalMessage}
+                        <div className="bg-purple-100 border-2 border-ink rounded-lg p-4">
+                          <p className="text-center text-ink italic">
+                            {rec.motivationalMessage}
                           </p>
                         </div>
                       )}
@@ -632,22 +633,22 @@ const AIAssessmentReport: React.FC<AIAssessmentReportProps> = ({
             </div>
 
             {/* Footer */}
-            <div className="p-6 bg-gradient-to-r from-white/5 to-white/10 border-t border-white/10">
+            <div className="p-6 bg-paper border-t border-ink/20">
               <div className="flex items-center justify-between">
-                <div className="text-sm text-white/60">
+                <div className="text-sm text-muted">
                   Report generated by CIRVIA AI • {new Date().toLocaleDateString('id-ID')}
                 </div>
                 <div className="flex space-x-3">
                   <button
                     onClick={() => window.print()}
-                    className="px-4 py-2 bg-white/10 hover:bg-white/20 border border-white/20 rounded-lg text-white text-sm transition-colors"
+                    className="px-4 py-2 bg-paper hover:bg-lamp-soft border-2 border-ink rounded-lg text-ink text-sm transition-colors"
                   >
                     Print Report
                   </button>
                   {onClose && (
                     <button
                       onClick={onClose}
-                      className="px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white rounded-lg text-sm transition-all"
+                      className="px-4 py-2 bg-purple-500 border-2 border-ink hover:bg-purple-500 text-white rounded-lg text-sm transition-all"
                     >
                       Tutup
                     </button>

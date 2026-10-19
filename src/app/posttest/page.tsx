@@ -24,7 +24,7 @@ import { extractAnswer, calculateScore } from '@/lib/answer-tracking';
 
 interface QuizState {
   currentQuestionIndex: number;
-  answers: (number | null | string[] | number[] | { [key: string]: string })[];  // ✅ Support all question types
+  answers: (number | null | string[] | number[] | { [key: string]: string })[];  // Support all question types
   showResult: boolean;
   quizCompleted: boolean;
   startTime: number;
@@ -68,7 +68,7 @@ const PostTestPage = () => {
     studentClass,
     (user?.role === 'student' ? (user as any).teacherId : null),
     'posttest',
-    defaultQuestions // ✅ Use database-fetched default questions
+    defaultQuestions // Use database-fetched default questions
   );
   
   // 🐛 Debug logging untuk questions
@@ -210,8 +210,8 @@ const PostTestPage = () => {
           selectedText: result.selectedText,
           correctText: result.correctText,
           explanation: result.explanation,
-          questionType: result.questionType as 'conceptual' | 'circuit' | 'circuitAnalysis' | 'simulation', // ✨ NEW: Question type tracking
-          metadata: result.metadata // ✨ NEW: Type-specific metadata
+          questionType: result.questionType as 'conceptual' | 'circuit' | 'circuitAnalysis' | 'simulation', // NEW: Question type tracking
+          metadata: result.metadata // NEW: Type-specific metadata
         }));
 
         const grade = SupabaseTestService.calculateGrade(percentage);
@@ -301,11 +301,11 @@ const PostTestPage = () => {
   // Show loading state while fetching questions
   if (questionsLoading || loadingDefaults) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-950 to-indigo-900 flex items-center justify-center">
-        <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-8 border border-white/20">
+      <div className="min-h-screen bg-transparent flex items-center justify-center">
+        <div className="bg-paper rounded-2xl p-8 border-2 border-ink">
           <div className="flex items-center space-x-3">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-400"></div>
-            <span className="text-white">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-ink"></div>
+            <span className="text-ink">
               {loadingDefaults 
                 ? 'Memuat soal default dari database...'
                 : 'Memuat soal post-test...'}
@@ -319,18 +319,18 @@ const PostTestPage = () => {
   // Show error state if questions failed to load
   if (questionsError) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-950 to-indigo-900 flex items-center justify-center">
-        <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-8 border border-white/20 text-center">
-          <div className="text-red-400 mb-4">
+      <div className="min-h-screen bg-transparent flex items-center justify-center">
+        <div className="bg-paper rounded-2xl p-8 border-2 border-ink text-center">
+          <div className="text-red-600 mb-4">
             <svg className="w-16 h-16 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.962-.833-2.732 0L3.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
             </svg>
           </div>
-          <h3 className="text-lg font-semibold text-white mb-2">Gagal Memuat Soal</h3>
-          <p className="text-gray-300 mb-4">Terjadi kesalahan saat memuat soal post-test. Silakan coba lagi.</p>
+          <h3 className="text-lg font-semibold text-ink mb-2">Gagal Memuat Soal</h3>
+          <p className="text-muted mb-4">Terjadi kesalahan saat memuat soal post-test. Silakan coba lagi.</p>
           <button
             onClick={() => window.location.reload()}
-            className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-6 py-2 rounded-lg hover:from-purple-600 hover:to-pink-600 transition-all duration-300"
+            className="bg-purple-500 border-2 border-ink text-white px-6 py-2 rounded-lg hover:bg-purple-500 transition-all duration-300"
           >
             Coba Lagi
           </button>
@@ -346,12 +346,12 @@ const PostTestPage = () => {
     const scoreData = calculateQuizScore(correctAnswers, questions.length);
     
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-950 to-indigo-900 relative overflow-hidden">
+      <div className="min-h-screen bg-transparent relative">
         {/* Animated Background */}
         <div className="absolute inset-0">
-          <div className="absolute top-20 left-10 w-72 h-72 bg-purple-500/10 rounded-full blur-3xl animate-pulse"></div>
-          <div className="absolute top-40 right-20 w-96 h-96 bg-pink-500/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
-          <div className="absolute bottom-20 left-1/3 w-80 h-80 bg-cyan-500/10 rounded-full blur-3xl animate-pulse delay-2000"></div>
+          <div className="absolute top-20 left-10 w-72 h-72 bg-purple-100 rounded-full hidden animate-pulse"></div>
+          <div className="absolute top-40 right-20 w-96 h-96 bg-purple-100 rounded-full hidden animate-pulse delay-1000"></div>
+          <div className="absolute bottom-20 left-1/3 w-80 h-80 bg-brand-soft rounded-full hidden animate-pulse delay-2000"></div>
         </div>
 
         <Navbar />
@@ -359,39 +359,39 @@ const PostTestPage = () => {
         <div className="container mx-auto px-6 py-16 relative z-10">
           <div className="max-w-4xl mx-auto text-center">
             {/* Completion Badge */}
-            <div className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-yellow-400/20 to-amber-400/20 rounded-full border border-yellow-400/30 backdrop-blur-sm mb-8">
-              <Trophy className="w-6 h-6 text-yellow-400 mr-3" />
-              <span className="text-yellow-400 text-lg font-bold">Post-Test Selesai!</span>
-              <Sparkles className="w-6 h-6 text-yellow-400 ml-3" />
+            <div className="inline-flex items-center px-6 py-3 bg-lamp-soft rounded-full border-2 border-ink mb-8">
+              <Trophy className="w-6 h-6 text-amber-700 mr-3" />
+              <span className="text-amber-700 text-lg font-bold">Post-Test Selesai!</span>
+              <Sparkles className="w-6 h-6 text-amber-700 ml-3" />
             </div>
 
             {/* Score Display */}
             <div className="relative mb-12">
-              <div className="inline-flex items-center justify-center w-40 h-40 rounded-full bg-gradient-to-br from-purple-500/20 to-pink-600/20 backdrop-blur-xl border border-white/20 shadow-2xl">
+              <div className="inline-flex items-center justify-center w-40 h-40 rounded-full bg-purple-100 border-2 border-ink shadow-hard">
                 <div className="text-center">
-                  <div className="text-6xl font-black text-white">{Math.round(scoreData.score)}%</div>
+                  <div className="text-6xl font-black text-ink">{Math.round(scoreData.score)}%</div>
                 </div>
               </div>
             </div>
 
             {/* Results */}
-            <h1 className="text-5xl font-black mb-6 bg-gradient-to-r from-white via-purple-200 to-pink-300 bg-clip-text text-transparent">
+            <h1 className="text-5xl font-black mb-6 text-ink">
               {scoreData.message}
             </h1>
 
             {/* Statistics */}
             <div className="grid md:grid-cols-3 gap-6 mb-12">
-              <div className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl rounded-2xl p-6 border border-white/20">
-                <div className="text-2xl font-bold text-white mb-2">{correctAnswers}/{questions.length}</div>
-                <div className="text-purple-300">Jawaban Benar</div>
+              <div className="bg-paper rounded-2xl p-6 border-2 border-ink">
+                <div className="text-2xl font-bold text-ink mb-2">{correctAnswers}/{questions.length}</div>
+                <div className="text-purple-700">Jawaban Benar</div>
               </div>
-              <div className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl rounded-2xl p-6 border border-white/20">
-                <div className="text-2xl font-bold text-white mb-2">{formatTime(timeElapsed)}</div>
-                <div className="text-purple-300">Waktu Total</div>
+              <div className="bg-paper rounded-2xl p-6 border-2 border-ink">
+                <div className="text-2xl font-bold text-ink mb-2">{formatTime(timeElapsed)}</div>
+                <div className="text-purple-700">Waktu Total</div>
               </div>
-              <div className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl rounded-2xl p-6 border border-white/20">
-                <div className="text-2xl font-bold text-white mb-2">{Math.round(timeElapsed / questions.length)}s</div>
-                <div className="text-purple-300">Rata-rata/Soal</div>
+              <div className="bg-paper rounded-2xl p-6 border-2 border-ink">
+                <div className="text-2xl font-bold text-ink mb-2">{Math.round(timeElapsed / questions.length)}s</div>
+                <div className="text-purple-700">Rata-rata/Soal</div>
               </div>
             </div>
 
@@ -412,14 +412,14 @@ const PostTestPage = () => {
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <button
                 onClick={handleResetQuiz}
-                className="flex items-center justify-center px-8 py-4 bg-gradient-to-r from-purple-500 to-pink-600 text-white rounded-2xl font-bold text-lg hover:from-purple-600 hover:to-pink-700 transition-all transform hover:scale-105 shadow-2xl"
+                className="flex items-center justify-center px-8 py-4 bg-purple-500 border-2 border-ink text-white rounded-2xl font-bold text-lg hover:bg-purple-500 transition-all transform shadow-hard"
               >
                 <RotateCcw className="w-5 h-5 mr-2" />
                 Ulangi Post-Test
               </button>
               <button
                 onClick={() => window.location.href = '/test'}
-                className="flex items-center justify-center px-8 py-4 bg-gradient-to-r from-blue-500 to-cyan-600 text-white rounded-2xl font-bold text-lg hover:from-blue-600 hover:to-cyan-700 transition-all transform hover:scale-105 shadow-2xl"
+                className="flex items-center justify-center px-8 py-4 bg-brand border-2 border-ink text-white rounded-2xl font-bold text-lg hover:bg-brand transition-all transform shadow-hard"
               >
                 Kembali ke Menu
                 <ArrowRight className="w-5 h-5 ml-2" />
@@ -434,12 +434,12 @@ const PostTestPage = () => {
   // Pre-test start screen
   if (!testStarted) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-950 to-indigo-900 relative overflow-hidden">
+      <div className="min-h-screen bg-transparent relative">
         {/* Animated Background */}
         <div className="absolute inset-0">
-          <div className="absolute top-20 left-10 w-72 h-72 bg-purple-500/10 rounded-full blur-3xl animate-pulse"></div>
-          <div className="absolute top-40 right-20 w-96 h-96 bg-pink-500/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
-          <div className="absolute bottom-20 left-1/3 w-80 h-80 bg-cyan-500/10 rounded-full blur-3xl animate-pulse delay-2000"></div>
+          <div className="absolute top-20 left-10 w-72 h-72 bg-purple-100 rounded-full hidden animate-pulse"></div>
+          <div className="absolute top-40 right-20 w-96 h-96 bg-purple-100 rounded-full hidden animate-pulse delay-1000"></div>
+          <div className="absolute bottom-20 left-1/3 w-80 h-80 bg-brand-soft rounded-full hidden animate-pulse delay-2000"></div>
         </div>
 
         <Navbar />
@@ -447,38 +447,38 @@ const PostTestPage = () => {
         <div className="container mx-auto px-6 py-16 relative z-10">
           <div className="max-w-5xl mx-auto">
             <div className="text-center mb-16">
-              <div className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-purple-400/20 to-pink-400/20 rounded-full border border-purple-400/30 backdrop-blur-sm mb-6">
-                <Brain className="w-5 h-5 text-purple-400 mr-2" />
-                <span className="text-purple-400 text-sm font-medium">Post-Test Evaluasi Akhir</span>
-                <Zap className="w-5 h-5 text-pink-400 ml-2" />
+              <div className="inline-flex items-center px-4 py-2 bg-purple-100 rounded-full border-2 border-ink mb-6">
+                <Brain className="w-5 h-5 text-purple-700 mr-2" />
+                <span className="text-purple-700 text-sm font-medium">Post-Test Evaluasi Akhir</span>
+                <Zap className="w-5 h-5 text-purple-700 ml-2" />
               </div>
 
               <h1 className="text-5xl md:text-7xl font-black mb-6 leading-tight">
-                <span className="bg-gradient-to-r from-white via-purple-200 to-pink-300 bg-clip-text text-transparent drop-shadow-2xl">
+                <span className="text-ink">
                   Post-Test
                 </span>
                 <br />
-                <span className="bg-gradient-to-r from-pink-300 via-purple-400 to-indigo-400 bg-clip-text text-transparent">
+                <span className="text-ink">
                   Rangkaian Listrik
                 </span>
               </h1>
 
-              <p className="text-xl text-blue-200/80 mb-12 max-w-3xl mx-auto leading-relaxed">
+              <p className="text-xl text-muted mb-12 max-w-3xl mx-auto leading-relaxed">
                 Evaluasi akhir untuk mengukur pemahaman Anda tentang rangkaian listrik setelah mengikuti pembelajaran. 
                 Bandingkan hasil dengan pre-test untuk melihat progress Anda!
               </p>
 
               <div className="grid md:grid-cols-2 gap-8 mb-12">
-                <div className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl rounded-2xl p-8 border border-white/20 text-left">
+                <div className="bg-paper rounded-2xl p-8 border-2 border-ink text-left">
                   <div className="flex items-center mb-4">
-                    <div className="w-12 h-12 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-xl flex items-center justify-center mr-4">
-                      <Trophy className="w-6 h-6 text-white" />
+                    <div className="w-12 h-12 bg-mint rounded-xl flex items-center justify-center mr-4">
+                      <Trophy className="w-6 h-6 text-ink" />
                     </div>
-                    <h3 className="text-2xl font-bold text-white">Evaluasi Akhir</h3>
+                    <h3 className="text-2xl font-bold text-ink">Evaluasi Akhir</h3>
                   </div>
                   <div>
-                    <h4 className="text-emerald-300 font-medium mb-2">Fitur Post-Test:</h4>
-                    <ul className="text-emerald-200/80 text-sm space-y-1">
+                    <h4 className="text-emerald-700 font-medium mb-2">Fitur Post-Test:</h4>
+                    <ul className="text-emerald-700 text-sm space-y-1">
                       <li>• Simulasi rangkaian listrik interaktif dengan drag & drop</li>
                       <li>• Perhitungan otomatis nilai I (Arus), V (Tegangan), R (Resistansi)</li>
                       <li>• Bandingkan hasil dengan pre-test untuk melihat progress</li>
@@ -487,16 +487,16 @@ const PostTestPage = () => {
                   </div>
                 </div>
 
-                <div className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl rounded-2xl p-8 border border-white/20 text-left">
+                <div className="bg-paper rounded-2xl p-8 border-2 border-ink text-left">
                   <div className="flex items-center mb-4">
-                    <div className="w-12 h-12 bg-gradient-to-br from-purple-400 to-pink-500 rounded-xl flex items-center justify-center mr-4">
+                    <div className="w-12 h-12 bg-purple-500 rounded-xl flex items-center justify-center mr-4">
                       <Brain className="w-6 h-6 text-white" />
                     </div>
-                    <h3 className="text-2xl font-bold text-white">Progress Tracking</h3>
+                    <h3 className="text-2xl font-bold text-ink">Progress Tracking</h3>
                   </div>
                   <div>
-                    <h4 className="text-purple-300 font-medium mb-2">Yang akan diukur:</h4>
-                    <ul className="text-purple-200/80 text-sm space-y-1">
+                    <h4 className="text-purple-700 font-medium mb-2">Yang akan diukur:</h4>
+                    <ul className="text-muted text-sm space-y-1">
                       <li>• Pemahaman konsep rangkaian seri dan paralel</li>
                       <li>• Kemampuan menghitung nilai resistansi total</li>
                       <li>• Analisis arus dan tegangan dalam rangkaian</li>
@@ -509,12 +509,12 @@ const PostTestPage = () => {
               <div className="text-center">
                 <button
                   onClick={() => requireStudentLogin('posttest', '/posttest')}
-                  className="group bg-gradient-to-r from-purple-500 to-pink-500 text-white px-12 py-4 rounded-2xl font-bold text-xl hover:from-purple-600 hover:to-pink-600 transition-all transform hover:scale-105 shadow-2xl flex items-center justify-center mx-auto"
+                  className="group bg-purple-500 border-2 border-ink text-white px-12 py-4 rounded-2xl font-bold text-xl hover:bg-purple-500 transition-all transform shadow-hard flex items-center justify-center mx-auto"
                 >
-                  🚀 Mulai Post-Test
-                  <ArrowRight className="w-6 h-6 ml-3 group-hover:translate-x-1 transition-transform" />
+                  Mulai Post-Test
+                  <ArrowRight className="w-6 h-6 ml-3 transition-transform" />
                 </button>
-                <p className="text-purple-300/60 text-sm mt-4">
+                <p className="text-purple-700 text-sm mt-4">
                   Klik tombol di atas untuk memulai evaluasi akhir pembelajaran
                 </p>
               </div>
@@ -526,18 +526,18 @@ const PostTestPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-950 to-indigo-900 relative overflow-hidden">
+    <div className="min-h-screen bg-transparent relative">
       {/* Animated Background Elements */}
       <div className="absolute inset-0">
-        <div className="absolute top-20 left-10 w-72 h-72 bg-purple-500/10 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute top-40 right-20 w-96 h-96 bg-pink-500/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
-        <div className="absolute bottom-20 left-1/3 w-80 h-80 bg-cyan-500/10 rounded-full blur-3xl animate-pulse delay-2000"></div>
+        <div className="absolute top-20 left-10 w-72 h-72 bg-purple-100 rounded-full hidden animate-pulse"></div>
+        <div className="absolute top-40 right-20 w-96 h-96 bg-purple-100 rounded-full hidden animate-pulse delay-1000"></div>
+        <div className="absolute bottom-20 left-1/3 w-80 h-80 bg-brand-soft rounded-full hidden animate-pulse delay-2000"></div>
         
         {/* Floating particles */}
         {[...Array(15)].map((_, i) => (
           <div
             key={i}
-            className="absolute w-1 h-1 bg-purple-400/30 rounded-full animate-ping"
+            className="absolute w-1 h-1 bg-purple-100 rounded-full hidden"
             style={{
               left: `${Math.random() * 100}%`,
               top: `${Math.random() * 100}%`,
@@ -554,18 +554,18 @@ const PostTestPage = () => {
         <div className="max-w-7xl mx-auto">
           {/* Header */}
           <div className="text-center mb-8">
-            <div className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-purple-400/20 to-pink-400/20 rounded-full border border-purple-400/30 backdrop-blur-sm mb-6">
-              <Brain className="w-5 h-5 text-purple-400 mr-2" />
-              <span className="text-purple-400 text-sm font-medium">Interactive Circuit Post-Test</span>
-              <Zap className="w-5 h-5 text-pink-400 ml-2" />
+            <div className="inline-flex items-center px-4 py-2 bg-purple-100 rounded-full border-2 border-ink mb-6">
+              <Brain className="w-5 h-5 text-purple-700 mr-2" />
+              <span className="text-purple-700 text-sm font-medium">Interactive Circuit Post-Test</span>
+              <Zap className="w-5 h-5 text-purple-700 ml-2" />
             </div>
 
             <h1 className="text-4xl md:text-6xl font-black mb-4 leading-tight">
-              <span className="bg-gradient-to-r from-white via-purple-200 to-pink-300 bg-clip-text text-transparent drop-shadow-2xl">
+              <span className="text-ink">
                 Post-Test Rangkaian
               </span>
               <br />
-              <span className="bg-gradient-to-r from-pink-300 via-purple-400 to-indigo-400 bg-clip-text text-transparent">
+              <span className="text-ink">
                 Listrik
               </span>
             </h1>
@@ -574,21 +574,21 @@ const PostTestPage = () => {
           {/* Progress Bar */}
           {!loadingDefaults && !questionsLoading && questions.length > 0 && (
             <div className="mb-8">
-              <div className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl rounded-2xl p-6 border border-white/20">
+              <div className="bg-paper rounded-2xl p-6 border-2 border-ink">
                 <div className="flex justify-between items-center mb-4">
-                  <div className="text-white font-bold">
+                  <div className="text-ink font-bold">
                     Soal {quizState.currentQuestionIndex + 1} dari {questions.length}
                   </div>
                   <div className="flex items-center space-x-4">
-                    <div className="text-cyan-300 font-bold">{formatTime(timeElapsed)}</div>
-                    <div className="text-purple-300">
+                    <div className="text-brand font-bold">{formatTime(timeElapsed)}</div>
+                    <div className="text-purple-700">
                       Benar: {quizState.answers.filter(Boolean).length}
                     </div>
                   </div>
                 </div>
-                <div className="w-full bg-white/10 rounded-full h-3">
+                <div className="w-full bg-paper rounded-full h-3">
                   <div 
-                    className="bg-gradient-to-r from-purple-500 to-pink-500 h-3 rounded-full transition-all duration-500"
+                    className="bg-purple-500 h-3 rounded-full transition-all duration-500"
                     style={{ width: `${((quizState.currentQuestionIndex + 1) / questions.length) * 100}%` }}
                   ></div>
                 </div>
@@ -607,28 +607,28 @@ const PostTestPage = () => {
               }
             />
           ) : questionsError ? (
-            <div className="bg-gradient-to-br from-red-500/20 to-red-600/10 backdrop-blur-xl rounded-2xl p-12 border border-red-500/50 text-center">
-              <p className="text-red-300 text-xl font-bold mb-4">⚠️ Gagal memuat soal</p>
-              <p className="text-red-200/70 mb-6">{questionsError}</p>
+            <div className="bg-coral-soft rounded-2xl p-12 border-2 border-ink text-center">
+              <p className="text-red-600 text-xl font-bold mb-4">Gagal memuat soal</p>
+              <p className="text-red-600 mb-6">{questionsError}</p>
               <button
                 onClick={() => window.location.reload()}
-                className="px-6 py-3 bg-red-500/30 hover:bg-red-500/50 border border-red-400/50 rounded-xl text-white font-medium transition-all"
+                className="px-6 py-3 bg-coral-soft hover:bg-coral-soft border-2 border-ink rounded-xl text-ink font-medium transition-all"
               >
                 Muat Ulang Halaman
               </button>
             </div>
           ) : questions.length === 0 ? (
-            <div className="bg-gradient-to-br from-yellow-500/20 to-yellow-600/10 backdrop-blur-xl rounded-2xl p-12 border border-yellow-500/50 text-center">
-              <p className="text-yellow-300 text-xl font-bold mb-4">📦 Tidak ada soal</p>
-              <p className="text-yellow-200/70">Belum ada soal post-test yang tersedia. Hubungi guru Anda.</p>
+            <div className="bg-lamp-soft rounded-2xl p-12 border-2 border-ink text-center">
+              <p className="text-amber-700 text-xl font-bold mb-4">Tidak ada soal</p>
+              <p className="text-amber-700">Belum ada soal post-test yang tersedia. Hubungi guru Anda.</p>
             </div>
           ) : !currentQuestion ? (
-            <div className="bg-gradient-to-br from-red-500/20 to-red-600/10 backdrop-blur-xl rounded-2xl p-12 border border-red-500/50 text-center">
-              <p className="text-red-300 text-xl font-bold mb-4">⚠️ Soal tidak ditemukan</p>
-              <p className="text-red-200/70">
+            <div className="bg-coral-soft rounded-2xl p-12 border-2 border-ink text-center">
+              <p className="text-red-600 text-xl font-bold mb-4">Soal tidak ditemukan</p>
+              <p className="text-red-600">
                 Soal nomor {quizState.currentQuestionIndex + 1} tidak dapat dimuat.
               </p>
-              <p className="text-red-200/50 text-sm mt-2">
+              <p className="text-red-600 text-sm mt-2">
                 Debug: questions.length = {questions.length}, currentIndex = {quizState.currentQuestionIndex}
               </p>
             </div>

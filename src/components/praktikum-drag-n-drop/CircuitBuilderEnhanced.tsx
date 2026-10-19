@@ -1,4 +1,5 @@
 "use client";
+import { Ico } from "@/components/ui/Ico";
 
 import React, { useMemo, useRef, useState, useEffect } from "react";
 
@@ -218,7 +219,7 @@ function analyzeCircuit(elements: CircuitElement[], wires: Wire[]) {
 
   return {
     isConnected,
-    isClosed: isConnected && anyClosedPath, // ✅ hanya butuh 1 jalur tertutup
+    isClosed: isConnected && anyClosedPath, // hanya butuh 1 jalur tertutup
     hasOpenSwitch: elements.some(
       (e) => e.type === "switch" && e.state === "open"
     ),
@@ -240,7 +241,7 @@ function calculateCurrentFlow(elements: CircuitElement[], wires: Wire[]) {
     data: (label: string, value: any) => console.log(`   → ${label}:`, value),
   };
 
-  log.header("🔌 ANALISIS RANGKAIAN LISTRIK");
+  log.header("ANALISIS RANGKAIAN LISTRIK");
 
   const batteries = elements.filter((e) => e.type === "battery");
   const resistiveElements = elements.filter(
@@ -340,12 +341,12 @@ function calculateCurrentFlow(elements: CircuitElement[], wires: Wire[]) {
   });
 
   console.log(
-    "🌐 [CONNECTION GRAPH] Graf koneksi struktural (semua saklar included):",
+    "[CONNECTION GRAPH] Graf koneksi struktural (semua saklar included):",
     {
       totalNodes: connectionGraph.size,
       switchesInGraph: switches.length,
       switchStates: switches.map((sw) => ({ id: sw.id, state: sw.state })),
-      note: "⚠️ Graf ini untuk TOPOLOGI, bukan listrik - saklar terbuka tetap dihitung!",
+      note: "Graf ini untuk TOPOLOGI, bukan listrik - saklar terbuka tetap dihitung!",
     }
   );
 
@@ -380,10 +381,10 @@ function calculateCurrentFlow(elements: CircuitElement[], wires: Wire[]) {
   });
 
   console.log(
-    "🔗 [UNION-FIND] Node elektrik yang terkelompok (untuk topologi):",
+    "[UNION-FIND] Node elektrik yang terkelompok (untuk topologi):",
     {
       totalGroups: new Set(Array.from(parent.keys()).map(find)).size,
-      note: "✅ Termasuk jalur melalui saklar terbuka - ini untuk struktur, bukan listrik!",
+      note: "Termasuk jalur melalui saklar terbuka - ini untuk struktur, bukan listrik!",
     }
   );
 
@@ -631,7 +632,7 @@ function calculateCurrentFlow(elements: CircuitElement[], wires: Wire[]) {
 
     if (!hasActivePath) {
       console.log(
-        "⚠️ Cabang paralel dinonaktifkan (semua saklar open):",
+        "Cabang paralel dinonaktifkan (semua saklar open):",
         group
       );
       return false;
@@ -662,7 +663,7 @@ function calculateCurrentFlow(elements: CircuitElement[], wires: Wire[]) {
 
   if (activeParallelGroups.length === 0) {
     console.log(
-      "⚠️ No active parallel groups - all branches blocked by open switches"
+      "No active parallel groups - all branches blocked by open switches"
     );
   }
   console.log("🟢 =========================================\n");
@@ -674,7 +675,7 @@ function calculateCurrentFlow(elements: CircuitElement[], wires: Wire[]) {
 
   if (activeParallelGroups.length > 0) {
     console.log(
-      "⚡ Parallel Mode: Mengevaluasi setiap elemen individual dalam cabang paralel..."
+      "Parallel Mode: Mengevaluasi setiap elemen individual dalam cabang paralel..."
     );
 
     // Kumpulkan SEMUA lampu/resistor dari semua parallel groups
@@ -749,7 +750,7 @@ function calculateCurrentFlow(elements: CircuitElement[], wires: Wire[]) {
 
     totalResistance = activeSerialElements.reduce((sum, r) => sum + r.value, 0);
     console.log(
-      `✅ Elemen seri aktif:`,
+      `Elemen seri aktif:`,
       activeSerialElements.map((e) => e.id),
       `R_total = ${totalResistance}Ω`
     );
@@ -793,7 +794,7 @@ function calculateCurrentFlow(elements: CircuitElement[], wires: Wire[]) {
       lampPowers[lampId] = lampPower;
 
       log.success(
-        `💡 Lampu ${lampId.slice(-8)}: HIDUP - I=${lampCurrent.toFixed(
+        `Lampu ${lampId.slice(-8)}: HIDUP - I=${lampCurrent.toFixed(
           3
         )}A, P=${lampPower.toFixed(2)}W`
       );
@@ -815,7 +816,7 @@ function calculateCurrentFlow(elements: CircuitElement[], wires: Wire[]) {
         if (el.type === "lamp") {
           lampPowers[el.id] = 0;
           console.log(
-            `    💡 Lampu ${el.id}: MATI (saklar terbuka di jalurnya)`
+            `    Lampu ${el.id}: MATI (saklar terbuka di jalurnya)`
           );
         }
         return;
@@ -825,7 +826,7 @@ function calculateCurrentFlow(elements: CircuitElement[], wires: Wire[]) {
       if (el.type === "lamp") {
         lampPowers[el.id] = totalCurrent * totalCurrent * el.value;
         console.log(
-          `    💡 Lampu ${el.id}: NYALA - Current=${totalCurrent.toFixed(
+          `    Lampu ${el.id}: NYALA - Current=${totalCurrent.toFixed(
             3
           )}A, Power=${lampPowers[el.id].toFixed(3)}W`
         );
@@ -841,7 +842,7 @@ function calculateCurrentFlow(elements: CircuitElement[], wires: Wire[]) {
         if (el.type === "lamp") {
           lampPowers[el.id] = 0;
           console.log(
-            `    💡 Lampu ${el.id}: MATI (saklar terbuka di jalurnya)`
+            `    Lampu ${el.id}: MATI (saklar terbuka di jalurnya)`
           );
         }
         return;
@@ -851,7 +852,7 @@ function calculateCurrentFlow(elements: CircuitElement[], wires: Wire[]) {
       if (el.type === "lamp") {
         lampPowers[el.id] = totalCurrent * totalCurrent * el.value;
         console.log(
-          `    💡 Lampu ${el.id}: NYALA - Current=${totalCurrent.toFixed(
+          `    Lampu ${el.id}: NYALA - Current=${totalCurrent.toFixed(
             3
           )}A, Power=${lampPowers[el.id].toFixed(3)}W`
         );
@@ -960,7 +961,7 @@ function calculateCurrentFlow(elements: CircuitElement[], wires: Wire[]) {
   // Topology type sudah dihitung di awal (detectedTopology)
   // Gunakan nilai yang sudah ada
   console.log(
-    "✅ [FINAL TOPOLOGY] Menggunakan topologi yang sudah terdeteksi:",
+    "[FINAL TOPOLOGY] Menggunakan topologi yang sudah terdeteksi:",
     {
       topologyType: detectedTopology.type,
       hasParallelBranch: detectedTopology.hasParallelBranch,
@@ -1796,7 +1797,7 @@ export default function CircuitBuilderEnhanced() {
                 fontWeight="bold"
                 fill={isSel ? "#eab308" : "#374151"}
               >
-                🔋 {el.value}V
+                {el.value}V
               </text>
             </g>
           );
@@ -1848,7 +1849,7 @@ export default function CircuitBuilderEnhanced() {
                 fontWeight="bold"
                 fill={isSel ? "#dc2626" : "#374151"}
               >
-                🔌 {el.value}Ω
+                {el.value}Ω
               </text>
             </g>
           );
@@ -1988,7 +1989,7 @@ export default function CircuitBuilderEnhanced() {
                 fontWeight="bold"
                 fill={isOn ? "#eab308" : isSel ? "#3b82f6" : "#374151"}
               >
-                💡 {isOn ? "ON" : "OFF"}
+                {isOn ? "ON" : "OFF"}
               </text>
               <text
                 x={0}
@@ -2095,7 +2096,7 @@ export default function CircuitBuilderEnhanced() {
                 fontWeight="bold"
                 fill={isOpen ? "#ef4444" : "#10b981"}
               >
-                ⚡ {isOpen ? "OPEN" : "CLOSED"}
+                {isOpen ? "OPEN" : "CLOSED"}
               </text>
               <text
                 x={0}
@@ -2161,7 +2162,7 @@ export default function CircuitBuilderEnhanced() {
                 fontWeight="bold"
                 fill={isSel ? "#3b82f6" : "#6b7280"}
               >
-                🧵 Kabel
+                Kabel
               </text>
 
               {/* Connection status */}
@@ -2333,31 +2334,31 @@ export default function CircuitBuilderEnhanced() {
               onClick={() => addComponent("battery")}
               className="px-3 py-2 rounded-xl bg-gradient-to-br from-amber-400 to-orange-500 text-white font-medium shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-200 text-sm"
             >
-              🔋 Baterai
+              Baterai
             </button>
             <button
               onClick={() => addComponent("lamp")}
               className="px-3 py-2 rounded-xl bg-gradient-to-br from-yellow-400 to-amber-500 text-white font-medium shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-200 text-sm"
             >
-              💡 Lampu
+              Lampu
             </button>
             <button
               onClick={() => addComponent("resistor")}
               className="px-3 py-2 rounded-xl bg-gradient-to-br from-red-500 to-pink-600 text-white font-medium shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-200 text-sm"
             >
-              🔌 Resistor
+              Resistor
             </button>
             <button
               onClick={() => addComponent("switch")}
               className="px-3 py-2 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 text-white font-medium shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-200 text-sm"
             >
-              ⚡ Saklar
+              Saklar
             </button>
             <button
               onClick={() => addComponent("wire")}
               className="px-3 py-2 rounded-xl bg-gradient-to-br from-slate-600 to-gray-700 text-white font-medium shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-200 text-sm"
             >
-              🧵 Kabel
+              Kabel
             </button>
           </div>
 
@@ -2375,34 +2376,34 @@ export default function CircuitBuilderEnhanced() {
                   : "bg-slate-700 text-blue-300 border-2 border-blue-500/30 hover:bg-slate-600"
               }`}
             >
-              {connectMode ? "✓ Mode Koneksi ON" : "🔗 Mode Koneksi"}
+              {connectMode ? "✓ Mode Koneksi ON" : "Mode Koneksi"}
             </button>
             <button
               onClick={rotateSelected}
               disabled={!selectedId}
               className="px-3 py-2 rounded-xl bg-slate-700 text-slate-200 border-2 border-slate-500/30 font-medium shadow-lg hover:shadow-xl hover:bg-slate-600 disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-200 text-sm"
             >
-              ↻ Rotasi
+              Rotasi
             </button>
             <button
               onClick={deleteSelected}
               disabled={!selectedId}
               className="px-3 py-2 rounded-xl bg-slate-700 text-red-400 border-2 border-red-500/30 font-medium shadow-lg hover:shadow-xl hover:bg-slate-600 disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-200 text-sm"
             >
-              🗑️ Hapus
+              Hapus
             </button>
             <button
               onClick={resetCircuit}
               className="px-3 py-2 rounded-xl bg-slate-700 text-orange-400 border-2 border-orange-500/30 font-medium shadow-lg hover:shadow-xl hover:bg-slate-600 transition-all duration-200 text-sm"
             >
-              ↺ Reset
+              Reset
             </button>
             {isMobile && (
               <button
                 onClick={() => setShowStats(!showStats)}
                 className="px-3 py-2 rounded-xl bg-slate-700 text-slate-200 border-2 border-slate-500/30 font-medium shadow-lg hover:shadow-xl hover:bg-slate-600 transition-all duration-200 text-sm"
               >
-                📊 Stats
+                Stats
               </button>
             )}
           </div>
@@ -2412,7 +2413,7 @@ export default function CircuitBuilderEnhanced() {
         {showStats && !calc.isConnected && (
           <div className="mb-6 p-4 bg-yellow-50 rounded-xl border-2 border-yellow-300 shadow-md">
             <div className="flex items-center gap-2">
-              <span className="text-2xl">⚠️</span>
+              <span className="text-2xl"><Ico n="alert" /></span>
               <div>
                 <div className="text-sm font-bold text-yellow-900">
                   Rangkaian Belum Terhubung
@@ -2421,7 +2422,7 @@ export default function CircuitBuilderEnhanced() {
                   • Komponen belum terhubung dengan benar
                 </div>
                 <div className="text-xs text-yellow-600 mt-2">
-                  💡 Hubungkan semua komponen menggunakan kabel untuk mendeteksi
+                  Hubungkan semua komponen menggunakan kabel untuk mendeteksi
                   topologi rangkaian
                 </div>
               </div>
@@ -2472,7 +2473,7 @@ export default function CircuitBuilderEnhanced() {
             {calc.isClosed && calc.current > 0 && (
               <div className="mb-3 p-2 bg-green-900/30 border-2 border-green-500/40 rounded-lg">
                 <div className="flex items-center gap-2">
-                  <span className="text-lg">✅</span>
+                  <span className="text-lg"><Ico n="check" /></span>
                   <div className="flex-1">
                     <div className="text-xs font-bold text-green-300">
                       Rangkaian Aktif - Arus Mengalir
@@ -2489,7 +2490,7 @@ export default function CircuitBuilderEnhanced() {
             {!calc.isClosed && (
               <div className="mb-3 p-2 bg-orange-900/30 border-2 border-orange-500/40 rounded-lg">
                 <div className="flex items-center gap-2">
-                  <span className="text-lg">⚠️</span>
+                  <span className="text-lg"><Ico n="alert" /></span>
                   <div className="flex-1">
                     <div className="text-xs font-bold text-orange-300">
                       Topologi Terdeteksi - Rangkaian Terbuka
@@ -2505,9 +2506,9 @@ export default function CircuitBuilderEnhanced() {
 
             <div className="flex items-center gap-2 mb-3">
               <div className="text-2xl">
-                {calc.topology.type === "series" && "📏"}
-                {calc.topology.type === "parallel" && "🔀"}
-                {calc.topology.type === "mixed" && "🔄"}
+                {calc.topology.type === "series" && <Ico n="ruler" />}
+                {calc.topology.type === "parallel" && <Ico n="shuffle" />}
+                {calc.topology.type === "mixed" && <Ico n="refresh" />}
               </div>
               <div className="flex-1">
                 <div className="text-xs text-emerald-400 font-medium">
@@ -2523,7 +2524,7 @@ export default function CircuitBuilderEnhanced() {
               {/* Indicator Percabangan */}
               {calc.topology.hasParallelBranch && (
                 <div className="flex items-center gap-1 px-2 py-1 bg-blue-900/40 rounded-lg border border-blue-500/40">
-                  <span className="text-lg">🌿</span>
+                  <span className="text-lg"><Ico n="sprout" /></span>
                   <span className="text-xs text-blue-300 font-semibold">
                     Percabangan Terdeteksi
                   </span>
@@ -2536,7 +2537,7 @@ export default function CircuitBuilderEnhanced() {
               calc.topology.branchNodes.length > 0 && (
                 <div className="mb-3 p-2 bg-blue-900/20 rounded-lg border border-blue-500/30">
                   <div className="text-xs text-blue-300 font-semibold mb-1">
-                    🔍 Node Percabangan (Degree &gt; 2):
+                    Node Percabangan (Degree &gt; 2):
                   </div>
                   <div className="flex flex-wrap gap-1">
                     {calc.topology.branchNodes.map((node, idx) => (
@@ -2549,7 +2550,7 @@ export default function CircuitBuilderEnhanced() {
                     ))}
                   </div>
                   <div className="text-xs text-blue-400 mt-1">
-                    💡 Node ini terhubung ke lebih dari 2 terminal (terjadi
+                    Node ini terhubung ke lebih dari 2 terminal (terjadi
                     percabangan paralel)
                   </div>
                 </div>
@@ -2569,8 +2570,8 @@ export default function CircuitBuilderEnhanced() {
                     <div className="flex items-center justify-between mb-2">
                       <div className="font-semibold text-sm text-emerald-300">
                         {group.type === "parallel"
-                          ? "🔀 Grup Paralel"
-                          : "📏 Grup Seri"}{" "}
+                          ? "Grup Paralel"
+                          : "Grup Seri"}{" "}
                         #{idx + 1}
                       </div>
                       <div className="text-xs text-blue-400 font-bold">
@@ -2584,10 +2585,10 @@ export default function CircuitBuilderEnhanced() {
                           className="inline-flex items-center gap-1 px-2 py-1 bg-slate-700/50 rounded-md text-xs"
                         >
                           <span>
-                            {elem.type === "battery" && "🔋"}
-                            {elem.type === "resistor" && "⚡"}
-                            {elem.type === "lamp" && "💡"}
-                            {elem.type === "switch" && "🔘"}
+                            {elem.type === "battery" && <Ico n="battery" />}
+                            {elem.type === "resistor" && <Ico n="zap" />}
+                            {elem.type === "lamp" && <Ico n="lightbulb" />}
+                            {elem.type === "switch" && <Ico n="switch" />}
                           </span>
                           <span className="font-medium text-slate-200">
                             {elem.type === "battery" && `${elem.voltage}V`}
@@ -2692,7 +2693,7 @@ export default function CircuitBuilderEnhanced() {
                           className="fill-purple-600 text-sm font-bold"
                           style={{ textShadow: "0 0 3px white" }}
                         >
-                          🔄 {el.rotation}°
+                          {el.rotation}°
                         </text>
                       </>
                     );
@@ -2725,22 +2726,22 @@ export default function CircuitBuilderEnhanced() {
           {/* Tips */}
           <div className="bg-gradient-to-r from-slate-700/50 to-slate-800/50 rounded-xl p-4 border-2 border-cyan-500/30">
             <h4 className="text-sm font-bold text-cyan-300 mb-2 flex items-center">
-              <span className="text-lg mr-2">💡</span>
+              <span className="text-lg mr-2"><Ico n="lightbulb" /></span>
               Panduan Cepat
             </h4>
             <div className="space-y-2 text-xs text-blue-200">
-              <div className="font-semibold text-cyan-300">📦 Komponen:</div>
+              <div className="font-semibold text-cyan-300">Komponen:</div>
               <div>• Tambahkan Baterai, Lampu, Resistor, Saklar, dan Kabel</div>
               <div>
                 • <strong>Drag body komponen</strong> untuk memindahkan posisi
               </div>
               <div>
                 • <strong>Drag terminal (bulatan)</strong> untuk merotasi
-                komponen 🔄
+                komponen 
               </div>
 
               <div className="font-semibold text-cyan-300 mt-2">
-                🔗 Koneksi dengan Kabel:
+                Koneksi dengan Kabel:
               </div>
               <div>• Tambahkan item &quot;Kabel&quot; ke canvas</div>
               <div>• Aktifkan &quot;Mode Koneksi&quot;</div>
@@ -2749,7 +2750,7 @@ export default function CircuitBuilderEnhanced() {
               <div>• Ulangi untuk ujung kabel lainnya</div>
 
               <div className="font-semibold text-cyan-300 mt-2">
-                ⚡ Rangkaian Paralel:
+                Rangkaian Paralel:
               </div>
               <div>• Gunakan lebih dari 1 kabel</div>
               <div>• Hubungkan beberapa kabel ke terminal yang sama</div>
@@ -2764,7 +2765,7 @@ export default function CircuitBuilderEnhanced() {
           {elements.length === 0 && (
             <div className="bg-gradient-to-r from-slate-700/50 to-slate-800/50 rounded-xl p-4 border-2 border-orange-500/30 text-center">
               <p className="text-sm font-medium text-orange-300">
-                👆 Mulai dengan menambahkan komponen di atas!
+                Mulai dengan menambahkan komponen di atas!
               </p>
             </div>
           )}
@@ -2774,7 +2775,7 @@ export default function CircuitBuilderEnhanced() {
             elements.filter((e) => e.type === "wire").length === 0 && (
               <div className="bg-gradient-to-r from-slate-700/50 to-slate-800/50 rounded-xl p-4 border-2 border-yellow-500/30">
                 <p className="text-sm font-medium text-yellow-300">
-                  ⚠️ Tambahkan item &quot;Kabel&quot; untuk menghubungkan
+                  Tambahkan item &quot;Kabel&quot; untuk menghubungkan
                   komponen!
                 </p>
               </div>
@@ -2786,7 +2787,7 @@ export default function CircuitBuilderEnhanced() {
             wires.length > 0 && (
               <div className="bg-gradient-to-r from-slate-700/50 to-slate-800/50 rounded-xl p-4 border-2 border-yellow-500/30">
                 <p className="text-sm font-medium text-yellow-300">
-                  ⚠️ Rangkaian belum tertutup. Pastikan semua komponen terhubung
+                  Rangkaian belum tertutup. Pastikan semua komponen terhubung
                   dalam satu loop!
                 </p>
               </div>
@@ -2795,7 +2796,7 @@ export default function CircuitBuilderEnhanced() {
           {calc.hasOpenSwitch && (
             <div className="bg-gradient-to-r from-slate-700/50 to-slate-800/50 rounded-xl p-4 border-2 border-red-500/30">
               <p className="text-sm font-medium text-red-300">
-                🔴 Saklar terbuka! Arus listrik tidak mengalir. Double-click
+                Saklar terbuka! Arus listrik tidak mengalir. Double-click
                 saklar untuk menutup.
               </p>
             </div>
@@ -2804,7 +2805,7 @@ export default function CircuitBuilderEnhanced() {
           {calc.isClosed && !calc.hasOpenSwitch && calc.current > 0 && (
             <div className="bg-gradient-to-r from-slate-700/50 to-slate-800/50 rounded-xl p-4 border-2 border-green-500/30">
               <p className="text-sm font-medium text-green-300">
-                ✅ Rangkaian tertutup! Arus mengalir:{" "}
+                Rangkaian tertutup! Arus mengalir:{" "}
                 <strong>{calc.current.toFixed(3)} A</strong>
               </p>
             </div>

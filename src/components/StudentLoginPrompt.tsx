@@ -42,74 +42,74 @@ export default function StudentLoginPrompt({
   const getColorClasses = (color: string) => {
     const colors = {
       blue: {
-        bg: 'bg-blue-500/20',
-        text: 'text-blue-400',
-        textSecondary: 'text-blue-200/60',
-        gradient: 'from-blue-500/20 to-cyan-600/20'
+        bg: 'bg-brand-soft',
+        text: 'text-brand',
+        textSecondary: 'text-muted',
+        gradient: 'bg-brand-soft'
       },
       purple: {
-        bg: 'bg-purple-500/20',
-        text: 'text-purple-400', 
-        textSecondary: 'text-purple-200/60',
-        gradient: 'from-purple-500/20 to-pink-600/20'
+        bg: 'bg-purple-100',
+        text: 'text-purple-700', 
+        textSecondary: 'text-muted',
+        gradient: 'bg-purple-100'
       },
       emerald: {
-        bg: 'bg-emerald-500/20',
-        text: 'text-emerald-400',
-        textSecondary: 'text-emerald-200/60', 
-        gradient: 'from-emerald-500/20 to-teal-600/20'
+        bg: 'bg-mint-soft',
+        text: 'text-emerald-700',
+        textSecondary: 'text-emerald-700', 
+        gradient: 'bg-mint-soft'
       }
     }
     return colors[color as keyof typeof colors] || colors.blue
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-950 to-indigo-900">
+    <div className="min-h-screen bg-transparent">
       <div className="container mx-auto px-6 py-16">
         {/* Hero Section for Login Prompt */}
         <div className="max-w-4xl mx-auto text-center">
-          <div className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-blue-400/20 to-indigo-400/20 rounded-full border border-blue-400/30 backdrop-blur-sm mb-8">
-            <BarChart3 className="w-4 h-4 text-blue-400 mr-2" />
-            <span className="text-blue-400 text-sm font-medium">Progress Pembelajaran</span>
+          <div className="inline-flex items-center px-4 py-2 bg-brand-soft rounded-full border-2 border-ink mb-8">
+            <BarChart3 className="w-4 h-4 text-brand mr-2" />
+            <span className="text-brand text-sm font-medium">Progress Pembelajaran</span>
           </div>
 
           <h1 className="text-6xl font-black mb-8 leading-tight">
-            <span className="bg-gradient-to-r from-white via-blue-200 to-cyan-300 bg-clip-text text-transparent drop-shadow-2xl">
+            <span className="text-ink">
               {title}
             </span>
           </h1>
 
-          <p className="text-xl text-blue-100/80 mb-12 leading-relaxed max-w-2xl mx-auto">
+          <p className="text-xl text-muted mb-12 leading-relaxed max-w-2xl mx-auto">
             {description}
           </p>
 
           <div className="relative">
-            <div className="absolute -inset-1 bg-gradient-to-r from-blue-500/30 to-cyan-600/30 rounded-3xl blur"></div>
-            <div className="relative bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl rounded-3xl p-8 border border-white/20 max-w-md mx-auto">
+            <div className="absolute -inset-1 bg-brand-soft rounded-3xl hidden"></div>
+            <div className="relative bg-paper rounded-3xl p-8 border-2 border-ink max-w-md mx-auto">
               <div className="space-y-6">
                 <div className="text-center">
-                  <div className="w-16 h-16 bg-blue-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <Users className="w-8 h-8 text-blue-400" />
+                  <div className="w-16 h-16 bg-brand-soft rounded-full flex items-center justify-center mx-auto mb-4">
+                    <Users className="w-8 h-8 text-brand" />
                   </div>
-                  <h3 className="text-2xl font-bold text-white mb-2">Login Siswa</h3>
-                  <p className="text-blue-200/70 text-sm mb-6">
+                  <h3 className="text-2xl font-bold text-ink mb-2">Login Siswa</h3>
+                  <p className="text-muted text-sm mb-6">
                     Masuk dengan nama dan NIS untuk melihat progress pembelajaran Anda
                   </p>
                 </div>
 
                 <Link 
                   href="/login/student" 
-                  className="w-full inline-flex items-center justify-center px-8 py-4 bg-gradient-to-r from-blue-500 to-cyan-500 text-white text-lg font-bold rounded-xl hover:from-blue-600 hover:to-cyan-600 transition-all transform hover:scale-105"
+                  className="w-full inline-flex items-center justify-center px-8 py-4 bg-brand border-2 border-ink text-white text-lg font-bold rounded-xl hover:bg-brand transition-all transform"
                 >
                   <BookOpen className="w-5 h-5 mr-3" />
                   Login Sebagai Siswa
                 </Link>
 
                 <div className="text-center">
-                  <div className="text-blue-200/50 text-sm mb-3">atau</div>
+                  <div className="text-muted text-sm mb-3">atau</div>
                   <Link 
                     href="/login" 
-                    className="text-blue-400 hover:text-blue-300 text-sm font-medium"
+                    className="text-brand hover:text-brand text-sm font-medium"
                   >
                     Login sebagai Guru →
                   </Link>
@@ -126,12 +126,12 @@ export default function StudentLoginPrompt({
               
               return (
                 <div key={index} className="relative group">
-                  <div className={`absolute -inset-1 bg-gradient-to-r ${colorClasses.gradient} rounded-2xl blur opacity-0 group-hover:opacity-100 transition-opacity`}></div>
-                  <div className="relative bg-gradient-to-br from-white/5 to-white/[0.02] backdrop-blur-sm rounded-2xl p-6 border border-white/10 hover:border-white/20 transition-colors">
+                  <div className={`absolute -inset-1 ${colorClasses.gradient} rounded-2xl hidden opacity-0 group-hover:opacity-100 transition-opacity`}></div>
+                  <div className="relative bg-paper to-white/[0.02] rounded-2xl p-6 border border-ink/20 hover:border-ink transition-colors">
                     <div className={`w-12 h-12 ${colorClasses.bg} rounded-full flex items-center justify-center mb-4`}>
                       <IconComponent className={`w-6 h-6 ${colorClasses.text}`} />
                     </div>
-                    <h4 className="text-lg font-bold text-white mb-2">{feature.title}</h4>
+                    <h4 className="text-lg font-bold text-ink mb-2">{feature.title}</h4>
                     <p className={`${colorClasses.textSecondary} text-sm`}>
                       {feature.description}
                     </p>

@@ -1,4 +1,5 @@
 'use client'
+import { Ico } from "@/components/ui/Ico";
 
 import React, { useState, useEffect, useCallback } from 'react'
 
@@ -93,11 +94,11 @@ const SimpleGestureDemo: React.FC<SimpleGestureProps> = ({
       {/* Status Panel */}
       <div className="bg-gradient-to-r from-blue-50 to-cyan-50 p-6 rounded-xl border border-blue-200">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-xl font-bold text-gray-800">🤖 AI Gesture Control</h3>
+          <h3 className="text-xl font-bold text-gray-800">AI Gesture Control</h3>
           <div className={`px-4 py-2 rounded-full text-sm font-medium ${
             isActive ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-600'
           }`}>
-            {isActive ? '🟢 Active' : '⚫ Inactive'}
+            {isActive ? 'Active' : 'Inactive'}
           </div>
         </div>
         
@@ -125,11 +126,11 @@ const SimpleGestureDemo: React.FC<SimpleGestureProps> = ({
           {/* Simulated camera view */}
           <div className="text-center">
             <div className="text-6xl mb-4">
-              {currentGesture === 'point' && '👆'}
-              {currentGesture === 'open_palm' && '✋'}
-              {currentGesture === 'fist' && '✊'}
-              {currentGesture === 'wave' && '👋'}
-              {currentGesture === 'none' && '👤'}
+              {currentGesture === 'point' && <Ico n="pointer" />}
+              {currentGesture === 'open_palm' && <Ico n="hand" />}
+              {currentGesture === 'fist' && <Ico n="grab" />}
+              {currentGesture === 'wave' && <Ico n="hand" />}
+              {currentGesture === 'none' && <Ico n="user" />}
             </div>
             <p className="text-xl font-semibold">{currentGesture.replace('_', ' ').toUpperCase()}</p>
           </div>
@@ -137,7 +138,7 @@ const SimpleGestureDemo: React.FC<SimpleGestureProps> = ({
           {/* Overlay Info */}
           <div className="absolute top-4 left-4 bg-black bg-opacity-70 text-white p-3 rounded">
             <div className="text-sm space-y-1">
-              <div>Mode: {demoMode === 'auto' ? '🔄 Auto Demo' : '🎮 Manual'}</div>
+              <div>Mode: {demoMode === 'auto' ? 'Auto Demo' : 'Manual'}</div>
               <div>Gesture: <span className="text-cyan-400">{currentGesture}</span></div>
             </div>
           </div>
@@ -145,7 +146,7 @@ const SimpleGestureDemo: React.FC<SimpleGestureProps> = ({
           {/* Demo indicator */}
           {demoMode === 'auto' && (
             <div className="absolute bottom-4 left-4 right-4 bg-blue-600 bg-opacity-80 text-white p-3 rounded text-center">
-              <div className="animate-pulse">🔄 Auto Demo Mode - Cycling through gestures...</div>
+              <div className="animate-pulse">Auto Demo Mode - Cycling through gestures...</div>
             </div>
           )}
         </div>
@@ -164,7 +165,7 @@ const SimpleGestureDemo: React.FC<SimpleGestureProps> = ({
                   : 'bg-blue-500 text-white hover:bg-blue-600'
               }`}
             >
-              {demoMode === 'auto' ? '⏹️ Stop Auto' : '▶️ Start Auto Demo'}
+              {demoMode === 'auto' ? 'Stop Auto' : '▶Start Auto Demo'}
             </button>
           </div>
         </div>
@@ -183,7 +184,7 @@ const SimpleGestureDemo: React.FC<SimpleGestureProps> = ({
                     : 'border-gray-300 hover:border-blue-300 hover:bg-blue-50'
                 } ${!isActive ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
               >
-                <div className="text-2xl mb-1">👆</div>
+                <div className="text-2xl mb-1"><Ico n="pointer" /></div>
                 <div className="text-sm">Point</div>
                 <div className="text-xs text-gray-500">Show Stats</div>
               </button>
@@ -197,7 +198,7 @@ const SimpleGestureDemo: React.FC<SimpleGestureProps> = ({
                     : 'border-gray-300 hover:border-green-300 hover:bg-green-50'
                 } ${!isActive ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
               >
-                <div className="text-2xl mb-1">✋</div>
+                <div className="text-2xl mb-1"><Ico n="hand" /></div>
                 <div className="text-sm">Open Palm</div>
                 <div className="text-xs text-gray-500">Add Resistor</div>
               </button>
@@ -211,7 +212,7 @@ const SimpleGestureDemo: React.FC<SimpleGestureProps> = ({
                     : 'border-gray-300 hover:border-red-300 hover:bg-red-50'
                 } ${!isActive ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
               >
-                <div className="text-2xl mb-1">✊</div>
+                <div className="text-2xl mb-1"><Ico n="grab" /></div>
                 <div className="text-sm">Fist</div>
                 <div className="text-xs text-gray-500">Clear Circuit</div>
               </button>
@@ -225,7 +226,7 @@ const SimpleGestureDemo: React.FC<SimpleGestureProps> = ({
                     : 'border-gray-300 hover:border-purple-300 hover:bg-purple-50'
                 } ${!isActive ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
               >
-                <div className="text-2xl mb-1">👋</div>
+                <div className="text-2xl mb-1"><Ico n="hand" /></div>
                 <div className="text-sm">Wave</div>
                 <div className="text-xs text-gray-500">Add Battery</div>
               </button>
@@ -236,7 +237,7 @@ const SimpleGestureDemo: React.FC<SimpleGestureProps> = ({
         {/* Auto Mode Info */}
         {demoMode === 'auto' && (
           <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
-            <h5 className="font-medium text-blue-800 mb-2">🔄 Auto Demo Mode</h5>
+            <h5 className="font-medium text-blue-800 mb-2">Auto Demo Mode</h5>
             <p className="text-sm text-blue-700 mb-3">
               Automatically cycling through all gesture commands every 3 seconds to demonstrate the functionality.
             </p>
@@ -252,18 +253,18 @@ const SimpleGestureDemo: React.FC<SimpleGestureProps> = ({
 
       {/* Gesture Guide */}
       <div className="bg-gradient-to-r from-gray-50 to-blue-50 p-6 rounded-xl border">
-        <h4 className="text-lg font-semibold text-gray-800 mb-4">📋 Gesture Commands Reference</h4>
+        <h4 className="text-lg font-semibold text-gray-800 mb-4">Gesture Commands Reference</h4>
         <div className="grid md:grid-cols-2 gap-4">
           <div className="space-y-3">
             <div className="flex items-center space-x-3 p-3 bg-white rounded-lg border">
-              <span className="text-2xl">👆</span>
+              <span className="text-2xl"><Ico n="pointer" /></span>
               <div>
                 <div className="font-medium text-blue-600">Point</div>
                 <div className="text-sm text-gray-600">Select circuit element</div>
               </div>
             </div>
             <div className="flex items-center space-x-3 p-3 bg-white rounded-lg border">
-              <span className="text-2xl">✋</span>
+              <span className="text-2xl"><Ico n="hand" /></span>
               <div>
                 <div className="font-medium text-green-600">Open Palm</div>
                 <div className="text-sm text-gray-600">Add new resistor</div>
@@ -272,14 +273,14 @@ const SimpleGestureDemo: React.FC<SimpleGestureProps> = ({
           </div>
           <div className="space-y-3">
             <div className="flex items-center space-x-3 p-3 bg-white rounded-lg border">
-              <span className="text-2xl">✊</span>
+              <span className="text-2xl"><Ico n="grab" /></span>
               <div>
                 <div className="font-medium text-red-600">Fist</div>
                 <div className="text-sm text-gray-600">Delete selected element</div>
               </div>
             </div>
             <div className="flex items-center space-x-3 p-3 bg-white rounded-lg border">
-              <span className="text-2xl">👋</span>
+              <span className="text-2xl"><Ico n="hand" /></span>
               <div>
                 <div className="font-medium text-purple-600">Wave</div>
                 <div className="text-sm text-gray-600">Reset circuit</div>

@@ -23,7 +23,7 @@ const QUICK_TOPICS = ['Hukum Ohm', 'Rangkaian Seri', 'Daya Listrik', 'Praktikum'
 
 const INITIAL_MESSAGE: Message = {
   id: '1',
-  text: 'Halo! Aku CIRVIA Assistant 🤖✨ \n\nAku di sini untuk jadi teman belajar kamu tentang rangkaian listrik! Mau tanya apa aja boleh - mulai dari yang basic sampai yang rumit. Aku jelasin pakai bahasa yang gampang dipahami kok! \n\nYuk, mulai petualangan belajar fisika yang seru! Ada yang mau ditanyakan? 😊🔌',
+  text: 'Halo! Aku CIRVIA Assistant \n\nAku di sini untuk jadi teman belajar kamu tentang rangkaian listrik! Mau tanya apa aja boleh - mulai dari yang basic sampai yang rumit. Aku jelasin pakai bahasa yang gampang dipahami kok! \n\nYuk, mulai petualangan belajar fisika yang seru! Ada yang mau ditanyakan? ',
   sender: 'bot',
   timestamp: new Date()
 }
@@ -132,7 +132,7 @@ const ChatBot: React.FC<ChatBotProps> = ({ isOpen, onClose }) => {
       // Show error message when AI service is unavailable
       const errorMessage: Message = {
         id: (Date.now() + 1).toString(),
-        text: 'Maaf, sepertinya ada gangguan koneksi. Silakan coba lagi dalam beberapa saat. 😅',
+        text: 'Maaf, sepertinya ada gangguan koneksi. Silakan coba lagi dalam beberapa saat. ',
         sender: 'bot',
         timestamp: new Date()
       }
@@ -198,9 +198,9 @@ const ChatBot: React.FC<ChatBotProps> = ({ isOpen, onClose }) => {
         result.push(
           <div key={`list-${index}`} className="my-3 space-y-2">
             {listItems.map((item, i) => (
-              <div key={i} className="flex items-start bg-slate-700/30 rounded-lg p-3 border-l-4 border-cyan-400/60">
-                <span className="text-cyan-400 mr-3 flex-shrink-0 font-bold">•</span>
-                <span className="flex-1 text-gray-100 leading-relaxed">{item}</span>
+              <div key={i} className="flex items-start bg-paper rounded-lg p-3 border-l-4 border-ink">
+                <span className="text-brand mr-3 flex-shrink-0 font-bold">•</span>
+                <span className="flex-1 text-muted leading-relaxed">{item}</span>
               </div>
             ))}
           </div>
@@ -211,48 +211,48 @@ const ChatBot: React.FC<ChatBotProps> = ({ isOpen, onClose }) => {
       if (segment.startsWith('<h1>')) {
         const content = segment.replace(/<\/?h1>/g, '')
         result.push(
-          <h1 key={index} className="font-bold text-xl mt-4 mb-2 text-cyan-300">
+          <h1 key={index} className="font-bold text-xl mt-4 mb-2 text-brand">
             {content}
           </h1>
         )
       } else if (segment.startsWith('<h2>')) {
         const content = segment.replace(/<\/?h2>/g, '')
         result.push(
-          <h2 key={index} className="font-bold text-lg mt-3 mb-2 text-cyan-300">
+          <h2 key={index} className="font-bold text-lg mt-3 mb-2 text-brand">
             {content}
           </h2>
         )
       } else if (segment.startsWith('<h3>')) {
         const content = segment.replace(/<\/?h3>/g, '')
         result.push(
-          <h3 key={index} className="font-semibold text-base mt-2 mb-1 text-cyan-300">
+          <h3 key={index} className="font-semibold text-base mt-2 mb-1 text-brand">
             {content}
           </h3>
         )
       } else if (segment.startsWith('<strong>')) {
         const content = segment.replace(/<\/?strong>/g, '')
         result.push(
-          <strong key={index} className="font-bold text-white">
+          <strong key={index} className="font-bold text-ink">
             {content}
           </strong>
         )
       } else if (segment.startsWith('<em>')) {
         const content = segment.replace(/<\/?em>/g, '')
         result.push(
-          <em key={index} className="italic text-blue-200">
+          <em key={index} className="italic text-muted">
             {content}
           </em>
         )
       } else if (segment.startsWith('<code>')) {
         const content = segment.replace(/<\/?code>/g, '')
         result.push(
-          <code key={index} className="bg-slate-700/50 px-2 py-1 rounded text-sm font-mono text-cyan-300 border border-cyan-500/30">
+          <code key={index} className="bg-paper px-2 py-1 rounded text-sm font-mono text-brand border-2 border-ink">
             {content}
           </code>
         )
       } else if (segment.trim()) {
         result.push(
-          <span key={index} className="text-gray-100">
+          <span key={index} className="text-muted">
             {segment}
           </span>
         )
@@ -264,16 +264,16 @@ const ChatBot: React.FC<ChatBotProps> = ({ isOpen, onClose }) => {
       result.push(
         <div key="list-final" className="my-3 space-y-2">
           {listItems.map((item, i) => (
-            <div key={i} className="flex items-start bg-slate-700/30 rounded-lg p-3 border-l-4 border-cyan-400/60">
-              <span className="text-cyan-400 mr-3 flex-shrink-0 font-bold">•</span>
-              <span className="flex-1 text-gray-100 leading-relaxed">{item}</span>
+            <div key={i} className="flex items-start bg-paper rounded-lg p-3 border-l-4 border-ink">
+              <span className="text-brand mr-3 flex-shrink-0 font-bold">•</span>
+              <span className="flex-1 text-muted leading-relaxed">{item}</span>
             </div>
           ))}
         </div>
       )
     }
 
-    return result.length > 0 ? result : <span className="text-gray-100">{text}</span>
+    return result.length > 0 ? result : <span className="text-muted">{text}</span>
   }, [])
 
   // Render individual message
@@ -283,16 +283,16 @@ const ChatBot: React.FC<ChatBotProps> = ({ isOpen, onClose }) => {
       className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}
     >
       <div
-        className={`max-w-[95%] md:max-w-[90%] transition-all duration-300 hover:scale-[1.005] ${
+        className={`max-w-[95%] md:max-w-[90%] transition-all duration-300 ${
           message.sender === 'user'
-            ? 'bg-gradient-to-r from-purple-500/80 to-pink-500/80 text-white border border-purple-400/30 rounded-2xl rounded-br-sm shadow-lg shadow-purple-500/25 p-4 md:p-5 backdrop-blur-sm'
-            : 'bg-gradient-to-br from-slate-800/80 to-slate-900/80 text-white border border-slate-600/40 rounded-2xl rounded-bl-sm shadow-xl shadow-slate-900/50 p-3 md:p-4 backdrop-blur-sm'
+            ? 'bg-purple-100 text-ink border-2 border-ink rounded-2xl rounded-br-sm p-4 md:p-5'
+            : 'bg-paper text-ink border-2 border-ink rounded-2xl rounded-bl-sm p-3 md:p-4'
         }`}
       >
         {message.sender === 'bot' ? (
           <div className="space-y-1">
             {/* AI Badge */}
-            <div className="flex items-center gap-2 mb-3 pb-2 border-b border-slate-600/30">
+            <div className="flex items-center gap-2 mb-3 pb-2 border-b border-ink">
               <div className="relative w-6 h-6 rounded-full overflow-hidden flex items-center justify-center">
                 <Image
                   src="/assets/illustrations/maskotkepala.png"
@@ -301,7 +301,7 @@ const ChatBot: React.FC<ChatBotProps> = ({ isOpen, onClose }) => {
                   className="object-contain"
                 />
               </div>
-              <span className="text-xs text-cyan-300 font-medium">CIRVIA Assistant</span>
+              <span className="text-xs text-brand font-medium">CIRVIA Assistant</span>
             </div>
             
             {/* Formatted Content */}
@@ -318,9 +318,9 @@ const ChatBot: React.FC<ChatBotProps> = ({ isOpen, onClose }) => {
         )}
         
         {message.sender === 'bot' && (
-          <div className="flex items-center justify-between mt-4 pt-3 border-t border-white/10">
-            <span className="text-xs text-blue-200/70 font-medium flex items-center">
-              <span className="w-2 h-2 bg-green-400 rounded-full mr-2 animate-pulse"></span>
+          <div className="flex items-center justify-between mt-4 pt-3 border-t border-ink/20">
+            <span className="text-xs text-muted font-medium flex items-center">
+              <span className="w-2 h-2 bg-mint rounded-full mr-2 animate-pulse"></span>
               {message.timestamp.toLocaleTimeString('id-ID', { 
                 hour: '2-digit', 
                 minute: '2-digit' 
@@ -328,12 +328,12 @@ const ChatBot: React.FC<ChatBotProps> = ({ isOpen, onClose }) => {
             </span>
             <button
               onClick={() => isSpeaking ? stopSpeaking() : speakText(message.text)}
-              className="p-2 hover:bg-white/10 rounded-full transition-all duration-300 backdrop-blur-sm border border-white/10 hover:border-white/20 hover:scale-110"
+              className="p-2 hover:bg-lamp-soft rounded-full transition-all duration-300 border border-ink/20 hover:border-ink"
               title={isSpeaking ? 'Stop Audio' : 'Play Audio'}
             >
               {isSpeaking ? 
-                <VolumeX size={14} className="text-red-400" /> : 
-                <Volume2 size={14} className="text-cyan-400" />
+                <VolumeX size={14} className="text-red-600" /> : 
+                <Volume2 size={14} className="text-brand" />
               }
             </button>
           </div>
@@ -345,14 +345,14 @@ const ChatBot: React.FC<ChatBotProps> = ({ isOpen, onClose }) => {
   // Render typing indicator
   const renderTypingIndicator = useCallback(() => (
     <div className="flex justify-start">
-      <div className="bg-gradient-to-br from-white/15 to-white/5 backdrop-blur-sm border border-white/20 text-white p-4 md:p-5 rounded-2xl rounded-bl-sm shadow-lg max-w-[90%] md:max-w-[85%]">
+      <div className="bg-paper border-2 border-ink text-ink p-4 md:p-5 rounded-2xl rounded-bl-sm max-w-[90%] md:max-w-[85%]">
         <div className="flex items-center space-x-3">
           <div className="flex space-x-1">
-            <div className="w-2 h-2 bg-cyan-400 rounded-full animate-bounce"></div>
-            <div className="w-2 h-2 bg-purple-400 rounded-full animate-bounce" style={{ animationDelay: '0.15s' }}></div>
-            <div className="w-2 h-2 bg-pink-400 rounded-full animate-bounce" style={{ animationDelay: '0.3s' }}></div>
+            <div className="w-2 h-2 bg-brand rounded-full animate-bounce"></div>
+            <div className="w-2 h-2 bg-purple-500 rounded-full animate-bounce" style={{ animationDelay: '0.15s' }}></div>
+            <div className="w-2 h-2 bg-purple-500 rounded-full animate-bounce" style={{ animationDelay: '0.3s' }}></div>
           </div>
-          <span className="text-sm text-blue-200/80 font-medium">CIRVIA sedang berpikir...</span>
+          <span className="text-sm text-muted font-medium">CIRVIA sedang berpikir...</span>
         </div>
       </div>
     </div>
@@ -360,7 +360,7 @@ const ChatBot: React.FC<ChatBotProps> = ({ isOpen, onClose }) => {
 
   // Render input section with controls and quick topics
   const renderInputSection = useCallback(() => (
-    <div className="relative p-3 md:p-4 bg-gradient-to-r from-white/5 to-white/10 backdrop-blur-xl border-t border-white/10 shrink-0">
+    <div className="relative p-3 md:p-4 bg-paper border-t border-ink/20 shrink-0">
       <div className="flex space-x-2 md:space-x-3">
         <input
           type="text"
@@ -368,12 +368,12 @@ const ChatBot: React.FC<ChatBotProps> = ({ isOpen, onClose }) => {
           onChange={(e) => setInputText(e.target.value)}
           onKeyPress={handleKeyPress}
           placeholder="Tanyakan tentang rangkaian listrik..."
-          className="flex-1 p-2.5 md:p-3 bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl focus:outline-none focus:ring-2 focus:ring-cyan-400/50 focus:border-cyan-400/50 text-white placeholder-blue-200/60 text-sm transition-all duration-300"
+          className="flex-1 p-2.5 md:p-3 bg-paper border-2 border-ink rounded-xl focus:outline-none focus:ring-2 focus:ring-brand focus:border-ink text-ink placeholder-muted text-sm transition-all duration-300"
         />
         <button
           onClick={handleSendMessage}
           disabled={!inputText.trim() || isTyping}
-          className="p-2.5 md:p-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-xl hover:from-purple-600 hover:to-pink-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-purple-500/25 backdrop-blur-sm border border-purple-400/30"
+          className="p-2.5 md:p-3 bg-purple-500 text-white rounded-xl hover:bg-purple-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 transform border-2 border-ink"
         >
           <Send size={14} className="md:w-4 md:h-4" />
         </button>
@@ -381,9 +381,9 @@ const ChatBot: React.FC<ChatBotProps> = ({ isOpen, onClose }) => {
         
       {/* AI Status Indicator */}
       <div className="mt-2 md:mt-3 flex items-center justify-center">
-        <div className="flex items-center space-x-2 px-2.5 md:px-3 py-1 bg-gradient-to-r from-purple-500/10 to-cyan-500/10 rounded-full border border-purple-400/20">
-          <div className="w-1.5 h-1.5 md:w-2 md:h-2 bg-green-400 rounded-full animate-pulse"></div>
-          <span className="text-xs text-blue-200/70 font-medium">AI Online</span>
+        <div className="flex items-center space-x-2 px-2.5 md:px-3 py-1 bg-purple-100 rounded-full border-2 border-ink">
+          <div className="w-1.5 h-1.5 md:w-2 md:h-2 bg-mint rounded-full animate-pulse"></div>
+          <span className="text-xs text-muted font-medium">AI Online</span>
         </div>
       </div>
     </div>
@@ -392,17 +392,17 @@ const ChatBot: React.FC<ChatBotProps> = ({ isOpen, onClose }) => {
   if (!isOpen) return null
 
   return (
-    <div className="fixed inset-4 md:bottom-4 md:right-4 md:top-auto md:left-auto md:w-96 md:h-[600px] w-full h-full md:max-h-[80vh] bg-gradient-to-br from-slate-900/95 via-blue-950/95 to-indigo-900/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/20 flex flex-col z-50 overflow-hidden">
+    <div className="fixed inset-4 md:bottom-4 md:right-4 md:top-auto md:left-auto md:w-96 md:h-[600px] w-full h-full md:max-h-[80vh] bg-paper rounded-2xl shadow-hard border-2 border-ink flex flex-col z-50 overflow-hidden">
       {/* Animated Background Elements */}
       <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-10 left-10 w-20 h-20 bg-purple-500/10 rounded-full blur-xl animate-pulse"></div>
-        <div className="absolute bottom-20 right-10 w-24 h-24 bg-cyan-500/10 rounded-full blur-xl animate-pulse delay-1000"></div>
+        <div className="absolute top-10 left-10 w-20 h-20 bg-purple-100 rounded-full hidden animate-pulse"></div>
+        <div className="absolute bottom-20 right-10 w-24 h-24 bg-brand-soft rounded-full hidden animate-pulse delay-1000"></div>
         
         {/* Floating particles */}
         {[...Array(8)].map((_, i) => (
           <div
             key={i}
-            className="absolute w-1 h-1 bg-blue-400/30 rounded-full animate-ping"
+            className="absolute w-1 h-1 bg-brand-soft rounded-full hidden"
             style={{
               left: `${Math.random() * 100}%`,
               top: `${Math.random() * 100}%`,
@@ -414,7 +414,7 @@ const ChatBot: React.FC<ChatBotProps> = ({ isOpen, onClose }) => {
       </div>
 
       {/* Header */}
-      <div className="relative flex items-center justify-between p-4 md:p-4 bg-gradient-to-r from-purple-500/20 to-cyan-500/20 backdrop-blur-xl border-b border-white/10 rounded-t-2xl shrink-0">
+      <div className="relative flex items-center justify-between p-4 md:p-4 bg-purple-100 border-b border-ink/20 rounded-t-2xl shrink-0">
         <div className="flex items-center space-x-3">
           <div className="relative w-10 h-10 md:w-12 md:h-12">
             <Image
@@ -425,14 +425,14 @@ const ChatBot: React.FC<ChatBotProps> = ({ isOpen, onClose }) => {
             />
           </div>
           <div>
-            <h3 className="font-bold text-white text-base md:text-lg">CIRVIA Assistant</h3>
+            <h3 className="font-bold text-ink text-base md:text-lg">CIRVIA Assistant</h3>
           </div>
         </div>
         <button
           onClick={onClose}
-          className="p-2 hover:bg-white/10 rounded-full transition-all duration-300 backdrop-blur-sm border border-white/10 hover:border-white/20"
+          className="p-2 hover:bg-lamp-soft rounded-full transition-all duration-300 border border-ink/20 hover:border-ink"
         >
-          <X size={20} className="text-white" />
+          <X size={20} className="text-ink" />
         </button>
       </div>
 

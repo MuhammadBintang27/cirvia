@@ -242,14 +242,14 @@ export const calculateQuizScore = (
 ): { score: number; grade: string; message: string } => {
   const percentage = (correctAnswers / totalQuestions) * 100;
   if (percentage >= 90)
-    return { score: percentage, grade: 'A+', message: '🎉 Luar biasa! Anda menguasai konsep rangkaian listrik dengan sempurna!' };
+    return { score: percentage, grade: 'A+', message: 'Luar biasa! Anda menguasai konsep rangkaian listrik dengan sempurna!' };
   if (percentage >= 80)
-    return { score: percentage, grade: 'A', message: '⭐ Sangat baik! Pemahaman Anda tentang rangkaian listrik sangat solid!' };
+    return { score: percentage, grade: 'A', message: 'Sangat baik! Pemahaman Anda tentang rangkaian listrik sangat solid!' };
   if (percentage >= 70)
-    return { score: percentage, grade: 'B+', message: '👍 Bagus! Anda memahami konsep dasar dengan baik, terus berlatih!' };
+    return { score: percentage, grade: 'B+', message: 'Bagus! Anda memahami konsep dasar dengan baik, terus berlatih!' };
   if (percentage >= 60)
-    return { score: percentage, grade: 'B', message: '📚 Cukup baik! Tinjau kembali hukum Ohm & konfigurasi rangkaian.' };
+    return { score: percentage, grade: 'B', message: 'Cukup baik! Tinjau kembali hukum Ohm & konfigurasi rangkaian.' };
   if (percentage >= 50)
-    return { score: percentage, grade: 'C', message: '💪 Terus semangat! Fokus pada dasar hukum Ohm dan latihan lebih banyak.' };
-  return { score: percentage, grade: 'D', message: '🎯 Jangan menyerah! Mulai dari konsep dasar dan berlatih bertahap.' };
+    return { score: percentage, grade: 'C', message: 'Terus semangat! Fokus pada dasar hukum Ohm dan latihan lebih banyak.' };
+  return { score: percentage, grade: 'D', message: 'Jangan menyerah! Mulai dari konsep dasar dan berlatih bertahap.' };
 };

@@ -1,8 +1,12 @@
 "use client";
+import { Ico } from "@/components/ui/Ico";
 import React, { useState, useEffect, useRef } from "react";
 import { ArrowLeft, CheckCircle, Trophy, Star, Zap, Lightbulb, Info, Home, Activity, TrendingUp, GitBranch, Calculator, Clock, Play, Pause } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import { ModuleHero, SectionLabel } from "./ModuleChrome";
+
+const SECTION_NAMES = ["Apa itu rangkaian paralel", "Arus", "Tegangan", "Hambatan", "Contoh nyata", "Soal dan perhitungan", "Ringkasan"];
 
 // Audio timestamps untuk auto-scroll (dalam detik)
 const AUDIO_TIMESTAMPS = {
@@ -145,31 +149,28 @@ const AudioPlayer = ({ onTimestampReached }: AudioPlayerProps) => {
         ref={buttonRef}
         onMouseEnter={() => setIsHovering(true)}
         onMouseLeave={() => setIsHovering(false)}
-        className="fixed top-80 right-8 z-50 pointer-events-auto group"
+        className="fixed bottom-20 md:bottom-6 left-4 md:left-6 z-50 pointer-events-auto group"
       >
         {/* Glowing Background Effect */}
-        <div className="absolute inset-0 bg-gradient-to-br from-purple-500 via-pink-500 to-indigo-500 rounded-full blur-lg opacity-60 group-hover:opacity-100 transition-opacity duration-300 animate-pulse"></div>
-        
-        {/* Animated Ring */}
-        <div className="absolute inset-0 rounded-full border-2 border-purple-300/30 animate-spin" style={{ animationDuration: '3s' }}></div>
+        <div className="absolute inset-0 bg-purple-500 rounded-full hidden opacity-60 group-hover:opacity-100 transition-opacity duration-300 animate-pulse"></div>
 
         {/* Main Button */}
         <button
           onClick={handlePlayPause}
-          className="relative p-5 rounded-full bg-gradient-to-br from-purple-500 via-pink-500 to-indigo-500 hover:from-purple-600 hover:via-pink-600 hover:to-indigo-600 shadow-2xl shadow-purple-500/50 transform hover:scale-125 transition-all duration-300 z-10 group-hover:shadow-purple-500/80 border border-purple-300/50"
+          className="relative p-5 rounded-full bg-purple-500 hover:bg-purple-500 shadow-hard transform transition-all duration-300 z-10 border-2 border-ink"
           title={isPlaying ? "Matikan Audio" : "Nyalakan Audio"}
         >
           {isPlaying ? (
-            <Pause className="w-7 h-7 text-white animate-pulse drop-shadow-lg" />
+            <Pause className="w-7 h-7 text-white" />
           ) : (
-            <Play className="w-7 h-7 text-white drop-shadow-lg" />
+            <Play className="w-7 h-7 text-white" />
           )}
         </button>
         
         {/* Floating Label */}
         {!isHovering && (
-          <div className="absolute -top-10 right-0 bg-gradient-to-r from-purple-600 to-pink-600 text-white text-xs font-bold px-3 py-1 rounded-full whitespace-nowrap shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-            🎧 Audio
+          <div className="absolute -top-10 left-0 bg-purple-500 border-2 border-ink text-white text-xs font-bold px-3 py-1 rounded-full whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+            Audio
           </div>
         )}
 
@@ -178,38 +179,38 @@ const AudioPlayer = ({ onTimestampReached }: AudioPlayerProps) => {
           <div 
             onMouseEnter={() => setIsHovering(true)}
             onMouseLeave={() => setIsHovering(false)}
-            className="absolute bottom-full right-0 mb-4 bg-gradient-to-br from-slate-900 to-slate-800 border border-purple-500/30 rounded-2xl p-4 shadow-2xl w-64 opacity-0 animate-fade-in backdrop-blur-sm z-50 pointer-events-auto"
+            className="absolute bottom-full left-0 mb-4 bg-paper border-2 border-ink rounded-2xl p-4 shadow-hard w-64 opacity-0 animate-fade-in z-50 pointer-events-auto"
           >
             {/* Title */}
-            <div className="text-xs font-bold text-purple-300 mb-3 uppercase tracking-widest">
-              🎧 Audio Pembelajaran
+            <div className="text-xs font-bold text-purple-700 mb-3 uppercase tracking-widest">
+              Audio Pembelajaran
             </div>
 
             {/* Time Display */}
             <div className="flex justify-between items-center mb-3 text-sm">
-              <span className="text-cyan-300 font-semibold">{formatTime(currentTime)}</span>
-              <span className="text-purple-300/60">/</span>
-              <span className="text-purple-300/80">{formatTime(duration)}</span>
+              <span className="text-brand font-semibold">{formatTime(currentTime)}</span>
+              <span className="text-ink">/</span>
+              <span className="text-ink">{formatTime(duration)}</span>
             </div>
 
             {/* Progress Bar - Clickable */}
             <div
               onClick={handleSeek}
-              className="relative w-full bg-slate-700/50 rounded-full h-1.5 cursor-pointer group mb-4 hover:h-2 transition-all"
+              className="relative w-full bg-paper rounded-full h-1.5 cursor-pointer group mb-4 hover:h-2 transition-all"
             >
               <div
-                className="bg-gradient-to-r from-cyan-400 to-purple-400 h-1.5 rounded-full transition-all group-hover:h-2"
+                className="bg-brand h-1.5 rounded-full transition-all group-hover:h-2"
                 style={{ width: `${progressPercent}%` }}
               />
               {/* Seek Indicator */}
               <div
-                className="absolute top-1/2 -translate-y-1/2 w-3 h-3 bg-white rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-opacity"
+                className="absolute top-1/2 -translate-y-1/2 w-3 h-3 bg-paper rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
                 style={{ left: `${progressPercent}%`, transform: "translateX(-50%)" }}
               />
             </div>
 
             {/* Quick Timestamps */}
-            <div className="text-xs text-purple-200/70 mb-2 font-semibold">Quick Jump:</div>
+            <div className="text-xs text-muted mb-2 font-semibold">Quick Jump:</div>
             <div className="grid grid-cols-2 gap-2">
               <button
                 onClick={() => {
@@ -219,7 +220,7 @@ const AudioPlayer = ({ onTimestampReached }: AudioPlayerProps) => {
                     audioRef.current.play();
                   }
                 }}
-                className="text-xs py-1.5 px-2 bg-blue-500/20 hover:bg-blue-500/40 rounded-lg text-blue-300 transition-all"
+                className="text-xs py-1.5 px-2 bg-brand-soft hover:bg-brand-soft rounded-lg text-brand transition-all"
               >
                 S1 (0:20)
               </button>
@@ -231,7 +232,7 @@ const AudioPlayer = ({ onTimestampReached }: AudioPlayerProps) => {
                     audioRef.current.play();
                   }
                 }}
-                className="text-xs py-1.5 px-2 bg-cyan-500/20 hover:bg-cyan-500/40 rounded-lg text-cyan-300 transition-all"
+                className="text-xs py-1.5 px-2 bg-brand-soft hover:bg-brand-soft rounded-lg text-brand transition-all"
               >
                 S2 (2:24)
               </button>
@@ -243,7 +244,7 @@ const AudioPlayer = ({ onTimestampReached }: AudioPlayerProps) => {
                     audioRef.current.play();
                   }
                 }}
-                className="text-xs py-1.5 px-2 bg-green-500/20 hover:bg-green-500/40 rounded-lg text-green-300 transition-all"
+                className="text-xs py-1.5 px-2 bg-mint-soft hover:bg-mint-soft rounded-lg text-emerald-700 transition-all"
               >
                 S3 (5:00)
               </button>
@@ -255,7 +256,7 @@ const AudioPlayer = ({ onTimestampReached }: AudioPlayerProps) => {
                     audioRef.current.play();
                   }
                 }}
-                className="text-xs py-1.5 px-2 bg-yellow-500/20 hover:bg-yellow-500/40 rounded-lg text-yellow-300 transition-all"
+                className="text-xs py-1.5 px-2 bg-lamp-soft hover:bg-lamp-soft rounded-lg text-amber-700 transition-all"
               >
                 S4 (7:00)
               </button>
@@ -267,7 +268,7 @@ const AudioPlayer = ({ onTimestampReached }: AudioPlayerProps) => {
                     audioRef.current.play();
                   }
                 }}
-                className="text-xs py-1.5 px-2 bg-orange-500/20 hover:bg-orange-500/40 rounded-lg text-orange-300 transition-all"
+                className="text-xs py-1.5 px-2 bg-lamp-soft hover:bg-lamp-soft rounded-lg text-amber-700 transition-all"
               >
                 S5 (10:28)
               </button>
@@ -279,7 +280,7 @@ const AudioPlayer = ({ onTimestampReached }: AudioPlayerProps) => {
                     audioRef.current.play();
                   }
                 }}
-                className="text-xs py-1.5 px-2 bg-pink-500/20 hover:bg-pink-500/40 rounded-lg text-pink-300 transition-all"
+                className="text-xs py-1.5 px-2 bg-purple-100 hover:bg-purple-100 rounded-lg text-purple-700 transition-all"
               >
                 S6 (11:20)
               </button>
@@ -291,14 +292,14 @@ const AudioPlayer = ({ onTimestampReached }: AudioPlayerProps) => {
                     audioRef.current.play();
                   }
                 }}
-                className="text-xs py-1.5 px-2 bg-purple-500/20 hover:bg-purple-500/40 rounded-lg text-purple-300 transition-all"
+                className="text-xs py-1.5 px-2 bg-purple-100 hover:bg-purple-100 rounded-lg text-purple-700 transition-all"
               >
                 S7 (12:45)
               </button>
             </div>
 
             {/* Pointer Arrow */}
-            <div className="absolute -bottom-2 right-6 w-4 h-4 bg-gradient-to-br from-slate-900 to-slate-800 border-r border-b border-purple-500/30 transform rotate-45"></div>
+            <div className="absolute -bottom-2 left-6 w-4 h-4 bg-paper border-r border-b border-ink transform rotate-45"></div>
           </div>
         )}
       </div>
@@ -360,9 +361,9 @@ const Section1Introduction = () => {
   };
 
   const branches = [
-    { id: 1, color: "from-blue-400 to-blue-600", label: "Cabang 1" },
-    { id: 2, color: "from-green-400 to-green-600", label: "Cabang 2" },
-    { id: 3, color: "from-red-400 to-red-600", label: "Cabang 3" },
+    { id: 1, color: "bg-brand", label: "Cabang 1" },
+    { id: 2, color: "bg-mint", label: "Cabang 2" },
+    { id: 3, color: "bg-coral", label: "Cabang 3" },
   ];
 
   return (
@@ -370,33 +371,33 @@ const Section1Introduction = () => {
       {/* Left: Text Content */}
       <div className="space-y-6">
         <div className="flex items-center gap-4 mb-2">
-          <div className="w-1 h-12 bg-gradient-to-b from-green-400 to-emerald-400 rounded-full"></div>
-          <h2 className="text-4xl font-black bg-gradient-to-r from-green-400 via-emerald-400 to-teal-400 bg-clip-text text-transparent drop-shadow-lg">
+          <div className="w-1 h-12 bg-mint rounded-full"></div>
+          <h2 className="text-4xl font-black text-ink">
             Apa itu Rangkaian Paralel?
           </h2>
         </div>
         
         <div className="space-y-4">
-          <p className="text-lg text-slate-200 leading-relaxed">
+          <p className="text-lg text-muted leading-relaxed">
             Bayangkan kamu menyalakan tiga lampu kecil dengan satu baterai. Namun kali ini, setiap lampu punya jalur sendiri menuju baterai.
           </p>
-          <p className="text-lg text-slate-200 leading-relaxed">
-            Dari kutub positif baterai, kabel bercabang menjadi tiga — masing-masing menuju satu lampu — lalu kembali bergabung ke kutub negatif baterai. <span className="font-bold text-green-400">Inilah yang disebut rangkaian paralel</span>.
+          <p className="text-lg text-muted leading-relaxed">
+            Dari kutub positif baterai, kabel bercabang menjadi tiga — masing-masing menuju satu lampu — lalu kembali bergabung ke kutub negatif baterai. <span className="font-bold text-emerald-700">Inilah yang disebut rangkaian paralel</span>.
           </p>
         </div>
 
-        <div className="h-px bg-gradient-to-r from-transparent via-green-500/50 to-transparent"></div>
+        <div className="h-px bg-ink/15"></div>
 
-        <div className="bg-gradient-to-br from-green-500/10 to-emerald-500/10 rounded-2xl p-6 border border-green-400/30 backdrop-blur-sm hover:border-green-400/60 transition-all duration-300">
-          <h3 className="font-bold text-green-300 mb-3 flex items-center gap-2">
-            <span className="text-xl">📌</span>
+        <div className="bg-mint-soft rounded-2xl p-6 border-2 border-ink hover:border-ink transition-all duration-300">
+          <h3 className="font-bold text-emerald-700 mb-3 flex items-center gap-2">
+            <span className="text-xl"><Ico n="pin" /></span>
             Definisi:
           </h3>
-          <p className="text-green-200 font-semibold">
+          <p className="text-emerald-700 font-semibold">
             Rangkaian listrik paralel adalah jenis susunan komponen listrik di mana terdapat lebih dari satu jalur untuk arus listrik mengalir.
           </p>
-          <p className="text-green-200 text-sm mt-3">
-            ⚡ Jika salah satu jalur terputus, arus di jalur lain tetap mengalir. Lampu lainnya tetap menyala!
+          <p className="text-ink text-sm mt-3">
+            Jika salah satu jalur terputus, arus di jalur lain tetap mengalir. Lampu lainnya tetap menyala!
           </p>
         </div>
       </div>
@@ -404,10 +405,10 @@ const Section1Introduction = () => {
       {/* Right: Interactive Visual */}
       <div className="space-y-6">
         <div className="relative group">
-          <div className="absolute -inset-3 bg-gradient-to-r from-green-500/20 to-emerald-500/20 rounded-3xl blur-2xl opacity-50 group-hover:opacity-70 transition duration-1000"></div>
+          <div className="absolute -inset-3 bg-mint-soft rounded-3xl hidden opacity-50 group-hover:opacity-70 transition duration-1000"></div>
           
-          <div className="relative rounded-3xl overflow-hidden bg-gradient-to-br from-slate-900 to-slate-800 border-2 border-green-400/30 p-8 shadow-2xl">
-            <svg className="w-full h-full" viewBox="0 0 800 500">
+          <div className="relative rounded-3xl overflow-hidden bg-paper border-2 border-ink p-8 shadow-hard">
+            <svg className="w-full h-full rounded-xl bg-[#14172B]" viewBox="0 0 800 500">
               <defs>
                 <filter id="glow-parallel">
                   <feGaussianBlur stdDeviation="2" result="coloredBlur" />
@@ -510,14 +511,14 @@ const Section1Introduction = () => {
                 return (
                   <g key={`electron-branch-${i}`}>
                     <circle cx={ex} cy={ey} r="8" fill="rgba(255, 215, 0, 0.2)" filter="url(#glow-parallel)" />
-                    <circle cx={ex} cy={ey} r="4" fill="rgba(255, 230, 0, 0.95)" filter="drop-shadow(0 0 3px rgba(255, 215, 0, 0.9))" />
+                    <circle cx={ex} cy={ey} r="4" fill="rgba(255, 230, 0, 0.95)" filter="(0 0 3px rgba(255, 215, 0, 0.9))" />
                   </g>
                 );
               })}
 
               {/* Battery */}
               <circle cx="100" cy="250" r="30" fill="none" stroke="rgba(255, 100, 100, 0.8)" strokeWidth="3" />
-              <text x="100" y="265" textAnchor="middle" fill="rgba(255, 150, 150, 0.9)" fontSize="35" fontWeight="bold">🔋</text>
+              <Ico n="battery" x={82.5} y={235.2} width={35} height={35} color="rgba(255, 150, 150, 0.9)" />
 
               {/* Main wire from battery up to top junction */}
               <line x1="100" y1="220" x2="100" y2="100" stroke={activeLamps.size > 0 ? "rgba(255, 215, 0, 0.8)" : "rgba(255, 100, 100, 0.5)"} strokeWidth="4" />
@@ -530,7 +531,7 @@ const Section1Introduction = () => {
               {/* Lamp 1 */}
               <g onClick={() => toggleLamp(1)} style={{ cursor: 'pointer' }}>
                 <circle cx="250" cy="250" r="30" fill="none" stroke={activeLamps.has(1) ? "rgba(255, 215, 0, 0.9)" : "rgba(100, 100, 100, 0.4)"} strokeWidth="3" />
-                <text x="250" y="265" textAnchor="middle" fill={activeLamps.has(1) ? "rgba(255, 215, 0, 0.9)" : "rgba(100, 100, 100, 0.5)"} fontSize="35" fontWeight="bold">{activeLamps.has(1) ? "💡" : "🔌"}</text>
+                <Ico n={activeLamps.has(1) ? "lightbulb" : "plug"} x={232.5} y={235.25} width={35} height={35} color={activeLamps.has(1) ? "rgba(255, 215, 0, 0.9)" : "rgba(100, 100, 100, 0.5)"} />
                 {activeLamps.has(1) && (
                   <circle cx="250" cy="250" r="36" fill="none" stroke="rgba(255, 215, 0, 0.3)" strokeWidth="2">
                     <animate attributeName="r" from="36" to="50" dur="1.5s" repeatCount="indefinite" />
@@ -546,7 +547,7 @@ const Section1Introduction = () => {
               {/* Lamp 2 */}
               <g onClick={() => toggleLamp(2)} style={{ cursor: 'pointer' }}>
                 <circle cx="350" cy="250" r="30" fill="none" stroke={activeLamps.has(2) ? "rgba(255, 215, 0, 0.9)" : "rgba(100, 100, 100, 0.4)"} strokeWidth="3" />
-                <text x="350" y="265" textAnchor="middle" fill={activeLamps.has(2) ? "rgba(255, 215, 0, 0.9)" : "rgba(100, 100, 100, 0.5)"} fontSize="35" fontWeight="bold">{activeLamps.has(2) ? "💡" : "🔌"}</text>
+                <Ico n={activeLamps.has(2) ? "lightbulb" : "plug"} x={332.5} y={235.25} width={35} height={35} color={activeLamps.has(2) ? "rgba(255, 215, 0, 0.9)" : "rgba(100, 100, 100, 0.5)"} />
                 {activeLamps.has(2) && (
                   <circle cx="350" cy="250" r="36" fill="none" stroke="rgba(255, 215, 0, 0.3)" strokeWidth="2">
                     <animate attributeName="r" from="36" to="50" dur="1.5s" repeatCount="indefinite" />
@@ -562,7 +563,7 @@ const Section1Introduction = () => {
               {/* Lamp 3 */}
               <g onClick={() => toggleLamp(3)} style={{ cursor: 'pointer' }}>
                 <circle cx="450" cy="250" r="30" fill="none" stroke={activeLamps.has(3) ? "rgba(255, 215, 0, 0.9)" : "rgba(100, 100, 100, 0.4)"} strokeWidth="3" />
-                <text x="450" y="265" textAnchor="middle" fill={activeLamps.has(3) ? "rgba(255, 215, 0, 0.9)" : "rgba(100, 100, 100, 0.5)"} fontSize="35" fontWeight="bold">{activeLamps.has(3) ? "💡" : "🔌"}</text>
+                <Ico n={activeLamps.has(3) ? "lightbulb" : "plug"} x={432.5} y={235.25} width={35} height={35} color={activeLamps.has(3) ? "rgba(255, 215, 0, 0.9)" : "rgba(100, 100, 100, 0.5)"} />
                 {activeLamps.has(3) && (
                   <circle cx="450" cy="250" r="36" fill="none" stroke="rgba(255, 215, 0, 0.3)" strokeWidth="2">
                     <animate attributeName="r" from="36" to="50" dur="1.5s" repeatCount="indefinite" />
@@ -581,12 +582,12 @@ const Section1Introduction = () => {
             </svg>
 
             {/* Info Box */}
-            <div className={`rounded-lg p-4 transition-all -mt-8 bg-green-500/20 border border-green-400/50 text-green-200`}>
+            <div className={`rounded-lg p-4 transition-all -mt-8 bg-mint-soft border-2 border-ink text-ink`}>
               <p className="text-sm font-semibold text-center">
                 {activeLamps.size === 3 
                   ? "✓ Ketiga cabang aktif - Rangkaian paralel tertutup" 
                   : activeLamps.size === 0
-                  ? "❌ Semua lampu mati - Buka lampu untuk mengaktifkan rangkaian"
+                  ? "Semua lampu mati - Buka lampu untuk mengaktifkan rangkaian"
                   : `✓ ${activeLamps.size} dari 3 cabang aktif - Cabang lain tetap bisa hidup/mati independen!`
                 }
               </p>
@@ -594,13 +595,13 @@ const Section1Introduction = () => {
           </div>
         </div>
 
-        <div className="bg-gradient-to-br from-green-500/10 to-emerald-500/10 rounded-2xl p-6 border border-green-400/30">
-          <h3 className="text-xl font-bold text-green-300 mb-3">🎮 Interaktif Demo:</h3>
-          <ul className="space-y-2 text-green-200 text-sm">
-            <li>✅ <strong>Ketiga lampu menyala</strong> saat rangkaian tertutup</li>
-            <li>⚡ <strong>Lihat aliran elektron</strong> (titik kuning) mengalir di setiap cabang yang aktif</li>
-            <li>💡 <strong>Klik lampu untuk hidup/matikan</strong> secara independen</li>
-            <li>✨ <strong>Setiap lampu bisa hidup/mati bebas</strong> - Lampu lain tetap berfungsi karena memiliki jalur terpisah!</li>
+        <div className="bg-mint-soft rounded-2xl p-6 border-2 border-ink">
+          <h3 className="text-xl font-bold text-emerald-700 mb-3">Interaktif Demo:</h3>
+          <ul className="space-y-2 text-emerald-700 text-sm">
+            <li><Ico n="check" /> <strong>Ketiga lampu menyala</strong> saat rangkaian tertutup</li>
+            <li><Ico n="zap" /> <strong>Lihat aliran elektron</strong> (titik kuning) mengalir di setiap cabang yang aktif</li>
+            <li><Ico n="lightbulb" /> <strong>Klik lampu untuk hidup/matikan</strong> secara independen</li>
+            <li><Ico n="sparkles" /> <strong>Setiap lampu bisa hidup/mati bebas</strong> - Lampu lain tetap berfungsi karena memiliki jalur terpisah!</li>
           </ul>
         </div>
       </div>
@@ -620,9 +621,9 @@ const Section2Current = () => {
   // Distribusi arus berdasarkan hambatan masing-masing cabang
   // Asumsikan: T1 = 6Ω, T2 = 4Ω, T3 = 12Ω (V = 12V)
   const resistances = [
-    { branch: 1, R: 6, color: "text-blue-300" },
-    { branch: 2, R: 4, color: "text-green-300" },
-    { branch: 3, R: 12, color: "text-red-300" },
+    { branch: 1, R: 6, color: "text-brand" },
+    { branch: 2, R: 4, color: "text-emerald-700" },
+    { branch: 3, R: 12, color: "text-red-600" },
   ];
   
   // Hitung arus per cabang menggunakan V/R (V=12V)
@@ -665,52 +666,52 @@ const Section2Current = () => {
       {/* Right: Text Content */}
       <div className="space-y-6 lg:order-2">
         <div className="flex items-center gap-4 mb-2">
-          <div className="w-1 h-12 bg-gradient-to-b from-blue-400 to-cyan-400 rounded-full"></div>
-          <h2 className="text-4xl font-black bg-gradient-to-r from-blue-400 via-cyan-400 to-teal-400 bg-clip-text text-transparent drop-shadow-lg">
+          <div className="w-1 h-12 bg-brand rounded-full"></div>
+          <h2 className="text-4xl font-black text-ink">
             Arus dalam Rangkaian Paralel
           </h2>
         </div>
         
         <div className="space-y-4">
-          <p className="text-lg text-slate-200 leading-relaxed">
-            Arus di setiap cabang bisa berbeda-beda, tergantung besar hambatan di cabang tersebut. Tetapi <span className="font-bold text-cyan-400">jumlah total arus yang masuk = jumlah arus yang keluar</span>.
-            <br /><br /><span className="font-bold text-cyan-400">Jumlah Arus terbagi di setiap cabang, sehingga setiap arus untuk setiap cabang harus dijumlahkan.</span>
+          <p className="text-lg text-muted leading-relaxed">
+            Arus di setiap cabang bisa berbeda-beda, tergantung besar hambatan di cabang tersebut. Tetapi <span className="font-bold text-brand">jumlah total arus yang masuk = jumlah arus yang keluar</span>.
+            <br /><br /><span className="font-bold text-brand">Jumlah Arus terbagi di setiap cabang, sehingga setiap arus untuk setiap cabang harus dijumlahkan.</span>
           </p>
         </div>
 
-        <div className="bg-gradient-to-br from-blue-500/10 to-cyan-500/10 rounded-2xl p-6 border border-blue-400/30 backdrop-blur-sm hover:border-blue-400/60 transition-all duration-300 hover:shadow-lg hover:shadow-blue-500/20">
-          <h3 className="font-bold text-blue-300 mb-3 flex items-center gap-2">
-            <span className="text-xl">📐</span>
+        <div className="bg-brand-soft rounded-2xl p-6 border-2 border-ink hover:border-ink transition-all duration-300">
+          <h3 className="font-bold text-brand mb-3 flex items-center gap-2">
+            <span className="text-xl"><Ico n="ruler" /></span>
             Rumus:
           </h3>
-          <p className="text-blue-200 font-mono text-lg font-bold">
+          <p className="text-muted font-mono text-lg font-bold">
             I<sub>tot</sub> = I₁ + I₂ + I₃ + ...
           </p>
-          <p className="text-blue-200 text-sm mt-3">
+          <p className="text-muted text-sm mt-3">
             Total arus = Jumlah arus di semua cabang
           </p>
         </div>
 
-        <div className="bg-gradient-to-br from-cyan-500/10 to-blue-500/10 rounded-2xl p-6 border border-cyan-400/30 backdrop-blur-sm hover:border-cyan-400/60 transition-all duration-300 hover:shadow-lg hover:shadow-cyan-500/20">
-          <h3 className="font-bold text-cyan-300 mb-3 flex items-center gap-2">
-            <span className="text-xl">🚗</span>
+        <div className="bg-brand-soft rounded-2xl p-6 border-2 border-ink hover:border-ink transition-all duration-300">
+          <h3 className="font-bold text-brand mb-3 flex items-center gap-2">
+            <span className="text-xl"><Ico n="car" /></span>
             Analogi Terowongan:
           </h3>
-          <p className="text-cyan-200 text-sm leading-relaxed mb-4">
+          <p className="text-muted text-sm leading-relaxed mb-4">
             Bayangkan jalan utama yang bercabang menjadi <span className="font-bold">tiga terowongan</span>. Setiap terowongan bisa punya jumlah mobil berbeda, tapi semua mobil dari ketiga terowongan kembali bergabung di ujung.
           </p>
-          <p className="text-cyan-200 text-sm leading-relaxed font-semibold">
-            ✨ <span className="text-yellow-300">Total mobil yang kembali = jumlah mobil di semua terowongan!</span>
+          <p className="text-muted text-sm leading-relaxed font-semibold">
+            <span className="text-amber-700">Total mobil yang kembali = jumlah mobil di semua terowongan!</span>
           </p>
         </div>
       </div>
       {/* Right: Interactive Visual */}
       <div className="space-y-6 lg:order-1">
         <div className="relative group">
-          <div className="absolute -inset-3 bg-gradient-to-r from-blue-500/20 to-cyan-500/20 rounded-3xl blur-2xl opacity-50 group-hover:opacity-70 transition duration-1000"></div>
+          <div className="absolute -inset-3 bg-brand-soft rounded-3xl hidden opacity-50 group-hover:opacity-70 transition duration-1000"></div>
           
-          <div className="relative rounded-3xl overflow-hidden bg-gradient-to-br from-slate-900 to-slate-800 border-2 border-blue-400/30 p-8 shadow-2xl">
-            <svg className="w-full h-full" viewBox="0 0 800 500">
+          <div className="relative rounded-3xl overflow-hidden bg-paper border-2 border-ink p-8 shadow-hard">
+            <svg className="w-full h-full rounded-xl bg-[#14172B]" viewBox="0 0 800 500">
               {/* Lintasan Tertutup - Rangkaian Paralel dengan Mobil */}
               
               {/* Baterai Positif (+) - Kiri Atas */}
@@ -825,37 +826,37 @@ const Section2Current = () => {
               })}
             </svg>
 
-            <div className="bg-gradient-to-br from-blue-500/10 to-cyan-500/10 rounded-2xl p-6 border border-blue-400/30">
-              <h3 className="text-xl font-bold text-blue-300 mb-3">🎮 Analisis Distribusi Arus:</h3>
-              <div className="space-y-2 text-blue-200 text-sm">
-                <p className="font-semibold text-cyan-300 mb-3">⚡ Perhitungan Arus (V = {V}V).<br/>Arus mengalir ke {branchCount} cabang dengan resistansi berbeda:</p>
+            <div className="bg-brand-soft rounded-2xl p-6 border-2 border-ink">
+              <h3 className="text-xl font-bold text-brand mb-3">Analisis Distribusi Arus:</h3>
+              <div className="space-y-2 text-muted text-sm">
+                <p className="font-semibold text-brand mb-3">Perhitungan Arus (V = {V}V).<br/>Arus mengalir ke {branchCount} cabang dengan resistansi berbeda:</p>
                 {currentPerBranch.map((data, idx) => (
-                  <div key={idx} className="flex items-center justify-between bg-slate-800/50 px-3 py-2 rounded border border-slate-700/50">
+                  <div key={idx} className="flex items-center justify-between bg-paper px-3 py-2 rounded border-2 border-ink">
                     <span>
                       <strong className={data.color}>T{data.branch}:</strong> R = {data.R}Ω → I = I = V/R → {V}V ÷ {data.R}Ω
                     </span>
                     <span className={`font-bold text-base ${data.color}`}>{data.I}A</span>
                   </div>
                 ))}
-                <div className="flex items-center justify-between bg-gradient-to-r from-blue-600/40 to-cyan-600/40 px-3 py-2 rounded border border-blue-400/60 mt-3 font-bold">
-                  <span className="text-yellow-300">✨ Total arus yang mengalir:</span>
-                  <span className="text-yellow-300 text-lg">{I_calculated}A</span>
+                <div className="flex items-center justify-between bg-brand-soft px-3 py-2 rounded border-2 border-ink mt-3 font-bold">
+                  <span className="text-ink">Total arus yang mengalir:</span>
+                  <span className="text-ink text-lg">{I_calculated}A</span>
                 </div>
               </div>
             </div>
 
             {/* Interactive Controls */}
-            <div className="bg-slate-800/50 rounded-2xl p-6 border border-slate-600 mt-5">
-              <label className="text-orange-200 font-bold text-sm block mb-4">Klik tombol untuk menambah/mengurangi cabang:</label>
+            <div className="bg-paper rounded-2xl p-6 border-2 border-ink mt-5">
+              <label className="text-amber-700 font-bold text-sm block mb-4">Klik tombol untuk menambah/mengurangi cabang:</label>
               <div className="flex gap-3 flex-wrap">
                 {[1, 2, 3].map((num) => (
                   <button
                     key={num}
                     onClick={() => setBranchCount(num)}
-                    className={`px-4 py-2 rounded-lg font-bold transition-all transform hover:scale-110 ${
+                    className={`px-4 py-2 rounded-lg font-bold transition-all transform ${
                       branchCount === num
-                        ? "bg-gradient-to-r from-blue-500 to-blue-500 text-white shadow-lg shadow-blue-500/50"
-                        : "bg-slate-700 text-slate-200 hover:bg-slate-600"
+                        ? "bg-brand text-white"
+                        : "bg-paper text-muted hover:bg-ink/30"
                     }`}
                   >
                     {num} Cabang
@@ -880,10 +881,10 @@ const Section3Voltage = () => {
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center opacity-0 animate-fade-in" style={{ animationDelay: "0.8s" }}>
       {/* Left: Visual */}
       <div className="relative group lg:order-2">
-        <div className="absolute -inset-3 bg-gradient-to-r from-green-500/20 to-emerald-500/20 rounded-3xl blur-2xl opacity-50 group-hover:opacity-70 transition duration-1000"></div>
+        <div className="absolute -inset-3 bg-mint-soft rounded-3xl hidden opacity-50 group-hover:opacity-70 transition duration-1000"></div>
         
-        <div className="relative rounded-3xl overflow-hidden bg-gradient-to-br from-slate-900 to-slate-800 border-2 border-green-400/30 p-8 shadow-2xl">
-          <svg className="w-full h-full" viewBox="0 0 800 500">
+        <div className="relative rounded-3xl overflow-hidden bg-paper border-2 border-ink p-8 shadow-hard">
+          <svg className="w-full h-full rounded-xl bg-[#14172B]" viewBox="0 0 800 500">
             {/* Lintasan Tegangan - Rangkaian Paralel */}
             
             
@@ -943,24 +944,24 @@ const Section3Voltage = () => {
           </svg>
 
           {/* Info Box - Dynamic */}
-          <div className="mt-6 bg-green-900/30 rounded-lg p-4 border border-green-400/50">
-            <p className="text-green-200 font-semibold text-center text-sm">
-              ⚡ Tegangan Sama | {branchCount >= 1 && <span className="text-blue-300">T1: 12V</span>} {branchCount >= 2 && <span className="text-green-300">T2: 12V</span>} {branchCount >= 3 && <span className="text-red-300">T3: 12V</span>}
+          <div className="mt-6 bg-mint-soft rounded-lg p-4 border-2 border-ink">
+            <p className="text-emerald-700 font-semibold text-center text-sm">
+              Tegangan Sama | {branchCount >= 1 && <span className="text-brand">T1: 12V</span>} {branchCount >= 2 && <span className="text-emerald-700">T2: 12V</span>} {branchCount >= 3 && <span className="text-red-600">T3: 12V</span>}
             </p>
           </div>
 
           {/* Interactive Controls */}
-          <div className="bg-slate-800/50 rounded-2xl p-6 border border-slate-600 mt-5">
-            <label className="text-orange-200 font-bold text-sm block mb-4">Klik tombol untuk menambah/mengurangi cabang:</label>
+          <div className="bg-paper rounded-2xl p-6 border-2 border-ink mt-5">
+            <label className="text-amber-700 font-bold text-sm block mb-4">Klik tombol untuk menambah/mengurangi cabang:</label>
             <div className="flex gap-3 flex-wrap">
               {[1, 2, 3].map((num) => (
                 <button
                   key={num}
                   onClick={() => setBranchCount(num)}
-                  className={`px-4 py-2 rounded-lg font-bold transition-all transform hover:scale-110 ${
+                  className={`px-4 py-2 rounded-lg font-bold transition-all transform ${
                     branchCount === num
-                      ? "bg-gradient-to-r from-green-500 to-emerald-500 text-white shadow-lg shadow-green-500/50"
-                      : "bg-slate-700 text-slate-200 hover:bg-slate-600"
+                      ? "bg-mint text-ink"
+                      : "bg-paper text-muted hover:bg-ink/30"
                   }`}
                 >
                   {num} Cabang
@@ -974,40 +975,40 @@ const Section3Voltage = () => {
       {/* Right: Text Content */}
       <div className="space-y-6 lg:order-1">
         <div className="flex items-center gap-4 mb-2">
-          <div className="w-1 h-12 bg-gradient-to-b from-emerald-400 to-green-400 rounded-full"></div>
-          <h2 className="text-4xl font-black bg-gradient-to-r from-emerald-400 via-green-400 to-teal-400 bg-clip-text text-transparent drop-shadow-lg">
+          <div className="w-1 h-12 bg-mint rounded-full"></div>
+          <h2 className="text-4xl font-black text-ink">
             Tegangan dalam Rangkaian Paralel
           </h2>
         </div>
         
         <div className="space-y-4">
-          <p className="text-lg text-slate-200 leading-relaxed">
-            Meskipun arusnya terbagi, tegangan pada setiap cabang paralel adalah <span className="font-bold text-green-400">sama besar</span>.
+          <p className="text-lg text-muted leading-relaxed">
+            Meskipun arusnya terbagi, tegangan pada setiap cabang paralel adalah <span className="font-bold text-emerald-700">sama besar</span>.
           </p>
-          <p className="text-lg text-slate-200 leading-relaxed">
+          <p className="text-lg text-muted leading-relaxed">
             Artinya, setiap terowongan &quot;merasakan&quot; tegangan yang sama dari sumber! Semua cabang terhubung langsung ke kutub positif dan negatif baterai.
           </p>
         </div>
 
-        <div className="bg-gradient-to-br from-green-500/10 to-emerald-500/10 rounded-2xl p-6 border border-green-400/30 backdrop-blur-sm hover:border-green-400/60 transition-all duration-300 hover:shadow-lg hover:shadow-green-500/20">
-          <h3 className="font-bold text-green-300 mb-3 flex items-center gap-2">
-            <span className="text-xl">📐</span>
+        <div className="bg-mint-soft rounded-2xl p-6 border-2 border-ink hover:border-ink transition-all duration-300">
+          <h3 className="font-bold text-emerald-700 mb-3 flex items-center gap-2">
+            <span className="text-xl"><Ico n="ruler" /></span>
             Rumus:
           </h3>
-          <p className="text-green-200 font-mono text-lg font-bold">
+          <p className="text-emerald-700 font-mono text-lg font-bold">
             V<sub>tot</sub> = V₁ = V₂ = V₃ = 12V
           </p>
-          <p className="text-green-200 text-sm mt-3">
+          <p className="text-ink text-sm mt-3">
             Tegangan sama di semua cabang!
           </p>
         </div>
 
-        <div className="bg-gradient-to-br from-teal-500/10 to-green-500/10 rounded-2xl p-6 border border-teal-400/30 backdrop-blur-sm hover:border-teal-400/60 transition-all duration-300 hover:shadow-lg hover:shadow-teal-500/20">
-          <h3 className="font-bold text-teal-300 mb-3 flex items-center gap-2">
-            <span className="text-xl">🚙</span>
+        <div className="bg-mint-soft rounded-2xl p-6 border-2 border-ink hover:border-ink transition-all duration-300">
+          <h3 className="font-bold text-emerald-700 mb-3 flex items-center gap-2">
+            <span className="text-xl"><Ico n="car" /></span>
             Analogi Terowongan:
           </h3>
-          <p className="text-teal-200 text-sm leading-relaxed">
+          <p className="text-ink text-sm leading-relaxed">
             Ada tiga terowongan sejajar yang semuanya berawal dari jalan utama dan berakhir di tempat yang sama. Mobil merasakan tenaga mesin (tegangan) yang sama — karena semua terhubung ke sumber tenaga yang sama.
           </p>
         </div>
@@ -1062,53 +1063,53 @@ const Section4Resistance = () => {
       {/* Right: Text Content */}
       <div className="space-y-6 lg:order-2">
         <div className="flex items-center gap-4 mb-2">
-          <div className="w-1 h-12 bg-gradient-to-b from-orange-400 to-red-400 rounded-full"></div>
-          <h2 className="text-4xl font-black bg-gradient-to-r from-orange-400 via-red-400 to-pink-400 bg-clip-text text-transparent drop-shadow-lg">
+          <div className="w-1 h-12 bg-lamp rounded-full"></div>
+          <h2 className="text-4xl font-black text-ink">
             Hambatan dalam Rangkaian Paralel
           </h2>
         </div>
         
         <div className="space-y-4">
-          <p className="text-lg text-slate-200 leading-relaxed">
-            Di rangkaian seri, menambah hambatan membuat arus makin kecil. Nah, di paralel, justru sebaliknya! <span className="font-bold text-orange-400">Semakin banyak cabang, hambatan total semakin kecil.</span>
+          <p className="text-lg text-muted leading-relaxed">
+            Di rangkaian seri, menambah hambatan membuat arus makin kecil. Nah, di paralel, justru sebaliknya! <span className="font-bold text-amber-700">Semakin banyak cabang, hambatan total semakin kecil.</span>
           </p>
-          <p className="text-lg text-slate-200 leading-relaxed">
-            <span className="font-bold text-red-400">Semakin banyak cabang, semakin mudah arus mengalir</span> — seperti jalan terbagi lebih banyak jalur!
+          <p className="text-lg text-muted leading-relaxed">
+            <span className="font-bold text-red-600">Semakin banyak cabang, semakin mudah arus mengalir</span> — seperti jalan terbagi lebih banyak jalur!
           </p>
         </div>
 
-        <div className="bg-gradient-to-br from-orange-500/10 to-red-500/10 rounded-2xl p-6 border border-orange-400/30 backdrop-blur-sm hover:border-orange-400/60 transition-all duration-300 hover:shadow-lg hover:shadow-orange-500/20">
-          <h3 className="font-bold text-orange-300 mb-3 flex items-center gap-2">
-            <span className="text-xl">📐</span>
+        <div className="bg-lamp-soft rounded-2xl p-6 border-2 border-ink hover:border-ink transition-all duration-300">
+          <h3 className="font-bold text-amber-700 mb-3 flex items-center gap-2">
+            <span className="text-xl"><Ico n="ruler" /></span>
             Rumus Hambatan Paralel:
           </h3>
-          <p className="text-orange-200 font-mono text-lg font-bold">
+          <p className="text-amber-700 font-mono text-lg font-bold">
             1/R<sub>tot</sub> = 1/R₁ + 1/R₂ + 1/R₃
           </p>
-          <p className="text-orange-200 text-sm mt-3">
-            ⭐ Hambatan total <strong>lebih kecil</strong> dari hambatan terkecil!
+          <p className="text-ink text-sm mt-3">
+            Hambatan total <strong>lebih kecil</strong> dari hambatan terkecil!
           </p>
         </div>
 
-        <div className="bg-gradient-to-br from-red-500/10 to-pink-500/10 rounded-2xl p-6 border border-red-400/30 backdrop-blur-sm hover:border-red-400/60 transition-all duration-300 hover:shadow-lg hover:shadow-red-500/20">
-          <h3 className="font-bold text-red-300 mb-3 flex items-center gap-2">
-            <span className="text-xl">🚗</span>
+        <div className="bg-coral-soft rounded-2xl p-6 border-2 border-ink hover:border-ink transition-all duration-300">
+          <h3 className="font-bold text-red-600 mb-3 flex items-center gap-2">
+            <span className="text-xl"><Ico n="car" /></span>
             Analogi Terowongan:
           </h3>
-          <p className="text-red-200 text-sm leading-relaxed mb-3">
+          <p className="text-ink text-sm leading-relaxed mb-3">
             Bayangkan <strong>3 terowongan paralel</strong> yang sepi mobil. Tapi jika buka lebih banyak terowongan, lebih banyak mobil bisa lewat bersamaan. Hambatan berkurang, arus mengalir lebih lancar!
           </p>
-          <p className="text-red-200 text-xs italic font-semibold">
-            💡 Klik tombol di bawah → lihat hambatan total berkurang! ⬇
+          <p className="text-red-600 text-xs italic font-semibold">
+            Klik tombol di bawah → lihat hambatan total berkurang! 
           </p>
         </div>
       </div>
             {/* Left: Visual */}
       <div className="relative group lg:order-1">
-        <div className="absolute -inset-3 bg-gradient-to-r from-orange-500/20 to-red-500/20 rounded-3xl blur-2xl opacity-50 group-hover:opacity-70 transition duration-1000"></div>
+        <div className="absolute -inset-3 bg-lamp-soft rounded-3xl hidden opacity-50 group-hover:opacity-70 transition duration-1000"></div>
         
-        <div className="relative rounded-3xl overflow-hidden bg-gradient-to-br from-slate-900 to-slate-800 border-2 border-orange-400/30 p-8 shadow-2xl">
-          <svg className="w-full h-full" viewBox="0 0 800 500">
+        <div className="relative rounded-3xl overflow-hidden bg-paper border-2 border-ink p-8 shadow-hard">
+          <svg className="w-full h-full rounded-xl bg-[#14172B]" viewBox="0 0 800 500">
             {/* Lintasan Tertutup - Rangkaian Paralel dengan Hambatan Visual */}
             
             {/* Define posisi cabang berdasarkan branchCount */}
@@ -1247,44 +1248,44 @@ const Section4Resistance = () => {
 
           {/* Info Boxes */}
           <div className="mt-6 space-y-3">
-            <div className="bg-orange-900/30 rounded-lg p-4 border border-orange-400/50">
-              <p className="text-orange-200 font-semibold text-center text-sm">
-                📊 Jumlah Cabang: {branchCount} | Hambatan Total: <span className="text-orange-300 font-bold">{R_total}Ω</span>
+            <div className="bg-lamp-soft rounded-lg p-4 border-2 border-ink">
+              <p className="text-amber-700 font-semibold text-center text-sm">
+                Jumlah Cabang: {branchCount} | Hambatan Total: <span className="text-amber-700 font-bold">{R_total}Ω</span>
               </p>
             </div>
-            <div className="bg-red-900/30 rounded-lg p-3 border border-red-400/50">
-              <p className="text-red-200 text-xs font-mono mb-2 text-center">
-                <span className="text-red-300 font-bold">1/R<sub>tot</sub> = 1/6</span>
+            <div className="bg-coral-soft rounded-lg p-3 border-2 border-ink">
+              <p className="text-ink text-xs font-mono mb-2 text-center">
+                <span className="text-red-600 font-bold">1/R<sub>tot</sub> = 1/6</span>
                 {branchCount > 1 && ` + 1/6`}
                 {branchCount > 2 && ` + 1/6`}
                 {branchCount > 3 && ` + 1/6`}
               </p>
-              <p className="text-red-300 text-xs font-bold text-center">
-                ⬇ R<sub>tot</sub> = {R_total}Ω ⬇
+              <p className="text-red-600 text-xs font-bold text-center">
+                R<sub>tot</sub> = {R_total}Ω 
               </p>
-              <p className="text-red-200 text-xs mt-2 text-center italic">
+              <p className="text-ink text-xs mt-2 text-center italic">
                 Semakin banyak cabang, hambatan total semakin kecil!
               </p>
             </div>
-            <div className="bg-amber-900/30 rounded-lg p-3 border border-amber-400/50">
-              <p className="text-amber-200 text-center text-xs">
-                ✨ <span className="font-bold">Jalur bertambah</span> → hambatan menurun ↓ → arus meningkat ↑
+            <div className="bg-lamp-soft rounded-lg p-3 border-2 border-ink">
+              <p className="text-ink text-center text-xs">
+                <span className="font-bold">Jalur bertambah</span> → hambatan menurun ↓ → arus meningkat ↑
               </p>
             </div>
           </div>
 
           {/* Interactive Controls */}
-          <div className="bg-slate-800/50 rounded-2xl p-6 border border-slate-600 mt-5">
-            <label className="text-orange-200 font-bold text-sm block mb-4">Klik tombol untuk menambah/mengurangi cabang:</label>
+          <div className="bg-paper rounded-2xl p-6 border-2 border-ink mt-5">
+            <label className="text-amber-700 font-bold text-sm block mb-4">Klik tombol untuk menambah/mengurangi cabang:</label>
             <div className="flex gap-3 flex-wrap">
               {[1, 2, 3, 4].map((num) => (
                 <button
                   key={num}
                   onClick={() => setBranchCount(num)}
-                  className={`px-4 py-2 rounded-lg font-bold transition-all transform hover:scale-110 ${
+                  className={`px-4 py-2 rounded-lg font-bold transition-all transform ${
                     branchCount === num
-                      ? "bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-lg shadow-orange-500/50"
-                      : "bg-slate-700 text-slate-200 hover:bg-slate-600"
+                      ? "bg-lamp text-ink"
+                      : "bg-paper text-muted hover:bg-ink/30"
                   }`}
                 >
                   {num} Cabang
@@ -1303,9 +1304,9 @@ const Section5RealExample = () => {
   const [activeDevices, setActiveDevices] = useState<Set<string>>(new Set());
   
   const devices = [
-    { id: "tv", name: "📺 TV", resistance: 220, color: "from-red-500 to-red-700", icon: "📺" },
-    { id: "charger", name: "🔌 Charger", resistance: 220, color: "from-blue-500 to-blue-700", icon: "🔌" },
-    { id: "fan", name: "🌀 Kipas", resistance: 440, color: "from-cyan-500 to-cyan-700", icon: "🌀" },
+    { id: "tv", name: "TV", resistance: 220, color: "bg-coral", icon: "tv" },
+    { id: "charger", name: "Charger", resistance: 220, color: "bg-brand", icon: "plug" },
+    { id: "fan", name: "Kipas", resistance: 440, color: "bg-brand", icon: "fan" },
   ];
 
   const V_total = 220; // Tegangan PLN
@@ -1350,24 +1351,24 @@ const Section5RealExample = () => {
       {/* Left: Text Content */}
       <div className="space-y-6">
         <div className="flex items-center gap-4 mb-2">
-          <div className="w-1 h-12 bg-gradient-to-b from-yellow-400 to-orange-400 rounded-full"></div>
-          <h2 className="text-4xl font-black bg-gradient-to-r from-yellow-400 via-amber-400 to-orange-400 bg-clip-text text-transparent drop-shadow-lg">
+          <div className="w-1 h-12 bg-lamp rounded-full"></div>
+          <h2 className="text-4xl font-black text-ink">
             Contoh Nyata: Stop Kontak
           </h2>
         </div>
         
         <div className="space-y-4">
-          <p className="text-lg text-slate-200 leading-relaxed">
+          <p className="text-lg text-muted leading-relaxed">
             Di rumah Anda, stop kontak dengan 3 atau lebih colokan menggunakan prinsip rangkaian paralel. Setiap alat (TV, charger, kipas) tersambung ke jalur yang sama dari PLN, tapi masing-masing punya cabangnya sendiri.
           </p>
-          <p className="text-lg text-slate-200 leading-relaxed">
-            <span className="font-bold text-yellow-400">Keuntungannya:</span> Kalau Anda cabut charger, TV dan kipas tetap menyala! Atau hidupkan semuanya sekaligus untuk membagi arus.
+          <p className="text-lg text-muted leading-relaxed">
+            <span className="font-bold text-amber-700">Keuntungannya:</span> Kalau Anda cabut charger, TV dan kipas tetap menyala! Atau hidupkan semuanya sekaligus untuk membagi arus.
           </p>
         </div>
 
-        <div className="bg-gradient-to-br from-yellow-500/10 to-amber-500/10 rounded-2xl p-6 border border-yellow-400/30">
-          <h3 className="font-bold text-yellow-300 mb-3">🏠 Keunggulan Rangkaian Paralel:</h3>
-          <ul className="space-y-2 text-yellow-200 text-sm">
+        <div className="bg-lamp-soft rounded-2xl p-6 border-2 border-ink">
+          <h3 className="font-bold text-amber-700 mb-3">Keunggulan Rangkaian Paralel:</h3>
+          <ul className="space-y-2 text-amber-700 text-sm">
             <li>✓ Tegangan penuh untuk setiap alat (220V)</li>
             <li>✓ Alat bisa dinyalakan/dimatikan terpisah</li>
             <li>✓ Jika satu rusak, yang lain tetap bekerja</li>
@@ -1376,20 +1377,20 @@ const Section5RealExample = () => {
         </div>
 
         {/* Current Status Info */}
-        <div className="bg-gradient-to-br from-orange-500/10 to-red-500/10 rounded-2xl p-6 border border-orange-400/30">
-          <h3 className="font-bold text-orange-300 mb-3">⚡ Status Saat Ini:</h3>
-          <div className="space-y-2 text-orange-200 text-sm">
+        <div className="bg-lamp-soft rounded-2xl p-6 border-2 border-ink">
+          <h3 className="font-bold text-amber-700 mb-3">Status Saat Ini:</h3>
+          <div className="space-y-2 text-ink text-sm">
             <div className="flex justify-between">
               <span>Alat Aktif:</span>
               <span className="font-bold">{activeDevices.size} dari {devices.length}</span>
             </div>
             <div className="flex justify-between">
               <span>Tegangan (V):</span>
-              <span className="font-bold text-yellow-300">{V_total}V</span>
+              <span className="font-bold text-amber-700">{V_total}V</span>
             </div>
             <div className="flex justify-between">
               <span>Arus Total:</span>
-              <span className="font-bold text-yellow-300">{activeCurrent}A</span>
+              <span className="font-bold text-amber-700">{activeCurrent}A</span>
             </div>
           </div>
         </div>
@@ -1397,54 +1398,54 @@ const Section5RealExample = () => {
 
       {/* Right: Interactive Visual */}
       <div className="relative group">
-        <div className="absolute -inset-3 bg-gradient-to-r from-yellow-500/20 to-amber-500/20 rounded-3xl blur-2xl opacity-50 group-hover:opacity-70 transition duration-1000"></div>
+        <div className="absolute -inset-3 bg-lamp-soft rounded-3xl hidden opacity-50 group-hover:opacity-70 transition duration-1000"></div>
         
-        <div className="relative rounded-3xl overflow-hidden bg-gradient-to-br from-slate-900 to-slate-800 border-2 border-yellow-400/30 p-8 shadow-2xl">
+        <div className="relative rounded-3xl overflow-hidden bg-paper border-2 border-ink p-8 shadow-hard">
           {/* Power Source - PLN */}
           <div className="text-center mb-12">
             <div className="inline-block">
-              <div className="w-20 h-32 bg-gradient-to-b from-red-500 to-red-700 rounded-lg border-4 border-red-600 flex flex-col items-center justify-center shadow-lg hover:shadow-red-500/50">
-                <span className="text-white font-bold text-3xl">⚡</span>
-                <span className="text-white text-xs font-bold mt-1">PLN</span>
+              <div className="w-20 h-32 bg-coral rounded-lg border-4 border-ink flex flex-col items-center justify-center">
+                <span className="text-white font-bold text-3xl"><Ico n="zap" /></span>
+                <span className="text-ink text-xs font-bold mt-1">PLN</span>
               </div>
-              <div className="text-xs font-bold text-yellow-300 mt-3">220V AC</div>
+              <div className="text-xs font-bold text-amber-700 mt-3">220V AC</div>
             </div>
           </div>
 
           {/* Kabel dari PLN ke Stop Kontak */}
           <div className="flex justify-center mb-8">
-            <div className="w-1 h-12 bg-gradient-to-b from-red-500 to-yellow-500 rounded-full animate-pulse"></div>
+            <div className="w-1 h-12 bg-coral rounded-full animate-pulse"></div>
           </div>
 
           {/* Stop Kontak dengan 3+ Lubang */}
           <div className="mb-8">
-            <div className="bg-gradient-to-b from-amber-100 to-amber-200 rounded-xl p-6 shadow-2xl border-4 border-amber-300">
+            <div className="bg-lamp-soft rounded-xl p-6 shadow-hard border-4 border-ink">
               <div className="grid grid-cols-3 gap-4 mb-4">
                 {devices.map((device, idx) => (
                   <div key={device.id} className="flex flex-col items-center">
                     {/* Stop Kontak Lubang */}
                     <div className="relative mb-3">
                       {/* Frame stop kontak */}
-                      <div className="w-24 h-32 bg-gradient-to-b from-yellow-100 to-yellow-200 rounded-lg border-2 border-yellow-400 flex flex-col items-center justify-center p-2 cursor-pointer transition-all transform hover:scale-105 relative"
+                      <div className="w-24 h-32 bg-lamp-soft rounded-lg border-2 border-ink flex flex-col items-center justify-center p-2 cursor-pointer transition-all transform relative"
                         onClick={() => toggleDevice(device.id)}
                       >
                         {/* Dua lubang stop kontak */}
                         <div className="flex gap-2 mb-2">
-                          <div className="w-2 h-3 bg-gray-400 rounded-full"></div>
-                          <div className="w-2 h-3 bg-gray-400 rounded-full"></div>
+                          <div className="w-2 h-3 bg-ink/20 rounded-full"></div>
+                          <div className="w-2 h-3 bg-ink/20 rounded-full"></div>
                         </div>
                         
                         {/* Indikator aktif */}
                         {activeDevices.has(device.id) && (
-                          <div className="absolute inset-1 bg-yellow-300/30 rounded-lg animate-pulse border-2 border-yellow-400"></div>
+                          <div className="absolute inset-1 bg-lamp-soft rounded-lg hidden border-2 border-ink"></div>
                         )}
                         
                         {/* Icon alat */}
-                        <div className="text-3xl mb-1">{device.icon}</div>
+                        <div className="text-3xl mb-1"><Ico n={device.icon} /></div>
                         
                         {/* Status dan Arus */}
                         <div className="text-center">
-                          <p className="text-xs font-bold text-gray-700">{device.name.split(" ")[1]}</p>
+                          <p className="text-xs font-bold text-ink">{device.name.split(" ")[1]}</p>
                           {activeDevices.has(device.id) && (
                             <p className="text-xs text-green-600 font-semibold">{(V_total / device.resistance).toFixed(2)}A</p>
                           )}
@@ -1454,8 +1455,8 @@ const Section5RealExample = () => {
                         {activeDevices.has(device.id) && (
                           <div className="absolute -top-2 left-1/2 transform -translate-x-1/2">
                             <div className="flex gap-1">
-                              <div className="w-1 h-4 bg-yellow-400 rounded-full animate-pulse"></div>
-                              <div className="w-1 h-4 bg-yellow-400 rounded-full animate-pulse" style={{ animationDelay: "0.1s" }}></div>
+                              <div className="w-1 h-4 bg-lamp rounded-full animate-pulse"></div>
+                              <div className="w-1 h-4 bg-lamp rounded-full animate-pulse" style={{ animationDelay: "0.1s" }}></div>
                             </div>
                           </div>
                         )}
@@ -1467,8 +1468,8 @@ const Section5RealExample = () => {
                       onClick={() => toggleDevice(device.id)}
                       className={`px-3 py-1 rounded-lg font-bold text-xs transition-all ${
                         activeDevices.has(device.id)
-                          ? `bg-gradient-to-r ${device.color} text-white shadow-lg`
-                          : "bg-gray-400 text-gray-700 hover:bg-gray-500"
+                          ? `${device.color} text-white`
+                          : "bg-ink/20 text-ink hover:bg-ink/30"
                       }`}
                     >
                       {activeDevices.has(device.id) ? "✓ ON" : "OFF"}
@@ -1478,32 +1479,32 @@ const Section5RealExample = () => {
               </div>
 
               {/* Ampere Rating */}
-              <div className="text-center text-xs text-gray-600 font-bold border-t-2 border-yellow-300 pt-3">
-                ⚡ Rated: 16A maksimal
+              <div className="text-center text-xs text-muted font-bold border-t-2 border-ink pt-3">
+                Rated: 16A maksimal
               </div>
             </div>
           </div>
 
           {/* Status Arus */}
-          <div className="bg-gradient-to-br from-yellow-900/50 to-orange-900/50 rounded-lg p-4 border border-yellow-400/60 space-y-3">
+          <div className="bg-lamp-soft rounded-lg p-4 border-2 border-ink space-y-3">
             {/* Total Current Display */}
             <div className="flex items-center justify-between">
-              <span className="text-yellow-200 font-semibold text-sm">🔌 Arus Total:</span>
-              <span className="text-yellow-300 font-bold text-lg">{activeCurrent}A</span>
+              <span className="text-amber-700 font-semibold text-sm">Arus Total:</span>
+              <span className="text-amber-700 font-bold text-lg">{activeCurrent}A</span>
             </div>
 
             {/* Active Devices List */}
             {activeDevices.size > 0 && (
-              <div className="bg-black/30 rounded p-2 border border-yellow-400/40">
-                <p className="text-yellow-200 text-xs font-semibold mb-2">Alat Aktif & Arus:</p>
+              <div className="bg-black/30 rounded p-2 border-2 border-ink">
+                <p className="text-amber-700 text-xs font-semibold mb-2">Alat Aktif & Arus:</p>
                 <div className="space-y-1">
                   {devices.map(device => {
                     if (activeDevices.has(device.id)) {
                       const I = (V_total / device.resistance).toFixed(2);
                       return (
-                        <div key={device.id} className="flex justify-between text-xs bg-slate-700/50 px-2 py-1 rounded border border-yellow-400/30">
-                          <span className="text-yellow-200">{device.name}</span>
-                          <span className="text-yellow-300 font-bold">I = 220V ÷ {device.resistance}Ω = {I}A</span>
+                        <div key={device.id} className="flex justify-between text-xs bg-paper px-2 py-1 rounded border-2 border-ink">
+                          <span className="text-ink">{device.name}</span>
+                          <span className="text-amber-700 font-bold">I = 220V ÷ {device.resistance}Ω = {I}A</span>
                         </div>
                       );
                     }
@@ -1515,15 +1516,15 @@ const Section5RealExample = () => {
 
             {/* Empty State */}
             {activeDevices.size === 0 && (
-              <div className="text-center text-yellow-300/70 text-sm font-semibold italic">
-                💡 Klik stop kontak untuk menghubungkan alat
+              <div className="text-center text-amber-700 text-sm font-semibold italic">
+                Klik stop kontak untuk menghubungkan alat
               </div>
             )}
           </div>
 
           {/* Info Text */}
-          <div className="text-xs text-center text-slate-400 mt-4">
-            ✅ Klík stop kontak untuk menyalakan/mematikan | 🎯 Bisa mengoperasikan semuanya sekaligus
+          <div className="text-xs text-center text-muted mt-4">
+            Klík stop kontak untuk menyalakan/mematikan | Bisa mengoperasikan semuanya sekaligus
           </div>
         </div>
       </div>
@@ -1548,31 +1549,31 @@ const Section6Calculation = () => {
 
   return (
     <div className="space-y-8 opacity-0 animate-fade-in" style={{ animationDelay: "0.8s" }}>
-      <h2 className="text-4xl font-black bg-gradient-to-r from-cyan-400 via-blue-400 to-indigo-400 bg-clip-text text-transparent drop-shadow-lg">
+      <h2 className="text-4xl font-black text-ink">
         Soal dan Perhitungan
       </h2>
 
       {/* Problem Statement */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <div className="relative group">
-          <div className="absolute -inset-3 bg-gradient-to-r from-cyan-500/20 to-blue-500/20 rounded-3xl blur-2xl opacity-50 group-hover:opacity-70 transition duration-1000"></div>
+          <div className="absolute -inset-3 bg-brand-soft rounded-3xl hidden opacity-50 group-hover:opacity-70 transition duration-1000"></div>
           
-          <div className="relative rounded-3xl bg-gradient-to-br from-slate-900 to-slate-800 border-2 border-cyan-400/30 p-8 shadow-2xl">
-            <h3 className="text-xl font-bold text-cyan-300 mb-4">� Persoalan:</h3>
-            <p className="text-slate-200 mb-4">
+          <div className="relative rounded-3xl bg-paper border-2 border-ink p-8 shadow-hard">
+            <h3 className="text-xl font-bold text-brand mb-4">Persoalan:</h3>
+            <p className="text-muted mb-4">
               Dua buah hambatan disusun paralel dan dihubungkan dengan baterai 12 V:
             </p>
 
             {/* Circuit Diagram */}
-            <div className="bg-gradient-to-b from-slate-900 to-slate-800 rounded-lg p-6 border border-cyan-500/20 mb-6 h-64 overflow-hidden flex items-center justify-center">
-              <svg className="w-full h-full" viewBox="0 0 600 200" preserveAspectRatio="xMidYMid meet">
+            <div className="bg-paper rounded-lg p-6 border-2 border-ink mb-6 h-64 overflow-hidden flex items-center justify-center">
+              <svg className="w-full h-full rounded-xl bg-[#14172B]" viewBox="0 0 600 200" preserveAspectRatio="xMidYMid meet">
                 {/* Power line - left vertical */}
                 <line x1="50" y1="50" x2="50" y2="150" stroke="rgba(255, 200, 0, 0.6)" strokeWidth="3" />
                 
                 {/* Battery */}
                 <g>
                   <circle cx="50" cy="100" r="15" fill="none" stroke="rgba(255, 100, 100, 0.8)" strokeWidth="2" />
-                  <text x="50" y="105" textAnchor="middle" fill="rgba(255, 100, 100, 0.9)" fontSize="18" fontWeight="bold">🔋</text>
+                  <Ico n="battery" x={41} y={89.7} width={18} height={18} color="rgba(255, 100, 100, 0.9)" />
                 </g>
 
                 {/* Top parallel line */}
@@ -1656,12 +1657,12 @@ const Section6Calculation = () => {
                 })}
               </svg>
             </div>
-            <ul className="text-slate-300 space-y-2 text-sm font-mono">
+            <ul className="text-muted space-y-2 text-sm font-mono">
               <li>• R₁ = 6 Ω</li>
               <li>• R₂ = 6 Ω</li>
             </ul>
-            <p className="text-cyan-200 font-bold mt-4 text-sm">Hitunglah:</p>
-            <ul className="text-cyan-200 space-y-1 text-sm mt-2">
+            <p className="text-muted font-bold mt-4 text-sm">Hitunglah:</p>
+            <ul className="text-muted space-y-1 text-sm mt-2">
               <li>1. Tegangan pada masing-masing hambatan</li>
               <li>2. Arus pada masing-masing hambatan</li>
               <li>3. Arus total pada rangkaian</li>
@@ -1672,56 +1673,56 @@ const Section6Calculation = () => {
 
         {/* Interactive Calculator */}
         <div className="relative group">
-          <div className="absolute -inset-3 bg-gradient-to-r from-green-500/20 to-emerald-500/20 rounded-3xl blur-2xl opacity-50 group-hover:opacity-70 transition duration-1000"></div>
+          <div className="absolute -inset-3 bg-mint-soft rounded-3xl hidden opacity-50 group-hover:opacity-70 transition duration-1000"></div>
           
-          <div className="relative rounded-3xl bg-gradient-to-br from-slate-900 to-slate-800 border-2 border-green-400/30 p-8 shadow-2xl">
-            <h3 className="text-xl font-bold text-green-300 mb-4">🎯 Solusi:</h3>
+          <div className="relative rounded-3xl bg-paper border-2 border-ink p-8 shadow-hard">
+            <h3 className="text-xl font-bold text-emerald-700 mb-4">Solusi:</h3>
             
             <div className="space-y-3 text-sm">
-              <div className="bg-green-500/10 border border-green-400/50 rounded p-3">
-                <p className="text-green-200 font-mono">V<sub>tot</sub> = V₁ = V₂ = <span className="font-bold text-green-300">{V_total} V</span></p>
-                <p className="text-green-200 text-xs mt-1">Tegangan sama untuk semua cabang</p>
+              <div className="bg-mint-soft border-2 border-ink rounded p-3">
+                <p className="text-emerald-700 font-mono">V<sub>tot</sub> = V₁ = V₂ = <span className="font-bold text-emerald-700">{V_total} V</span></p>
+                <p className="text-ink text-xs mt-1">Tegangan sama untuk semua cabang</p>
               </div>
               
-              <div className="bg-cyan-500/10 border border-cyan-400/50 rounded p-3">
-                <p className="text-cyan-200 font-mono text-xs">I₁ = V / R₁ = {V_total} / {R1} = <span className="font-bold text-cyan-300">{I1} A</span></p>
-                <p className="text-cyan-200 font-mono text-xs">I₂ = V / R₂ = {V_total} / {R2} = <span className="font-bold text-cyan-300">{I2} A</span></p>
+              <div className="bg-brand-soft border-2 border-ink rounded p-3">
+                <p className="text-muted font-mono text-xs">I₁ = V / R₁ = {V_total} / {R1} = <span className="font-bold text-brand">{I1} A</span></p>
+                <p className="text-muted font-mono text-xs">I₂ = V / R₂ = {V_total} / {R2} = <span className="font-bold text-brand">{I2} A</span></p>
               </div>
 
-              <div className="bg-yellow-500/10 border border-yellow-400/50 rounded p-3">
-                <p className="text-yellow-200 font-mono">I<sub>tot</sub> = I₁ + I₂ = {I1} + {I2} = <span className="font-bold text-yellow-300">{I_total} A</span></p>
+              <div className="bg-lamp-soft border-2 border-ink rounded p-3">
+                <p className="text-amber-700 font-mono">I<sub>tot</sub> = I₁ + I₂ = {I1} + {I2} = <span className="font-bold text-amber-700">{I_total} A</span></p>
               </div>
 
-              <div className="bg-purple-500/10 border border-purple-400/50 rounded p-3">
-                <p className="text-purple-200 font-mono text-xs"><span className="font-bold">Jika satu hambatan putus:</span> Arus masih bisa lewat cabang lain ✓</p>
+              <div className="bg-purple-100 border-2 border-ink rounded p-3">
+                <p className="text-muted font-mono text-xs"><span className="font-bold">Jika satu hambatan putus:</span> Arus masih bisa lewat cabang lain ✓</p>
               </div>
             </div>
           </div>
         
         {/* Comparison: Effect of Branch Count */}
       <div className="relative group mt-5">
-        <div className="absolute -inset-3 bg-gradient-to-r from-orange-500/20 to-red-500/20 rounded-3xl blur-2xl opacity-50 group-hover:opacity-70 transition duration-1000"></div>
+        <div className="absolute -inset-3 bg-lamp-soft rounded-3xl hidden opacity-50 group-hover:opacity-70 transition duration-1000"></div>
         
-            <div className="relative rounded-3xl bg-gradient-to-br from-slate-900 to-slate-800 border-2 border-orange-400/30 p-8 shadow-2xl">
-              <h3 className="text-xl font-bold text-orange-300 mb-4">📈 Dampak Jumlah Cabang terhadap Arus Total:</h3>
+            <div className="relative rounded-3xl bg-paper border-2 border-ink p-8 shadow-hard">
+              <h3 className="text-xl font-bold text-amber-700 mb-4">Dampak Jumlah Cabang terhadap Arus Total:</h3>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="bg-orange-500/10 border border-orange-400/50 rounded-lg p-4 text-center">
-                  <p className="text-orange-300 font-bold mb-2">1 Cabang</p>
-                  <p className="text-orange-200 font-mono font-bold text-lg">I = {I1.toFixed(2)} A</p>
-                  <p className="text-orange-200/60 text-xs mt-2">Arus dari 1 cabang saja</p>
+                <div className="bg-lamp-soft border-2 border-ink rounded-lg p-4 text-center">
+                  <p className="text-amber-700 font-bold mb-2">1 Cabang</p>
+                  <p className="text-amber-700 font-mono font-bold text-lg">I = {I1.toFixed(2)} A</p>
+                  <p className="text-ink text-xs mt-2">Arus dari 1 cabang saja</p>
                 </div>
                 
-                <div className="bg-orange-500/10 border border-orange-400/50 rounded-lg p-4 text-center">
-                  <p className="text-orange-300 font-bold mb-2">2 Cabang</p>
-                  <p className="text-orange-200 font-mono font-bold text-lg">I = {I_total.toFixed(2)} A</p>
-                  <p className="text-orange-200/60 text-xs mt-2">Arus bertambah!</p>
+                <div className="bg-lamp-soft border-2 border-ink rounded-lg p-4 text-center">
+                  <p className="text-amber-700 font-bold mb-2">2 Cabang</p>
+                  <p className="text-amber-700 font-mono font-bold text-lg">I = {I_total.toFixed(2)} A</p>
+                  <p className="text-ink text-xs mt-2">Arus bertambah!</p>
                 </div>
               </div>
 
-              <div className="bg-red-500/10 border border-red-400/30 rounded-lg p-4 mt-4">
-                <p className="text-red-200 font-semibold text-sm">
-                  ⚡ <span className="font-bold">Kesimpulan:</span> Pada rangkaian paralel, semakin banyak cabang, hambatan total berkurang, sehingga arus total bertambah!
+              <div className="bg-coral-soft border-2 border-ink rounded-lg p-4 mt-4">
+                <p className="text-red-600 font-semibold text-sm">
+                  <span className="font-bold">Kesimpulan:</span> Pada rangkaian paralel, semakin banyak cabang, hambatan total berkurang, sehingga arus total bertambah!
                 </p>
               </div>
             </div>
@@ -1738,20 +1739,20 @@ const Section7Summary = () => {
   const [selectedAspect, setSelectedAspect] = useState<number | null>(null);
   
   const characteristics = [
-    { aspect: "Jalur Arus", paralel: "Lebih dari satu jalur (bercabang)", detail: "I_tot = I₁ + I₂ + I₃ + ...", icon: "🔀", color: "from-blue-500 to-cyan-500" },
-    { aspect: "Tegangan (V)", paralel: "Sama di semua cabang", detail: "V = V₁ = V₂ = V₃ = ...", icon: "🔋", color: "from-green-500 to-emerald-500" },
-    { aspect: "Hambatan (R)", paralel: "Lebih kecil dari terkecil", detail: "1/R_tot = 1/R₁ + 1/R₂ + ...", icon: "🌊", color: "from-orange-500 to-red-500" },
-    { aspect: "Jika Rusak", paralel: "Cabang lain tetap bekerja", detail: "Independen dan redundan", icon: "✅", color: "from-purple-500 to-pink-500" },
-    { aspect: "Contoh Nyata", paralel: "Stop kontak rumah, jalan raya", detail: "Instalasi listrik yang aman", icon: "🏠", color: "from-yellow-500 to-amber-500" },
+    { aspect: "Jalur Arus", paralel: "Lebih dari satu jalur (bercabang)", detail: "I_tot = I₁ + I₂ + I₃ + ...", icon: "shuffle", color: "bg-brand" },
+    { aspect: "Tegangan (V)", paralel: "Sama di semua cabang", detail: "V = V₁ = V₂ = V₃ = ...", icon: "battery", color: "bg-mint" },
+    { aspect: "Hambatan (R)", paralel: "Lebih kecil dari terkecil", detail: "1/R_tot = 1/R₁ + 1/R₂ + ...", icon: "waves", color: "bg-lamp" },
+    { aspect: "Jika Rusak", paralel: "Cabang lain tetap bekerja", detail: "Independen dan redundan", icon: "check", color: "bg-purple-500" },
+    { aspect: "Contoh Nyata", paralel: "Stop kontak rumah, jalan raya", detail: "Instalasi listrik yang aman", icon: "home", color: "bg-lamp" },
   ];
 
   return (
     <div className="space-y-12 opacity-0 animate-fade-in" style={{ animationDelay: "0.8s" }}>
       <div className="text-center mb-12">
-        <h2 className="text-5xl font-black bg-gradient-to-r from-purple-400 via-pink-400 to-red-400 bg-clip-text text-transparent drop-shadow-lg mb-4">
-          🎓 Ringkasan: Ciri-Ciri Rangkaian Paralel
+        <h2 className="text-5xl font-black text-ink mb-4">
+          Ringkasan: Ciri-Ciri Rangkaian Paralel
         </h2>
-        <p className="text-slate-300 text-lg">Klik pada setiap item untuk melihat detail lebih lanjut</p>
+        <p className="text-muted text-lg">Klik pada setiap item untuk melihat detail lebih lanjut</p>
       </div>
 
       {/* Characteristics Grid */}
@@ -1759,40 +1760,40 @@ const Section7Summary = () => {
         {characteristics.map((char, idx) => (
           <div
             key={idx}
-            className="relative group cursor-pointer opacity-0 animate-fade-in transition-all transform hover:scale-105"
+            className="relative group cursor-pointer opacity-0 animate-fade-in transition-all transform"
             style={{ animationDelay: `${0.1 + idx * 0.08}s` }}
             onClick={() => setSelectedAspect(selectedAspect === idx ? null : idx)}
           >
-            <div className={`absolute -inset-2 bg-gradient-to-r ${char.color} rounded-xl blur-lg opacity-30 group-hover:opacity-60 transition duration-500`}></div>
+            <div className={`absolute -inset-2 ${char.color} rounded-xl hidden opacity-30 group-hover:opacity-60 transition duration-500`}></div>
             
-            <div className={`relative bg-gradient-to-br from-slate-900 to-slate-800 border-2 rounded-xl p-6 shadow-xl transition-all ${
+            <div className={`relative bg-paper border-2 rounded-xl p-6 transition-all ${
               selectedAspect === idx 
-                ? `border-transparent bg-gradient-to-br ${char.color} shadow-2xl` 
-                : `border-slate-700 hover:border-slate-600`
+                ? `border-transparent ${char.color} shadow-hard` 
+                : `border-ink hover:border-ink`
             }`}>
               {/* Icon */}
               <div className={`text-5xl mb-3 transition-transform ${selectedAspect === idx ? 'scale-110' : ''}`}>
-                {char.icon}
+                <Ico n={char.icon} />
               </div>
               
               {/* Title */}
               <h3 className={`font-black text-lg mb-2 transition-all ${
-                selectedAspect === idx ? 'text-white' : 'text-slate-200'
+                selectedAspect === idx ? 'text-ink' : 'text-muted'
               }`}>
                 {char.aspect}
               </h3>
               
               {/* Description */}
               <p className={`text-sm mb-3 transition-all ${
-                selectedAspect === idx ? 'text-white font-semibold' : 'text-slate-400'
+                selectedAspect === idx ? 'text-ink font-semibold' : 'text-muted'
               }`}>
                 {char.paralel}
               </p>
               
               {/* Expandable Detail */}
               {selectedAspect === idx && (
-                <div className="mt-4 pt-4 border-t border-white/20 animate-fade-in">
-                  <p className="text-xs font-mono text-white/80 bg-black/30 p-3 rounded-lg">
+                <div className="mt-4 pt-4 border-t border-ink animate-fade-in">
+                  <p className="text-xs font-mono text-white bg-black/30 p-3 rounded-lg">
                     {char.detail}
                   </p>
                 </div>
@@ -1804,27 +1805,27 @@ const Section7Summary = () => {
 
       {/* Key Takeaway - Enhanced */}
       <div className="relative group mt-12">
-        <div className="absolute -inset-4 bg-gradient-to-r from-yellow-500/40 via-orange-500/40 to-red-500/40 rounded-3xl blur-3xl opacity-50 group-hover:opacity-75 transition duration-1000"></div>
+        <div className="absolute -inset-4 bg-lamp-soft rounded-3xl hidden opacity-50 group-hover:opacity-75 transition duration-1000"></div>
         
-        <div className="relative rounded-3xl bg-gradient-to-br from-slate-900 to-slate-800 border-2 border-yellow-400/60 p-10 shadow-2xl overflow-hidden">
+        <div className="relative rounded-3xl bg-paper border-2 border-ink p-10 shadow-hard overflow-hidden">
           {/* Decorative background */}
-          <div className="absolute top-0 right-0 w-40 h-40 bg-yellow-500/10 rounded-full blur-3xl -z-10"></div>
+          <div className="absolute top-0 right-0 w-40 h-40 bg-lamp-soft rounded-full hidden -z-10"></div>
           
           <div className="flex items-start gap-6">
-            <div className="text-6xl flex-shrink-0 animate-bounce" style={{ animationDuration: '2s' }}>🎯</div>
+            <div className="text-6xl flex-shrink-0 animate-bounce" style={{ animationDuration: '2s' }}><Ico n="target" /></div>
             
             <div className="flex-1">
-              <h3 className="text-3xl font-black text-yellow-300 mb-6">Poin Penting</h3>
+              <h3 className="text-3xl font-black text-amber-700 mb-6">Poin Penting</h3>
               <ul className="space-y-4">
                 {[
-                  { icon: "�", text: "Rangkaian paralel memiliki lebih dari satu jalur untuk arus mengalir" },
-                  { icon: "⚡", text: "Arus terbagi di cabang, tetapi tegangan tetap sama di semua cabang" },
-                  { icon: "📈", text: "Semakin banyak cabang, hambatan total semakin kecil, arus total meningkat" },
-                  { icon: "✅", text: "Jika satu komponen rusak, komponen lain tetap bekerja dengan independen" },
+                  { icon: "shuffle", text: "Rangkaian paralel memiliki lebih dari satu jalur untuk arus mengalir" },
+                  { icon: "zap", text: "Arus terbagi di cabang, tetapi tegangan tetap sama di semua cabang" },
+                  { icon: "trending-up", text: "Semakin banyak cabang, hambatan total semakin kecil, arus total meningkat" },
+                  { icon: "check", text: "Jika satu komponen rusak, komponen lain tetap bekerja dengan independen" },
                 ].map((point, i) => (
-                  <li key={i} className="flex gap-4 group/item cursor-pointer transition-transform hover:translate-x-2">
-                    <span className="text-2xl flex-shrink-0 group-hover/item:scale-125 transition-transform">{point.icon}</span>
-                    <span className="text-yellow-100 text-lg leading-relaxed font-medium">{point.text}</span>
+                  <li key={i} className="flex gap-4 group/item cursor-pointer transition-transform">
+                    <span className="text-2xl flex-shrink-0 transition-transform"><Ico n={point.icon} /></span>
+                    <span className="text-ink text-lg leading-relaxed font-medium">{point.text}</span>
                   </li>
                 ))}
               </ul>
@@ -1832,25 +1833,25 @@ const Section7Summary = () => {
           </div>
 
           {/* Bottom accent line */}
-          <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-yellow-400 via-orange-400 to-red-400"></div>
+          <div className="absolute bottom-0 left-0 right-0 h-1 bg-lamp"></div>
         </div>
       </div>
 
       {/* Formula Reference */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="relative group">
-          <div className="absolute -inset-2 bg-gradient-to-r from-blue-500/20 to-cyan-500/20 rounded-xl blur-lg opacity-40 group-hover:opacity-70 transition duration-500"></div>
+          <div className="absolute -inset-2 bg-brand-soft rounded-xl hidden opacity-40 group-hover:opacity-70 transition duration-500"></div>
           
-          <div className="relative bg-gradient-to-br from-slate-900 to-slate-800 border-2 border-blue-400/40 rounded-xl p-6 shadow-xl">
-            <h4 className="text-xl font-black text-blue-300 mb-4">📐 Rumus Dasar</h4>
-            <div className="space-y-3 font-mono text-sm text-blue-200">
-              <div className="bg-blue-500/10 p-3 rounded border border-blue-400/30">
+          <div className="relative bg-paper border-2 border-ink rounded-xl p-6">
+            <h4 className="text-xl font-black text-brand mb-4">Rumus Dasar</h4>
+            <div className="space-y-3 font-mono text-sm text-muted">
+              <div className="bg-brand-soft p-3 rounded border-2 border-ink">
                 <p>I<sub>tot</sub> = I₁ + I₂ + I₃</p>
               </div>
-              <div className="bg-blue-500/10 p-3 rounded border border-blue-400/30">
+              <div className="bg-brand-soft p-3 rounded border-2 border-ink">
                 <p>V = V₁ = V₂ = V₃</p>
               </div>
-              <div className="bg-blue-500/10 p-3 rounded border border-blue-400/30">
+              <div className="bg-brand-soft p-3 rounded border-2 border-ink">
                 <p>1/R = 1/R₁ + 1/R₂ + 1/R₃</p>
               </div>
             </div>
@@ -1858,18 +1859,18 @@ const Section7Summary = () => {
         </div>
 
         <div className="relative group">
-          <div className="absolute -inset-2 bg-gradient-to-r from-purple-500/20 to-pink-500/20 rounded-xl blur-lg opacity-40 group-hover:opacity-70 transition duration-500"></div>
+          <div className="absolute -inset-2 bg-purple-100 rounded-xl hidden opacity-40 group-hover:opacity-70 transition duration-500"></div>
           
-          <div className="relative bg-gradient-to-br from-slate-900 to-slate-800 border-2 border-purple-400/40 rounded-xl p-6 shadow-xl">
-            <h4 className="text-xl font-black text-purple-300 mb-4">💡 Hukum Ohm</h4>
-            <div className="space-y-3 font-mono text-sm text-purple-200">
-              <div className="bg-purple-500/10 p-3 rounded border border-purple-400/30">
+          <div className="relative bg-paper border-2 border-ink rounded-xl p-6">
+            <h4 className="text-xl font-black text-purple-700 mb-4">Hukum Ohm</h4>
+            <div className="space-y-3 font-mono text-sm text-muted">
+              <div className="bg-purple-100 p-3 rounded border-2 border-ink">
                 <p>V = I × R</p>
               </div>
-              <div className="bg-purple-500/10 p-3 rounded border border-purple-400/30">
+              <div className="bg-purple-100 p-3 rounded border-2 border-ink">
                 <p>I = V / R</p>
               </div>
-              <div className="bg-purple-500/10 p-3 rounded border border-purple-400/30">
+              <div className="bg-purple-100 p-3 rounded border-2 border-ink">
                 <p>R = V / I</p>
               </div>
             </div>
@@ -1879,15 +1880,15 @@ const Section7Summary = () => {
 
       {/* Comparison Table */}
       <div className="relative group">
-        <div className="absolute -inset-3 bg-gradient-to-r from-green-500/20 to-teal-500/20 rounded-2xl blur-2xl opacity-40 group-hover:opacity-60 transition duration-1000"></div>
+        <div className="absolute -inset-3 bg-mint-soft rounded-2xl hidden opacity-40 group-hover:opacity-60 transition duration-1000"></div>
         
-        <div className="relative rounded-2xl bg-gradient-to-br from-slate-900 to-slate-800 border-2 border-green-400/40 p-8 shadow-2xl overflow-x-auto">
-          <h4 className="text-2xl font-black text-green-300 mb-6">📊 Tabel Perbandingan</h4>
+        <div className="relative rounded-2xl bg-paper border-2 border-ink p-8 shadow-hard overflow-x-auto">
+          <h4 className="text-2xl font-black text-emerald-700 mb-6">Tabel Perbandingan</h4>
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b-2 border-green-400/50">
-                <th className="text-left py-3 px-4 text-green-300 font-bold">Karakteristik</th>
-                <th className="text-left py-3 px-4 text-green-300 font-bold">Rangkaian Paralel</th>
+              <tr className="border-b-2 border-ink">
+                <th className="text-left py-3 px-4 text-emerald-700 font-bold">Karakteristik</th>
+                <th className="text-left py-3 px-4 text-emerald-700 font-bold">Rangkaian Paralel</th>
               </tr>
             </thead>
             <tbody>
@@ -1898,9 +1899,9 @@ const Section7Summary = () => {
                 { char: "Hambatan (R)", desc: "1/R_tot = Σ 1/R" },
                 { char: "Jika Rusak", desc: "Yang lain tetap bekerja" },
               ].map((row, i) => (
-                <tr key={i} className={`border-b border-green-400/20 hover:bg-green-500/10 transition ${i % 2 === 0 ? 'bg-green-500/5' : ''}`}>
-                  <td className="py-3 px-4 text-green-200 font-semibold">{row.char}</td>
-                  <td className="py-3 px-4 text-green-100">{row.desc}</td>
+                <tr key={i} className={`border-b border-ink hover:bg-mint-soft transition ${i % 2 === 0 ? 'bg-mint-soft' : ''}`}>
+                  <td className="py-3 px-4 text-emerald-700 font-semibold">{row.char}</td>
+                  <td className="py-3 px-4 text-ink">{row.desc}</td>
                 </tr>
               ))}
             </tbody>
@@ -1967,27 +1968,27 @@ const ModuleParallelPageNew = ({ isCompleted = false, onMarkComplete }: ModulePa
 
   if (!isClient) {
     return (
-      <div className="min-h-screen bg-slate-900 flex items-center justify-center">
-        <div className="text-white">Loading...</div>
+      <div className="min-h-screen bg-transparent flex items-center justify-center">
+        <div className="text-ink">Loading...</div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 relative overflow-hidden">
+    <div className="min-h-screen bg-transparent relative">
       {/* Audio Player */}
       {isClient && <AudioPlayer onTimestampReached={handleTimestampReached} />}
 
       {/* Animated Background */}
       <div className="fixed inset-0 -z-10 overflow-hidden pointer-events-none">
-        <div className="absolute top-20 left-10 w-72 h-72 bg-emerald-500/10 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute top-40 right-20 w-96 h-96 bg-teal-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: "1s" }}></div>
-        <div className="absolute bottom-20 left-1/3 w-80 h-80 bg-green-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: "2s" }}></div>
+        <div className="absolute top-20 left-10 w-72 h-72 bg-mint-soft rounded-full hidden animate-pulse"></div>
+        <div className="absolute top-40 right-20 w-96 h-96 bg-mint-soft rounded-full hidden animate-pulse" style={{ animationDelay: "1s" }}></div>
+        <div className="absolute bottom-20 left-1/3 w-80 h-80 bg-mint-soft rounded-full hidden animate-pulse" style={{ animationDelay: "2s" }}></div>
         
         {[...Array(20)].map((_, i) => (
           <div
             key={i}
-            className="absolute w-1 h-1 bg-emerald-400/30 rounded-full animate-ping"
+            className="absolute w-1 h-1 bg-mint-soft rounded-full hidden"
             style={{
               left: `${Math.random() * 100}%`,
               top: `${Math.random() * 100}%`,
@@ -2003,177 +2004,84 @@ const ModuleParallelPageNew = ({ isCompleted = false, onMarkComplete }: ModulePa
         <Navbar />
       </div>
 
-      {/* Hero Section */}
-      <div className="relative bg-gradient-to-br from-emerald-950 via-slate-900 to-slate-900 text-white py-20 px-6 overflow-hidden">
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute -top-20 -right-20 w-96 h-96 bg-emerald-500/20 rounded-full blur-3xl animate-pulse"></div>
-          <div className="absolute -bottom-10 -left-10 w-96 h-96 bg-teal-500/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: "1s" }}></div>
-          
-          {[...Array(15)].map((_, i) => (
-            <div
-              key={i}
-              className="absolute w-1 h-1 bg-emerald-400/40 rounded-full animate-ping"
-              style={{
-                left: `${Math.random() * 100}%`,
-                top: `${Math.random() * 100}%`,
-                animationDelay: `${Math.random() * 3}s`,
-                animationDuration: `${3 + Math.random() * 2}s`,
-              }}
-            ></div>
-          ))}
-        </div>
-
-        <div className="max-w-7xl mx-auto relative z-10">
-          <div className="flex items-start justify-between gap-8 mb-8 opacity-0 animate-fade-in" style={{ animationDelay: "0.2s" }}>
-            <div className="flex-1">
-              <div className="flex items-center gap-2 mb-4">
-                <Star className="w-5 h-5 text-yellow-400 fill-current" />
-                <span className="text-yellow-400 text-sm font-bold">Modul 3</span>
-              </div>
-              <h1 className="text-5xl md:text-6xl font-black mb-4 bg-gradient-to-r from-emerald-200 via-teal-200 to-green-300 bg-clip-text text-transparent drop-shadow-2xl">
-                Rangkaian Listrik Paralel
-              </h1>
-              <p className="text-lg text-emerald-200">Pelajari cara kerja komponen dalam jalur bercabang</p>
-            </div>
-
-            <div className="flex flex-col items-center px-6 py-4 rounded-2xl shadow-lg border border-white/20 backdrop-blur-xl bg-white/10">
-              <Clock className="w-8 h-8 mb-2 text-emerald-300" />
-              <span className="font-bold text-sm text-emerald-100">7 Sections</span>
-            </div>
-          </div>
-        </div>
-      </div>
+      {/* Hero */}
+      <ModuleHero
+        label="Modul 3"
+        title="Rangkaian Listrik Paralel"
+        subtitle="Pelajari cara kerja komponen dalam jalur bercabang"
+        sections={SECTION_NAMES}
+        onJump={(i) => [section1Ref, section2Ref, section3Ref, section4Ref, section5Ref, section6Ref, section7Ref][i].current?.scrollIntoView({ behavior: "smooth", block: "start" })}
+      />
 
       {/* Sections Container */}
       <div className="relative py-16">
-        <div className="max-w-7xl mx-auto px-6 space-y-20">
+        <div className="max-w-7xl mx-auto px-6 space-y-24">
 
           {/* Section 1 */}
-          <div ref={section1Ref}>
+          <div ref={section1Ref} className="scroll-mt-24">
+            <SectionLabel n={1} total={7} name={SECTION_NAMES[0]} />
             <Section1Introduction />
           </div>
 
-          {/* Divider */}
-          <div className="flex justify-center">
-            <div className="flex items-center gap-6">
-              <div className="h-px bg-gradient-to-r from-transparent via-blue-400/50 to-transparent w-32"></div>
-              <div className="bg-gradient-to-br from-blue-500 to-cyan-500 p-3 rounded-full shadow-xl border border-white/30">
-                <Zap className="w-6 h-6 text-white" />
-              </div>
-              <div className="h-px bg-gradient-to-r from-transparent via-blue-400/50 to-transparent w-32"></div>
-            </div>
-          </div>
-
           {/* Section 2 */}
-          <div ref={section2Ref}>
+          <div ref={section2Ref} className="scroll-mt-24">
+            <SectionLabel n={2} total={7} name={SECTION_NAMES[1]} />
             <Section2Current />
           </div>
 
-          {/* Divider */}
-          <div className="flex justify-center">
-            <div className="flex items-center gap-6">
-              <div className="h-px bg-gradient-to-r from-transparent via-green-400/50 to-transparent w-32"></div>
-              <div className="bg-gradient-to-br from-green-500 to-emerald-500 p-3 rounded-full shadow-xl border border-white/30">
-                <Zap className="w-6 h-6 text-white" />
-              </div>
-              <div className="h-px bg-gradient-to-r from-transparent via-green-400/50 to-transparent w-32"></div>
-            </div>
-          </div>
-
           {/* Section 3 */}
-          <div ref={section3Ref}>
+          <div ref={section3Ref} className="scroll-mt-24">
+            <SectionLabel n={3} total={7} name={SECTION_NAMES[2]} />
             <Section3Voltage />
           </div>
 
-          {/* Divider */}
-          <div className="flex justify-center">
-            <div className="flex items-center gap-6">
-              <div className="h-px bg-gradient-to-r from-transparent via-orange-400/50 to-transparent w-32"></div>
-              <div className="bg-gradient-to-br from-orange-500 to-red-500 p-3 rounded-full shadow-xl border border-white/30">
-                <Zap className="w-6 h-6 text-white" />
-              </div>
-              <div className="h-px bg-gradient-to-r from-transparent via-orange-400/50 to-transparent w-32"></div>
-            </div>
-          </div>
-
           {/* Section 4 */}
-          <div ref={section4Ref}>
+          <div ref={section4Ref} className="scroll-mt-24">
+            <SectionLabel n={4} total={7} name={SECTION_NAMES[3]} />
             <Section4Resistance />
           </div>
 
-          {/* Divider */}
-          <div className="flex justify-center">
-            <div className="flex items-center gap-6">
-              <div className="h-px bg-gradient-to-r from-transparent via-yellow-400/50 to-transparent w-32"></div>
-              <div className="bg-gradient-to-br from-yellow-500 to-amber-500 p-3 rounded-full shadow-xl border border-white/30">
-                <Zap className="w-6 h-6 text-white" />
-              </div>
-              <div className="h-px bg-gradient-to-r from-transparent via-yellow-400/50 to-transparent w-32"></div>
-            </div>
-          </div>
-
           {/* Section 5 */}
-          <div ref={section5Ref}>
+          <div ref={section5Ref} className="scroll-mt-24">
+            <SectionLabel n={5} total={7} name={SECTION_NAMES[4]} />
             <Section5RealExample />
           </div>
 
-          {/* Divider */}
-          <div className="flex justify-center">
-            <div className="flex items-center gap-6">
-              <div className="h-px bg-gradient-to-r from-transparent via-cyan-400/50 to-transparent w-32"></div>
-              <div className="bg-gradient-to-br from-cyan-500 to-blue-500 p-3 rounded-full shadow-xl border border-white/30">
-                <Zap className="w-6 h-6 text-white" />
-              </div>
-              <div className="h-px bg-gradient-to-r from-transparent via-cyan-400/50 to-transparent w-32"></div>
-            </div>
-          </div>
-
           {/* Section 6 */}
-          <div ref={section6Ref}>
+          <div ref={section6Ref} className="scroll-mt-24">
+            <SectionLabel n={6} total={7} name={SECTION_NAMES[5]} />
             <Section6Calculation />
           </div>
 
-          {/* Divider */}
-          <div className="flex justify-center">
-            <div className="flex items-center gap-6">
-              <div className="h-px bg-gradient-to-r from-transparent via-purple-400/50 to-transparent w-32"></div>
-              <div className="bg-gradient-to-br from-purple-500 to-pink-500 p-3 rounded-full shadow-xl border border-white/30">
-                <Zap className="w-6 h-6 text-white" />
-              </div>
-              <div className="h-px bg-gradient-to-r from-transparent via-purple-400/50 to-transparent w-32"></div>
-            </div>
-          </div>
-
           {/* Section 7 */}
-          <div ref={section7Ref}>
+          <div ref={section7Ref} className="scroll-mt-24">
+            <SectionLabel n={7} total={7} name={SECTION_NAMES[6]} />
             <Section7Summary />
           </div>
         </div>
       </div>
 
       {/* Completion Section - Extended dengan Footer */}
-      <div className="relative text-white py-32 px-6 overflow-hidden mt-20 opacity-0 animate-fade-in" style={{ animationDelay: "0.2s" }} ref={completionRef}>
-        {/* Background yang sama dengan section */}
-        <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-emerald-950 to-teal-950"></div>
+      <div className="relative text-ink py-16 px-6 border-t-2 border-ink mt-12 opacity-0 animate-fade-in" style={{ animationDelay: "0.2s" }} ref={completionRef}>
         
         <div className="absolute inset-0 opacity-40">
-          <div className="absolute top-0 left-1/4 w-96 h-96 bg-gradient-to-r from-emerald-500/20 to-teal-500/20 rounded-full blur-3xl animate-pulse"></div>
-          <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-gradient-to-r from-teal-500/20 to-emerald-500/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: "1s" }}></div>
+          <div className="absolute top-0 left-1/4 w-96 h-96 bg-mint-soft rounded-full hidden animate-pulse"></div>
+          <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-mint-soft rounded-full hidden animate-pulse" style={{ animationDelay: "1s" }}></div>
         </div>
 
         <div className="max-w-7xl mx-auto relative z-10">
           {/* Completion Card */}
-          <div className="group relative mb-20">
-            <div className="absolute -inset-1 bg-gradient-to-r from-emerald-500/30 via-teal-500/20 to-emerald-500/30 rounded-3xl blur-2xl opacity-50 group-hover:opacity-75 transition duration-1000"></div>
+          <div className="group relative">
+            <div className="absolute -inset-1 bg-mint-soft rounded-3xl hidden opacity-50 group-hover:opacity-75 transition duration-1000"></div>
             
-            <div className="relative bg-gradient-to-br from-slate-900/80 to-emerald-950/80 backdrop-blur-xl rounded-3xl border-2 border-emerald-400/30 p-12 shadow-2xl">
+            <div className="relative bg-paper rounded-3xl border-2 border-ink p-12 shadow-hard">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                 {/* Left: Main Message */}
                 <div className="md:col-span-2 flex flex-col justify-center">
-                  <h2 className="text-5xl md:text-5xl font-black mb-4 bg-gradient-to-r from-emerald-300 via-teal-300 to-emerald-300 bg-clip-text text-transparent drop-shadow-lg">
-                    {isModuleCompleted ? "✨ Selesai!" : "🚀 Hampir Selesai!"}
+                  <h2 className="text-5xl md:text-5xl font-black mb-4 text-ink">
+                    {isModuleCompleted ? "Selesai!" : "Hampir Selesai!"}
                   </h2>
-                  <p className="text-lg text-emerald-100/90 mb-8 leading-relaxed max-w-xl">
+                  <p className="text-lg text-ink mb-8 leading-relaxed max-w-xl">
                     {isModuleCompleted
                       ? "Anda telah menguasai rangkaian paralel dengan sempurna. Sekarang Anda memahami bagaimana komponen bekerja independen!"
                       : "Anda telah menyelesaikan semua 7 section. Tandai modul ini sebagai selesai untuk melanjutkan!"}
@@ -2182,41 +2090,41 @@ const ModuleParallelPageNew = ({ isCompleted = false, onMarkComplete }: ModulePa
                   {/* Stats */}
                   <div className="flex gap-6 mb-8">
                     <div className="text-center">
-                      <div className="text-3xl font-black text-emerald-400">7</div>
-                      <p className="text-xs text-emerald-300 font-semibold mt-1">Sections</p>
+                      <div className="text-3xl font-black text-emerald-700">7</div>
+                      <p className="text-xs text-emerald-700 font-semibold mt-1">Sections</p>
                     </div>
                     <div className="text-center">
-                      <div className="text-3xl font-black text-teal-400">100%</div>
-                      <p className="text-xs text-teal-300 font-semibold mt-1">Selesai</p>
+                      <div className="text-3xl font-black text-emerald-700">100%</div>
+                      <p className="text-xs text-emerald-700 font-semibold mt-1">Selesai</p>
                     </div>
                     <div className="text-center">
-                      <div className="text-3xl font-black text-emerald-300">✓</div>
-                      <p className="text-xs text-emerald-200 font-semibold mt-1">Terpahami</p>
+                      <div className="text-3xl font-black text-emerald-700">✓</div>
+                      <p className="text-xs text-emerald-700 font-semibold mt-1">Terpahami</p>
                     </div>
                   </div>
                 </div>
 
                 {/* Right: Visual Status */}
                 <div className="flex flex-col items-center justify-center">
-                  <div className={`w-32 h-32 rounded-full flex items-center justify-center mb-6 shadow-2xl border-2 transition-all duration-1000 ${
+                  <div className={`w-32 h-32 rounded-full flex items-center justify-center mb-6 shadow-hard border-2 transition-all duration-1000 ${
                     isModuleCompleted
-                      ? "bg-gradient-to-br from-emerald-500/20 to-teal-500/20 border-emerald-400/50 shadow-emerald-400/30"
-                      : "bg-gradient-to-br from-teal-500/20 to-emerald-500/20 border-emerald-400/50 shadow-emerald-400/30"
+                      ? "bg-mint-soft border-ink"
+                      : "bg-mint-soft border-ink"
                   }`}>
                     {isModuleCompleted ? (
-                      <Trophy className="w-16 h-16 text-emerald-300 fill-emerald-300" />
+                      <Trophy className="w-16 h-16 text-emerald-700 fill-emerald-300" />
                     ) : (
-                      <CheckCircle className="w-16 h-16 text-emerald-300" />
+                      <CheckCircle className="w-16 h-16 text-emerald-700" />
                     )}
                   </div>
-                  <p className="text-sm font-bold tracking-widest text-emerald-300">
+                  <p className="text-sm font-bold tracking-widest text-emerald-700">
                     {isModuleCompleted ? "ACHIEVEMENT" : "DALAM PROGRESS"}
                   </p>
                 </div>
               </div>
 
               {/* Divider */}
-              <div className="my-8 h-px bg-gradient-to-r from-transparent via-emerald-400/30 to-transparent"></div>
+              <div className="my-8 h-px bg-ink/15"></div>
 
               {/* Action Buttons */}
               <div className="flex flex-col md:flex-row gap-4 justify-end">
@@ -2226,7 +2134,7 @@ const ModuleParallelPageNew = ({ isCompleted = false, onMarkComplete }: ModulePa
                       setIsModuleCompleted(true);
                       if (onMarkComplete) onMarkComplete();
                     }}
-                    className="group flex items-center justify-center gap-3 px-10 py-4 bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-black rounded-xl hover:from-emerald-600 hover:to-teal-600 transition-all transform hover:scale-105 shadow-2xl border border-emerald-300/30"
+                    className="group flex items-center justify-center gap-3 px-10 py-4 bg-mint text-ink font-black rounded-xl hover:bg-mint transition-all transform shadow-hard border-2 border-ink"
                   >
                     <Trophy className="w-5 h-5" />
                     <span>Tandai Selesai</span>
@@ -2235,21 +2143,18 @@ const ModuleParallelPageNew = ({ isCompleted = false, onMarkComplete }: ModulePa
 
                 <button
                   onClick={() => window.history.back()}
-                  className="group flex items-center justify-center gap-3 px-10 py-4 bg-white/10 border-2 border-white/30 text-white font-bold rounded-xl hover:bg-white/20 transition-all backdrop-blur-sm"
+                  className="group flex items-center justify-center gap-3 px-10 py-4 bg-paper border-2 border-ink text-ink font-bold rounded-xl hover:bg-lamp-soft transition-all"
                 >
-                  <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
+                  <ArrowLeft className="w-5 h-5 transition-transform" />
                   <span>Kembali</span>
                 </button>
               </div>
             </div>
           </div>
-
-          {/* Footer Section - Integrated dengan theme emerald */}
-          <Footer theme="emerald" />
         </div>
       </div>
 
-      
+      <Footer />
     </div>
   );
 };

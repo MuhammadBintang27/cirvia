@@ -129,7 +129,7 @@ const AudioPlayer: React.FC<AudioPlayerProps> = ({
         </div>
         <div className="flex items-center space-x-2">
           <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">
-            🎙️ NotebookLM Audio
+            NotebookLM Audio
           </span>
         </div>
       </div>

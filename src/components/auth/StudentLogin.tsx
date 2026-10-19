@@ -61,7 +61,7 @@ const StudentLogin: React.FC<StudentLoginProps> = ({ onSwitchToTeacher }) => {
 
       {/* Information Box */}
       <div className="bg-gradient-to-r from-emerald-500/10 to-teal-500/10 rounded-xl p-4 border border-emerald-400/30 mb-6">
-        <h4 className="text-emerald-300 font-medium mb-2">ℹ️ Informasi Login Siswa:</h4>
+        <h4 className="text-emerald-300 font-medium mb-2">ℹInformasi Login Siswa:</h4>
         <div className="text-sm text-emerald-200/80 space-y-1">
           <div>• Gunakan nama lengkap sesuai data dari guru</div>
           <div>• Password adalah Nomor Induk Siswa (NIS) Anda</div>
@@ -134,7 +134,7 @@ const StudentLogin: React.FC<StudentLoginProps> = ({ onSwitchToTeacher }) => {
 
         {/* Help Text */}
         <div className="bg-gradient-to-r from-blue-500/10 to-indigo-500/10 rounded-xl p-4 border border-blue-400/30">
-          <h4 className="text-blue-300 font-medium mb-2">🆘 Butuh Bantuan?</h4>
+          <h4 className="text-blue-300 font-medium mb-2">Butuh Bantuan?</h4>
           <div className="text-sm text-blue-200/80 space-y-1">
             <div>• Pastikan nama dan NIS sudah benar</div>
             <div>• Data siswa diinput oleh guru kelas</div>

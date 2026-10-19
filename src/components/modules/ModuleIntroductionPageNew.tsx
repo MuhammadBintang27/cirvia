@@ -1,8 +1,12 @@
 "use client";
+import { Ico } from "@/components/ui/Ico";
 import React, { useState, useEffect, useRef } from "react";
 import { ArrowLeft, CheckCircle, Trophy, Star, Zap, Lightbulb, Info, Clock, Play, Pause } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import { ModuleHero, SectionLabel } from "./ModuleChrome";
+
+const SECTION_NAMES = ["Lampu meja belajarmu", "Arus listrik searah", "Komponen rangkaian", "Hukum Ohm"];
 
 // Audio timestamps untuk auto-scroll (dalam detik)
 const AUDIO_TIMESTAMPS = {
@@ -142,31 +146,28 @@ const AudioPlayer = ({ onTimestampReached }: AudioPlayerProps) => {
         ref={buttonRef}
         onMouseEnter={() => setIsHovering(true)}
         onMouseLeave={() => setIsHovering(false)}
-        className="fixed top-80 right-8 z-50 pointer-events-auto group"
+        className="fixed bottom-20 md:bottom-6 left-4 md:left-6 z-50 pointer-events-auto group"
       >
         {/* Glowing Background Effect */}
-        <div className="absolute inset-0 bg-gradient-to-br from-purple-500 via-pink-500 to-indigo-500 rounded-full blur-lg opacity-60 group-hover:opacity-100 transition-opacity duration-300 animate-pulse"></div>
-        
-        {/* Animated Ring */}
-        <div className="absolute inset-0 rounded-full border-2 border-purple-300/30 animate-spin" style={{ animationDuration: '3s' }}></div>
+        <div className="absolute inset-0 bg-purple-500 rounded-full hidden opacity-60 group-hover:opacity-100 transition-opacity duration-300 animate-pulse"></div>
 
         {/* Main Button */}
         <button
           onClick={handlePlayPause}
-          className="relative p-5 rounded-full bg-gradient-to-br from-purple-500 via-pink-500 to-indigo-500 hover:from-purple-600 hover:via-pink-600 hover:to-indigo-600 shadow-2xl shadow-purple-500/50 transform hover:scale-125 transition-all duration-300 z-10 group-hover:shadow-purple-500/80 border border-purple-300/50"
+          className="relative p-5 rounded-full bg-purple-500 hover:bg-purple-500 shadow-hard transform transition-all duration-300 z-10 border-2 border-ink"
           title={isPlaying ? "Matikan Audio" : "Nyalakan Audio"}
         >
           {isPlaying ? (
-            <Pause className="w-7 h-7 text-white animate-pulse drop-shadow-lg" />
+            <Pause className="w-7 h-7 text-white" />
           ) : (
-            <Play className="w-7 h-7 text-white drop-shadow-lg" />
+            <Play className="w-7 h-7 text-white" />
           )}
         </button>
         
         {/* Floating Label */}
         {!isHovering && (
-          <div className="absolute -top-10 right-0 bg-gradient-to-r from-purple-600 to-pink-600 text-white text-xs font-bold px-3 py-1 rounded-full whitespace-nowrap shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-            🎧 Audio
+          <div className="absolute -top-10 left-0 bg-purple-500 border-2 border-ink text-white text-xs font-bold px-3 py-1 rounded-full whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+            Audio
           </div>
         )}
 
@@ -175,38 +176,38 @@ const AudioPlayer = ({ onTimestampReached }: AudioPlayerProps) => {
           <div 
             onMouseEnter={() => setIsHovering(true)}
             onMouseLeave={() => setIsHovering(false)}
-            className="absolute bottom-full right-0 mb-4 bg-gradient-to-br from-slate-900 to-slate-800 border border-purple-500/30 rounded-2xl p-4 shadow-2xl w-64 opacity-0 animate-fade-in backdrop-blur-sm z-50 pointer-events-auto"
+            className="absolute bottom-full left-0 mb-4 bg-paper border-2 border-ink rounded-2xl p-4 shadow-hard w-64 opacity-0 animate-fade-in z-50 pointer-events-auto"
           >
             {/* Title */}
-            <div className="text-xs font-bold text-purple-300 mb-3 uppercase tracking-widest">
-              🎧 Audio Pembelajaran
+            <div className="text-xs font-bold text-purple-700 mb-3 uppercase tracking-widest">
+              Audio Pembelajaran
             </div>
 
             {/* Time Display */}
             <div className="flex justify-between items-center mb-3 text-sm">
-              <span className="text-cyan-300 font-semibold">{formatTime(currentTime)}</span>
-              <span className="text-purple-300/60">/</span>
-              <span className="text-purple-300/80">{formatTime(duration)}</span>
+              <span className="text-brand font-semibold">{formatTime(currentTime)}</span>
+              <span className="text-ink">/</span>
+              <span className="text-ink">{formatTime(duration)}</span>
             </div>
 
             {/* Progress Bar - Clickable */}
             <div
               onClick={handleSeek}
-              className="relative w-full bg-slate-700/50 rounded-full h-1.5 cursor-pointer group mb-4 hover:h-2 transition-all"
+              className="relative w-full bg-paper rounded-full h-1.5 cursor-pointer group mb-4 hover:h-2 transition-all"
             >
               <div
-                className="bg-gradient-to-r from-cyan-400 to-purple-400 h-1.5 rounded-full transition-all group-hover:h-2"
+                className="bg-brand h-1.5 rounded-full transition-all group-hover:h-2"
                 style={{ width: `${progressPercent}%` }}
               />
               {/* Seek Indicator */}
               <div
-                className="absolute top-1/2 -translate-y-1/2 w-3 h-3 bg-white rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-opacity"
+                className="absolute top-1/2 -translate-y-1/2 w-3 h-3 bg-paper rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
                 style={{ left: `${progressPercent}%`, transform: "translateX(-50%)" }}
               />
             </div>
 
             {/* Quick Timestamps */}
-            <div className="text-xs text-purple-200/70 mb-2 font-semibold">Quick Jump:</div>
+            <div className="text-xs text-muted mb-2 font-semibold">Quick Jump:</div>
             <div className="grid grid-cols-2 gap-2">
               <button
                 onClick={() => {
@@ -216,7 +217,7 @@ const AudioPlayer = ({ onTimestampReached }: AudioPlayerProps) => {
                     audioRef.current.play();
                   }
                 }}
-                className="text-xs py-1.5 px-2 bg-blue-500/20 hover:bg-blue-500/40 rounded-lg text-blue-300 transition-all"
+                className="text-xs py-1.5 px-2 bg-brand-soft hover:bg-brand-soft rounded-lg text-brand transition-all"
               >
                 S1 (0:80)
               </button>
@@ -228,7 +229,7 @@ const AudioPlayer = ({ onTimestampReached }: AudioPlayerProps) => {
                     audioRef.current.play();
                   }
                 }}
-                className="text-xs py-1.5 px-2 bg-cyan-500/20 hover:bg-cyan-500/40 rounded-lg text-cyan-300 transition-all"
+                className="text-xs py-1.5 px-2 bg-brand-soft hover:bg-brand-soft rounded-lg text-brand transition-all"
               >
                 S2 (2:25)
               </button>
@@ -240,7 +241,7 @@ const AudioPlayer = ({ onTimestampReached }: AudioPlayerProps) => {
                     audioRef.current.play();
                   }
                 }}
-                className="text-xs py-1.5 px-2 bg-green-500/20 hover:bg-green-500/40 rounded-lg text-green-300 transition-all"
+                className="text-xs py-1.5 px-2 bg-mint-soft hover:bg-mint-soft rounded-lg text-emerald-700 transition-all"
               >
                 S3 (5:00)
               </button>
@@ -252,14 +253,14 @@ const AudioPlayer = ({ onTimestampReached }: AudioPlayerProps) => {
                     audioRef.current.play();
                   }
                 }}
-                className="text-xs py-1.5 px-2 bg-yellow-500/20 hover:bg-yellow-500/40 rounded-lg text-yellow-300 transition-all"
+                className="text-xs py-1.5 px-2 bg-lamp-soft hover:bg-lamp-soft rounded-lg text-amber-700 transition-all"
               >
                 S4 (9:00)
               </button>
             </div>
 
             {/* Pointer Arrow */}
-            <div className="absolute -bottom-2 right-6 w-4 h-4 bg-gradient-to-br from-slate-900 to-slate-800 border-r border-b border-purple-500/30 transform rotate-45"></div>
+            <div className="absolute -bottom-2 left-6 w-4 h-4 bg-paper border-r border-b border-ink transform rotate-45"></div>
           </div>
         )}
       </div>
@@ -306,8 +307,8 @@ const Section1DarkRoom = () => {
     <div
       className={`relative rounded-3xl overflow-hidden transition-all duration-1000 border-2 ${
         isLightOn
-          ? "bg-gradient-to-br from-yellow-50 to-orange-50 border-yellow-300/50 shadow-2xl shadow-yellow-500/20"
-          : "bg-gradient-to-br from-slate-900 to-slate-800 border-slate-700/50 shadow-xl"
+          ? "bg-gradient-to-br from-yellow-50 to-orange-50 border-ink shadow-hard"
+          : "bg-gradient-to-br from-slate-900 to-slate-800 border-ink shadow-hard"
       }`}
       style={{ aspectRatio: "16 / 9" }}
     >
@@ -457,13 +458,13 @@ const Section1DarkRoom = () => {
                   : "bg-gradient-to-r from-gray-700 to-gray-800 text-yellow-300 border border-yellow-400/30"
               }`}
             >
-              {isLightOn ? "❌ Matikan" : "✓ Nyalakan"}
+              {isLightOn ? "Matikan" : "✓ Nyalakan"}
             </button>
 
             {/* Status */}
             <div className="absolute top-8 left-8">
               <p className={`text-xl font-bold transition-all duration-1000 ${isLightOn ? "text-yellow-400" : "text-gray-500"}`}>
-                {isLightOn ? "💡Lampu Menyala" : "🌙 Kamar yang Gelap"}
+                {isLightOn ? "Lampu Menyala" : "Kamar yang Gelap"}
               </p>
             </div>
       </div>
@@ -496,38 +497,38 @@ const Section2ElectronAnimation = () => {
 
       {/* Right: Text Content (order will be first) */}
       <div className="space-y-6 lg:order-2">
-        <h2 className="text-5xl font-black bg-gradient-to-r from-cyan-400 via-blue-400 to-indigo-400 bg-clip-text text-transparent drop-shadow-lg">
+        <h2 className="text-5xl font-black text-ink">
           Arus Listrik Searah (DC)
         </h2>
         
         <div className="space-y-4">
-          <p className="text-lg text-slate-200 leading-relaxed">
+          <p className="text-lg text-muted leading-relaxed">
             Sebelum memahami lebih jauh tentang rangkaian, kita perlu tahu dulu apa itu arus listrik searah (DC).
           </p>
-          <p className="text-lg text-slate-200 leading-relaxed">
-            <span className="font-bold text-cyan-400">Arus listrik searah</span> adalah arus yang bergerak dalam satu arah tetap melalui penghantar.
+          <p className="text-lg text-muted leading-relaxed">
+            <span className="font-bold text-brand">Arus listrik searah</span> adalah arus yang bergerak dalam satu arah tetap melalui penghantar.
           </p>
         </div>
 
         {/* Key points */}
         <div className="grid grid-cols-2 gap-4">
-          <div className="bg-gradient-to-br from-red-500/10 to-red-600/10 rounded-2xl p-4 border border-red-400/30">
-            <div className="text-3xl mb-2 font-bold text-red-400">+</div>
-            <h3 className="text-lg font-bold text-red-300 mb-2">Kutub Positif</h3>
-            <p className="text-red-200 text-sm">Tempat Arus mulai bergerak keluar.</p>
+          <div className="bg-coral-soft rounded-2xl p-4 border-2 border-ink">
+            <div className="text-3xl mb-2 font-bold text-red-600">+</div>
+            <h3 className="text-lg font-bold text-red-600 mb-2">Kutub Positif</h3>
+            <p className="text-ink text-sm">Tempat Arus mulai bergerak keluar.</p>
           </div>
-          <div className="bg-gradient-to-br from-blue-500/10 to-blue-600/10 rounded-2xl p-4 border border-blue-400/30">
-            <div className="text-3xl mb-2 font-bold text-blue-400">−</div>
-            <h3 className="text-lg font-bold text-blue-300 mb-2">Kutub Negatif</h3>
-            <p className="text-blue-200 text-sm">Tempat Arus akhirnya sampai.</p>
+          <div className="bg-brand-soft rounded-2xl p-4 border-2 border-ink">
+            <div className="text-3xl mb-2 font-bold text-brand">−</div>
+            <h3 className="text-lg font-bold text-brand mb-2">Kutub Negatif</h3>
+            <p className="text-muted text-sm">Tempat Arus akhirnya sampai.</p>
           </div>
         </div>
 
-        <div className="bg-gradient-to-br from-cyan-500/10 to-blue-500/10 rounded-2xl p-6 border border-cyan-400/30">
-          <p className="text-center text-cyan-200 font-semibold leading-relaxed">
-            <strong>⚡ Arus mengalir dari kutub positif ke kutub negatif.</strong>
+        <div className="bg-brand-soft rounded-2xl p-6 border-2 border-ink">
+          <p className="text-center text-muted font-semibold leading-relaxed">
+            <strong>Arus mengalir dari kutub positif ke kutub negatif.</strong>
             <br />
-            <span className="text-cyan-300 text-sm mt-2 block">
+            <span className="text-ink text-sm mt-2 block">
               Aliran ini disebut <strong>arus listrik</strong>.
             </span>
           </p>
@@ -536,9 +537,9 @@ const Section2ElectronAnimation = () => {
 
       {/* Left: Visual (order will be reversed) */}
       <div className="relative group lg:order-1">
-        <div className="absolute -inset-3 bg-gradient-to-r from-cyan-500/20 to-blue-500/20 rounded-3xl blur-2xl opacity-50 group-hover:opacity-70 transition duration-1000"></div>
+        <div className="absolute -inset-3 bg-gradient-to-r from-cyan-500/20 to-blue-500/20 rounded-3xl hidden opacity-50 group-hover:opacity-70 transition duration-1000"></div>
         
-        <div className="relative bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-xl rounded-3xl border-2 border-cyan-400/30 p-12 shadow-2xl overflow-hidden" style={{ aspectRatio: "16 / 10" }}>
+        <div className="relative bg-[#14172B] rounded-3xl border-2 border-ink p-12 shadow-hard overflow-hidden" style={{ aspectRatio: "16 / 10" }}>
           {/* Battery Visual (Kiri) - Berdempet */}
           <div className="absolute left-12 top-1/2 pt-10 transform -translate-y-1/2 flex flex-col items-center gap-0 z-20">
             {/* Battery Negatif (Atas) */}
@@ -679,7 +680,7 @@ const Section2ElectronAnimation = () => {
             {/* Main title label */}
             {isAnimating && (
               <text x="500" y="45" textAnchor="middle" fill="rgba(100, 200, 255, 0.8)" fontSize="26" fontWeight="bold">
-                ⚡ ALIRAN ELEKTRON
+                ALIRAN ELEKTRON
               </text>
             )}
           </svg>
@@ -689,7 +690,7 @@ const Section2ElectronAnimation = () => {
           {isAnimating && (
             <div className="absolute top-16 left-8 flex flex-col items-center gap-2">
               <div className="text-sm font-bold text-cyan-300 bg-cyan-500/20 px-3 py-1 rounded-full border border-cyan-400/40">
-                ⚡ Mengalir
+                Mengalir
               </div>
               <div className="w-8 h-1 bg-gradient-to-r from-yellow-400 to-cyan-400 rounded-full animate-pulse"></div>
             </div>
@@ -704,7 +705,7 @@ const Section2ElectronAnimation = () => {
                 : "bg-gradient-to-r from-gray-600 to-gray-700 text-white"
             }`}
           >
-            {isAnimating ? "⏸ Pause" : "▶ Play"}
+            {isAnimating ? "Pause" : "▶ Play"}
           </button>
         </div>
       </div>
@@ -734,22 +735,22 @@ const Section3CircuitComponents = () => {
   }, [circuitClosed]);
 
   const components = [
-    { id: "battery", name: "Sumber Daya (Baterai)", icon: "🔋", description: "Memberi energi listrik yang menggerakkan elektron melalui rangkaian.", color: "from-red-500 to-orange-500" },
-    { id: "wire", name: "Konduktor (Kabel)", icon: "🔌", description: "Tempat arus listrik mengalir. Biasanya terbuat dari logam seperti tembaga.", color: "from-yellow-500 to-amber-500" },
-    { id: "switch", name: "Sakelar (Switch)", icon: "🔘", description: "Alat untuk menghubungkan atau memutus arus. Ketika ON, rangkaian tertutup.", color: "from-blue-500 to-cyan-500" },
-    { id: "load", name: "Beban (Lampu)", icon: "💡", description: "Tempat energi listrik diubah menjadi energi lain seperti cahaya.", color: "from-yellow-400 to-yellow-600" },
+    { id: "battery", name: "Sumber Daya (Baterai)", icon: "battery", description: "Memberi energi listrik yang menggerakkan elektron melalui rangkaian.", color: "bg-coral" },
+    { id: "wire", name: "Konduktor (Kabel)", icon: "plug", description: "Tempat arus listrik mengalir. Biasanya terbuat dari logam seperti tembaga.", color: "bg-lamp" },
+    { id: "switch", name: "Sakelar (Switch)", icon: "switch", description: "Alat untuk menghubungkan atau memutus arus. Ketika ON, rangkaian tertutup.", color: "bg-brand" },
+    { id: "load", name: "Beban (Lampu)", icon: "lightbulb", description: "Tempat energi listrik diubah menjadi energi lain seperti cahaya.", color: "bg-lamp" },
   ];
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-start opacity-0 animate-fade-in" style={{ animationDelay: "0.8s" }}>
       {/* Left: Text Content */}
       <div className="space-y-6">
-        <h2 className="text-5xl font-black bg-gradient-to-r from-green-400 via-emerald-400 to-teal-400 bg-clip-text text-transparent drop-shadow-lg">
+        <h2 className="text-5xl font-black text-ink">
           Komponen Rangkaian Listrik
         </h2>
         
-        <p className="text-lg text-slate-200 leading-relaxed">
-          <span className="font-bold text-green-400">Rangkaian listrik</span> adalah susunan dari beberapa komponen listrik yang saling terhubung sehingga arus listrik dapat mengalir.
+        <p className="text-lg text-muted leading-relaxed">
+          <span className="font-bold text-emerald-700">Rangkaian listrik</span> adalah susunan dari beberapa komponen listrik yang saling terhubung sehingga arus listrik dapat mengalir.
         </p>
 
         {/* Components */}
@@ -758,21 +759,21 @@ const Section3CircuitComponents = () => {
             <button
               key={component.id}
               onClick={() => setSelectedComponent(selectedComponent === component.id ? null : component.id)}
-              className={`p-5 rounded-xl text-left transition-all hover:scale-[1.02] ${
+              className={`p-5 rounded-xl text-left transition-all ${
                 selectedComponent === component.id
-                  ? `bg-gradient-to-br ${component.color} shadow-2xl border-2 border-white/30`
-                  : "bg-slate-800/50 hover:bg-slate-700/50 border-2 border-slate-600/30"
+                  ? `${component.color} shadow-hard border-2 border-ink`
+                  : "bg-paper hover:bg-paper border-2 border-ink"
               }`}
             >
               <div className="flex items-start gap-4">
-                <div className="text-4xl">{component.icon}</div>
+                <div className="text-4xl"><Ico n={component.icon} /></div>
                 <div className="flex-1">
-                  <h3 className="text-lg font-bold text-white mb-2 flex items-center gap-2">
+                  <h3 className="text-lg font-bold text-ink mb-2 flex items-center gap-2">
                     {component.name}
                     {selectedComponent === component.id && <Info className="w-5 h-5 animate-pulse" />}
                   </h3>
                   {selectedComponent === component.id && (
-                    <p className="text-white/90 text-sm">{component.description}</p>
+                    <p className="text-ink text-sm">{component.description}</p>
                   )}
                 </div>
               </div>
@@ -784,13 +785,13 @@ const Section3CircuitComponents = () => {
       {/* Right: Visual */}
       <div className="space-y-8">
         <div className="relative group">
-          <div className="absolute -inset-3 bg-gradient-to-r from-green-500/20 to-emerald-500/20 rounded-3xl blur-2xl opacity-50 group-hover:opacity-70 transition duration-1000"></div>
+          <div className="absolute -inset-3 bg-mint-soft rounded-3xl hidden opacity-50 group-hover:opacity-70 transition duration-1000"></div>
           
-          <div className="relative bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-xl rounded-3xl border-2 border-green-400/30 p-8 shadow-2xl">
-            <svg className="w-full h-full" viewBox="0 0 800 500">
+          <div className="relative bg-paper rounded-3xl border-2 border-ink p-8 shadow-hard">
+            <svg className="w-full h-full rounded-xl bg-[#14172B]" viewBox="0 0 800 500">
               {/* Battery */}
               <circle cx="100" cy="250" r="30" fill="none" stroke="rgba(255, 100, 100, 0.8)" strokeWidth="3" />
-              <text x="100" y="260" textAnchor="middle" fill="rgba(255, 150, 150, 0.9)" fontSize="40">🔋</text>
+              <Ico n="battery" x={80} y={226} width={40} height={40} color="rgba(255, 150, 150, 0.9)" />
 
               {/* Wires with dynamic positioning */}
               {/* Wire 1: Battery to Switch - moves when circuit closes */}
@@ -810,11 +811,11 @@ const Section3CircuitComponents = () => {
 
               {/* Switch */}
               <circle cx="350" cy="150" r="25" fill="none" stroke={circuitClosed ? "rgba(100, 255, 100, 0.8)" : "rgba(255, 100, 100, 0.8)"} strokeWidth="3" />
-              <text x="350" y="165" textAnchor="middle" fill={circuitClosed ? "rgba(150, 255, 150, 0.9)" : "rgba(255, 150, 150, 0.9)"} fontSize="40">🔘</text>
+              <Ico n="switch" x={330} y={131} width={40} height={40} color={circuitClosed ? "rgba(150, 255, 150, 0.9)" : "rgba(255, 150, 150, 0.9)"} />
 
               {/* Lamp */}
               <circle cx="600" cy="150" r="30" fill="none" stroke={circuitClosed ? "rgba(255, 215, 0, 0.8)" : "rgba(100, 100, 100, 0.4)"} strokeWidth="3" />
-              <text x="600" y="160" textAnchor="middle" fill={circuitClosed ? "rgba(255, 215, 0, 0.9)" : "rgba(100, 100, 100, 0.5)"} fontSize="40">💡</text>
+              <Ico n="lightbulb" x={580} y={126} width={40} height={40} color={circuitClosed ? "rgba(255, 215, 0, 0.9)" : "rgba(100, 100, 100, 0.5)"} />
               
               {circuitClosed && (
                 <circle cx="600" cy="150" r="35" fill="none" stroke="rgba(255, 215, 0, 0.3)" strokeWidth="2" opacity="0.5">
@@ -861,9 +862,9 @@ const Section3CircuitComponents = () => {
                 return (
                   <g key={`electron-s3-${i}`}>
                     {/* Electron glow */}
-                    <circle cx={x} cy={y} r="8" fill="rgba(255, 215, 0, 0.2)" filter="drop-shadow(0 0 6px rgba(255, 215, 0, 0.6))" />
+                    <circle cx={x} cy={y} r="8" fill="rgba(255, 215, 0, 0.2)" filter="(0 0 6px rgba(255, 215, 0, 0.6))" />
                     {/* Electron core */}
-                    <circle cx={x} cy={y} r="4" fill="rgba(255, 230, 0, 0.95)" filter="drop-shadow(0 0 3px rgba(255, 215, 0, 0.9))" />
+                    <circle cx={x} cy={y} r="4" fill="rgba(255, 230, 0, 0.95)" filter="(0 0 3px rgba(255, 215, 0, 0.9))" />
                   </g>
                 );
               })}
@@ -871,19 +872,19 @@ const Section3CircuitComponents = () => {
 
             <button
               onClick={() => setCircuitClosed(!circuitClosed)}
-              className="absolute bottom-6 right-6 px-8 py-3 rounded-xl font-bold transition-all hover:scale-105 shadow-2xl bg-gradient-to-r from-green-500 to-emerald-500 text-white border border-white/20"
+              className="absolute bottom-6 right-6 px-8 py-3 rounded-xl font-bold transition-all shadow-hard bg-mint text-ink border-2 border-ink"
             >
-              {circuitClosed ? "❌ Buka" : "✓ Tutup"} Rangkaian
+              {circuitClosed ? "Buka" : "✓ Tutup"} Rangkaian
             </button>
           </div>
         </div>
 
-        <div className="bg-gradient-to-br from-green-500/10 to-emerald-500/10 rounded-2xl p-6 border border-green-400/30">
-          <h3 className="text-xl font-bold text-green-300 mb-3">🎮 Coba Sekarang!</h3>
-          <ul className="space-y-2 text-green-200 text-sm">
-            <li>✅ <strong>Klik komponen</strong> di sebelah kiri untuk detail</li>
-            <li>⚡ <strong>Klik tombol</strong> untuk menghubungkan rangkaian</li>
-            <li>💡 <strong>Lihat lampu menyala</strong> ketika tertutup</li>
+        <div className="bg-mint-soft rounded-2xl p-6 border-2 border-ink">
+          <h3 className="text-xl font-bold text-emerald-700 mb-3">Coba Sekarang!</h3>
+          <ul className="space-y-2 text-emerald-700 text-sm">
+            <li><Ico n="check" /> <strong>Klik komponen</strong> di sebelah kiri untuk detail</li>
+            <li><Ico n="zap" /> <strong>Klik tombol</strong> untuk menghubungkan rangkaian</li>
+            <li><Ico n="lightbulb" /> <strong>Lihat lampu menyala</strong> ketika tertutup</li>
           </ul>
         </div>
       </div>
@@ -903,63 +904,63 @@ const Section4OhmsLaw = () => {
 
       {/* Right: Text Content (will be on left) */}
       <div className="space-y-6 lg:order-2">
-        <h2 className="text-5xl font-black bg-gradient-to-r from-orange-400 via-red-400 to-pink-400 bg-clip-text text-transparent drop-shadow-lg">
+        <h2 className="text-5xl font-black text-ink">
           Hukum Ohm
         </h2>
 
-        <p className="text-lg text-slate-200 leading-relaxed">
-          <span className="font-bold text-orange-400">💡 Hukum Ohm</span> menyatakan bahwa tegangan, arus, dan hambatan saling berhubungan melalui rumus sederhana.
+        <p className="text-lg text-muted leading-relaxed">
+          <span className="font-bold text-amber-700">Hukum Ohm</span> menyatakan bahwa tegangan, arus, dan hambatan saling berhubungan melalui rumus sederhana.
         </p>
 
         {/* Formula */}
-        <div className="bg-gradient-to-br from-orange-500/10 to-red-500/10 rounded-2xl p-6 border-2 border-orange-400/30">
+        <div className="bg-lamp-soft rounded-2xl p-6 border-2 border-ink">
           <div className="text-center">
-            <div className="text-5xl font-black text-orange-300 mb-2">V = I × R</div>
-            <p className="text-orange-200 text-base">Tegangan = Arus × Hambatan</p>
+            <div className="text-5xl font-black text-amber-700 mb-2">V = I × R</div>
+            <p className="text-ink text-base">Tegangan = Arus × Hambatan</p>
           </div>
         </div>
 
         {/* Key Messages */}
         <div className="space-y-4">
-          <div className="bg-gradient-to-br from-green-500/10 to-emerald-600/10 rounded-2xl p-6 border-2 border-green-400/30">
-            <h4 className="text-xl font-bold text-green-300 mb-3">📈 Naik Tegangan?</h4>
-            <p className="text-green-200 text-sm">
+          <div className="bg-mint-soft rounded-2xl p-6 border-2 border-ink">
+            <h4 className="text-xl font-bold text-emerald-700 mb-3">Naik Tegangan?</h4>
+            <p className="text-ink text-sm">
               Jika tegangan (V) naik dan hambatan (R) tetap, maka arus (I) akan <strong>bertambah</strong>.
             </p>
           </div>
 
-          <div className="bg-gradient-to-br from-red-500/10 to-orange-600/10 rounded-2xl p-6 border-2 border-red-400/30">
-            <h4 className="text-xl font-bold text-red-300 mb-3">📉 Naik Hambatan?</h4>
-            <p className="text-red-200 text-sm">
+          <div className="bg-coral-soft rounded-2xl p-6 border-2 border-ink">
+            <h4 className="text-xl font-bold text-red-600 mb-3">Naik Hambatan?</h4>
+            <p className="text-ink text-sm">
               Jika hambatan (R) naik, maka arus (I) akan <strong>berkurang</strong>.
             </p>
           </div>
         </div>
 
         {/* Conclusion */}
-        <div className="bg-gradient-to-br from-purple-500/10 to-pink-500/10 rounded-2xl p-6 border-2 border-purple-400/30">
-          <h3 className="text-2xl font-bold text-purple-300 mb-3">✨ Kesimpulan</h3>
-          <p className="text-purple-200 text-base leading-relaxed mb-3">
+        <div className="bg-purple-100 rounded-2xl p-6 border-2 border-ink">
+          <h3 className="text-2xl font-bold text-purple-700 mb-3">Kesimpulan</h3>
+          <p className="text-muted text-base leading-relaxed mb-3">
             <strong>Hukum Ohm membantu kita memahami</strong> kenapa lampu bisa terang atau redup, dan bagaimana arus listrik dikendalikan.
           </p>
-          <p className="text-purple-300 font-semibold text-sm">
-            🎯 Semakin paham Hukum Ohm, semakin mudah memahami rangkaian listrik!
+          <p className="text-purple-700 font-semibold text-sm">
+            Semakin paham Hukum Ohm, semakin mudah memahami rangkaian listrik!
           </p>
         </div>
       </div>
       {/* Left: Visual (will be on right) */}
       <div className="space-y-8 lg:order-1">
         <div className="relative group">
-          <div className="absolute -inset-3 bg-gradient-to-r from-orange-500/20 to-red-500/20 rounded-3xl blur-2xl opacity-50 group-hover:opacity-70 transition duration-1000"></div>
+          <div className="absolute -inset-3 bg-lamp-soft rounded-3xl hidden opacity-50 group-hover:opacity-70 transition duration-1000"></div>
           
-          <div className="relative bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-xl rounded-3xl p-10 border-2 border-orange-400/30 shadow-2xl">
-            <h3 className="text-2xl font-bold text-orange-300 mb-8">⚡ Coba Ubah Nilai!</h3>
+          <div className="relative bg-paper rounded-3xl p-10 border-2 border-ink shadow-hard">
+            <h3 className="text-2xl font-bold text-amber-700 mb-8">Coba Ubah Nilai!</h3>
 
             {/* Voltage Slider */}
             <div className="mb-10">
               <div className="flex items-center justify-between mb-3">
-                <label className="text-lg font-semibold text-orange-200">Tegangan (V)</label>
-                <div className="text-3xl font-bold text-orange-400">{voltage}V</div>
+                <label className="text-lg font-semibold text-amber-700">Tegangan (V)</label>
+                <div className="text-3xl font-bold text-amber-700">{voltage}V</div>
               </div>
               <input
                 type="range"
@@ -967,15 +968,15 @@ const Section4OhmsLaw = () => {
                 max="24"
                 value={voltage}
                 onChange={(e) => setVoltage(Number(e.target.value))}
-                className="w-full h-3 bg-orange-900/30 rounded-lg appearance-none cursor-pointer accent-orange-500"
+                className="w-full h-3 bg-lamp-soft rounded-lg appearance-none cursor-pointer accent-orange-500"
               />
             </div>
 
             {/* Resistance Slider */}
             <div className="mb-10">
               <div className="flex items-center justify-between mb-3">
-                <label className="text-lg font-semibold text-red-200">Hambatan (R)</label>
-                <div className="text-3xl font-bold text-red-400">{resistance}Ω</div>
+                <label className="text-lg font-semibold text-red-600">Hambatan (R)</label>
+                <div className="text-3xl font-bold text-red-600">{resistance}Ω</div>
               </div>
               <input
                 type="range"
@@ -983,34 +984,34 @@ const Section4OhmsLaw = () => {
                 max="100"
                 value={resistance}
                 onChange={(e) => setResistance(Number(e.target.value))}
-                className="w-full h-3 bg-red-900/30 rounded-lg appearance-none cursor-pointer accent-red-500"
+                className="w-full h-3 bg-coral-soft rounded-lg appearance-none cursor-pointer accent-red-500"
               />
             </div>
 
             {/* Formula */}
-            <div className="bg-gradient-to-r from-yellow-500/20 to-orange-500/20 rounded-2xl p-6 border-2 border-yellow-400/30 mb-6">
+            <div className="bg-lamp-soft rounded-2xl p-6 border-2 border-ink mb-6">
               <div className="text-center">
-                <p className="text-yellow-200 text-sm mb-3 font-semibold">Formula:</p>
-                <div className="text-4xl font-black text-yellow-300 mb-3">
+                <p className="text-amber-700 text-sm mb-3 font-semibold">Formula:</p>
+                <div className="text-4xl font-black text-amber-700 mb-3">
                   {voltage} = {current.toFixed(2)} × {resistance}
                 </div>
-                <p className="text-yellow-300 text-lg font-bold">I (Arus) = {current.toFixed(2)} A</p>
+                <p className="text-amber-700 text-lg font-bold">I (Arus) = {current.toFixed(2)} A</p>
               </div>
             </div>
 
             {/* Results Grid */}
             <div className="grid grid-cols-3 gap-4">
-              <div className="bg-gradient-to-br from-orange-500/20 to-orange-600/10 rounded-xl p-6 border-2 border-orange-400/30 text-center">
-                <div className="text-2xl font-bold text-orange-300 mb-2">{voltage}</div>
-                <div className="text-sm text-orange-200 font-semibold">Tegangan (V)</div>
+              <div className="bg-lamp-soft rounded-xl p-6 border-2 border-ink text-center">
+                <div className="text-2xl font-bold text-amber-700 mb-2">{voltage}</div>
+                <div className="text-sm text-amber-700 font-semibold">Tegangan (V)</div>
               </div>
-              <div className="bg-gradient-to-br from-cyan-500/20 to-blue-600/10 rounded-xl p-6 border-2 border-cyan-400/30 text-center">
-                <div className="text-2xl font-bold text-cyan-300 mb-2">{current.toFixed(2)}</div>
-                <div className="text-sm text-cyan-200 font-semibold">Arus (A)</div>
+              <div className="bg-brand-soft rounded-xl p-6 border-2 border-ink text-center">
+                <div className="text-2xl font-bold text-brand mb-2">{current.toFixed(2)}</div>
+                <div className="text-sm text-muted font-semibold">Arus (A)</div>
               </div>
-              <div className="bg-gradient-to-br from-red-500/20 to-red-600/10 rounded-xl p-6 border-2 border-red-400/30 text-center">
-                <div className="text-2xl font-bold text-red-300 mb-2">{resistance}</div>
-                <div className="text-sm text-red-200 font-semibold">Hambatan (Ω)</div>
+              <div className="bg-coral-soft rounded-xl p-6 border-2 border-ink text-center">
+                <div className="text-2xl font-bold text-red-600 mb-2">{resistance}</div>
+                <div className="text-sm text-red-600 font-semibold">Hambatan (Ω)</div>
               </div>
             </div>
           </div>
@@ -1064,27 +1065,27 @@ const ModuleIntroductionPage = ({ isCompleted = false, onMarkComplete }: ModuleI
 
   if (!isClient) {
     return (
-      <div className="min-h-screen bg-slate-900 flex items-center justify-center">
-        <div className="text-white">Loading...</div>
+      <div className="min-h-screen bg-transparent flex items-center justify-center">
+        <div className="text-ink">Loading...</div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 relative overflow-hidden">
+    <div className="min-h-screen bg-transparent relative">
       {/* Audio Player */}
       {isClient && <AudioPlayer onTimestampReached={handleTimestampReached} />}
 
       {/* Animated Background */}
       <div className="fixed inset-0 -z-10 overflow-hidden pointer-events-none">
-        <div className="absolute top-20 left-10 w-72 h-72 bg-blue-500/10 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute top-40 right-20 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: "1s" }}></div>
-        <div className="absolute bottom-20 left-1/3 w-80 h-80 bg-cyan-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: "2s" }}></div>
+        <div className="absolute top-20 left-10 w-72 h-72 bg-brand-soft rounded-full hidden animate-pulse"></div>
+        <div className="absolute top-40 right-20 w-96 h-96 bg-brand-soft rounded-full hidden animate-pulse" style={{ animationDelay: "1s" }}></div>
+        <div className="absolute bottom-20 left-1/3 w-80 h-80 bg-brand-soft rounded-full hidden animate-pulse" style={{ animationDelay: "2s" }}></div>
         
         {[...Array(20)].map((_, i) => (
           <div
             key={i}
-            className="absolute w-1 h-1 bg-blue-400/30 rounded-full animate-ping"
+            className="absolute w-1 h-1 bg-brand-soft rounded-full hidden"
             style={{
               left: `${Math.random() * 100}%`,
               top: `${Math.random() * 100}%`,
@@ -1100,88 +1101,55 @@ const ModuleIntroductionPage = ({ isCompleted = false, onMarkComplete }: ModuleI
         <Navbar />
       </div>
 
-      {/* Hero Section + Section 1 Combined */}
-      <div className="relative bg-gradient-to-br from-slate-900 via-blue-950 to-indigo-900 text-white py-20 px-6 overflow-hidden">
-        {/* Animated Background Elements */}
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute -top-20 -right-20 w-96 h-96 bg-blue-500/20 rounded-full blur-3xl animate-pulse"></div>
-          <div className="absolute -bottom-10 -left-10 w-96 h-96 bg-purple-500/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: "1s" }}></div>
-          
-          {/* Floating particles */}
-          {[...Array(15)].map((_, i) => (
-            <div
-              key={i}
-              className="absolute w-1 h-1 bg-blue-400/40 rounded-full animate-ping"
-              style={{
-                left: `${Math.random() * 100}%`,
-                top: `${Math.random() * 100}%`,
-                animationDelay: `${Math.random() * 3}s`,
-                animationDuration: `${3 + Math.random() * 2}s`,
-              }}
-            ></div>
-          ))}
-        </div>
-              
-            <div className="max-w-7xl mx-auto relative z-10">
-              <div className="flex items-start justify-between gap-8 mb-8 opacity-0 animate-fade-in" style={{ animationDelay: "0.2s" }}>
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-4">
-                    <Star className="w-5 h-5 text-yellow-400 fill-current" />
-                    <span className="text-yellow-400 text-sm font-bold">Modul Pengantar</span>
-                  </div>
-                  <h1 className="text-5xl md:text-6xl font-black mb-4 bg-gradient-to-r from-blue-200 via-cyan-200 to-blue-300 bg-clip-text text-transparent drop-shadow-2xl">
-                    Apa itu Rangkaian Listrik?
-                  </h1>
-                  <p className="text-lg text-blue-200">Pelajari dasar-dasar rangkaian listrik dan komponen-komponennya</p>
-                </div>
-
-                <div className="flex flex-col items-center px-6 py-4 rounded-2xl shadow-lg border border-white/20 backdrop-blur-xl bg-white/10">
-                  <Clock className="w-8 h-8 mb-2 text-blue-300" />
-                  <span className="font-bold text-sm text-blue-100">4 Sections</span>
-                </div>
-              </div>
-            </div>
-          </div>
+      {/* Hero */}
+      <ModuleHero
+        label="Modul 1"
+        title="Apa itu Rangkaian Listrik?"
+        subtitle="Pelajari dasar-dasar rangkaian listrik dan komponen-komponennya"
+        sections={SECTION_NAMES}
+        onJump={(i) => [section1Ref, section2Ref, section3Ref, section4Ref][i].current?.scrollIntoView({ behavior: "smooth", block: "start" })}
+      />
 
       {/* Section 1 */}
-      <div className="relative py-16" ref={section1Ref}>
-        <div className="max-w-7xl mx-auto relative z-10">
+      <div className="relative py-12 scroll-mt-24" ref={section1Ref}>
+        <div className="max-w-7xl mx-auto px-6 relative z-10">
+          <SectionLabel n={1} total={4} name={SECTION_NAMES[0]} />
           {/* Main Grid: Text + Interactive Visual */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center opacity-0 animate-fade-in" style={{ animationDelay: "0.4s" }}>
             {/* Left: Text Content */}
             <div className="space-y-6">
-              <h2 className="text-4xl font-black bg-gradient-to-r from-yellow-400 via-orange-400 to-red-400 bg-clip-text text-transparent drop-shadow-lg">
+              <h2 className="text-4xl font-black text-ink">
                 Lampu Meja Belajarmu
               </h2>
               
               <div className="space-y-4">
-                <p className="text-lg text-slate-200 leading-relaxed">
+                <p className="text-lg text-muted leading-relaxed">
                   Bayangkan kamu berada di kamar yang gelap. Kamu ingin menyalakan lampu kecil di meja belajarmu.
                 </p>
-                <p className="text-lg text-slate-200 leading-relaxed">
-                  Kamu memasang baterai, menyambungkan kabel, dan… <span className="font-bold text-yellow-400">klik! 💡</span> lampu menyala!
+                <p className="text-lg text-muted leading-relaxed">
+                  Kamu memasang baterai, menyambungkan kabel, dan… <span className="font-bold text-amber-700">klik! </span> lampu menyala!
                 </p>
-                <p className="text-lg text-slate-200 leading-relaxed">
-                  Nah, itulah salah satu contoh <span className="font-bold text-yellow-400">rangkaian listrik sederhana</span>.
+                <p className="text-lg text-muted leading-relaxed">
+                  Nah, itulah salah satu contoh <span className="font-bold text-amber-700">rangkaian listrik sederhana</span>.
                 </p>
               </div>
 
-              <div className="h-px bg-gradient-to-r from-transparent via-yellow-500/50 to-transparent"></div>
+              <div className="h-px bg-ink/15"></div>
 
-              <p className="text-xl text-orange-400 font-semibold">
-                ⚡ Tapi… kenapa lampunya bisa menyala? Apa yang sebenarnya terjadi di balik kabel itu?
+              <p className="text-xl text-amber-700 font-semibold">
+                Tapi… kenapa lampunya bisa menyala? Apa yang sebenarnya terjadi di balik kabel itu?
               </p>
 
-              <div className="bg-gradient-to-br from-yellow-500/10 to-orange-500/10 rounded-2xl p-6 border border-yellow-400/30 backdrop-blur-sm">
-                <p className="text-yellow-200 text-center font-semibold">
-                  👉 Klik tombol di sebelah kanan untuk melihat apa yang terjadi ketika rangkaian tertutup dan terbuka!
+              <div className="bg-lamp-soft rounded-2xl p-6 border-2 border-ink">
+                <p className="text-amber-700 text-center font-semibold">
+                  Klik tombol di sebelah kanan untuk melihat apa yang terjadi ketika rangkaian tertutup dan terbuka!
                 </p>
               </div>
             </div>
 
             {/* Right: Interactive Visual - Section 1 Component */}
             <div className="relative group">
-              <div className="absolute -inset-3 bg-gradient-to-r from-yellow-500/20 to-orange-500/20 rounded-3xl blur-2xl opacity-50 group-hover:opacity-70 transition duration-1000"></div>
+              <div className="absolute -inset-3 bg-lamp-soft rounded-3xl hidden opacity-50 group-hover:opacity-70 transition duration-1000"></div>
               
               <Section1DarkRoom />
             </div>
@@ -1189,83 +1157,51 @@ const ModuleIntroductionPage = ({ isCompleted = false, onMarkComplete }: ModuleI
         </div>
       </div>
 
-      {/* Divider */}
-      <div className="flex justify-center py-12">
-        <div className="flex items-center gap-6">
-          <div className="h-px bg-gradient-to-r from-transparent via-yellow-400/50 to-transparent w-32"></div>
-          <div className="bg-gradient-to-br from-yellow-500 to-orange-500 p-3 rounded-full shadow-xl border border-white/30">
-            <Zap className="w-6 h-6 text-white" />
-          </div>
-          <div className="h-px bg-gradient-to-r from-transparent via-yellow-400/50 to-transparent w-32"></div>
-        </div>
-      </div>
-
       {/* Section 2 */}
-      <div className="py-20 relative bg-gradient-to-b from-transparent via-slate-800/30 to-transparent" ref={section2Ref}>
+      <div className="py-12 relative scroll-mt-24" ref={section2Ref}>
         <div className="max-w-7xl mx-auto px-6 opacity-0 animate-fade-in" style={{ animationDelay: "0.2s" }}>
+          <SectionLabel n={2} total={4} name={SECTION_NAMES[1]} />
           <Section2ElectronAnimation />
         </div>
       </div>
 
-      {/* Divider */}
-      <div className="flex justify-center py-12">
-        <div className="flex items-center gap-6">
-          <div className="h-px bg-gradient-to-r from-transparent via-cyan-400/50 to-transparent w-32"></div>
-          <div className="bg-gradient-to-br from-cyan-500 to-blue-500 p-3 rounded-full shadow-xl border border-white/30">
-            <Zap className="w-6 h-6 text-white" />
-          </div>
-          <div className="h-px bg-gradient-to-r from-transparent via-cyan-400/50 to-transparent w-32"></div>
-        </div>
-      </div>
-
       {/* Section 3 */}
-      <div className="py-20 relative" ref={section3Ref}>
+      <div className="py-12 relative scroll-mt-24" ref={section3Ref}>
         <div className="max-w-7xl mx-auto px-6 opacity-0 animate-fade-in" style={{ animationDelay: "0.2s" }}>
+          <SectionLabel n={3} total={4} name={SECTION_NAMES[2]} />
           <Section3CircuitComponents />
         </div>
       </div>
 
-      {/* Divider */}
-      <div className="flex justify-center py-12">
-        <div className="flex items-center gap-6">
-          <div className="h-px bg-gradient-to-r from-transparent via-green-400/50 to-transparent w-32"></div>
-          <div className="bg-gradient-to-br from-green-500 to-emerald-500 p-3 rounded-full shadow-xl border border-white/30">
-            <Zap className="w-6 h-6 text-white" />
-          </div>
-          <div className="h-px bg-gradient-to-r from-transparent via-green-400/50 to-transparent w-32"></div>
-        </div>
-      </div>
-
       {/* Section 4 */}
-      <div className="py-20 relative bg-gradient-to-b from-transparent via-slate-800/30 to-transparent" ref={section4Ref}>
+      <div className="py-12 relative scroll-mt-24" ref={section4Ref}>
         <div className="max-w-7xl mx-auto px-6 opacity-0 animate-fade-in" style={{ animationDelay: "0.2s" }}>
+          <SectionLabel n={4} total={4} name={SECTION_NAMES[3]} />
           <Section4OhmsLaw />
         </div>
       </div>
 
       {/* Completion Section - Extended dengan Footer */}
-      <div className="relative text-white py-32 px-6 overflow-hidden mt-20 opacity-0 animate-fade-in" style={{ animationDelay: "0.2s" }} ref={completionRef}>
-        {/* Background yang sama dengan section */}
-        <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-blue-950 to-indigo-950"></div>
+      <div className="relative text-ink py-16 px-6 border-t-2 border-ink mt-12 opacity-0 animate-fade-in" style={{ animationDelay: "0.2s" }} ref={completionRef}>
         
         <div className="absolute inset-0 opacity-40">
-          <div className="absolute top-0 left-1/4 w-96 h-96 bg-gradient-to-r from-yellow-500/20 to-orange-500/20 rounded-full blur-3xl animate-pulse"></div>
-          <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-gradient-to-r from-cyan-500/20 to-blue-500/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: "1s" }}></div>
+          <div className="absolute top-0 left-1/4 w-96 h-96 bg-lamp-soft rounded-full hidden animate-pulse"></div>
+          <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-brand-soft rounded-full hidden animate-pulse" style={{ animationDelay: "1s" }}></div>
         </div>
 
         <div className="max-w-7xl mx-auto relative z-10">
           {/* Completion Card */}
-          <div className="group relative mb-20">
-            <div className="absolute -inset-1 bg-gradient-to-r from-yellow-500/30 via-orange-500/20 to-blue-500/30 rounded-3xl blur-2xl opacity-50 group-hover:opacity-75 transition duration-1000"></div>
+          <div className="group relative">
+            <div className="absolute -inset-1 bg-lamp-soft rounded-3xl hidden opacity-50 group-hover:opacity-75 transition duration-1000"></div>
             
-            <div className="relative bg-gradient-to-br from-slate-900/80 to-blue-950/80 backdrop-blur-xl rounded-3xl border-2 border-yellow-400/30 p-12 shadow-2xl">
+            <div className="relative bg-paper rounded-3xl border-2 border-ink p-12 shadow-hard">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                 {/* Left: Main Message */}
                 <div className="md:col-span-2 flex flex-col justify-center">
-                  <h2 className="text-5xl md:text-5xl font-black mb-4 bg-gradient-to-r from-yellow-300 via-orange-300 to-yellow-300 bg-clip-text text-transparent drop-shadow-lg">
-                    {isModuleCompleted ? "✨ Selesai!" : "🚀 Hampir Selesai!"}
+                  <h2 className="text-5xl md:text-5xl font-black mb-4 text-ink">
+                    {isModuleCompleted ? "Selesai!" : "Hampir Selesai!"}
                   </h2>
-                  <p className="text-lg text-yellow-100/90 mb-8 leading-relaxed max-w-xl">
+                  <p className="text-lg text-ink mb-8 leading-relaxed max-w-xl">
                     {isModuleCompleted
                       ? "Anda telah menguasai fondasi rangkaian listrik dengan sempurna. Siap melanjutkan ke materi lebih dalam?"
                       : "Anda telah menyelesaikan semua 4 section fundamental. Tandai modul ini sebagai selesai untuk melanjutkan!"}
@@ -1274,41 +1210,41 @@ const ModuleIntroductionPage = ({ isCompleted = false, onMarkComplete }: ModuleI
                   {/* Stats */}
                   <div className="flex gap-6 mb-8">
                     <div className="text-center">
-                      <div className="text-3xl font-black text-yellow-400">4</div>
-                      <p className="text-xs text-yellow-300 font-semibold mt-1">Sections</p>
+                      <div className="text-3xl font-black text-amber-700">4</div>
+                      <p className="text-xs text-amber-700 font-semibold mt-1">Sections</p>
                     </div>
                     <div className="text-center">
-                      <div className="text-3xl font-black text-orange-400">100%</div>
-                      <p className="text-xs text-orange-300 font-semibold mt-1">Selesai</p>
+                      <div className="text-3xl font-black text-amber-700">100%</div>
+                      <p className="text-xs text-amber-700 font-semibold mt-1">Selesai</p>
                     </div>
                     <div className="text-center">
-                      <div className="text-3xl font-black text-yellow-300">✓</div>
-                      <p className="text-xs text-yellow-200 font-semibold mt-1">Terpahami</p>
+                      <div className="text-3xl font-black text-amber-700">✓</div>
+                      <p className="text-xs text-amber-700 font-semibold mt-1">Terpahami</p>
                     </div>
                   </div>
                 </div>
 
                 {/* Right: Visual Status */}
                 <div className="flex flex-col items-center justify-center">
-                  <div className={`w-32 h-32 rounded-full flex items-center justify-center mb-6 shadow-2xl border-2 transition-all duration-1000 ${
+                  <div className={`w-32 h-32 rounded-full flex items-center justify-center mb-6 shadow-hard border-2 transition-all duration-1000 ${
                     isModuleCompleted
-                      ? "bg-gradient-to-br from-yellow-500/20 to-orange-500/20 border-yellow-400/50 shadow-yellow-400/30"
-                      : "bg-gradient-to-br from-blue-500/20 to-cyan-500/20 border-yellow-400/50 shadow-yellow-400/30"
+                      ? "bg-lamp-soft border-ink"
+                      : "bg-brand-soft border-ink"
                   }`}>
                     {isModuleCompleted ? (
-                      <Trophy className="w-16 h-16 text-yellow-300 fill-yellow-300" />
+                      <Trophy className="w-16 h-16 text-amber-700 fill-yellow-300" />
                     ) : (
-                      <CheckCircle className="w-16 h-16 text-yellow-300" />
+                      <CheckCircle className="w-16 h-16 text-amber-700" />
                     )}
                   </div>
-                  <p className="text-sm font-bold tracking-widest text-yellow-300">
+                  <p className="text-sm font-bold tracking-widest text-amber-700">
                     {isModuleCompleted ? "ACHIEVEMENT" : "DALAM PROGRESS"}
                   </p>
                 </div>
               </div>
 
               {/* Divider */}
-              <div className="my-8 h-px bg-gradient-to-r from-transparent via-yellow-400/30 to-transparent"></div>
+              <div className="my-8 h-px bg-ink/15"></div>
 
               {/* Action Buttons */}
               <div className="flex flex-col md:flex-row gap-4 justify-end">
@@ -1318,7 +1254,7 @@ const ModuleIntroductionPage = ({ isCompleted = false, onMarkComplete }: ModuleI
                       setIsModuleCompleted(true);
                       if (onMarkComplete) onMarkComplete();
                     }}
-                    className="group flex items-center justify-center gap-3 px-10 py-4 bg-gradient-to-r from-yellow-500 to-orange-500 text-white font-black rounded-xl hover:from-yellow-600 hover:to-orange-600 transition-all transform hover:scale-105 shadow-2xl border border-yellow-300/30"
+                    className="group flex items-center justify-center gap-3 px-10 py-4 bg-lamp text-ink font-black rounded-xl hover:bg-lamp transition-all transform shadow-hard border-2 border-ink"
                   >
                     <Trophy className="w-5 h-5" />
                     <span>Tandai Selesai</span>
@@ -1327,19 +1263,18 @@ const ModuleIntroductionPage = ({ isCompleted = false, onMarkComplete }: ModuleI
 
                 <button
                   onClick={() => window.history.back()}
-                  className="group flex items-center justify-center gap-3 px-10 py-4 bg-white/10 border-2 border-white/30 text-white font-bold rounded-xl hover:bg-white/20 transition-all backdrop-blur-sm"
+                  className="group flex items-center justify-center gap-3 px-10 py-4 bg-paper border-2 border-ink text-ink font-bold rounded-xl hover:bg-lamp-soft transition-all"
                 >
-                  <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
+                  <ArrowLeft className="w-5 h-5 transition-transform" />
                   <span>Kembali</span>
                 </button>
               </div>
             </div>
           </div>
-
-          {/* Footer Section - Integrated dengan theme yellow */}
-          <Footer theme="yellow" />
         </div>
       </div>
+
+      <Footer />
     </div>
   );
 };

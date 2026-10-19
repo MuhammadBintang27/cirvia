@@ -1,4 +1,5 @@
 'use client'
+import { Ico } from "@/components/ui/Ico";
 
 import React, { useState } from 'react';
 import { Resistor } from '@/lib/questions';
@@ -448,13 +449,13 @@ const ImprovedCircuitDiagram: React.FC<ImprovedCircuitDiagramProps> = ({
   };
 
   return (
-    <div className="w-full p-6 bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-xl rounded-2xl border border-slate-600/30 shadow-2xl">
+    <div className="w-full p-6 bg-paper rounded-2xl border-2 border-ink shadow-hard">
       <div className="text-center mb-6">
-        <h3 className="text-xl font-bold text-white mb-2 flex items-center justify-center">
-          <span className="mr-2">⚡</span>
+        <h3 className="text-xl font-bold text-ink mb-2 flex items-center justify-center">
+          <span className="mr-2"><Ico n="zap" /></span>
           Diagram Rangkaian {circuitType === 'series' ? 'Seri' : 'Paralel'}
         </h3>
-        <p className="text-blue-200/80 text-sm">
+        <p className="text-muted text-sm">
           {circuitType === 'series' 
             ? 'Klik pada slot atau drag & drop resistor untuk menempatkan komponen' 
             : 'Setiap cabang paralel memiliki tegangan yang sama dengan sumber'
@@ -468,9 +469,9 @@ const ImprovedCircuitDiagram: React.FC<ImprovedCircuitDiagramProps> = ({
       
       {/* Circuit type indicator */}
       <div className="mt-6 text-center">
-        <div className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-purple-500/20 to-pink-500/20 rounded-full border border-purple-400/30 backdrop-blur-sm">
-          <span className="text-purple-300 text-sm font-medium">
-            {circuitType === 'series' ? '🔗 Rangkaian Seri' : '🔀 Rangkaian Paralel'}
+        <div className="inline-flex items-center px-6 py-3 bg-purple-100 rounded-full border-2 border-ink">
+          <span className="text-purple-700 text-sm font-medium">
+            {circuitType === 'series' ? 'Rangkaian Seri' : 'Rangkaian Paralel'}
           </span>
         </div>
       </div>

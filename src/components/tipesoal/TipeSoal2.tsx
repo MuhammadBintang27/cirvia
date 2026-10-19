@@ -1,4 +1,5 @@
 'use client'
+import { Ico } from "@/components/ui/Ico";
 
 import React, { useState, useEffect } from 'react';
 import { 
@@ -287,32 +288,32 @@ const TipeSoal2: React.FC<TipeSoal2Props> = ({
   return (
     <div className="space-y-8">
       {/* Question Info */}
-      <div className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl rounded-2xl p-8 border border-white/20">
+      <div className="bg-paper rounded-2xl p-8 border-2 border-ink">
         <div className="flex items-center mb-4">
           <div className={`w-3 h-3 rounded-full mr-3 ${
-            question.difficulty === 'easy' ? 'bg-green-400' : 
-            question.difficulty === 'medium' ? 'bg-yellow-400' : 'bg-red-400'
+            question.difficulty === 'easy' ? 'bg-mint' : 
+            question.difficulty === 'medium' ? 'bg-lamp' : 'bg-coral'
           }`}></div>
-          <span className="text-white/70 text-sm font-medium uppercase">
+          <span className="text-muted text-sm font-medium uppercase">
             {question.difficulty === 'easy' ? 'Mudah' : 
              question.difficulty === 'medium' ? 'Sedang' : 'Sulit'}
           </span>
         </div>
         
-        <h2 className="text-2xl font-bold text-white mb-4">{question.title}</h2>
-        <p className="text-blue-200/90 text-lg mb-4">{question.description}</p>
+        <h2 className="text-2xl font-bold text-ink mb-4">{question.title}</h2>
+        <p className="text-muted text-lg mb-4">{question.description}</p>
         
         
         {/* Question Text */}
         {question.question && (
-          <div className="bg-gradient-to-r from-blue-500/10 to-cyan-500/10 rounded-xl p-4 border border-blue-400/30 mb-4">
+          <div className="bg-brand-soft rounded-xl p-4 border-2 border-ink mb-4">
             <div className="flex items-start space-x-3">
-              <div className="flex-shrink-0 w-8 h-8 bg-blue-500/20 rounded-lg flex items-center justify-center mt-0.5">
-                <span className="text-lg">❓</span>
+              <div className="flex-shrink-0 w-8 h-8 bg-brand-soft rounded-lg flex items-center justify-center mt-0.5">
+                <span className="text-lg"><Ico n="help" /></span>
               </div>
               <div className="flex-1">
-                <p className="text-blue-200/90 font-medium text-sm mb-1">Pertanyaan:</p>
-                <p className="text-blue-100 leading-relaxed">
+                <p className="text-muted font-medium text-sm mb-1">Pertanyaan:</p>
+                <p className="text-muted leading-relaxed">
                   {question.question}
                 </p>
               </div>
@@ -321,12 +322,12 @@ const TipeSoal2: React.FC<TipeSoal2Props> = ({
         )}
 
         {/* Instruction */}
-        <div className="bg-gradient-to-r from-cyan-500/10 to-blue-500/10 rounded-xl p-4 border border-cyan-400/30 mb-6">
+        <div className="bg-brand-soft rounded-xl p-4 border-2 border-ink mb-6">
           <div className="flex items-center mb-2">
-            <Target className="w-5 h-5 text-cyan-400 mr-2" />
-            <span className="text-cyan-300 font-bold">Instruksi:</span>
+            <Target className="w-5 h-5 text-brand mr-2" />
+            <span className="text-brand font-bold">Instruksi:</span>
           </div>
-          <div className="text-white font-semibold">
+          <div className="text-ink font-semibold">
             {question.instruction}
           </div>
         </div>
@@ -334,15 +335,15 @@ const TipeSoal2: React.FC<TipeSoal2Props> = ({
         {/* Hint Button */}
         <button
           onClick={() => setState(prev => ({ ...prev, showHint: !prev.showHint }))}
-          className="flex items-center px-4 py-2 bg-gradient-to-r from-yellow-500/20 to-amber-500/20 rounded-xl border border-yellow-400/30 text-yellow-300 hover:bg-yellow-500/30 transition-all"
+          className="flex items-center px-4 py-2 bg-lamp-soft rounded-xl border-2 border-ink text-amber-700 hover:bg-lamp-soft transition-all"
         >
           <Lightbulb className="w-4 h-4 mr-2" />
           {state.showHint ? 'Sembunyikan Hint' : 'Tampilkan Hint'}
         </button>
 
         {state.showHint && (
-          <div className="mt-4 p-4 bg-gradient-to-r from-yellow-500/10 to-amber-500/10 rounded-xl border border-yellow-400/30">
-            <p className="text-yellow-200">{question.hint}</p>
+          <div className="mt-4 p-4 bg-lamp-soft rounded-xl border-2 border-ink">
+            <p className="text-amber-700">{question.hint}</p>
           </div>
         )}
       </div>
@@ -352,8 +353,8 @@ const TipeSoal2: React.FC<TipeSoal2Props> = ({
         <div className="grid grid-cols-3 gap-8 min-h-[600px]">
           {/* Left Panel - Circuit Display (2/3 width) */}
           <div className="col-span-2 space-y-6">
-            <h3 className="text-xl font-bold text-white flex items-center">
-              <Zap className="w-5 h-5 mr-2 text-cyan-400" />
+            <h3 className="text-xl font-bold text-ink flex items-center">
+              <Zap className="w-5 h-5 mr-2 text-brand" />
               Rangkaian Tersedia
             </h3>
             
@@ -375,15 +376,15 @@ const TipeSoal2: React.FC<TipeSoal2Props> = ({
           {/* Right Panel - Drop Slots (1/3 width) */}
           <div className="col-span-1 space-y-4">
             <div className="flex items-center justify-between">
-              <h3 className="text-lg font-bold text-white flex items-center">
-                <Target className="w-4 h-4 mr-2 text-purple-400" />
+              <h3 className="text-lg font-bold text-ink flex items-center">
+                <Target className="w-4 h-4 mr-2 text-purple-700" />
                 Urutan
               </h3>
               
               {state.slotAssignments.some(slot => slot !== null) && !showResult && (
                 <button
                   onClick={handleReset}
-                  className="flex items-center px-2 py-1 bg-red-500/20 hover:bg-red-500/30 rounded-lg border border-red-400/30 text-red-300 text-xs transition-all"
+                  className="flex items-center px-2 py-1 bg-coral-soft hover:bg-coral-soft rounded-lg border-2 border-ink text-red-600 text-xs transition-all"
                 >
                   <RotateCcw className="w-3 h-3 mr-1" />
                   Reset
@@ -429,8 +430,8 @@ const TipeSoal2: React.FC<TipeSoal2Props> = ({
       ) : (
         <div className="flex items-center justify-center py-12">
           <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></div>
-            <p className="text-white/70">Memuat rangkaian...</p>
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-ink mx-auto mb-4"></div>
+            <p className="text-muted">Memuat rangkaian...</p>
           </div>
         </div>
       )}
@@ -441,7 +442,7 @@ const TipeSoal2: React.FC<TipeSoal2Props> = ({
           <button
             onClick={handleSubmitAnswer}
             disabled={!canSubmit()}
-            className="flex items-center px-8 py-4 bg-gradient-to-r from-purple-500 to-pink-600 text-white rounded-2xl font-bold text-lg hover:from-purple-600 hover:to-pink-700 transition-all transform hover:scale-105 shadow-2xl disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+            className="flex items-center px-8 py-4 bg-purple-500 border-2 border-ink text-white rounded-2xl font-bold text-lg hover:bg-purple-500 transition-all transform shadow-hard disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
           >
             <CheckCircle className="w-5 h-5 mr-2" />
             Submit Jawaban
@@ -456,28 +457,28 @@ const TipeSoal2: React.FC<TipeSoal2Props> = ({
         return (
           <div className="space-y-6">
             {/* Result Status */}
-            <div className={`bg-gradient-to-br backdrop-blur-xl rounded-2xl p-8 border ${
+            <div className={`rounded-2xl p-8 border ${
               result.isCorrect 
-                ? 'from-green-500/10 to-emerald-500/10 border-green-400/30' 
-                : 'from-red-500/10 to-pink-500/10 border-red-400/30'
+                ? 'bg-mint-soft border-ink' 
+                : 'bg-coral-soft border-ink'
             }`}>
               <div className="flex items-center mb-4">
                 {result.isCorrect ? (
-                  <CheckCircle className="w-8 h-8 text-green-400 mr-3" />
+                  <CheckCircle className="w-8 h-8 text-emerald-700 mr-3" />
                 ) : (
-                  <XCircle className="w-8 h-8 text-red-400 mr-3" />
+                  <XCircle className="w-8 h-8 text-red-600 mr-3" />
                 )}
-                <h3 className="text-2xl font-bold text-white">
+                <h3 className="text-2xl font-bold text-ink">
                   {result.isCorrect ? 'Benar!' : 'Kurang Tepat'}
                 </h3>
               </div>
               
               <div className="space-y-4">
                 <div>
-                  <p className="text-white mb-2">
+                  <p className="text-ink mb-2">
                     <strong>Jawaban Anda:</strong> {result.userOrder.join(' → ')}
                   </p>
-                  <p className="text-white mb-4">
+                  <p className="text-ink mb-4">
                     <strong>Jawaban Benar:</strong> {currentCorrectOrder.join(' → ')}
                   </p>
                 </div>
@@ -485,12 +486,12 @@ const TipeSoal2: React.FC<TipeSoal2Props> = ({
             </div>
 
             {/* Explanation */}
-            <div className="bg-white/5 rounded-xl p-6 border border-white/10">
-              <h4 className="text-white font-bold mb-4 flex items-center">
-                <Lightbulb className="w-5 h-5 mr-2 text-yellow-400" />
-                💡 Penjelasan Lengkap:
+            <div className="bg-paper rounded-xl p-6 border border-ink/20">
+              <h4 className="text-ink font-bold mb-4 flex items-center">
+                <Lightbulb className="w-5 h-5 mr-2 text-amber-700" />
+                Penjelasan Lengkap:
               </h4>
-              <p className="text-blue-200/80 leading-relaxed whitespace-pre-line">
+              <p className="text-muted leading-relaxed whitespace-pre-line">
                 {currentExplanation}
               </p>
             </div>
@@ -499,7 +500,7 @@ const TipeSoal2: React.FC<TipeSoal2Props> = ({
             <div className="flex justify-center">
               <button
                 onClick={onNextQuestion}
-                className="flex items-center px-8 py-4 bg-gradient-to-r from-blue-500 to-cyan-600 text-white rounded-2xl font-bold text-lg hover:from-blue-600 hover:to-cyan-700 transition-all transform hover:scale-105 shadow-2xl"
+                className="flex items-center px-8 py-4 bg-brand border-2 border-ink text-white rounded-2xl font-bold text-lg hover:bg-brand transition-all transform shadow-hard"
               >
                 {isLastQuestion ? (
                   <>

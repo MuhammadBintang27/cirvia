@@ -170,7 +170,7 @@ export class CircuitComponentRenderer {
     ctx.font = "bold 12px Arial";
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
-    ctx.fillText("🔋 12V", 0, -25);
+    ctx.fillText("12V", 0, -25);
   }
 
   /**
@@ -218,7 +218,7 @@ export class CircuitComponentRenderer {
     ctx.font = `bold ${fontSize}px Arial`;
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
-    ctx.fillText("🔌 100Ω", 0, -18);
+    ctx.fillText("100Ω", 0, -18);
   }
 
   /**
@@ -324,7 +324,7 @@ export class CircuitComponentRenderer {
     ctx.font = `bold ${fontSize}px Arial`;
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
-    ctx.fillText(isOn ? "💡 ON" : "💡 OFF", 0, -30);
+    ctx.fillText(isOn ? "ON" : "OFF", 0, -30);
 
     // Power label
     if (lampPower > 0) {
@@ -403,7 +403,7 @@ export class CircuitComponentRenderer {
     ctx.font = `bold ${fontSize}px Arial`;
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
-    ctx.fillText(isOpen ? "⚡ OPEN" : "⚡ CLOSED", 0, -25);
+    ctx.fillText(isOpen ? "OPEN" : "CLOSED", 0, -25);
   }
 
   /**

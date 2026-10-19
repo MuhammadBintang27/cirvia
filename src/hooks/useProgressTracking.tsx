@@ -207,8 +207,8 @@ export const OverallProgress: React.FC<OverallProgressProps> = ({
           <div className="text-center mt-3">
             <p className="text-blue-200 font-medium">
               {isComplete 
-                ? "Selamat! Semua modul telah diselesaikan! 🎉" 
-                : `${totalModules - completedModules} modul tersisa - tetap semangat! 💪`
+                ? "Selamat! Semua modul telah diselesaikan! " 
+                : `${totalModules - completedModules} modul tersisa - tetap semangat! `
               }
             </p>
           </div>
@@ -264,7 +264,7 @@ export const OverallProgress: React.FC<OverallProgressProps> = ({
         {!isComplete && (
           <div className="mt-6 text-center p-4 bg-gradient-to-r from-blue-500/10 to-cyan-500/10 rounded-xl border border-blue-400/20">
             <p className="text-blue-200">
-              💡 <strong>Tips:</strong> Selesaikan satu modul setiap hari untuk hasil optimal!
+              <strong>Tips:</strong> Selesaikan satu modul setiap hari untuk hasil optimal!
             </p>
           </div>
         )}

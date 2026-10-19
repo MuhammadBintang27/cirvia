@@ -139,9 +139,66 @@
   background: #94a3b8;
 }
 
-/* Smooth transitions for all elements */
-* {
-  transition-property: color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter;
-  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-  transition-duration: 150ms;
+/* CIRVIA design system: neo-playful components */
+@layer base {
+  h1, h2, h3, h4 {
+    font-family: var(--font-display), var(--font-emoji), system-ui, sans-serif;
+    letter-spacing: -0.01em;
+  }
+}
+
+@layer components {
+  .bg-grid {
+    background-color: #FFF6E5;
+    background-image:
+      linear-gradient(rgba(27,27,47,.05) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(27,27,47,.05) 1px, transparent 1px);
+    background-size: 32px 32px;
+  }
+  .card {
+    @apply rounded-[20px] border-2 border-ink bg-paper shadow-hard;
+  }
+  .tag {
+    @apply inline-block rounded-full border-2 border-ink bg-lamp px-3 py-0.5 text-sm font-bold text-ink;
+  }
+  .label-mono {
+    @apply font-mono text-[13px] font-medium uppercase tracking-wider;
+  }
+  /* buttons press into their shadow */
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-[14px] border-2 border-ink bg-paper px-6 py-3 font-bold text-ink shadow-hard transition-[transform,box-shadow] duration-100 hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-[2px_2px_0_#1B1B2F] active:translate-x-1 active:translate-y-1 active:shadow-none;
+  }
+  .btn-primary { @apply bg-brand text-white; }
+  .btn-lamp { @apply bg-lamp; }
+  .btn-sm { @apply px-4 py-2 text-sm; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .btn { transition: none; }
+}
+
+/* Range sliders: one visible style everywhere (tracks used to be translucent white on dark) */
+input[type='range'] {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 12px;
+  border-radius: 999px;
+  background: #fff;
+  border: 2px solid #1B1B2F;
+  cursor: pointer;
+}
+input[type='range']::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #FFC93C;
+  border: 2px solid #1B1B2F;
+}
+input[type='range']::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #FFC93C;
+  border: 2px solid #1B1B2F;
 }

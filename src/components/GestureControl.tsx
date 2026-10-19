@@ -175,10 +175,10 @@ const GestureControl: React.FC<GestureControlProps> = ({
             cameraStatus === 'error' ? 'bg-red-100 text-red-800' :
             'bg-gray-100 text-gray-800'
           }`}>
-            {cameraStatus === 'active' && '🟢 Active'}
-            {cameraStatus === 'starting' && '🟡 Starting...'}
-            {cameraStatus === 'error' && '🔴 Error'}
-            {cameraStatus === 'inactive' && '⚫ Inactive'}
+            {cameraStatus === 'active' && 'Active'}
+            {cameraStatus === 'starting' && 'Starting...'}
+            {cameraStatus === 'error' && 'Error'}
+            {cameraStatus === 'inactive' && 'Inactive'}
           </div>
         </div>
         
@@ -245,7 +245,7 @@ const GestureControl: React.FC<GestureControlProps> = ({
                 : 'bg-white border border-gray-300 hover:bg-gray-50'
             }`}
           >
-            👆 Point
+            Point
           </button>
           <button
             onClick={() => triggerGesture('open_palm')}
@@ -255,7 +255,7 @@ const GestureControl: React.FC<GestureControlProps> = ({
                 : 'bg-white border border-gray-300 hover:bg-gray-50'
             }`}
           >
-            ✋ Open Palm
+            Open Palm
           </button>
           <button
             onClick={() => triggerGesture('fist')}
@@ -265,7 +265,7 @@ const GestureControl: React.FC<GestureControlProps> = ({
                 : 'bg-white border border-gray-300 hover:bg-gray-50'
             }`}
           >
-            ✊ Fist
+            Fist
           </button>
           <button
             onClick={() => triggerGesture('wave')}
@@ -275,11 +275,11 @@ const GestureControl: React.FC<GestureControlProps> = ({
                 : 'bg-white border border-gray-300 hover:bg-gray-50'
             }`}
           >
-            👋 Wave
+            Wave
           </button>
         </div>
         <p className="text-xs text-gray-500 mt-2">
-          💡 Use manual buttons to test gesture commands while camera is being set up
+          Use manual buttons to test gesture commands while camera is being set up
         </p>
       </div>
 
@@ -288,19 +288,19 @@ const GestureControl: React.FC<GestureControlProps> = ({
         <h4 className="font-semibold mb-3">Gesture Commands</h4>
         <div className="space-y-2 text-sm">
           <div className="flex justify-between">
-            <span>👆 Point</span>
+            <span>Point</span>
             <span className="text-gray-600">Select circuit element</span>
           </div>
           <div className="flex justify-between">
-            <span>✋ Open Palm</span>
+            <span>Open Palm</span>
             <span className="text-gray-600">Add resistor</span>
           </div>
           <div className="flex justify-between">
-            <span>✊ Fist</span>
+            <span>Fist</span>
             <span className="text-gray-600">Delete element</span>
           </div>
           <div className="flex justify-between">
-            <span>👋 Wave</span>
+            <span>Wave</span>
             <span className="text-gray-600">Reset circuit</span>
           </div>
         </div>

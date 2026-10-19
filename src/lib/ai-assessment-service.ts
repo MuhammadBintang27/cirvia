@@ -94,7 +94,7 @@ class AIAssessmentService {
             priority: 'high' as const
           }],
           nextSteps: ['Kerjakan tes gaya belajar'],
-          motivationalMessage: 'Memahami gaya belajar Anda adalah langkah pertama menuju pembelajaran yang efektif! 🎯'
+          motivationalMessage: 'Memahami gaya belajar Anda adalah langkah pertama menuju pembelajaran yang efektif! '
         }
       }
 
@@ -167,7 +167,7 @@ class AIAssessmentService {
             priority: 'high' as const
           }],
           nextSteps: ['Kerjakan pre-test', 'Pelajari materi', 'Kerjakan post-test'],
-          motivationalMessage: 'Mari mulai perjalanan pembelajaran Anda! Setiap ahli pernah menjadi pemula. 💪'
+          motivationalMessage: 'Mari mulai perjalanan pembelajaran Anda! Setiap ahli pernah menjadi pemula. '
         }
       }
 
@@ -182,7 +182,7 @@ class AIAssessmentService {
             priority: 'high' as const
           }],
           nextSteps: ['Kerjakan pre-test'],
-          motivationalMessage: 'Pre-test adalah titik awal perjalanan pembelajaran! Jangan khawatir tentang hasilnya. 🚀'
+          motivationalMessage: 'Pre-test adalah titik awal perjalanan pembelajaran! Jangan khawatir tentang hasilnya. '
         }
       }
 
@@ -250,7 +250,7 @@ class AIAssessmentService {
             priority: 'medium' as const
           }],
           nextSteps: ['Pelajari materi berdasarkan hasil pre-test', 'Kerjakan post-test'],
-          motivationalMessage: 'Anda sudah memulai dengan baik! Lanjutkan pembelajaran dan lihat progress Anda. 📈'
+          motivationalMessage: 'Anda sudah memulai dengan baik! Lanjutkan pembelajaran dan lihat progress Anda. '
         }
       }
 
@@ -533,7 +533,7 @@ class AIAssessmentService {
           const feedbackType = posttest ? 'post_posttest' : 'post_pretest'
           
           await SupabaseTestService.saveAIFeedback(
-            contextData.student.id, // ✅ Use student ID (UUID) instead of name
+            contextData.student.id, // Use student ID (UUID) instead of name
             testResultId,
             null, // No learning style result ID
             feedbackType,
@@ -569,7 +569,7 @@ class AIAssessmentService {
     
     // Learning Style Analysis
     if (contextData.learningStyle) {
-      prompt += `📚 PROFIL GAYA BELAJAR:\n`
+      prompt += `PROFIL GAYA BELAJAR:\n`
       prompt += `- Visual Learner: ${contextData.learningStyle.visual}% (${contextData.learningStyle.primaryStyle === 'visual' ? 'DOMINAN' : 'pendukung'})\n`
       prompt += `- Auditory Learner: ${contextData.learningStyle.auditory}% (${contextData.learningStyle.primaryStyle === 'auditory' ? 'DOMINAN' : 'pendukung'})\n`
       prompt += `- Kinesthetic Learner: ${contextData.learningStyle.kinesthetic}% (${contextData.learningStyle.primaryStyle === 'kinesthetic' ? 'DOMINAN' : 'pendukung'})\n`
@@ -578,7 +578,7 @@ class AIAssessmentService {
 
     // Pre-test Analysis with detailed breakdown
     if (contextData.pretest) {
-      prompt += `📊 HASIL PRE-TEST (Kemampuan Awal):\n`
+      prompt += `HASIL PRE-TEST (Kemampuan Awal):\n`
       prompt += `- Skor Total: ${contextData.pretest.score}/${contextData.pretest.totalQuestions} (${contextData.pretest.percentage.toFixed(1)}%)\n`
       prompt += `- Waktu Pengerjaan: ${Math.floor(contextData.pretest.timeSpent / 60)} menit ${contextData.pretest.timeSpent % 60} detik\n`
       prompt += `- Efisiensi Waktu: ${(contextData.pretest.timeSpent / contextData.pretest.totalQuestions / 60).toFixed(1)} menit per soal\n\n`
@@ -586,11 +586,11 @@ class AIAssessmentService {
       const wrongAnswersPretest = contextData.pretest.answers.filter((answer: any) => !answer.isCorrect)
       
       if (wrongAnswersPretest.length > 0) {
-        prompt += `❌ ANALISIS KESALAHAN PRE-TEST:\n`
+        prompt += `ANALISIS KESALAHAN PRE-TEST:\n`
         wrongAnswersPretest.forEach((answer: any, index: number) => {
           prompt += `${index + 1}. SOAL: "${answer.questionText}"\n`
-          prompt += `   ├─ Jawaban Siswa: "${answer.selectedText}" ❌\n`
-          prompt += `   ├─ Jawaban Benar: "${answer.correctText}" ✅\n`
+          prompt += `   ├─ Jawaban Siswa: "${answer.selectedText}" \n`
+          prompt += `   ├─ Jawaban Benar: "${answer.correctText}" \n`
           prompt += `   └─ Konsep Terkait: ${this.extractDetailedConcept(answer.questionText, answer.explanation)}\n\n`
         })
       }
@@ -598,18 +598,18 @@ class AIAssessmentService {
 
     // Post-test Analysis with improvement tracking
     if (contextData.posttest) {
-      prompt += `📈 HASIL POST-TEST (Kemampuan Akhir):\n`
+      prompt += `HASIL POST-TEST (Kemampuan Akhir):\n`
       prompt += `- Skor Total: ${contextData.posttest.score}/${contextData.posttest.totalQuestions} (${contextData.posttest.percentage.toFixed(1)}%)\n`
       prompt += `- Waktu Pengerjaan: ${Math.floor(contextData.posttest.timeSpent / 60)} menit ${contextData.posttest.timeSpent % 60} detik\n`
       prompt += `- Efisiensi Waktu: ${(contextData.posttest.timeSpent / contextData.posttest.totalQuestions / 60).toFixed(1)} menit per soal\n\n`
       
       const wrongAnswersPosttest = contextData.posttest.answers.filter((answer: any) => !answer.isCorrect)
       if (wrongAnswersPosttest.length > 0) {
-        prompt += `❌ ANALISIS KESALAHAN POST-TEST (Masih Perlu Diperbaiki):\n`
+        prompt += `ANALISIS KESALAHAN POST-TEST (Masih Perlu Diperbaiki):\n`
         wrongAnswersPosttest.forEach((answer: any, index: number) => {
           prompt += `${index + 1}. SOAL: "${answer.questionText}"\n`
-          prompt += `   ├─ Jawaban Siswa: "${answer.selectedText}" ❌\n`
-          prompt += `   ├─ Jawaban Benar: "${answer.correctText}" ✅\n`
+          prompt += `   ├─ Jawaban Siswa: "${answer.selectedText}" \n`
+          prompt += `   ├─ Jawaban Benar: "${answer.correctText}" \n`
           prompt += `   ├─ Penjelasan: ${answer.explanation}\n`
           prompt += `   └─ Konsep yang Perlu Diperkuat: ${this.extractDetailedConcept(answer.questionText, answer.explanation)}\n\n`
         })
@@ -617,7 +617,7 @@ class AIAssessmentService {
 
       const correctAnswersPosttest = contextData.posttest.answers.filter((answer: any) => answer.isCorrect)
       if (correctAnswersPosttest.length > 0) {
-        prompt += `✅ KONSEP YANG SUDAH DIKUASAI:\n`
+        prompt += `KONSEP YANG SUDAH DIKUASAI:\n`
         const conceptsArray = correctAnswersPosttest.map((answer: any) => 
           this.extractDetailedConcept(answer.questionText, answer.explanation)
         )
@@ -634,7 +634,7 @@ class AIAssessmentService {
     // Detailed Progress Analysis
     if (contextData.progress && contextData.pretest && contextData.posttest) {
       const improvement = contextData.progress.improvement
-      prompt += `📊 ANALISIS PROGRESS PEMBELAJARAN:\n`
+      prompt += `ANALISIS PROGRESS PEMBELAJARAN:\n`
       prompt += `- Peningkatan Skor: ${improvement > 0 ? '+' : ''}${improvement.toFixed(1)}% ${improvement > 0 ? '📈' : improvement < 0 ? '📉' : '➡️'}\n`
       prompt += `- Perubahan Waktu: ${contextData.pretest.timeSpent > contextData.posttest.timeSpent ? 'Lebih cepat' : 'Lebih lambat'} (${Math.abs(contextData.pretest.timeSpent - contextData.posttest.timeSpent)} detik)\n`
       prompt += `- Efektivitas Pembelajaran: ${contextData.progress.learningEffectiveness.toUpperCase()}\n`
@@ -650,7 +650,7 @@ class AIAssessmentService {
     }
 
     // Specific request for AI analysis with detailed JSON format
-    prompt += `🎯 REQUEST ANALISIS AI:\n\n`
+    prompt += `REQUEST ANALISIS AI:\n\n`
     prompt += `Anda adalah AI mentor pribadi yang ramah dan supportif untuk siswa SMA dalam pembelajaran fisika rangkaian listrik.\n\n`
     
     prompt += `PERSONA: Bicara langsung ke "${contextData.student.name}" dengan cara yang friendly, encouraging, dan personal - seperti kakak yang peduli dengan pembelajaran mereka.\n\n`
@@ -665,13 +665,13 @@ class AIAssessmentService {
     prompt += `GAYA BAHASA:\n`
     prompt += `- Friendly dan conversational (seperti ngobrol dengan teman/kakak)\n`
     prompt += `- Mix bahasa Indonesia dan sedikit English untuk kesan modern\n`
-    prompt += `- Emoji boleh dipakai untuk warmth tapi jangan berlebihan\n`
+    prompt += `- Jangan gunakan emoji\n`
     prompt += `- Hindari bahasa terlalu formal/kaku\n\n`
     
     prompt += `FORMAT RESPONSE (gunakan format JSON yang valid):\n`
     prompt += `{\n`
-    prompt += `  "title": "[Sapaan personal + highlight pencapaian - contoh: 'Great Job, ${contextData.student.name}! Kamu Nailed the Basics! 🎉']",\n`
-    prompt += `  "summary": "[1 paragraf RINGKAS (3-4 kalimat) - Bicara langsung ke siswa. Mix Indo-English casual. Contoh tone: '${contextData.student.name}, I see that you've done a great job understanding the basics of electrical circuits. Kamu udah bisa ngerjain soal Hukum Ohm dan Analisis Arus Listrik dengan baik. That's fantastic! Tapi, aku notice ada beberapa area yang masih perlu kamu kuasai lebih dalam, khususnya tentang Rangkaian Seri dan dasar-dasar Rangkaian Listrik. No worries, kita bisa kerjain ini bareng! 💪']",\n`
+    prompt += `  "title": "[Sapaan personal + highlight pencapaian - contoh: 'Great Job, ${contextData.student.name}! Kamu Nailed the Basics! ']",\n`
+    prompt += `  "summary": "[1 paragraf RINGKAS (3-4 kalimat) - Bicara langsung ke siswa. Mix Indo-English casual. Contoh tone: '${contextData.student.name}, I see that you've done a great job understanding the basics of electrical circuits. Kamu udah bisa ngerjain soal Hukum Ohm dan Analisis Arus Listrik dengan baik. That's fantastic! Tapi, aku notice ada beberapa area yang masih perlu kamu kuasai lebih dalam, khususnya tentang Rangkaian Seri dan dasar-dasar Rangkaian Listrik. No worries, kita bisa kerjain ini bareng! ']",\n`
     prompt += `  "recommendations": [\n`
     prompt += `    {\n`
     prompt += `      "category": "Yang Bisa Kamu Lakukan",\n`
@@ -689,15 +689,15 @@ class AIAssessmentService {
     prompt += `    "[Langkah 2]",\n`
     prompt += `    "[Langkah 3]"\n`
     prompt += `  ],\n`
-    prompt += `  "motivationalMessage": "[1-2 kalimat inspiring. Contoh: '${contextData.student.name}, jangan menyerah! Setiap ahli pernah menjadi pemula. Terus berlatih dan Anda pasti bisa! 💪 ✨']"\n`
+    prompt += `  "motivationalMessage": "[1-2 kalimat inspiring. Contoh: '${contextData.student.name}, jangan menyerah! Setiap ahli pernah menjadi pemula. Terus berlatih dan Anda pasti bisa! ']"\n`
     prompt += `}\n\n`
     
     prompt += `CONTOH TONE YANG DIHARAPKAN:\n`
-    prompt += `❌ JANGAN: "Siswa menunjukkan pemahaman yang baik terhadap konsep dasar"\n`
-    prompt += `✅ LAKUKAN: "Hebat! Kamu udah ngerti banget konsep dasarnya. Aku impressed dengan jawabanmu di bagian Hukum Ohm!"\n\n`
+    prompt += `JANGAN: "Siswa menunjukkan pemahaman yang baik terhadap konsep dasar"\n`
+    prompt += `LAKUKAN: "Hebat! Kamu udah ngerti banget konsep dasarnya. Aku impressed dengan jawabanmu di bagian Hukum Ohm!"\n\n`
     
-    prompt += `❌ JANGAN: "Disarankan untuk memperdalam pemahaman"\n`
-    prompt += `✅ LAKUKAN: "Ayo kita tingkatkan lagi! Coba fokus lebih ke rangkaian seri-paralel - kamu pasti bisa!"\n\n`
+    prompt += `JANGAN: "Disarankan untuk memperdalam pemahaman"\n`
+    prompt += `LAKUKAN: "Ayo kita tingkatkan lagi! Coba fokus lebih ke rangkaian seri-paralel - kamu pasti bisa!"\n\n`
     
     prompt += `PENTING:\n`
     prompt += `- Summary: RINGKAS, cukup 1 paragraf (3-4 kalimat), mix Indo-English casual\n`
@@ -1178,13 +1178,13 @@ class AIAssessmentService {
     const progress = contextData.progress
 
     if (progress?.improvement > 20) {
-      return `Luar biasa ${name}! Peningkatan Anda sangat mengesankan. Terus pertahankan semangat belajar! 🌟⚡`
+      return `Luar biasa ${name}! Peningkatan Anda sangat mengesankan. Terus pertahankan semangat belajar! `
     } else if (progress?.improvement > 0) {
-      return `Bagus ${name}! Anda menunjukkan kemajuan yang baik. Sedikit lagi menuju kesempurnaan! 📈💪`
+      return `Bagus ${name}! Anda menunjukkan kemajuan yang baik. Sedikit lagi menuju kesempurnaan! `
     } else if (progress?.improvement === 0) {
-      return `${name}, konsistensi Anda patut diapresiasi. Mari coba strategi pembelajaran yang berbeda! 🎯✨`
+      return `${name}, konsistensi Anda patut diapresiasi. Mari coba strategi pembelajaran yang berbeda! `
     } else {
-      return `${name}, jangan menyerah! Setiap ahli pernah menjadi pemula. Terus berlatih dan Anda pasti bisa! 💪🚀`
+      return `${name}, jangan menyerah! Setiap ahli pernah menjadi pemula. Terus berlatih dan Anda pasti bisa! `
     }
   }
 
@@ -1306,11 +1306,11 @@ class AIAssessmentService {
 
   private static getLearningStyleMotivation(style: string): string {
     const motivations = {
-      visual: 'Mata Anda adalah jendela pembelajaran! Manfaatkan kekuatan visual Anda untuk menguasai rangkaian listrik. 👁️✨',
-      auditory: 'Suara adalah musik pembelajaran! Dengarkan, diskusikan, dan nyanyikan konsep listrik. 🎵🔊',
-      kinesthetic: 'Tangan Anda adalah kunci pemahaman! Sentuh, rasakan, dan praktikkan setiap konsep. 🤲⚡'
+      visual: 'Mata Anda adalah jendela pembelajaran! Manfaatkan kekuatan visual Anda untuk menguasai rangkaian listrik. ',
+      auditory: 'Suara adalah musik pembelajaran! Dengarkan, diskusikan, dan nyanyikan konsep listrik. ',
+      kinesthetic: 'Tangan Anda adalah kunci pemahaman! Sentuh, rasakan, dan praktikkan setiap konsep. '
     }
-    return motivations[style as keyof typeof motivations] || 'Terus semangat belajar! 💪'
+    return motivations[style as keyof typeof motivations] || 'Terus semangat belajar! '
   }
 
   // Helper methods for progress analysis
@@ -1450,10 +1450,10 @@ class AIAssessmentService {
   }
 
   private static getProgressTitle(analysis: ProgressAnalysis): string {
-    if (analysis.improvement > 20) return 'Progress Luar Biasa! 🌟'
-    if (analysis.improvement > 10) return 'Progress Sangat Baik! 📈'
-    if (analysis.improvement > 0) return 'Ada Peningkatan! 👍'
-    return 'Mari Tingkatkan Lagi! 💪'
+    if (analysis.improvement > 20) return 'Progress Luar Biasa! '
+    if (analysis.improvement > 10) return 'Progress Sangat Baik! '
+    if (analysis.improvement > 0) return 'Ada Peningkatan! '
+    return 'Mari Tingkatkan Lagi! '
   }
 
   private static getProgressSummary(pretest: any, posttest: any, analysis: ProgressAnalysis): string {
@@ -1493,11 +1493,11 @@ class AIAssessmentService {
 
   private static getProgressMotivation(analysis: ProgressAnalysis): string {
     if (analysis.improvement > 20) {
-      return 'Fantastic! Anda menunjukkan kemajuan yang luar biasa. Terus pertahankan semangat belajar! 🎉🌟'
+      return 'Fantastic! Anda menunjukkan kemajuan yang luar biasa. Terus pertahankan semangat belajar! '
     } else if (analysis.improvement > 0) {
-      return 'Great job! Setiap langkah kecil adalah progress. Terus semangat menuju kesuksesan! 📈💪'
+      return 'Great job! Setiap langkah kecil adalah progress. Terus semangat menuju kesuksesan! '
     } else {
-      return 'Jangan menyerah! Setiap master pernah gagal lebih banyak dari yang pernah dicoba pemula. Keep going! 🚀💫'
+      return 'Jangan menyerah! Setiap master pernah gagal lebih banyak dari yang pernah dicoba pemula. Keep going! '
     }
   }
 
@@ -1570,7 +1570,7 @@ class AIAssessmentService {
         'Buat jadwal belajar yang konsisten',
         'Monitor progress secara berkala'
       ],
-      motivationalMessage: 'Perjalanan pembelajaran adalah marathon, bukan sprint. Setiap langkah membawa Anda lebih dekat ke tujuan! 🎯🏃‍♂️'
+      motivationalMessage: 'Perjalanan pembelajaran adalah marathon, bukan sprint. Setiap langkah membawa Anda lebih dekat ke tujuan! '
     }
   }
 
@@ -1582,7 +1582,7 @@ class AIAssessmentService {
   ) {
     let score = 0
     let level: 'beginner' | 'intermediate' | 'advanced' | 'expert' = 'beginner'
-    let badge = '🌱'
+    let badge = 'sprout'
 
     // Calculate score based on available data
     if (learningStyle) score += 25
@@ -1597,16 +1597,16 @@ class AIAssessmentService {
     // Determine level and badge
     if (score >= 90) {
       level = 'expert'
-      badge = '🏆'
+      badge = 'trophy'
     } else if (score >= 75) {
       level = 'advanced'
-      badge = '⭐'
+      badge = 'star'
     } else if (score >= 50) {
       level = 'intermediate'
-      badge = '📈'
+      badge = 'trending-up'
     } else {
       level = 'beginner'
-      badge = '🌱'
+      badge = 'sprout'
     }
 
     return { score, level, badge }

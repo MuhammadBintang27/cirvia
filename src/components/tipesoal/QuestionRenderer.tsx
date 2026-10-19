@@ -28,9 +28,9 @@ const QuestionRenderer: React.FC<QuestionRendererProps> = ({
   if (!question) {
     console.error('❌ QuestionRenderer: question is null/undefined');
     return (
-      <div className="bg-red-500/20 border border-red-500/50 rounded-xl p-6 text-center">
-        <p className="text-red-300 font-bold text-lg">⚠️ Error: Soal tidak ditemukan</p>
-        <p className="text-red-200/70 text-sm mt-2">
+      <div className="bg-coral-soft border-2 border-ink rounded-xl p-6 text-center">
+        <p className="text-red-600 font-bold text-lg">Error: Soal tidak ditemukan</p>
+        <p className="text-red-600 text-sm mt-2">
           Data soal tidak valid atau tidak dapat dimuat dari database.
         </p>
       </div>
@@ -40,9 +40,9 @@ const QuestionRenderer: React.FC<QuestionRendererProps> = ({
   if (!question.questionType) {
     console.error('❌ QuestionRenderer: questionType is missing', question);
     return (
-      <div className="bg-red-500/20 border border-red-500/50 rounded-xl p-6 text-center">
-        <p className="text-red-300 font-bold text-lg">⚠️ Error: Tipe soal tidak diketahui</p>
-        <p className="text-red-200/70 text-sm mt-2">
+      <div className="bg-coral-soft border-2 border-ink rounded-xl p-6 text-center">
+        <p className="text-red-600 font-bold text-lg">Error: Tipe soal tidak diketahui</p>
+        <p className="text-red-600 text-sm mt-2">
           Soal ID: {(question as any).id || 'unknown'} - questionType hilang
         </p>
       </div>
@@ -102,7 +102,7 @@ const QuestionRenderer: React.FC<QuestionRendererProps> = ({
               <button
                 onClick={onNextQuestion}
                 disabled={disabled}
-                className="flex items-center px-8 py-4 bg-gradient-to-r from-blue-500 to-cyan-600 text-white rounded-2xl font-bold text-lg hover:from-blue-600 hover:to-cyan-700 transition-all transform hover:scale-105 shadow-2xl disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                className="flex items-center px-8 py-4 bg-brand border-2 border-ink text-white rounded-2xl font-bold text-lg hover:bg-brand transition-all transform shadow-hard disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
               >
                 {isLastQuestion ? 'Selesai Test' : 'Soal Berikutnya'}
               </button>
@@ -126,7 +126,7 @@ const QuestionRenderer: React.FC<QuestionRendererProps> = ({
               <button
                 onClick={onNextQuestion}
                 disabled={disabled}
-                className="flex items-center px-8 py-4 bg-gradient-to-r from-blue-500 to-cyan-600 text-white rounded-2xl font-bold text-lg hover:from-blue-600 hover:to-cyan-700 transition-all transform hover:scale-105 shadow-2xl disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                className="flex items-center px-8 py-4 bg-brand border-2 border-ink text-white rounded-2xl font-bold text-lg hover:bg-brand transition-all transform shadow-hard disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
               >
                 {isLastQuestion ? 'Selesai Test' : 'Soal Berikutnya'}
               </button>
@@ -138,9 +138,9 @@ const QuestionRenderer: React.FC<QuestionRendererProps> = ({
 
     default:
       return (
-        <div className="bg-gradient-to-br from-red-500/10 to-pink-500/10 backdrop-blur-xl rounded-2xl p-8 border border-red-400/30">
-          <h2 className="text-2xl font-bold text-red-400 mb-4">Error: Unknown Question Type</h2>
-          <p className="text-red-200/90">
+        <div className="bg-coral-soft rounded-2xl p-8 border-2 border-ink">
+          <h2 className="text-2xl font-bold text-red-600 mb-4">Error: Unknown Question Type</h2>
+          <p className="text-red-600">
             Question type &quot;{(question as any).questionType}&quot; is not supported.
           </p>
         </div>

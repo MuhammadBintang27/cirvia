@@ -37,12 +37,12 @@ INSTRUKSI RESPONSE:
 GAYA BAHASA:
 - Friendly dan conversational (seperti ngobrol dengan teman/kakak)
 - Mix bahasa Indonesia dan sedikit English untuk kesan modern
-- Emoji boleh dipakai untuk warmth
+- Jangan gunakan emoji
 - Hindari bahasa terlalu formal/kaku
 
 FORMAT RESPONSE (gunakan format JSON yang valid):
 {
-  "title": "[Sapaan personal + highlight pencapaian - contoh: 'Great Job! Kamu Nailed the Basics! 🎉']",
+  "title": "[Sapaan personal + highlight pencapaian - contoh: 'Great Job! Kamu Nailed the Basics! ']",
   "summary": "[Bicara langsung ke siswa tentang hasil mereka - mulai dengan 'Kamu berhasil...' atau 'Great work on...' atau 'Aku notice bahwa kamu...']",
   "recommendations": [
     {
@@ -56,11 +56,11 @@ FORMAT RESPONSE (gunakan format JSON yang valid):
 }
 
 CONTOH TONE YANG DIHARAPKAN:
-❌ JANGAN: "Siswa menunjukkan pemahaman yang baik terhadap konsep dasar"
-✅ LAKUKAN: "Hebat! Kamu udah ngerti banget konsep dasarnya. Aku impressed dengan jawabanmu di bagian Hukum Ohm!"
+JANGAN: "Siswa menunjukkan pemahaman yang baik terhadap konsep dasar"
+LAKUKAN: "Hebat! Kamu udah ngerti banget konsep dasarnya. Aku impressed dengan jawabanmu di bagian Hukum Ohm!"
 
-❌ JANGAN: "Disarankan untuk memperdalam pemahaman"
-✅ LAKUKAN: "Ayo kita tingkatkan lagi! Coba fokus lebih ke rangkaian seri-paralel - kamu pasti bisa!"
+JANGAN: "Disarankan untuk memperdalam pemahaman"
+LAKUKAN: "Ayo kita tingkatkan lagi! Coba fokus lebih ke rangkaian seri-paralel - kamu pasti bisa!"
 `
 
     // Call OpenAI API

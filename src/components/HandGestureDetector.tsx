@@ -253,7 +253,7 @@ const HandGestureDetector: React.FC<HandGestureProps> = ({
           {/* Overlay Info */}
           <div className="absolute top-4 left-4 bg-black bg-opacity-70 text-white p-2 rounded">
             <div className="text-sm">
-              <div>Status: {isActive ? '🟢 Active' : '🔴 Inactive'}</div>
+              <div>Status: {isActive ? 'Active' : 'Inactive'}</div>
               <div>Gesture: <span className="font-bold text-green-400">{currentGesture}</span></div>
               <div>Confidence: <span className="font-bold text-blue-400">{Math.round(confidence * 100)}%</span></div>
             </div>
@@ -265,27 +265,27 @@ const HandGestureDetector: React.FC<HandGestureProps> = ({
           <h4 className="font-semibold text-gray-800 mb-3">Gesture Commands:</h4>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-3 text-sm">
             <div className={`p-2 rounded ${currentGesture === 'point' ? 'bg-blue-100 border-blue-300' : 'bg-white border-gray-200'} border`}>
-              <div className="font-medium">👆 Point</div>
+              <div className="font-medium">Point</div>
               <div className="text-gray-600">Select element</div>
             </div>
             <div className={`p-2 rounded ${currentGesture === 'open_palm' ? 'bg-blue-100 border-blue-300' : 'bg-white border-gray-200'} border`}>
-              <div className="font-medium">✋ Open Palm</div>
+              <div className="font-medium">Open Palm</div>
               <div className="text-gray-600">Add resistor</div>
             </div>
             <div className={`p-2 rounded ${currentGesture === 'fist' ? 'bg-blue-100 border-blue-300' : 'bg-white border-gray-200'} border`}>
-              <div className="font-medium">✊ Fist</div>
+              <div className="font-medium">Fist</div>
               <div className="text-gray-600">Delete element</div>
             </div>
             <div className={`p-2 rounded ${currentGesture === 'peace' ? 'bg-blue-100 border-blue-300' : 'bg-white border-gray-200'} border`}>
-              <div className="font-medium">✌️ Peace</div>
+              <div className="font-medium">Peace</div>
               <div className="text-gray-600">Reset circuit</div>
             </div>
             <div className={`p-2 rounded ${currentGesture === 'three' ? 'bg-blue-100 border-blue-300' : 'bg-white border-gray-200'} border`}>
-              <div className="font-medium">🤟 Three</div>
+              <div className="font-medium">Three</div>
               <div className="text-gray-600">Increase value</div>
             </div>
             <div className={`p-2 rounded ${currentGesture === 'four' ? 'bg-blue-100 border-blue-300' : 'bg-white border-gray-200'} border`}>
-              <div className="font-medium">🖖 Four</div>
+              <div className="font-medium">Four</div>
               <div className="text-gray-600">Decrease value</div>
             </div>
           </div>

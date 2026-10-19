@@ -1,4 +1,5 @@
 'use client';
+import { Ico } from "@/components/ui/Ico";
 
 import React, { useState, useCallback, useMemo } from 'react';
 import { CheckCircle, X, Lightbulb, LightbulbOff, Power, Target, AlertCircle, RotateCcw } from 'lucide-react';
@@ -185,7 +186,7 @@ const TipeSoal4: React.FC<TipeSoal4Props> = ({ question, onAnswer }) => {
     // Check if all lamps are answered
     const hasUnanswered = lampIds.some(lampId => state.lampStates[lampId] === 'unknown');
     if (hasUnanswered) {
-      alert('⚠️ Silakan pilih status untuk semua lampu (Menyala atau Mati) sebelum submit!');
+      alert('Silakan pilih status untuk semua lampu (Menyala atau Mati) sebelum submit!');
       return;
     }
 
@@ -312,7 +313,7 @@ const TipeSoal4: React.FC<TipeSoal4Props> = ({ question, onAnswer }) => {
           width="16"
           height="6"
           fill="#64748b"
-          stroke="#ffffff"
+          stroke="#1B1B2F"
           strokeWidth="1"
           rx="2"
         />
@@ -360,7 +361,7 @@ const TipeSoal4: React.FC<TipeSoal4Props> = ({ question, onAnswer }) => {
             textAnchor="middle"
             className="text-lg font-bold fill-red-300 pointer-events-none"
           >
-            ❌
+            <Ico n="x" />
           </text>
         )}
 
@@ -373,7 +374,7 @@ const TipeSoal4: React.FC<TipeSoal4Props> = ({ question, onAnswer }) => {
                 cy={comp.position.y - 18}
                 r="10"
                 fill="#22c55e"
-                stroke="#ffffff"
+                stroke="#1B1B2F"
                 strokeWidth="2"
               />
             )}
@@ -383,7 +384,7 @@ const TipeSoal4: React.FC<TipeSoal4Props> = ({ question, onAnswer }) => {
                 cy={comp.position.y - 18}
                 r="10"
                 fill="#ef4444"
-                stroke="#ffffff"
+                stroke="#1B1B2F"
                 strokeWidth="2"
               />
             )}
@@ -424,7 +425,7 @@ const TipeSoal4: React.FC<TipeSoal4Props> = ({ question, onAnswer }) => {
           width="40"
           height="24"
           fill="#22c55e"
-          stroke="#ffffff"
+          stroke="#1B1B2F"
           strokeWidth="2"
           rx="4"
         />
@@ -490,7 +491,7 @@ const TipeSoal4: React.FC<TipeSoal4Props> = ({ question, onAnswer }) => {
           cy={comp.position.y}
           r="6"
           fill="#64748b"
-          stroke="#ffffff"
+          stroke="#1B1B2F"
           strokeWidth="2"
         />
         
@@ -548,7 +549,7 @@ const TipeSoal4: React.FC<TipeSoal4Props> = ({ question, onAnswer }) => {
             y1={fromComp.position.y - 1}
             x2={toComp.position.x}
             y2={toComp.position.y - 1}
-            stroke="#ffffff"
+            stroke="#1B1B2F"
             strokeWidth="1.5"
             className="opacity-40"
           />
@@ -558,20 +559,20 @@ const TipeSoal4: React.FC<TipeSoal4Props> = ({ question, onAnswer }) => {
   };
 
   return (
-    <div className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl rounded-2xl border border-white/20 shadow-2xl p-6">
+    <div className="bg-paper rounded-2xl border-2 border-ink shadow-hard p-6">
       <div className="grid grid-cols-2 gap-6 h-full">
         {/* Interactive SVG Circuit Diagram */}
-        <div className="bg-gradient-to-br from-blue-500/10 to-cyan-500/10 backdrop-blur-sm rounded-xl border border-blue-400/30 p-6">
+        <div className="bg-brand-soft rounded-xl border-2 border-ink p-6">
           <div className="mb-4">
-            <h3 className="text-xl font-bold text-white mb-2">
+            <h3 className="text-xl font-bold text-ink mb-2">
               Rangkaian Listrik
             </h3>
-            <p className="text-blue-200/90 text-sm">
+            <p className="text-muted text-sm">
               Klik lampu untuk memprediksi kondisi Nyala/Padam
             </p>
           </div>
           
-          <svg viewBox="0 0 520 360" className="w-full h-80 bg-gradient-to-br from-slate-900/50 to-blue-900/30 rounded-lg border border-blue-500/20">
+          <svg viewBox="0 0 520 360" className="w-full h-80 bg-paper rounded-lg border-2 border-ink">
             {/* Render wire connections first (behind components) */}
             {renderWires()}
             
@@ -594,54 +595,54 @@ const TipeSoal4: React.FC<TipeSoal4Props> = ({ question, onAnswer }) => {
         {/* Information and Controls Panel */}
         <div className="flex flex-col justify-between">
           {/* Question Info */}
-          <div className="bg-gradient-to-br from-blue-500/10 to-cyan-500/10 backdrop-blur-sm rounded-xl border border-blue-400/30 p-6 mb-6">
-            <h3 className="text-xl font-bold bg-gradient-to-r from-blue-300 to-cyan-300 bg-clip-text text-transparent mb-4">
+          <div className="bg-brand-soft rounded-xl border-2 border-ink p-6 mb-6">
+            <h3 className="text-xl font-bold text-ink mb-4">
               Analisis Rangkaian
             </h3>
             
             <div className="space-y-4">
-              <div className="p-4 bg-blue-500/10 border border-blue-400/30 rounded-lg">
-                <p className="text-blue-200/90 font-medium mb-2">❓ Pertanyaan:</p>
-                <p className="text-blue-100 text-sm leading-relaxed">
+              <div className="p-4 bg-brand-soft border-2 border-ink rounded-lg">
+                <p className="text-muted font-medium mb-2">Pertanyaan:</p>
+                <p className="text-muted text-sm leading-relaxed">
                   {question.question}
                 </p>
               </div>
 
-              <div className="p-4 bg-red-500/10 border border-red-400/30 rounded-lg">
+              <div className="p-4 bg-coral-soft border-2 border-ink rounded-lg">
                 <div className="flex items-center space-x-3">
-                  <X className="w-6 h-6 text-red-400" />
+                  <X className="w-6 h-6 text-red-600" />
                   <div>
-                    <p className="text-red-300 font-semibold">
+                    <p className="text-red-600 font-semibold">
                       Lampu {question.targetLamp} PADAM
                     </p>
-                    <p className="text-red-200/80 text-sm">
+                    <p className="text-red-600 text-sm">
                       {question.description}
                     </p>
                   </div>
                 </div>
               </div>
 
-              <div className="p-4 bg-blue-500/10 border border-blue-400/30 rounded-lg">
-                <p className="text-blue-300 font-semibold mb-2">Instruksi:</p>
-                <ul className="text-blue-200/80 text-sm space-y-1">
+              <div className="p-4 bg-brand-soft border-2 border-ink rounded-lg">
+                <p className="text-brand font-semibold mb-2">Instruksi:</p>
+                <ul className="text-muted text-sm space-y-1">
                   <li>• Analisis struktur rangkaian untuk menentukan jalur arus</li>
                   <li>• Klik lampu pada diagram untuk memprediksi kondisinya</li>
-                  <li>• 💡 = Nyala/Padam, ? = Belum diprediksi</li>
+                  <li>• <Ico n="sun" /> = Nyala, <Ico n="x" /> = Padam, ? = Belum diprediksi</li>
                   <li>• Perhatikan: lampu mana yang akan terpengaruh jika target lamp putus</li>
-                  <li className="text-yellow-300 font-medium">⚠️ Semua lampu harus dipilih sebelum submit!</li>
+                  <li className="text-amber-700 font-medium">Semua lampu harus dipilih sebelum submit!</li>
                 </ul>
               </div>
             </div>
           </div>
 
           {/* Prediction Summary */}
-          <div className="bg-gradient-to-br from-blue-500/10 to-cyan-500/10 backdrop-blur-sm rounded-xl border border-blue-400/30 p-6 mb-6">
+          <div className="bg-brand-soft rounded-xl border-2 border-ink p-6 mb-6">
             <div className="flex items-center justify-between mb-3">
-              <h4 className="text-lg font-semibold bg-gradient-to-r from-blue-300 to-cyan-300 bg-clip-text text-transparent">
+              <h4 className="text-lg font-semibold text-ink">
                 Status Prediksi
               </h4>
               {!state.showResult && !canSubmit() && (
-                <span className="text-xs px-3 py-1 bg-yellow-500/20 text-yellow-300 rounded-full border border-yellow-400/30">
+                <span className="text-xs px-3 py-1 bg-lamp-soft text-amber-700 rounded-full border-2 border-ink">
                   {lampIds.filter(id => state.lampStates[id] === 'unknown').length} lampu belum dipilih
                 </span>
               )}
@@ -661,31 +662,31 @@ const TipeSoal4: React.FC<TipeSoal4Props> = ({ question, onAnswer }) => {
                       className={`p-3 rounded-lg border transition-all duration-300 ${
                         state.showResult
                           ? feedback === 'correct'
-                            ? 'bg-gradient-to-br from-green-500/20 to-emerald-500/20 border-green-400/40'
+                            ? 'bg-mint-soft border-ink'
                             : feedback === 'incorrect'
-                            ? 'bg-gradient-to-br from-red-500/20 to-pink-500/20 border-red-400/40'
-                            : 'bg-gradient-to-br from-gray-500/10 to-slate-500/10 border-gray-400/30'
-                          : 'bg-gradient-to-br from-blue-500/5 to-cyan-500/5 border-blue-400/20 hover:border-blue-400/40'
+                            ? 'bg-coral-soft border-ink'
+                            : 'bg-ink/20 border-ink'
+                          : 'bg-brand-soft border-ink hover:border-ink'
                       }`}
                     >
                       <div className="flex items-center justify-between">
-                        <span className="text-white font-medium">{lampId}</span>
+                        <span className="text-ink font-medium">{lampId}</span>
                         <div className="flex items-center space-x-2">
                           {state.showResult ? (
                             <>
-                              <span className="text-sm text-gray-300">
-                                {correctState === 'on' ? '🔆' : '❌'}
+                              <span className="text-sm text-muted">
+                                {correctState === 'on' ? <Ico n="sun" /> : <Ico n="x" />}
                               </span>
                               {feedback === 'correct' && (
-                                <CheckCircle className="w-4 h-4 text-green-400" />
+                                <CheckCircle className="w-4 h-4 text-emerald-700" />
                               )}
                               {feedback === 'incorrect' && (
-                                <X className="w-4 h-4 text-red-400" />
+                                <X className="w-4 h-4 text-red-600" />
                               )}
                             </>
                           ) : (
                             <span className="text-sm">
-                              {userState === 'on' ? '🔆' : userState === 'off' ? '❌' : '?'}
+                              {userState === 'on' ? <Ico n="sun" /> : userState === 'off' ? <Ico n="x" /> : '?'}
                             </span>
                           )}
                         </div>
@@ -702,17 +703,17 @@ const TipeSoal4: React.FC<TipeSoal4Props> = ({ question, onAnswer }) => {
               <div className="flex space-x-3">
                 <button
                   onClick={handleReset}
-                  className="flex-1 px-4 py-3 bg-gradient-to-r from-slate-600/50 to-slate-700/50 hover:from-slate-600/70 hover:to-slate-700/70 text-white rounded-xl border border-slate-500/40 transition-all duration-300 transform hover:scale-105 font-semibold shadow-lg"
+                  className="flex-1 px-4 py-3 bg-ink/20 hover:bg-ink/30 text-ink rounded-xl border-2 border-ink transition-all duration-300 transform font-semibold"
                 >
                   Reset
                 </button>
                 <button
                   onClick={handleSubmit}
                   disabled={!canSubmit()}
-                  className={`flex-1 px-4 py-3 rounded-xl border transition-all duration-300 font-semibold shadow-lg ${
+                  className={`flex-1 px-4 py-3 rounded-xl border transition-all duration-300 font-semibold ${
                     canSubmit()
-                      ? 'bg-gradient-to-r from-blue-500 to-cyan-600 hover:from-blue-600 hover:to-cyan-700 text-white border-blue-400/30 transform hover:scale-105 shadow-blue-500/25'
-                      : 'bg-gray-600/30 text-gray-400 border-gray-500/30 cursor-not-allowed opacity-50'
+                      ? 'bg-brand hover:bg-brand text-white border-ink transform'
+                      : 'bg-ink/20 text-muted border-ink cursor-not-allowed opacity-50'
                   }`}
                 >
                   Submit
@@ -723,8 +724,8 @@ const TipeSoal4: React.FC<TipeSoal4Props> = ({ question, onAnswer }) => {
             {state.showResult && (
               <div className={`p-4 rounded-xl border text-center transition-all duration-300 ${
                 state.isCorrect
-                  ? 'bg-gradient-to-br from-green-500/20 to-emerald-500/20 border-green-400/40 text-green-300'
-                  : 'bg-gradient-to-br from-red-500/20 to-pink-500/20 border-red-400/40 text-red-300'
+                  ? 'bg-mint-soft border-ink text-emerald-700'
+                  : 'bg-coral-soft border-ink text-red-600'
               }`}>
                 <div className="flex items-center justify-center space-x-2 mb-2">
                   {state.isCorrect ? (

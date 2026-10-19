@@ -16,7 +16,7 @@ import { extractAnswer, calculateScore } from '@/lib/answer-tracking'
 
 interface QuizState {
   currentQuestionIndex: number;
-  answers: (number | null | string[] | number[] | { [key: string]: string })[];  // ✅ Support all question types
+  answers: (number | null | string[] | number[] | { [key: string]: string })[];  // Support all question types
   showResult: boolean;
   quizCompleted: boolean;
   startTime: number;
@@ -62,7 +62,7 @@ export default function PretestPage() {
     studentClass,
     (user?.role === 'student' ? (user as any).teacherId : null),
     'pretest',
-    defaultQuestions // ✅ Use database-fetched default questions
+    defaultQuestions // Use database-fetched default questions
   );
   
   // Check if student has already completed pretest
@@ -207,8 +207,8 @@ export default function PretestPage() {
           selectedText: result.selectedText,
           correctText: result.correctText,
           explanation: result.explanation,
-          questionType: result.questionType as 'conceptual' | 'circuit' | 'circuitAnalysis' | 'simulation', // ✨ NEW: Question type tracking
-          metadata: result.metadata // ✨ NEW: Type-specific metadata
+          questionType: result.questionType as 'conceptual' | 'circuit' | 'circuitAnalysis' | 'simulation', // NEW: Question type tracking
+          metadata: result.metadata // NEW: Type-specific metadata
         }));
 
         const grade = SupabaseTestService.calculateGrade(percentage);
@@ -288,12 +288,12 @@ export default function PretestPage() {
   // Show message if student has already completed pretest
   if (hasCompletedPretest && !checkingPreviousAttempt) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-950 to-indigo-900 relative overflow-hidden">
+      <div className="min-h-screen bg-transparent relative">
         {/* Animated Background */}
         <div className="absolute inset-0">
-          <div className="absolute top-20 left-10 w-72 h-72 bg-green-500/10 rounded-full blur-3xl animate-pulse"></div>
-          <div className="absolute top-40 right-20 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
-          <div className="absolute bottom-20 left-1/3 w-80 h-80 bg-teal-500/10 rounded-full blur-3xl animate-pulse delay-2000"></div>
+          <div className="absolute top-20 left-10 w-72 h-72 bg-mint-soft rounded-full hidden animate-pulse"></div>
+          <div className="absolute top-40 right-20 w-96 h-96 bg-mint-soft rounded-full hidden animate-pulse delay-1000"></div>
+          <div className="absolute bottom-20 left-1/3 w-80 h-80 bg-mint-soft rounded-full hidden animate-pulse delay-2000"></div>
         </div>
 
         <Navbar />
@@ -301,42 +301,42 @@ export default function PretestPage() {
         <div className="container mx-auto px-6 py-16 relative z-10">
           <div className="max-w-4xl mx-auto text-center">
             {/* Already Completed Badge */}
-            <div className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-blue-400/20 to-cyan-400/20 rounded-full border border-blue-400/30 backdrop-blur-sm mb-8">
-              <CheckCircle className="w-6 h-6 text-blue-400 mr-3" />
-              <span className="text-blue-400 text-lg font-bold">Pre-Test Sudah Selesai</span>
-              <Sparkles className="w-6 h-6 text-blue-400 ml-3" />
+            <div className="inline-flex items-center px-6 py-3 bg-brand-soft rounded-full border-2 border-ink mb-8">
+              <CheckCircle className="w-6 h-6 text-brand mr-3" />
+              <span className="text-brand text-lg font-bold">Pre-Test Sudah Selesai</span>
+              <Sparkles className="w-6 h-6 text-brand ml-3" />
             </div>
 
             {/* Info Message */}
-            <h1 className="text-5xl font-black mb-6 bg-gradient-to-r from-white via-blue-200 to-cyan-300 bg-clip-text text-transparent">
+            <h1 className="text-5xl font-black mb-6 text-ink">
               Anda Sudah Mengerjakan Pre-Test
             </h1>
 
-            <p className="text-xl text-blue-200/80 mb-12 max-w-3xl mx-auto leading-relaxed">
+            <p className="text-xl text-muted mb-12 max-w-3xl mx-auto leading-relaxed">
               Pre-test hanya bisa dikerjakan sekali untuk memastikan evaluasi awal yang akurat. 
               Anda sudah menyelesaikan pre-test sebelumnya.
             </p>
 
             {/* Info Box */}
-            <div className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl rounded-2xl p-8 border border-white/20 mb-12">
+            <div className="bg-paper rounded-2xl p-8 border-2 border-ink mb-12">
               <div className="flex items-center justify-center mb-4">
-                <div className="w-16 h-16 bg-gradient-to-br from-blue-400 to-cyan-500 rounded-xl flex items-center justify-center">
+                <div className="w-16 h-16 bg-brand rounded-xl flex items-center justify-center">
                   <Trophy className="w-8 h-8 text-white" />
                 </div>
               </div>
-              <h3 className="text-2xl font-bold text-white mb-4">Langkah Selanjutnya</h3>
+              <h3 className="text-2xl font-bold text-ink mb-4">Langkah Selanjutnya</h3>
               <div className="grid md:grid-cols-2 gap-6 text-left">
                 <div className="space-y-2">
-                  <h4 className="text-cyan-300 font-medium">Yang bisa Anda lakukan:</h4>
-                  <ul className="text-cyan-200/80 text-sm space-y-1">
+                  <h4 className="text-brand font-medium">Yang bisa Anda lakukan:</h4>
+                  <ul className="text-muted text-sm space-y-1">
                     <li>• Mulai pembelajaran materi rangkaian listrik</li>
                     <li>• Kerjakan praktikum interaktif</li>
                     <li>• Lihat progress pembelajaran Anda</li>
                   </ul>
                 </div>
                 <div className="space-y-2">
-                  <h4 className="text-green-300 font-medium">Setelah belajar:</h4>
-                  <ul className="text-green-200/80 text-sm space-y-1">
+                  <h4 className="text-emerald-700 font-medium">Setelah belajar:</h4>
+                  <ul className="text-emerald-700 text-sm space-y-1">
                     <li>• Kerjakan post-test untuk melihat peningkatan</li>
                     <li>• Bandingkan hasil dengan pre-test</li>
                     <li>• Dapatkan sertifikat pembelajaran</li>
@@ -349,14 +349,14 @@ export default function PretestPage() {
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <button
                 onClick={() => window.location.href = '/materials'}
-                className="flex items-center justify-center px-8 py-4 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-2xl font-bold text-lg hover:from-green-600 hover:to-emerald-700 transition-all transform hover:scale-105 shadow-2xl"
+                className="flex items-center justify-center px-8 py-4 bg-mint border-2 border-ink text-ink rounded-2xl font-bold text-lg hover:bg-mint transition-all transform shadow-hard"
               >
                 Mulai Pembelajaran
                 <ArrowRight className="w-5 h-5 ml-2" />
               </button>
               <button
                 onClick={() => window.location.href = '/dashboard/student'}
-                className="flex items-center justify-center px-8 py-4 bg-gradient-to-r from-blue-500 to-cyan-600 text-white rounded-2xl font-bold text-lg hover:from-blue-600 hover:to-cyan-700 transition-all transform hover:scale-105 shadow-2xl"
+                className="flex items-center justify-center px-8 py-4 bg-brand border-2 border-ink text-white rounded-2xl font-bold text-lg hover:bg-brand transition-all transform shadow-hard"
               >
                 Lihat Progress
                 <Trophy className="w-5 h-5 ml-2" />
@@ -375,12 +375,12 @@ export default function PretestPage() {
     const scoreData = calculateQuizScore(correctAnswers, questions.length);
     
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-950 to-indigo-900 relative overflow-hidden">
+      <div className="min-h-screen bg-transparent relative">
         {/* Animated Background */}
         <div className="absolute inset-0">
-          <div className="absolute top-20 left-10 w-72 h-72 bg-green-500/10 rounded-full blur-3xl animate-pulse"></div>
-          <div className="absolute top-40 right-20 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
-          <div className="absolute bottom-20 left-1/3 w-80 h-80 bg-teal-500/10 rounded-full blur-3xl animate-pulse delay-2000"></div>
+          <div className="absolute top-20 left-10 w-72 h-72 bg-mint-soft rounded-full hidden animate-pulse"></div>
+          <div className="absolute top-40 right-20 w-96 h-96 bg-mint-soft rounded-full hidden animate-pulse delay-1000"></div>
+          <div className="absolute bottom-20 left-1/3 w-80 h-80 bg-mint-soft rounded-full hidden animate-pulse delay-2000"></div>
         </div>
 
         <Navbar />
@@ -388,29 +388,29 @@ export default function PretestPage() {
         <div className="container mx-auto px-6 py-16 relative z-10">
           <div className="max-w-4xl mx-auto text-center">
             {/* Completion Badge */}
-            <div className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-green-400/20 to-emerald-400/20 rounded-full border border-green-400/30 backdrop-blur-sm mb-8">
-              <Trophy className="w-6 h-6 text-green-400 mr-3" />
-              <span className="text-green-400 text-lg font-bold">Pre-Test Selesai!</span>
-              <Sparkles className="w-6 h-6 text-green-400 ml-3" />
+            <div className="inline-flex items-center px-6 py-3 bg-mint-soft rounded-full border-2 border-ink mb-8">
+              <Trophy className="w-6 h-6 text-emerald-700 mr-3" />
+              <span className="text-emerald-700 text-lg font-bold">Pre-Test Selesai!</span>
+              <Sparkles className="w-6 h-6 text-emerald-700 ml-3" />
             </div>
 
             {/* Score Display */}
             <div className="relative mb-12">
-              <div className="inline-flex items-center justify-center w-40 h-40 rounded-full bg-gradient-to-br from-green-500/20 to-emerald-600/20 backdrop-blur-xl border border-white/20 shadow-2xl">
+              <div className="inline-flex items-center justify-center w-40 h-40 rounded-full bg-mint-soft border-2 border-ink shadow-hard">
                 <div className="text-center">
-                  <div className="text-6xl font-black text-white">{Math.round(scoreData.score)}%</div>
+                  <div className="text-6xl font-black text-ink">{Math.round(scoreData.score)}%</div>
                 </div>
               </div>
             </div>
 
             {/* Results */}
-            <h1 className="text-5xl font-black mb-4 bg-gradient-to-r from-white via-green-200 to-emerald-300 bg-clip-text text-transparent">
+            <h1 className="text-5xl font-black mb-4 text-ink">
               {scoreData.message}
             </h1>
 
             {/* Pre-test completion notice */}
-            <div className="bg-gradient-to-r from-blue-500/20 to-cyan-500/20 border border-blue-400/30 rounded-2xl p-6 mb-8 backdrop-blur-sm">
-              <p className="text-blue-200 text-center">
+            <div className="bg-brand-soft border-2 border-ink rounded-2xl p-6 mb-8">
+              <p className="text-muted text-center">
                 <strong>Pre-test Anda sudah tercatat!</strong> Hasil ini menjadi baseline untuk mengukur progress pembelajaran. 
                 Sekarang Anda bisa mulai pembelajaran dan nanti mengerjakan post-test.
               </p>
@@ -418,17 +418,17 @@ export default function PretestPage() {
 
             {/* Statistics */}
             <div className="grid md:grid-cols-3 gap-6 mb-12">
-              <div className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl rounded-2xl p-6 border border-white/20">
-                <div className="text-2xl font-bold text-white mb-2">{correctAnswers}/{questions.length}</div>
-                <div className="text-green-300">Jawaban Benar</div>
+              <div className="bg-paper rounded-2xl p-6 border-2 border-ink">
+                <div className="text-2xl font-bold text-ink mb-2">{correctAnswers}/{questions.length}</div>
+                <div className="text-emerald-700">Jawaban Benar</div>
               </div>
-              <div className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl rounded-2xl p-6 border border-white/20">
-                <div className="text-2xl font-bold text-white mb-2">{formatTime(timeElapsed)}</div>
-                <div className="text-green-300">Waktu Total</div>
+              <div className="bg-paper rounded-2xl p-6 border-2 border-ink">
+                <div className="text-2xl font-bold text-ink mb-2">{formatTime(timeElapsed)}</div>
+                <div className="text-emerald-700">Waktu Total</div>
               </div>
-              <div className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl rounded-2xl p-6 border border-white/20">
-                <div className="text-2xl font-bold text-white mb-2">{Math.round(timeElapsed / questions.length)}s</div>
-                <div className="text-green-300">Rata-rata/Soal</div>
+              <div className="bg-paper rounded-2xl p-6 border-2 border-ink">
+                <div className="text-2xl font-bold text-ink mb-2">{Math.round(timeElapsed / questions.length)}s</div>
+                <div className="text-emerald-700">Rata-rata/Soal</div>
               </div>
             </div>
 
@@ -448,14 +448,14 @@ export default function PretestPage() {
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <button
                 onClick={() => window.location.href = '/materials'}
-                className="flex items-center justify-center px-8 py-4 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-2xl font-bold text-lg hover:from-green-600 hover:to-emerald-700 transition-all transform hover:scale-105 shadow-2xl"
+                className="flex items-center justify-center px-8 py-4 bg-mint border-2 border-ink text-ink rounded-2xl font-bold text-lg hover:bg-mint transition-all transform shadow-hard"
               >
                 Mulai Pembelajaran
                 <ArrowRight className="w-5 h-5 ml-2" />
               </button>
               <button
                 onClick={() => window.location.href = '/test'}
-                className="flex items-center justify-center px-8 py-4 bg-gradient-to-r from-blue-500 to-cyan-600 text-white rounded-2xl font-bold text-lg hover:from-blue-600 hover:to-cyan-700 transition-all transform hover:scale-105 shadow-2xl"
+                className="flex items-center justify-center px-8 py-4 bg-brand border-2 border-ink text-white rounded-2xl font-bold text-lg hover:bg-brand transition-all transform shadow-hard"
               >
                 Kembali ke Menu
                 <Trophy className="w-5 h-5 ml-2" />
@@ -470,12 +470,12 @@ export default function PretestPage() {
   // Pre-test start screen
   if (!testStarted) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-950 to-indigo-900 relative overflow-hidden">
+      <div className="min-h-screen bg-transparent relative">
         {/* Animated Background */}
         <div className="absolute inset-0">
-          <div className="absolute top-20 left-10 w-72 h-72 bg-green-500/10 rounded-full blur-3xl animate-pulse"></div>
-          <div className="absolute top-40 right-20 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
-          <div className="absolute bottom-20 left-1/3 w-80 h-80 bg-teal-500/10 rounded-full blur-3xl animate-pulse delay-2000"></div>
+          <div className="absolute top-20 left-10 w-72 h-72 bg-mint-soft rounded-full hidden animate-pulse"></div>
+          <div className="absolute top-40 right-20 w-96 h-96 bg-mint-soft rounded-full hidden animate-pulse delay-1000"></div>
+          <div className="absolute bottom-20 left-1/3 w-80 h-80 bg-mint-soft rounded-full hidden animate-pulse delay-2000"></div>
         </div>
 
         <Navbar />
@@ -483,36 +483,36 @@ export default function PretestPage() {
         <div className="container mx-auto px-6 py-16 relative z-10">
           <div className="max-w-5xl mx-auto">
             <div className="text-center mb-16">
-              <div className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-green-400/20 to-emerald-400/20 rounded-full border border-green-400/30 backdrop-blur-sm mb-6">
-                <CheckCircle className="w-5 h-5 text-green-400 mr-2" />
-                <span className="text-green-400 text-sm font-medium">Pre-Test Evaluasi Awal</span>
-                <Star className="w-5 h-5 text-emerald-400 ml-2" />
+              <div className="inline-flex items-center px-4 py-2 bg-mint-soft rounded-full border-2 border-ink mb-6">
+                <CheckCircle className="w-5 h-5 text-emerald-700 mr-2" />
+                <span className="text-emerald-700 text-sm font-medium">Pre-Test Evaluasi Awal</span>
+                <Star className="w-5 h-5 text-emerald-700 ml-2" />
               </div>
 
               <h1 className="text-5xl md:text-7xl font-black mb-6 leading-tight">
-                <span className="bg-gradient-to-r from-white via-green-200 to-emerald-300 bg-clip-text text-transparent drop-shadow-2xl">
+                <span className="text-ink">
                   Pre-Test
                 </span>
                 <br />
-                <span className="bg-gradient-to-r from-emerald-300 via-green-400 to-teal-400 bg-clip-text text-transparent">
+                <span className="text-ink">
                   Rangkaian Listrik
                 </span>
               </h1>
 
-              <p className="text-xl text-blue-200/80 mb-8 max-w-3xl mx-auto leading-relaxed">
+              <p className="text-xl text-muted mb-8 max-w-3xl mx-auto leading-relaxed">
                 Evaluasi awal untuk mengukur pemahaman Anda tentang rangkaian listrik sebelum memulai pembelajaran. 
                 Hasil ini akan menjadi baseline untuk mengukur progress Anda!
               </p>
 
               {/* Important Notice */}
-              <div className="bg-gradient-to-r from-amber-500/20 to-orange-500/20 border border-amber-400/30 rounded-2xl p-6 mb-12 backdrop-blur-sm">
+              <div className="bg-lamp-soft border-2 border-ink rounded-2xl p-6 mb-12">
                 <div className="flex items-center justify-center mb-3">
-                  <div className="w-8 h-8 bg-amber-400 rounded-full flex items-center justify-center mr-3">
-                    <span className="text-white font-bold text-lg">!</span>
+                  <div className="w-8 h-8 bg-lamp rounded-full flex items-center justify-center mr-3">
+                    <span className="text-ink font-bold text-lg">!</span>
                   </div>
-                  <h3 className="text-amber-300 font-bold text-lg">Penting!</h3>
+                  <h3 className="text-amber-700 font-bold text-lg">Penting!</h3>
                 </div>
-                <p className="text-amber-200 text-center">
+                <p className="text-amber-700 text-center">
                   <strong>Pre-test hanya bisa dikerjakan sekali</strong> untuk memastikan evaluasi awal yang akurat. 
                   Pastikan Anda dalam kondisi siap sebelum memulai.
                 </p>
@@ -521,12 +521,12 @@ export default function PretestPage() {
               <div className="text-center">
                 <button
                   onClick={() => requireStudentLogin('pretest', '/pretest')}
-                  className="group bg-gradient-to-r from-green-500 to-emerald-500 text-white px-12 py-4 rounded-2xl font-bold text-xl hover:from-green-600 hover:to-emerald-600 transition-all transform hover:scale-105 shadow-2xl flex items-center justify-center mx-auto"
+                  className="group bg-mint border-2 border-ink text-ink px-12 py-4 rounded-2xl font-bold text-xl hover:bg-mint transition-all transform shadow-hard flex items-center justify-center mx-auto"
                 >
-                  🚀 Mulai Pre-Test
-                  <ArrowRight className="w-6 h-6 ml-3 group-hover:translate-x-1 transition-transform" />
+                  Mulai Pre-Test
+                  <ArrowRight className="w-6 h-6 ml-3 transition-transform" />
                 </button>
-                <p className="text-green-300/60 text-sm mt-4">
+                <p className="text-emerald-700 text-sm mt-4">
                   Klik tombol di atas untuk memulai evaluasi awal pembelajaran
                 </p>
               </div>
@@ -538,18 +538,18 @@ export default function PretestPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-950 to-indigo-900 relative overflow-hidden">
+    <div className="min-h-screen bg-transparent relative">
       {/* Animated Background Elements */}
       <div className="absolute inset-0">
-        <div className="absolute top-20 left-10 w-72 h-72 bg-green-500/10 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute top-40 right-20 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
-        <div className="absolute bottom-20 left-1/3 w-80 h-80 bg-teal-500/10 rounded-full blur-3xl animate-pulse delay-2000"></div>
+        <div className="absolute top-20 left-10 w-72 h-72 bg-mint-soft rounded-full hidden animate-pulse"></div>
+        <div className="absolute top-40 right-20 w-96 h-96 bg-mint-soft rounded-full hidden animate-pulse delay-1000"></div>
+        <div className="absolute bottom-20 left-1/3 w-80 h-80 bg-mint-soft rounded-full hidden animate-pulse delay-2000"></div>
         
         {/* Floating particles */}
         {[...Array(15)].map((_, i) => (
           <div
             key={i}
-            className="absolute w-1 h-1 bg-green-400/30 rounded-full animate-ping"
+            className="absolute w-1 h-1 bg-mint-soft rounded-full hidden"
             style={{
               left: `${Math.random() * 100}%`,
               top: `${Math.random() * 100}%`,
@@ -566,18 +566,18 @@ export default function PretestPage() {
         <div className="max-w-7xl mx-auto">
           {/* Header */}
           <div className="text-center mb-8">
-            <div className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-green-400/20 to-emerald-400/20 rounded-full border border-green-400/30 backdrop-blur-sm mb-6">
-              <CheckCircle className="w-5 h-5 text-green-400 mr-2" />
-              <span className="text-green-400 text-sm font-medium">Interactive Pre-Test</span>
-              <Star className="w-5 h-5 text-emerald-400 ml-2" />
+            <div className="inline-flex items-center px-4 py-2 bg-mint-soft rounded-full border-2 border-ink mb-6">
+              <CheckCircle className="w-5 h-5 text-emerald-700 mr-2" />
+              <span className="text-emerald-700 text-sm font-medium">Interactive Pre-Test</span>
+              <Star className="w-5 h-5 text-emerald-700 ml-2" />
             </div>
 
             <h1 className="text-4xl md:text-6xl font-black mb-4 leading-tight">
-              <span className="bg-gradient-to-r from-white via-green-200 to-emerald-300 bg-clip-text text-transparent drop-shadow-2xl">
+              <span className="text-ink">
                 Pre-Test Rangkaian
               </span>
               <br />
-              <span className="bg-gradient-to-r from-emerald-300 via-green-400 to-teal-400 bg-clip-text text-transparent">
+              <span className="text-ink">
                 Listrik
               </span>
             </h1>
@@ -585,22 +585,22 @@ export default function PretestPage() {
 
           {/* Progress Bar */}
           <div className="mb-8">
-            <div className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl rounded-2xl p-6 border border-white/20">
+            <div className="bg-paper rounded-2xl p-6 border-2 border-ink">
               <div className="flex justify-between items-center mb-4">
-                <div className="text-white font-bold">
+                <div className="text-ink font-bold">
                   Soal {quizState.currentQuestionIndex + 1} dari {questions.length}
                   {/* Debug: {JSON.stringify({ questionsLength: questions.length, questionIds: questions.slice(0, 3).map(q => q.id) })} */}
                 </div>
                 <div className="flex items-center space-x-4">
-                  <div className="text-cyan-300 font-bold">{formatTime(timeElapsed)}</div>
-                  <div className="text-green-300">
+                  <div className="text-brand font-bold">{formatTime(timeElapsed)}</div>
+                  <div className="text-emerald-700">
                     Benar: {quizState.answers.filter(Boolean).length}
                   </div>
                 </div>
               </div>
-              <div className="w-full bg-white/10 rounded-full h-3">
+              <div className="w-full bg-paper rounded-full h-3">
                 <div 
-                  className="bg-gradient-to-r from-green-500 to-emerald-500 h-3 rounded-full transition-all duration-500"
+                  className="bg-mint h-3 rounded-full transition-all duration-500"
                   style={{ width: `${((quizState.currentQuestionIndex + 1) / questions.length) * 100}%` }}
                 ></div>
               </div>
@@ -621,9 +621,9 @@ export default function PretestPage() {
               } 
             />
           ) : questionsError ? (
-            <div className="bg-red-500/10 border border-red-400/30 rounded-2xl p-6 text-center">
-              <p className="text-red-300 mb-2">⚠️ Gagal memuat soal assignment</p>
-              <p className="text-red-200 text-sm">Menggunakan soal default sebagai fallback</p>
+            <div className="bg-coral-soft border-2 border-ink rounded-2xl p-6 text-center">
+              <p className="text-red-600 mb-2">Gagal memuat soal assignment</p>
+              <p className="text-red-600 text-sm">Menggunakan soal default sebagai fallback</p>
             </div>
           ) : null}
 

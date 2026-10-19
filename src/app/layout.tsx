@@ -1,24 +1,38 @@
 import './globals.css'
-import { Poppins, Fira_Code } from 'next/font/google'
+import { Bricolage_Grotesque, Nunito_Sans, Fira_Code, Noto_Emoji } from 'next/font/google'
 import FloatingChatButton from '@/components/FloatingChatButton'
-import Footer from '@/components/Footer'
 import { AuthProvider } from '@/contexts/AuthContext'
 import { ToastProvider } from '@/components/Toast'
 import ConditionalFooter from '@/components/ConditionalFooter'
 import AuthLoader from '@/components/AuthLoader'
 import TeacherRedirect from '@/components/TeacherRedirect'
 
-const poppins = Poppins({ 
-  weight: ['300', '400', '500', '600', '700', '800'],
+const bricolage = Bricolage_Grotesque({
+  weight: ['600', '800'],
   subsets: ['latin'],
   display: 'swap',
-  variable: '--font-poppins',
+  variable: '--font-display',
+})
+
+const nunito = Nunito_Sans({
+  weight: ['400', '600', '700'],
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-body',
 })
 
 const firaCode = Fira_Code({ 
   subsets: ['latin'],
   display: 'swap',
   variable: '--font-fira-code',
+})
+
+// Emoji satu warna sebagai cadangan: teks dari AI atau guru yang memuat emoji tidak tampil warna-warni
+const notoEmoji = Noto_Emoji({
+  weight: ['400', '700'],
+  subsets: ['emoji'],
+  display: 'swap',
+  variable: '--font-emoji',
 })
 
 export const metadata = {
@@ -36,20 +50,13 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="id" className={`${poppins.variable} ${firaCode.variable}`}>
-      <body className="font-sans bg-gradient-to-br from-slate-900 via-blue-950 to-indigo-900 antialiased">
+    <html lang="id" className={`${bricolage.variable} ${nunito.variable} ${firaCode.variable} ${notoEmoji.variable}`}>
+      <body className="bg-grid font-sans text-ink antialiased pb-16 md:pb-0">
         <AuthProvider>
           <ToastProvider>
             <AuthLoader>
               <TeacherRedirect />
-              <div className="min-h-screen flex flex-col relative overflow-hidden">
-                {/* Animated Background Elements - Global */}
-                <div className="fixed inset-0 pointer-events-none">
-                  <div className="absolute top-20 left-10 w-72 h-72 bg-blue-500/10 rounded-full blur-3xl animate-pulse"></div>
-                  <div className="absolute top-40 right-20 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl animate-pulse"></div>
-                  <div className="absolute bottom-20 left-1/3 w-80 h-80 bg-cyan-500/10 rounded-full blur-3xl animate-pulse"></div>
-                </div>
-                
+              <div className="min-h-screen flex flex-col relative">
                 <main className="flex-grow relative z-10">
                   {children}
                 </main>

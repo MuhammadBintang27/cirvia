@@ -1,4 +1,5 @@
 "use client";
+import { Ico } from "@/components/ui/Ico";
 import React, { useState } from 'react';
 // import { useParams } from 'next/navigation';
 import { CheckCircle, Clock, BookOpen, Volume2, Zap, ArrowLeft, ArrowRight, Play, Pause, SkipBack, SkipForward, Star, Trophy } from 'lucide-react';
@@ -287,13 +288,13 @@ const AudioPlayer = ({ title, description, chapters }: AudioPlayerProps) => {
   }, [isPlaying, currentChapter, chapters]);
 
   return (
-    <div className="bg-gradient-to-br from-purple-500/10 to-indigo-500/10 backdrop-blur-sm rounded-2xl p-6 border border-purple-400/20">
+    <div className="bg-purple-100 rounded-2xl p-6 border-2 border-ink">
       <div className="flex items-center justify-between mb-4">
         <div>
-          <h4 className="text-lg font-bold text-white">{title}</h4>
-          <p className="text-purple-200/80 text-sm">{description}</p>
+          <h4 className="text-lg font-bold text-ink">{title}</h4>
+          <p className="text-muted text-sm">{description}</p>
         </div>
-        <div className="text-2xl">🎧</div>
+        <div className="text-2xl"><Ico n="headphones" /></div>
       </div>
 
       {/* Audio Element - Only render when source is ready */}
@@ -323,24 +324,24 @@ const AudioPlayer = ({ title, description, chapters }: AudioPlayerProps) => {
 
       {/* Debug Info - Show audio source status */}
       {audioSrc && !audioError && (
-        <div className="mb-4 p-3 bg-blue-500/10 border border-blue-400/20 rounded-xl">
-          <div className="text-xs text-blue-300 space-y-1">
+        <div className="mb-4 p-3 bg-brand-soft border-2 border-ink rounded-xl">
+          <div className="text-xs text-brand space-y-1">
             <div className="flex items-center justify-between">
               <div className="flex items-center">
-                <span className={`w-2 h-2 rounded-full mr-2 ${audioLoaded ? 'bg-green-400' : 'bg-yellow-400 animate-pulse'}`}></span>
+                <span className={`w-2 h-2 rounded-full mr-2 ${audioLoaded ? 'bg-mint' : 'bg-lamp animate-pulse'}`}></span>
                 <span className="font-medium">
                   {audioLoaded ? 'Audio Ready from Supabase Storage' : 'Loading audio from Supabase...'}
                 </span>
               </div>
               {!audioLoaded && (
-                <div className="w-4 h-4 border-2 border-blue-400 border-t-transparent rounded-full animate-spin"></div>
+                <div className="w-4 h-4 border-2 border-ink border-t-transparent rounded-full animate-spin"></div>
               )}
             </div>
-            <div className="text-blue-200/60 font-mono text-[10px] break-all">
+            <div className="text-muted font-mono text-[10px] break-all">
               {audioSrc}
             </div>
             {audioLoaded && (
-              <div className="text-green-400 text-xs flex items-center">
+              <div className="text-emerald-700 text-xs flex items-center">
                 <svg className="w-3 h-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                 </svg>
@@ -353,8 +354,8 @@ const AudioPlayer = ({ title, description, chapters }: AudioPlayerProps) => {
 
       {/* Error Message */}
       {audioError && (
-        <div className="mb-4 p-4 bg-yellow-500/20 border border-yellow-400/30 rounded-xl">
-          <div className="flex items-center space-x-2 text-yellow-300 mb-2">
+        <div className="mb-4 p-4 bg-lamp-soft border-2 border-ink rounded-xl">
+          <div className="flex items-center space-x-2 text-amber-700 mb-2">
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
             </svg>
@@ -362,10 +363,10 @@ const AudioPlayer = ({ title, description, chapters }: AudioPlayerProps) => {
               File audio tidak tersedia
             </p>
           </div>
-          <p className="text-xs text-yellow-200/70 ml-7">
+          <p className="text-xs text-amber-700 ml-7">
             Path: {audioSrc}
           </p>
-          <p className="text-xs text-yellow-200/70 ml-7">
+          <p className="text-xs text-amber-700 ml-7">
             Silakan baca materi pembelajaran di bawah atau hubungi admin.
           </p>
         </div>
@@ -373,12 +374,12 @@ const AudioPlayer = ({ title, description, chapters }: AudioPlayerProps) => {
 
       {/* Chapters List */}
       <div className="mb-4">
-        <div className="mb-2 text-purple-200 font-semibold text-sm">Bab Audio</div>
-        <div className="rounded-xl overflow-hidden border border-purple-400/10 bg-white/5">
+        <div className="mb-2 text-muted font-semibold text-sm">Bab Audio</div>
+        <div className="rounded-xl overflow-hidden border-2 border-ink bg-paper">
           {chapters.map((chapter, idx) => (
             <button
               key={idx}
-              className={`flex items-center justify-between w-full px-4 py-2 text-left text-sm transition-colors ${idx === currentChapter ? 'bg-purple-100/20 text-purple-300 font-bold' : 'hover:bg-purple-900/10 text-purple-200'}`}
+              className={`flex items-center justify-between w-full px-4 py-2 text-left text-sm transition-colors ${idx === currentChapter ? 'bg-purple-100 text-purple-700 font-bold' : 'hover:bg-purple-100 text-muted'}`}
               onClick={() => {
                 setCurrentChapter(idx);
                 if (audioRef.current) {
@@ -402,7 +403,7 @@ const AudioPlayer = ({ title, description, chapters }: AudioPlayerProps) => {
               }}
             >
               <span>{chapter.title}</span>
-              <span className="ml-2 text-xs text-purple-400">{`${Math.floor(chapter.startTime/60)}:${(chapter.startTime%60).toString().padStart(2,'0')}`}</span>
+              <span className="ml-2 text-xs text-purple-700">{`${Math.floor(chapter.startTime/60)}:${(chapter.startTime%60).toString().padStart(2,'0')}`}</span>
             </button>
           ))}
         </div>
@@ -410,13 +411,13 @@ const AudioPlayer = ({ title, description, chapters }: AudioPlayerProps) => {
 
       {/* Progress Bar */}
       <div className="mb-4">
-        <div className="flex justify-between text-sm text-purple-200 mb-2">
+        <div className="flex justify-between text-sm text-muted mb-2">
           <span>Chapter {currentChapter + 1}: {chapters[currentChapter]?.title}</span>
           <span>{progress.toFixed(0)}%</span>
         </div>
-        <div className="w-full bg-purple-900/30 rounded-full h-2">
+        <div className="w-full bg-purple-100 rounded-full h-2">
           <div 
-            className="bg-gradient-to-r from-purple-400 to-pink-400 h-2 rounded-full transition-all duration-300"
+            className="bg-purple-500 h-2 rounded-full transition-all duration-300"
             style={{ width: `${progress}%` }}
           ></div>
         </div>
@@ -429,11 +430,11 @@ const AudioPlayer = ({ title, description, chapters }: AudioPlayerProps) => {
           disabled={audioError || currentChapter === 0}
           className={`p-2 rounded-full transition-colors ${
             audioError || currentChapter === 0
-              ? 'bg-purple-500/10 opacity-50 cursor-not-allowed'
-              : 'bg-purple-500/20 hover:bg-purple-500/30'
+              ? 'bg-purple-100 opacity-50 cursor-not-allowed'
+              : 'bg-purple-100 hover:bg-purple-100'
           }`}
         >
-          <SkipBack className="w-4 h-4 text-purple-300" />
+          <SkipBack className="w-4 h-4 text-purple-700" />
         </button>
 
         <button 
@@ -441,8 +442,8 @@ const AudioPlayer = ({ title, description, chapters }: AudioPlayerProps) => {
           disabled={audioError || !audioLoaded || !audioSrc}
           className={`p-4 rounded-full transition-all transform ${
             audioError || !audioLoaded || !audioSrc
-              ? 'bg-gray-500/20 opacity-50 cursor-not-allowed'
-              : 'bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 hover:scale-105'
+              ? 'bg-ink/20 opacity-50 cursor-not-allowed'
+              : 'bg-purple-500 hover:bg-purple-500'
           }`}
           title={
             audioError 
@@ -453,11 +454,11 @@ const AudioPlayer = ({ title, description, chapters }: AudioPlayerProps) => {
           }
         >
           {!audioLoaded && audioSrc && !audioError ? (
-            <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+            <div className="w-6 h-6 border-2 border-ink border-t-transparent rounded-full animate-spin"></div>
           ) : isPlaying ? (
-            <Pause className="w-6 h-6 text-white" />
+            <Pause className="w-6 h-6 text-ink" />
           ) : (
-            <Play className="w-6 h-6 text-white" />
+            <Play className="w-6 h-6 text-ink" />
           )}
         </button>
 
@@ -466,11 +467,11 @@ const AudioPlayer = ({ title, description, chapters }: AudioPlayerProps) => {
           disabled={audioError || currentChapter === chapters.length - 1}
           className={`p-2 rounded-full transition-colors ${
             audioError || currentChapter === chapters.length - 1
-              ? 'bg-purple-500/10 opacity-50 cursor-not-allowed'
-              : 'bg-purple-500/20 hover:bg-purple-500/30'
+              ? 'bg-purple-100 opacity-50 cursor-not-allowed'
+              : 'bg-purple-100 hover:bg-purple-100'
           }`}
         >
-          <SkipForward className="w-4 h-4 text-purple-300" />
+          <SkipForward className="w-4 h-4 text-purple-700" />
         </button>
       </div>
 
@@ -480,7 +481,7 @@ const AudioPlayer = ({ title, description, chapters }: AudioPlayerProps) => {
           <a 
             href={audioSrc} 
             download 
-            className="flex items-center space-x-2 text-purple-300 hover:text-purple-400 text-sm py-2 px-4 rounded-lg transition-colors"
+            className="flex items-center space-x-2 text-purple-700 hover:text-purple-700 text-sm py-2 px-4 rounded-lg transition-colors"
           >
             <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5m0 0l5-5m-5 5V4" /></svg>
             <span>Download Audio untuk Offline</span>
@@ -505,19 +506,19 @@ const InteractiveCircuitDemo = ({ voltage, resistance, title }: InteractiveCircu
   const power = (currentVoltage * currentVoltage) / currentResistance;
 
   return (
-    <div className="bg-gradient-to-br from-orange-500/10 to-red-500/10 backdrop-blur-sm rounded-2xl p-6 border border-orange-400/20">
+    <div className="bg-lamp-soft rounded-2xl p-6 border-2 border-ink">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h4 className="text-lg font-bold text-white">{title}</h4>
-          <p className="text-orange-200/80 text-sm">Interaktif Circuit Simulator</p>
+          <h4 className="text-lg font-bold text-ink">{title}</h4>
+          <p className="text-amber-700 text-sm">Interaktif Circuit Simulator</p>
         </div>
-        <div className="text-2xl">⚡</div>
+        <div className="text-2xl"><Ico n="zap" /></div>
       </div>
       
       {/* Controls */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
         <div>
-          <label className="block text-orange-200 text-sm font-medium mb-2">
+          <label className="block text-amber-700 text-sm font-medium mb-2">
             Tegangan (V): {currentVoltage}V
           </label>
           <input
@@ -526,12 +527,12 @@ const InteractiveCircuitDemo = ({ voltage, resistance, title }: InteractiveCircu
             max="24"
             value={currentVoltage}
             onChange={(e) => setCurrentVoltage(Number(e.target.value))}
-            className="w-full h-2 bg-orange-900/30 rounded-lg appearance-none cursor-pointer"
+            className="w-full h-2 bg-lamp-soft rounded-lg appearance-none cursor-pointer"
           />
         </div>
         
         <div>
-          <label className="block text-orange-200 text-sm font-medium mb-2">
+          <label className="block text-amber-700 text-sm font-medium mb-2">
             Resistansi (Ω): {currentResistance}Ω
           </label>
           <input
@@ -540,24 +541,24 @@ const InteractiveCircuitDemo = ({ voltage, resistance, title }: InteractiveCircu
             max="1000"
             value={currentResistance}
             onChange={(e) => setCurrentResistance(Number(e.target.value))}
-            className="w-full h-2 bg-orange-900/30 rounded-lg appearance-none cursor-pointer"
+            className="w-full h-2 bg-lamp-soft rounded-lg appearance-none cursor-pointer"
           />
         </div>
       </div>
       
       {/* Results */}
       <div className="grid grid-cols-3 gap-4">
-        <div className="text-center p-4 bg-orange-500/20 rounded-xl border border-orange-400/30">
-          <div className="text-2xl font-bold text-orange-300">{current.toFixed(2)}</div>
-          <div className="text-sm text-orange-200">Arus (A)</div>
+        <div className="text-center p-4 bg-lamp-soft rounded-xl border-2 border-ink">
+          <div className="text-2xl font-bold text-amber-700">{current.toFixed(2)}</div>
+          <div className="text-sm text-amber-700">Arus (A)</div>
         </div>
-        <div className="text-center p-4 bg-red-500/20 rounded-xl border border-red-400/30">
-          <div className="text-2xl font-bold text-red-300">{currentVoltage}</div>
-          <div className="text-sm text-red-200">Tegangan (V)</div>
+        <div className="text-center p-4 bg-coral-soft rounded-xl border-2 border-ink">
+          <div className="text-2xl font-bold text-red-600">{currentVoltage}</div>
+          <div className="text-sm text-red-600">Tegangan (V)</div>
         </div>
-        <div className="text-center p-4 bg-yellow-500/20 rounded-xl border border-yellow-400/30">
-          <div className="text-2xl font-bold text-yellow-300">{power.toFixed(2)}</div>
-          <div className="text-sm text-yellow-200">Daya (W)</div>
+        <div className="text-center p-4 bg-lamp-soft rounded-xl border-2 border-ink">
+          <div className="text-2xl font-bold text-amber-700">{power.toFixed(2)}</div>
+          <div className="text-sm text-amber-700">Daya (W)</div>
         </div>
       </div>
     </div>
@@ -673,7 +674,7 @@ const ModuleDetailPage = () => {
       resistance: 100,
       title: 'Demo: Hukum Ohm'
     },
-    gradientColors: 'from-blue-500 to-cyan-500'
+    gradientColors: 'bg-brand'
   },
 
   'rangkaian-seri': {
@@ -709,7 +710,7 @@ const ModuleDetailPage = () => {
           </ul>
         </li>
       </ol>
-      <p style="color:#22c55e;font-weight:600;margin:1rem 0 1.5rem;">Cek: V<sub>1</sub> + V<sub>2</sub> + V<sub>3</sub> = 2 + 4 + 6 = 12 V ✅</p>
+      <p style="color:#22c55e;font-weight:600;margin:1rem 0 1.5rem;">Cek: V<sub>1</sub> + V<sub>2</sub> + V<sub>3</sub> = 2 + 4 + 6 = 12 V </p>
     `,
     audioData: {
       title: 'Audio: Rangkaian Seri',
@@ -726,7 +727,7 @@ const ModuleDetailPage = () => {
       resistance: 150,
       title: 'Demo: Rangkaian Seri'
     },
-    gradientColors: 'from-green-500 to-blue-500'
+    gradientColors: 'bg-mint'
   },
 
   'rangkaian-paralel': {
@@ -777,7 +778,7 @@ const ModuleDetailPage = () => {
       resistance: 75,
       title: 'Demo: Daya Listrik'
     },
-    gradientColors: 'from-purple-500 to-pink-500'
+    gradientColors: 'bg-purple-500'
   }
 };
 
@@ -786,17 +787,17 @@ const ModuleDetailPage = () => {
   const moduleData = modulesData[key];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-950 to-indigo-900 relative overflow-hidden">
+    <div className="min-h-screen bg-transparent relative">
       {/* Animated Background Elements */}
       <div className="absolute inset-0">
-        <div className="absolute top-20 left-10 w-72 h-72 bg-blue-500/10 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute top-40 right-20 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
-        <div className="absolute bottom-20 left-1/3 w-80 h-80 bg-cyan-500/10 rounded-full blur-3xl animate-pulse delay-2000"></div>
+        <div className="absolute top-20 left-10 w-72 h-72 bg-brand-soft rounded-full hidden animate-pulse"></div>
+        <div className="absolute top-40 right-20 w-96 h-96 bg-brand-soft rounded-full hidden animate-pulse delay-1000"></div>
+        <div className="absolute bottom-20 left-1/3 w-80 h-80 bg-brand-soft rounded-full hidden animate-pulse delay-2000"></div>
         
         {[...Array(15)].map((_, i) => (
           <div
             key={i}
-            className="absolute w-1 h-1 bg-blue-400/30 rounded-full animate-ping"
+            className="absolute w-1 h-1 bg-brand-soft rounded-full hidden"
             style={{
               left: `${Math.random() * 100}%`,
               top: `${Math.random() * 100}%`,
@@ -813,37 +814,37 @@ const ModuleDetailPage = () => {
       <div className="container mx-auto px-4 py-16 pb-24 md:pb-8 relative z-10">
         <div className="max-w-4xl mx-auto">
           {/* Module Header */}
-          <div className={`relative rounded-3xl overflow-hidden shadow-2xl mb-12 group bg-gradient-to-br ${moduleData.gradientColors} animate-fade-in`}> 
+          <div className={`relative rounded-3xl overflow-hidden shadow-hard mb-12 group ${moduleData.gradientColors} animate-fade-in`}> 
             {/* Glassmorphism Layer */}
-            <div className="absolute inset-0 bg-white/10 backdrop-blur-2xl z-0" />
+            <div className="absolute inset-0 bg-paper z-0" />
             
             {/* Gradient Decorations */}
-            <div className="absolute -top-10 -right-10 w-60 h-60 bg-white/10 rounded-full blur-2xl z-0" />
-            <div className="absolute bottom-0 left-0 w-40 h-40 bg-white/5 rounded-full blur-xl z-0" />
+            <div className="absolute -top-10 -right-10 w-60 h-60 bg-paper rounded-full hidden z-0" />
+            <div className="absolute bottom-0 left-0 w-40 h-40 bg-paper rounded-full hidden z-0" />
             
             <div className="relative z-10 p-10">
               <div className="flex items-start justify-between mb-6">
                 <div className="flex-1">
                   <div className="flex items-center space-x-2 mb-4">
-                    <Star className="w-5 h-5 text-yellow-400 fill-current" />
-                    <span className="text-yellow-400 text-sm font-medium">Premium Module</span>
+                    <Star className="w-5 h-5 text-amber-700 fill-current" />
+                    <span className="text-amber-700 text-sm font-medium">Premium Module</span>
                   </div>
-                  <h1 className="text-4xl md:text-5xl font-black mb-3 bg-gradient-to-r from-white via-blue-200 to-cyan-300 bg-clip-text text-transparent drop-shadow-2xl">
+                  <h1 className="text-4xl md:text-5xl font-black mb-3 text-ink">
                     {moduleData.title}
                   </h1>
-                  <p className="text-lg md:text-xl font-medium text-blue-100 mb-2">{moduleData.subtitle}</p>
-                  <p className="text-base text-blue-200/80">{moduleData.description}</p>
+                  <p className="text-lg md:text-xl font-medium text-muted mb-2">{moduleData.subtitle}</p>
+                  <p className="text-base text-muted">{moduleData.description}</p>
                 </div>
                 
                 {/* Status Badge */}
-                <div className={`flex flex-col items-center px-6 py-4 rounded-2xl shadow-lg border border-white/20 backdrop-blur-xl ${
+                <div className={`flex flex-col items-center px-6 py-4 rounded-2xl border-2 border-ink ${
                   isCompleted 
-                    ? 'bg-emerald-400/20 text-emerald-100' 
-                    : 'bg-white/10 text-blue-100'
+                    ? 'bg-mint-soft text-emerald-700' 
+                    : 'bg-paper text-muted'
                 }`}>
                   {isCompleted ? (
                     <>
-                      <Trophy className="w-8 h-8 mb-2 text-yellow-400" />
+                      <Trophy className="w-8 h-8 mb-2 text-amber-700" />
                       <CheckCircle className="w-6 h-6 mb-1" />
                       <span className="font-bold text-sm">Selesai</span>
                     </>
@@ -857,7 +858,7 @@ const ModuleDetailPage = () => {
               </div>
               
               {/* Features */}
-              <div className="flex items-center space-x-8 text-base text-blue-200">
+              <div className="flex items-center space-x-8 text-base text-muted">
                 <div className="flex items-center space-x-2">
                   <BookOpen className="w-5 h-5" />
                   <span>Materi Lengkap</span>
@@ -878,15 +879,15 @@ const ModuleDetailPage = () => {
           <div className="space-y-10">
             {/* Audio Learning Section */}
             <div className="group relative">
-              <div className="absolute -inset-1 bg-gradient-to-r from-purple-500/30 to-pink-500/30 rounded-2xl blur opacity-25 group-hover:opacity-50 transition duration-1000"></div>
-              <div className="relative bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl rounded-2xl shadow-lg p-8 border border-white/20">
+              <div className="absolute -inset-1 bg-purple-100 rounded-2xl hidden opacity-25 group-hover:opacity-50 transition duration-1000"></div>
+              <div className="relative bg-paper rounded-2xl p-8 border-2 border-ink">
                 <div className="flex items-center space-x-3 mb-6">
-                  <div className="bg-purple-900/20 p-3 rounded-full">
-                    <Volume2 className="w-6 h-6 text-purple-400" />
+                  <div className="bg-purple-100 p-3 rounded-full">
+                    <Volume2 className="w-6 h-6 text-purple-700" />
                   </div>
                   <div>
-                    <h3 className="text-xl font-bold text-white">Audio Pembelajaran</h3>
-                    <p className="text-purple-200">Dengarkan penjelasan dengan gaya podcast edukatif</p>
+                    <h3 className="text-xl font-bold text-ink">Audio Pembelajaran</h3>
+                    <p className="text-muted">Dengarkan penjelasan dengan gaya podcast edukatif</p>
                   </div>
                 </div>
                 <AudioPlayer 
@@ -899,15 +900,15 @@ const ModuleDetailPage = () => {
 
             {/* Main Content */}
             <div className="group relative">
-              <div className="absolute -inset-1 bg-gradient-to-r from-blue-500/30 to-cyan-500/30 rounded-2xl blur opacity-25 group-hover:opacity-50 transition duration-1000"></div>
-              <div className="relative bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl rounded-2xl shadow-lg p-8 border border-white/20">
+              <div className="absolute -inset-1 bg-brand-soft rounded-2xl hidden opacity-25 group-hover:opacity-50 transition duration-1000"></div>
+              <div className="relative bg-paper rounded-2xl p-8 border-2 border-ink">
                 <div className="flex items-center space-x-3 mb-6">
-                  <div className="bg-blue-900/20 p-3 rounded-full">
-                    <BookOpen className="w-6 h-6 text-blue-400" />
+                  <div className="bg-brand-soft p-3 rounded-full">
+                    <BookOpen className="w-6 h-6 text-brand" />
                   </div>
                   <div>
-                    <h3 className="text-xl font-bold text-white">Materi Pembelajaran</h3>
-                    <p className="text-blue-200">Penjelasan lengkap dan mudah dipahami</p>
+                    <h3 className="text-xl font-bold text-ink">Materi Pembelajaran</h3>
+                    <p className="text-muted">Penjelasan lengkap dan mudah dipahami</p>
                   </div>
                 </div>
                 <div 
@@ -919,15 +920,15 @@ const ModuleDetailPage = () => {
 
             {/* Interactive Demo */}
             <div className="group relative">
-              <div className="absolute -inset-1 bg-gradient-to-r from-orange-500/30 to-red-500/30 rounded-2xl blur opacity-25 group-hover:opacity-50 transition duration-1000"></div>
-              <div className="relative bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl rounded-2xl shadow-lg p-8 border border-white/20">
+              <div className="absolute -inset-1 bg-lamp-soft rounded-2xl hidden opacity-25 group-hover:opacity-50 transition duration-1000"></div>
+              <div className="relative bg-paper rounded-2xl p-8 border-2 border-ink">
                 <div className="flex items-center space-x-3 mb-6">
-                  <div className="bg-orange-900/20 p-3 rounded-full">
-                    <Zap className="w-6 h-6 text-orange-400" />
+                  <div className="bg-lamp-soft p-3 rounded-full">
+                    <Zap className="w-6 h-6 text-amber-700" />
                   </div>
                   <div>
-                    <h3 className="text-xl font-bold text-white">Demo Interaktif</h3>
-                    <p className="text-orange-200">Simulasi rangkaian untuk pemahaman lebih baik</p>
+                    <h3 className="text-xl font-bold text-ink">Demo Interaktif</h3>
+                    <p className="text-amber-700">Simulasi rangkaian untuk pemahaman lebih baik</p>
                   </div>
                 </div>
                 <InteractiveCircuitDemo
@@ -940,37 +941,37 @@ const ModuleDetailPage = () => {
 
             {/* Completion Section */}
             <div className="group relative">
-              <div className="absolute -inset-1 bg-gradient-to-r from-emerald-500/30 to-green-500/30 rounded-2xl blur opacity-25 group-hover:opacity-50 transition duration-1000"></div>
-              <div className="relative bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl rounded-2xl p-8 border border-white/20 text-center">
+              <div className="absolute -inset-1 bg-mint-soft rounded-2xl hidden opacity-25 group-hover:opacity-50 transition duration-1000"></div>
+              <div className="relative bg-paper rounded-2xl p-8 border-2 border-ink text-center">
                 {!isCompleted ? (
                   <div>
-                    <div className="w-16 h-16 bg-gradient-to-br from-emerald-500/20 to-green-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                      <CheckCircle className="w-8 h-8 text-emerald-400" />
+                    <div className="w-16 h-16 bg-mint-soft rounded-full flex items-center justify-center mx-auto mb-4">
+                      <CheckCircle className="w-8 h-8 text-emerald-700" />
                     </div>
-                    <h3 className="text-xl font-bold text-white mb-3">Selesaikan Modul Ini</h3>
-                    <p className="text-blue-200 mb-6">
+                    <h3 className="text-xl font-bold text-ink mb-3">Selesaikan Modul Ini</h3>
+                    <p className="text-muted mb-6">
                       Tandai modul sebagai selesai setelah memahami semua materi
                     </p>
                     <button
                       onClick={handleMarkComplete}
-                      className="bg-gradient-to-r from-emerald-500 to-green-500 text-white px-8 py-4 rounded-xl font-bold hover:from-emerald-600 hover:to-green-600 transition-all transform hover:scale-105 shadow-lg"
+                      className="bg-mint border-2 border-ink text-ink px-8 py-4 rounded-xl font-bold hover:bg-mint transition-all transform"
                     >
-                      ✅ Tandai Selesai
+                      Tandai Selesai
                     </button>
                   </div>
                 ) : (
                   <div>
-                    <div className="w-20 h-20 bg-gradient-to-br from-emerald-500 to-green-500 rounded-full flex items-center justify-center mx-auto mb-4 shadow-2xl">
-                      <Trophy className="w-10 h-10 text-white" />
+                    <div className="w-20 h-20 bg-mint rounded-full flex items-center justify-center mx-auto mb-4 shadow-hard">
+                      <Trophy className="w-10 h-10 text-ink" />
                     </div>
-                    <h3 className="text-2xl font-bold text-emerald-300 mb-2">Modul Selesai! 🎉</h3>
-                    <p className="text-emerald-200 text-lg">
+                    <h3 className="text-2xl font-bold text-emerald-700 mb-2">Modul Selesai! </h3>
+                    <p className="text-emerald-700 text-lg">
                       Selamat! Anda telah menyelesaikan modul ini dengan baik.
                     </p>
                     <div className="flex items-center justify-center space-x-2 mt-4">
-                      <Star className="w-5 h-5 text-yellow-400 fill-current" />
-                      <Star className="w-5 h-5 text-yellow-400 fill-current" />
-                      <Star className="w-5 h-5 text-yellow-400 fill-current" />
+                      <Star className="w-5 h-5 text-amber-700 fill-current" />
+                      <Star className="w-5 h-5 text-amber-700 fill-current" />
+                      <Star className="w-5 h-5 text-amber-700 fill-current" />
                     </div>
                   </div>
                 )}
@@ -979,21 +980,21 @@ const ModuleDetailPage = () => {
           </div>
 
           {/* Navigation */}
-          <div className="flex justify-between items-center mt-12 pt-8 border-t border-white/10">
+          <div className="flex justify-between items-center mt-12 pt-8 border-t border-ink/20">
             <button
-              className="flex items-center space-x-2 text-blue-200 hover:text-blue-100 font-semibold transition-colors group"
+              className="flex items-center space-x-2 text-muted hover:text-muted font-semibold transition-colors group"
               onClick={() => window.location.href = '/materials'}
             >
-              <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
+              <ArrowLeft className="w-5 h-5 transition-transform" />
               <span>Kembali ke Daftar Materi</span>
             </button>
             
             <button
-              className="flex items-center space-x-2 bg-gradient-to-r from-blue-600 to-cyan-600 text-white px-6 py-3 rounded-xl font-bold hover:from-blue-700 hover:to-cyan-700 transition-all transform hover:scale-105 shadow-lg group"
+              className="flex items-center space-x-2 bg-brand border-2 border-ink text-white px-6 py-3 rounded-xl font-bold hover:bg-brand transition-all transform group"
               onClick={() => window.location.href = '/practicum'}
             >
               <span>Lanjut ke Praktikum</span>
-              <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+              <ArrowRight className="w-5 h-5 transition-transform" />
             </button>
           </div>
         </div>

@@ -58,19 +58,19 @@ export default function LKPDResultPage() {
 
   if (!lkpdData) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-950 to-indigo-900">
+      <div className="min-h-screen bg-transparent">
         <Navbar />
         <div className="container mx-auto px-6 py-16">
           <div className="max-w-2xl mx-auto text-center">
-            <div className="bg-white/10 backdrop-blur-xl rounded-3xl p-12 border border-white/20">
-              <FileText className="w-20 h-20 text-blue-400 mx-auto mb-6" />
-              <h2 className="text-3xl font-bold text-white mb-4">Belum Ada Data E-LKPD</h2>
-              <p className="text-blue-200/70 mb-8">
+            <div className="bg-paper rounded-3xl p-12 border-2 border-ink">
+              <FileText className="w-20 h-20 text-brand mx-auto mb-6" />
+              <h2 className="text-3xl font-bold text-ink mb-4">Belum Ada Data E-LKPD</h2>
+              <p className="text-muted mb-8">
                 Anda belum mengisi E-LKPD. Silakan kerjakan praktikum terlebih dahulu.
               </p>
               <Link
                 href="/practicum"
-                className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-blue-500 to-cyan-500 text-white rounded-xl font-bold hover:from-blue-600 hover:to-cyan-600 transition-all"
+                className="inline-flex items-center px-6 py-3 bg-brand border-2 border-ink text-white rounded-xl font-bold hover:bg-brand transition-all"
               >
                 <FlaskConical className="w-5 h-5 mr-2" />
                 Mulai Praktikum
@@ -91,7 +91,7 @@ export default function LKPDResultPage() {
     : lkpdData.conclusion_answers || {};
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-950 to-indigo-900">
+    <div className="min-h-screen bg-transparent">
       <Navbar />
       
       <div className="container mx-auto px-6 py-16">
@@ -100,35 +100,35 @@ export default function LKPDResultPage() {
           <div className="mb-8">
             <Link
               href="/dashboard/student"
-              className="inline-flex items-center text-blue-300 hover:text-blue-200 mb-6 transition-colors"
+              className="inline-flex items-center text-brand hover:text-muted mb-6 transition-colors"
             >
               <ArrowLeft className="w-4 h-4 mr-2" />
               Kembali ke Dashboard
             </Link>
 
             <div className="relative">
-              <div className="absolute -inset-1 bg-gradient-to-r from-blue-500/30 to-indigo-600/30 rounded-3xl blur"></div>
-              <div className="relative bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl rounded-3xl p-8 border border-white/20">
+              <div className="absolute -inset-1 bg-brand-soft rounded-3xl hidden"></div>
+              <div className="relative bg-paper rounded-3xl p-8 border-2 border-ink">
                 <div className="flex items-start justify-between">
                   <div className="flex items-start gap-4">
-                    <div className="p-3 bg-gradient-to-br from-blue-500/20 to-indigo-500/20 rounded-xl">
-                      <FileText className="w-8 h-8 text-blue-400" />
+                    <div className="p-3 bg-brand-soft rounded-xl">
+                      <FileText className="w-8 h-8 text-brand" />
                     </div>
                     <div>
-                      <h1 className="text-3xl font-black text-white mb-2">Hasil E-LKPD Praktikum</h1>
-                      <p className="text-blue-200/70 mb-4">Lembar Kerja Peserta Didik Digital - Rangkaian Listrik</p>
+                      <h1 className="text-3xl font-black text-ink mb-2">Hasil E-LKPD Praktikum</h1>
+                      <p className="text-muted mb-4">Lembar Kerja Peserta Didik Digital - Rangkaian Listrik</p>
                       
                       <div className="flex flex-wrap gap-4 text-sm">
-                        <div className="flex items-center text-blue-200">
+                        <div className="flex items-center text-muted">
                           <User className="w-4 h-4 mr-2" />
                           <span>{student.name} ({student.nis})</span>
                         </div>
-                        <div className="flex items-center text-blue-200">
+                        <div className="flex items-center text-muted">
                           <Calendar className="w-4 h-4 mr-2" />
                           <span>{lkpdData.last_saved_at ? new Date(lkpdData.last_saved_at).toLocaleDateString('id-ID') : '-'}</span>
                         </div>
                         {lkpdData.completed_sections && (
-                          <div className="flex items-center text-emerald-300">
+                          <div className="flex items-center text-emerald-700">
                             <CheckCircle2 className="w-4 h-4 mr-2" />
                             <span>{lkpdData.completed_sections.length}/6 Bagian Selesai</span>
                           </div>
@@ -140,7 +140,7 @@ export default function LKPDResultPage() {
                   <div className="flex gap-2">
                     <button
                       onClick={() => window.print()}
-                      className="p-3 bg-white/10 hover:bg-white/20 text-white rounded-xl transition-all"
+                      className="p-3 bg-paper hover:bg-lamp-soft text-ink rounded-xl transition-all"
                       title="Cetak"
                     >
                       <Printer className="w-5 h-5" />
@@ -156,14 +156,14 @@ export default function LKPDResultPage() {
             {/* Hipotesis Awal */}
             {analysisData.hypothesis && (
               <div className="relative">
-                <div className="absolute -inset-1 bg-gradient-to-r from-yellow-500/20 to-amber-600/20 rounded-2xl blur"></div>
-                <div className="relative bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl rounded-2xl p-6 border border-white/20">
+                <div className="absolute -inset-1 bg-lamp-soft rounded-2xl hidden"></div>
+                <div className="relative bg-paper rounded-2xl p-6 border-2 border-ink">
                   <div className="flex items-center gap-3 mb-4">
-                    <Target className="w-6 h-6 text-yellow-400" />
-                    <h2 className="text-xl font-bold text-white">Hipotesis Awal</h2>
+                    <Target className="w-6 h-6 text-amber-700" />
+                    <h2 className="text-xl font-bold text-ink">Hipotesis Awal</h2>
                   </div>
-                  <div className="bg-white/5 rounded-lg p-4 border border-white/10">
-                    <p className="text-white/90 whitespace-pre-wrap leading-relaxed">{analysisData.hypothesis}</p>
+                  <div className="bg-paper rounded-lg p-4 border border-ink/20">
+                    <p className="text-ink whitespace-pre-wrap leading-relaxed">{analysisData.hypothesis}</p>
                   </div>
                 </div>
               </div>
@@ -171,70 +171,70 @@ export default function LKPDResultPage() {
 
             {/* Hasil Pengamatan */}
             <div className="relative">
-              <div className="absolute -inset-1 bg-gradient-to-r from-blue-500/20 to-cyan-600/20 rounded-2xl blur"></div>
-              <div className="relative bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl rounded-2xl p-6 border border-white/20">
+              <div className="absolute -inset-1 bg-brand-soft rounded-2xl hidden"></div>
+              <div className="relative bg-paper rounded-2xl p-6 border-2 border-ink">
                 <div className="flex items-center gap-3 mb-6">
-                  <FlaskConical className="w-6 h-6 text-blue-400" />
-                  <h2 className="text-xl font-bold text-white">Hasil Pengamatan</h2>
+                  <FlaskConical className="w-6 h-6 text-brand" />
+                  <h2 className="text-xl font-bold text-ink">Hasil Pengamatan</h2>
                 </div>
 
                 <div className="overflow-x-auto">
                   <table className="w-full border-collapse">
                     <thead>
-                      <tr className="bg-white/5">
-                        <th className="border border-white/20 px-4 py-3 text-white font-bold text-left" rowSpan={2}>Jenis Pengamatan</th>
-                        <th className="border border-white/20 px-4 py-3 text-white font-bold text-center" colSpan={2}>Rangkaian Seri</th>
-                        <th className="border border-white/20 px-4 py-3 text-white font-bold text-center" colSpan={2}>Rangkaian Paralel</th>
+                      <tr className="bg-paper">
+                        <th className="border-2 border-ink px-4 py-3 text-ink font-bold text-left" rowSpan={2}>Jenis Pengamatan</th>
+                        <th className="border-2 border-ink px-4 py-3 text-ink font-bold text-center" colSpan={2}>Rangkaian Seri</th>
+                        <th className="border-2 border-ink px-4 py-3 text-ink font-bold text-center" colSpan={2}>Rangkaian Paralel</th>
                       </tr>
-                      <tr className="bg-white/5">
-                        <th className="border border-white/20 px-4 py-2 text-blue-200 text-sm">5 Lampu</th>
-                        <th className="border border-white/20 px-4 py-2 text-blue-200 text-sm">2 Lampu</th>
-                        <th className="border border-white/20 px-4 py-2 text-blue-200 text-sm">5 Lampu</th>
-                        <th className="border border-white/20 px-4 py-2 text-blue-200 text-sm">2 Lampu</th>
+                      <tr className="bg-paper">
+                        <th className="border-2 border-ink px-4 py-2 text-muted text-sm">5 Lampu</th>
+                        <th className="border-2 border-ink px-4 py-2 text-muted text-sm">2 Lampu</th>
+                        <th className="border-2 border-ink px-4 py-2 text-muted text-sm">5 Lampu</th>
+                        <th className="border-2 border-ink px-4 py-2 text-muted text-sm">2 Lampu</th>
                       </tr>
                     </thead>
-                    <tbody className="text-white/90">
+                    <tbody className="text-ink">
                       <tr>
-                        <td className="border border-white/20 px-4 py-2 font-semibold bg-white/5">Tegangan (V)</td>
-                        <td className="border border-white/20 px-4 py-2 text-center">{lkpdData.series_5_voltage || '-'}</td>
-                        <td className="border border-white/20 px-4 py-2 text-center">{lkpdData.series_2_voltage || '-'}</td>
-                        <td className="border border-white/20 px-4 py-2 text-center">{lkpdData.parallel_5_voltage || '-'}</td>
-                        <td className="border border-white/20 px-4 py-2 text-center">{lkpdData.parallel_2_voltage || '-'}</td>
+                        <td className="border-2 border-ink px-4 py-2 font-semibold bg-paper">Tegangan (V)</td>
+                        <td className="border-2 border-ink px-4 py-2 text-center">{lkpdData.series_5_voltage || '-'}</td>
+                        <td className="border-2 border-ink px-4 py-2 text-center">{lkpdData.series_2_voltage || '-'}</td>
+                        <td className="border-2 border-ink px-4 py-2 text-center">{lkpdData.parallel_5_voltage || '-'}</td>
+                        <td className="border-2 border-ink px-4 py-2 text-center">{lkpdData.parallel_2_voltage || '-'}</td>
                       </tr>
                       <tr>
-                        <td className="border border-white/20 px-4 py-2 font-semibold bg-white/5">Arus (A)</td>
-                        <td className="border border-white/20 px-4 py-2 text-center">{lkpdData.series_5_current || '-'}</td>
-                        <td className="border border-white/20 px-4 py-2 text-center">{lkpdData.series_2_current || '-'}</td>
-                        <td className="border border-white/20 px-4 py-2 text-center">{lkpdData.parallel_5_current || '-'}</td>
-                        <td className="border border-white/20 px-4 py-2 text-center">{lkpdData.parallel_2_current || '-'}</td>
+                        <td className="border-2 border-ink px-4 py-2 font-semibold bg-paper">Arus (A)</td>
+                        <td className="border-2 border-ink px-4 py-2 text-center">{lkpdData.series_5_current || '-'}</td>
+                        <td className="border-2 border-ink px-4 py-2 text-center">{lkpdData.series_2_current || '-'}</td>
+                        <td className="border-2 border-ink px-4 py-2 text-center">{lkpdData.parallel_5_current || '-'}</td>
+                        <td className="border-2 border-ink px-4 py-2 text-center">{lkpdData.parallel_2_current || '-'}</td>
                       </tr>
                       <tr>
-                        <td className="border border-white/20 px-4 py-2 font-semibold bg-white/5">Hambatan (Ω)</td>
-                        <td className="border border-white/20 px-4 py-2 text-center">{lkpdData.series_5_resistance || '-'}</td>
-                        <td className="border border-white/20 px-4 py-2 text-center">{lkpdData.series_2_resistance || '-'}</td>
-                        <td className="border border-white/20 px-4 py-2 text-center">{lkpdData.parallel_5_resistance || '-'}</td>
-                        <td className="border border-white/20 px-4 py-2 text-center">{lkpdData.parallel_2_resistance || '-'}</td>
+                        <td className="border-2 border-ink px-4 py-2 font-semibold bg-paper">Hambatan (Ω)</td>
+                        <td className="border-2 border-ink px-4 py-2 text-center">{lkpdData.series_5_resistance || '-'}</td>
+                        <td className="border-2 border-ink px-4 py-2 text-center">{lkpdData.series_2_resistance || '-'}</td>
+                        <td className="border-2 border-ink px-4 py-2 text-center">{lkpdData.parallel_5_resistance || '-'}</td>
+                        <td className="border-2 border-ink px-4 py-2 text-center">{lkpdData.parallel_2_resistance || '-'}</td>
                       </tr>
                       <tr>
-                        <td className="border border-white/20 px-4 py-2 font-semibold bg-white/5">Kondisi (Semua ON)</td>
-                        <td className="border border-white/20 px-4 py-2 text-center text-sm">{lkpdData.lamp_all_on_series_5 || '-'}</td>
-                        <td className="border border-white/20 px-4 py-2 text-center text-sm">{lkpdData.lamp_all_on_series_2 || '-'}</td>
-                        <td className="border border-white/20 px-4 py-2 text-center text-sm">{lkpdData.lamp_all_on_parallel_5 || '-'}</td>
-                        <td className="border border-white/20 px-4 py-2 text-center text-sm">{lkpdData.lamp_all_on_parallel_2 || '-'}</td>
+                        <td className="border-2 border-ink px-4 py-2 font-semibold bg-paper">Kondisi (Semua ON)</td>
+                        <td className="border-2 border-ink px-4 py-2 text-center text-sm">{lkpdData.lamp_all_on_series_5 || '-'}</td>
+                        <td className="border-2 border-ink px-4 py-2 text-center text-sm">{lkpdData.lamp_all_on_series_2 || '-'}</td>
+                        <td className="border-2 border-ink px-4 py-2 text-center text-sm">{lkpdData.lamp_all_on_parallel_5 || '-'}</td>
+                        <td className="border-2 border-ink px-4 py-2 text-center text-sm">{lkpdData.lamp_all_on_parallel_2 || '-'}</td>
                       </tr>
                       <tr>
-                        <td className="border border-white/20 px-4 py-2 font-semibold bg-white/5">Kondisi (Satu OFF)</td>
-                        <td className="border border-white/20 px-4 py-2 text-center text-sm">{lkpdData.lamp_one_off_series_5 || '-'}</td>
-                        <td className="border border-white/20 px-4 py-2 text-center text-sm">{lkpdData.lamp_one_off_series_2 || '-'}</td>
-                        <td className="border border-white/20 px-4 py-2 text-center text-sm">{lkpdData.lamp_one_off_parallel_5 || '-'}</td>
-                        <td className="border border-white/20 px-4 py-2 text-center text-sm">{lkpdData.lamp_one_off_parallel_2 || '-'}</td>
+                        <td className="border-2 border-ink px-4 py-2 font-semibold bg-paper">Kondisi (Satu OFF)</td>
+                        <td className="border-2 border-ink px-4 py-2 text-center text-sm">{lkpdData.lamp_one_off_series_5 || '-'}</td>
+                        <td className="border-2 border-ink px-4 py-2 text-center text-sm">{lkpdData.lamp_one_off_series_2 || '-'}</td>
+                        <td className="border-2 border-ink px-4 py-2 text-center text-sm">{lkpdData.lamp_one_off_parallel_5 || '-'}</td>
+                        <td className="border-2 border-ink px-4 py-2 text-center text-sm">{lkpdData.lamp_one_off_parallel_2 || '-'}</td>
                       </tr>
                       <tr>
-                        <td className="border border-white/20 px-4 py-2 font-semibold bg-white/5">Tingkat Kecerahan</td>
-                        <td className="border border-white/20 px-4 py-2 text-center text-sm">{lkpdData.lamp_brightness_series_5 || '-'}</td>
-                        <td className="border border-white/20 px-4 py-2 text-center text-sm">{lkpdData.lamp_brightness_series_2 || '-'}</td>
-                        <td className="border border-white/20 px-4 py-2 text-center text-sm">{lkpdData.lamp_brightness_parallel_5 || '-'}</td>
-                        <td className="border border-white/20 px-4 py-2 text-center text-sm">{lkpdData.lamp_brightness_parallel_2 || '-'}</td>
+                        <td className="border-2 border-ink px-4 py-2 font-semibold bg-paper">Tingkat Kecerahan</td>
+                        <td className="border-2 border-ink px-4 py-2 text-center text-sm">{lkpdData.lamp_brightness_series_5 || '-'}</td>
+                        <td className="border-2 border-ink px-4 py-2 text-center text-sm">{lkpdData.lamp_brightness_series_2 || '-'}</td>
+                        <td className="border-2 border-ink px-4 py-2 text-center text-sm">{lkpdData.lamp_brightness_parallel_5 || '-'}</td>
+                        <td className="border-2 border-ink px-4 py-2 text-center text-sm">{lkpdData.lamp_brightness_parallel_2 || '-'}</td>
                       </tr>
                     </tbody>
                   </table>
@@ -245,14 +245,14 @@ export default function LKPDResultPage() {
             {/* Menguji Hipotesis */}
             {analysisData.hypothesis_testing && (
               <div className="relative">
-                <div className="absolute -inset-1 bg-gradient-to-r from-purple-500/20 to-pink-600/20 rounded-2xl blur"></div>
-                <div className="relative bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl rounded-2xl p-6 border border-white/20">
+                <div className="absolute -inset-1 bg-purple-100 rounded-2xl hidden"></div>
+                <div className="relative bg-paper rounded-2xl p-6 border-2 border-ink">
                   <div className="flex items-center gap-3 mb-4">
-                    <Lightbulb className="w-6 h-6 text-purple-400" />
-                    <h2 className="text-xl font-bold text-white">Menguji Hipotesis</h2>
+                    <Lightbulb className="w-6 h-6 text-purple-700" />
+                    <h2 className="text-xl font-bold text-ink">Menguji Hipotesis</h2>
                   </div>
-                  <div className="bg-white/5 rounded-lg p-4 border border-white/10">
-                    <p className="text-white/90 whitespace-pre-wrap leading-relaxed">{analysisData.hypothesis_testing}</p>
+                  <div className="bg-paper rounded-lg p-4 border border-ink/20">
+                    <p className="text-ink whitespace-pre-wrap leading-relaxed">{analysisData.hypothesis_testing}</p>
                   </div>
                 </div>
               </div>
@@ -261,14 +261,14 @@ export default function LKPDResultPage() {
             {/* Kesimpulan */}
             {conclusionData.conclusion && (
               <div className="relative">
-                <div className="absolute -inset-1 bg-gradient-to-r from-emerald-500/20 to-teal-600/20 rounded-2xl blur"></div>
-                <div className="relative bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl rounded-2xl p-6 border border-white/20">
+                <div className="absolute -inset-1 bg-mint-soft rounded-2xl hidden"></div>
+                <div className="relative bg-paper rounded-2xl p-6 border-2 border-ink">
                   <div className="flex items-center gap-3 mb-4">
-                    <BookOpen className="w-6 h-6 text-emerald-400" />
-                    <h2 className="text-xl font-bold text-white">Kesimpulan</h2>
+                    <BookOpen className="w-6 h-6 text-emerald-700" />
+                    <h2 className="text-xl font-bold text-ink">Kesimpulan</h2>
                   </div>
-                  <div className="bg-white/5 rounded-lg p-4 border border-white/10">
-                    <p className="text-white/90 whitespace-pre-wrap leading-relaxed">{conclusionData.conclusion}</p>
+                  <div className="bg-paper rounded-lg p-4 border border-ink/20">
+                    <p className="text-ink whitespace-pre-wrap leading-relaxed">{conclusionData.conclusion}</p>
                   </div>
                 </div>
               </div>

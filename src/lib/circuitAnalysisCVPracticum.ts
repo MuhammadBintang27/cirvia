@@ -94,7 +94,7 @@ export function analyzeCircuit(
   // Early exit conditions
   if (totalVoltage === 0 || resistiveElements.length === 0) {
     console.log(
-      "⚠️ Rangkaian tidak aktif (tidak ada tegangan atau komponen resistif)"
+      "Rangkaian tidak aktif (tidak ada tegangan atau komponen resistif)"
     );
     return {
       current: 0,
@@ -142,7 +142,7 @@ export function analyzeCircuit(
 
   console.log("\n📍 STATUS SAKLAR:");
   switches.forEach((sw) => {
-    const status = sw.state === "closed" ? "✅ TERTUTUP" : "❌ TERBUKA";
+    const status = sw.state === "closed" ? "TERTUTUP" : "TERBUKA";
     console.log(`   ${status}: Switch ${sw.id.slice(-8)}`);
   });
 
@@ -349,7 +349,7 @@ export function analyzeCircuit(
       if (!hasOpenSwitchInPath(el.id)) {
         activeElements.push(el.id);
         console.log(
-          `   ✅ ${el.type} ${el.id.slice(-8)}: AKTIF (R=${el.value}Ω)`
+          `   ${el.type} ${el.id.slice(-8)}: AKTIF (R=${el.value}Ω)`
         );
       } else {
         console.log(`   ❌ ${el.type} ${el.id.slice(-8)}: TERBLOKIR`);
@@ -378,7 +378,7 @@ export function analyzeCircuit(
         activeElements.push(el.id);
         totalResistance += el.value;
         console.log(
-          `   ✅ ${el.type} ${el.id.slice(-8)}: AKTIF (R=${el.value}Ω)`
+          `   ${el.type} ${el.id.slice(-8)}: AKTIF (R=${el.value}Ω)`
         );
       } else {
         console.log(`   ❌ ${el.type} ${el.id.slice(-8)}: TERBLOKIR`);
@@ -422,7 +422,7 @@ export function analyzeCircuit(
         if (el.type === "lamp") {
           lampPowers[el.id] = elementCurrent * elementCurrent * el.value;
           console.log(
-            `   💡 Lampu ${el.id.slice(-8)}: HIDUP (I=${elementCurrent.toFixed(
+            `   Lampu ${el.id.slice(-8)}: HIDUP (I=${elementCurrent.toFixed(
               3
             )}A, P=${lampPowers[el.id].toFixed(2)}W)`
           );
@@ -434,7 +434,7 @@ export function analyzeCircuit(
         if (el.type === "lamp") {
           lampPowers[el.id] = 0;
           console.log(
-            `   💡 Lampu ${el.id.slice(-8)}: MATI (${
+            `   Lampu ${el.id.slice(-8)}: MATI (${
               hasOpenSwitchInPath(el.id)
                 ? "saklar terbuka di cabangnya"
                 : "tidak aktif"
@@ -452,7 +452,7 @@ export function analyzeCircuit(
         if (el.type === "lamp") {
           lampPowers[el.id] = totalCurrent * totalCurrent * el.value;
           console.log(
-            `   💡 Lampu ${el.id.slice(-8)}: HIDUP (I=${totalCurrent.toFixed(
+            `   Lampu ${el.id.slice(-8)}: HIDUP (I=${totalCurrent.toFixed(
               3
             )}A, P=${lampPowers[el.id].toFixed(2)}W)`
           );

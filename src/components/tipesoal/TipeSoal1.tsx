@@ -159,18 +159,18 @@ const TipeSoal1: React.FC<TipeSoal1Props> = ({
       <div className="grid lg:grid-cols-2 gap-8 mb-8">
         {/* Question Info */}
         <div className="space-y-6">
-          <div className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl rounded-2xl p-8 border border-white/20">
+          <div className="bg-paper rounded-2xl p-8 border-2 border-ink">
             
             
-            <h2 className="text-2xl font-bold text-white mb-4">{question.title}</h2>
-            <p className="text-blue-200/90 text-lg mb-6">{question.description}</p>
+            <h2 className="text-2xl font-bold text-ink mb-4">{question.title}</h2>
+            <p className="text-muted text-lg mb-6">{question.description}</p>
             
     
 
             {/* Hint Button */}
             <button
               onClick={() => setQuizState(prev => ({ ...prev, showHint: !prev.showHint }))}
-              className="flex items-center px-4 py-2 bg-gradient-to-r from-yellow-500/20 to-amber-500/20 rounded-xl border border-yellow-400/30 text-yellow-300 hover:bg-yellow-500/30 transition-all"
+              className="flex items-center px-4 py-2 bg-lamp-soft rounded-xl border-2 border-ink text-amber-700 hover:bg-lamp-soft transition-all"
               disabled={disabled}
             >
               <Lightbulb className="w-4 h-4 mr-2" />
@@ -178,8 +178,8 @@ const TipeSoal1: React.FC<TipeSoal1Props> = ({
             </button>
 
             {quizState.showHint && (
-              <div className="mt-4 p-4 bg-gradient-to-r from-yellow-500/10 to-amber-500/10 rounded-xl border border-yellow-400/30">
-                <p className="text-yellow-200">{question.hint}</p>
+              <div className="mt-4 p-4 bg-lamp-soft rounded-xl border-2 border-ink">
+                <p className="text-amber-700">{question.hint}</p>
               </div>
             )}
           </div>
@@ -207,9 +207,9 @@ const TipeSoal1: React.FC<TipeSoal1Props> = ({
 
           {/* Current Results Display */}
           {getCurrentResult() && (
-            <div className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl rounded-2xl p-6 border border-white/20">
-              <h4 className="text-white font-bold mb-4 flex items-center">
-                <Zap className="w-5 h-5 mr-2 text-yellow-400" />
+            <div className="bg-paper rounded-2xl p-6 border-2 border-ink">
+              <h4 className="text-ink font-bold mb-4 flex items-center">
+                <Zap className="w-5 h-5 mr-2 text-amber-700" />
                 Hasil Perhitungan
               </h4>
               {(() => {
@@ -217,16 +217,16 @@ const TipeSoal1: React.FC<TipeSoal1Props> = ({
                 return (
                   <div className="space-y-2 text-sm">
                     <div className="flex justify-between">
-                      <span className="text-blue-200/70">Resistansi Total:</span>
-                      <span className="text-white font-mono">{result.totalResistance.toFixed(2)}Ω</span>
+                      <span className="text-muted">Resistansi Total:</span>
+                      <span className="text-ink font-mono">{result.totalResistance.toFixed(2)}Ω</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-blue-200/70">Arus Total:</span>
-                      <span className="text-white font-mono">{result.totalCurrent.toFixed(4)}A</span>
+                      <span className="text-muted">Arus Total:</span>
+                      <span className="text-ink font-mono">{result.totalCurrent.toFixed(4)}A</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-blue-200/70">Daya Total:</span>
-                      <span className="text-white font-mono">{result.totalPower.toFixed(4)}W</span>
+                      <span className="text-muted">Daya Total:</span>
+                      <span className="text-ink font-mono">{result.totalPower.toFixed(4)}W</span>
                     </div>
                   </div>
                 );
@@ -242,7 +242,7 @@ const TipeSoal1: React.FC<TipeSoal1Props> = ({
           <button
             onClick={handleSubmitAnswer}
             disabled={disabled || quizState.selectedResistors.includes(null)}
-            className="flex items-center px-8 py-4 bg-gradient-to-r from-purple-500 to-pink-600 text-white rounded-2xl font-bold text-lg hover:from-purple-600 hover:to-pink-700 transition-all transform hover:scale-105 shadow-2xl disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+            className="flex items-center px-8 py-4 bg-purple-500 border-2 border-ink text-white rounded-2xl font-bold text-lg hover:bg-purple-500 transition-all transform shadow-hard disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
           >
             <CheckCircle className="w-5 h-5 mr-2" />
             Submit Jawaban
@@ -250,7 +250,7 @@ const TipeSoal1: React.FC<TipeSoal1Props> = ({
         ) : (
           <button
             onClick={onNextQuestion}
-            className="flex items-center px-8 py-4 bg-gradient-to-r from-blue-500 to-cyan-600 text-white rounded-2xl font-bold text-lg hover:from-blue-600 hover:to-cyan-700 transition-all transform hover:scale-105 shadow-2xl"
+            className="flex items-center px-8 py-4 bg-brand border-2 border-ink text-white rounded-2xl font-bold text-lg hover:bg-brand transition-all transform shadow-hard"
           >
             {isLastQuestion ? (
               <>
@@ -274,28 +274,28 @@ const TipeSoal1: React.FC<TipeSoal1Props> = ({
         
         return (
           <div className="mb-8">
-            <div className={`bg-gradient-to-br backdrop-blur-xl rounded-2xl p-8 border ${
+            <div className={`rounded-2xl p-8 border ${
               answerCheck.isCorrect 
-                ? 'from-green-500/10 to-emerald-500/10 border-green-400/30' 
-                : 'from-red-500/10 to-pink-500/10 border-red-400/30'
+                ? 'bg-mint-soft border-ink' 
+                : 'bg-coral-soft border-ink'
             }`}>
               <div className="flex items-center mb-4">
                 {answerCheck.isCorrect ? (
-                  <CheckCircle className="w-8 h-8 text-green-400 mr-3" />
+                  <CheckCircle className="w-8 h-8 text-emerald-700 mr-3" />
                 ) : (
-                  <XCircle className="w-8 h-8 text-red-400 mr-3" />
+                  <XCircle className="w-8 h-8 text-red-600 mr-3" />
                 )}
-                <h3 className="text-2xl font-bold text-white">
+                <h3 className="text-2xl font-bold text-ink">
                   {answerCheck.isCorrect ? 'Benar!' : 'Kurang Tepat'}
                 </h3>
               </div>
               
-              <p className="text-lg text-white mb-4">{answerCheck.message}</p>
-              <p className="text-blue-200/80 mb-6">{answerCheck.details}</p>
+              <p className="text-lg text-ink mb-4">{answerCheck.message}</p>
+              <p className="text-muted mb-6">{answerCheck.details}</p>
               
               {/* Solution Steps */}
-              <div className="bg-white/5 rounded-xl p-6 border border-white/10">
-                <h4 className="text-white font-bold mb-4">💡 Penjelasan Lengkap:</h4>
+              <div className="bg-paper rounded-xl p-6 border border-ink/20">
+                <h4 className="text-ink font-bold mb-4">Penjelasan Lengkap:</h4>
                 <div className="space-y-2">
                   {generateSolutionSteps(
                     question.circuitType,
@@ -303,13 +303,13 @@ const TipeSoal1: React.FC<TipeSoal1Props> = ({
                     quizState.selectedResistors as number[],
                     result
                   ).map((step, index) => (
-                    <div key={index} className="text-blue-200/80 text-sm font-mono">
+                    <div key={index} className="text-muted text-sm font-mono">
                       {step}
                     </div>
                   ))}
                 </div>
-                <div className="mt-4 pt-4 border-t border-white/10">
-                  <p className="text-cyan-200 text-sm">{question.explanation}</p>
+                <div className="mt-4 pt-4 border-t border-ink/20">
+                  <p className="text-muted text-sm">{question.explanation}</p>
                 </div>
               </div>
             </div>

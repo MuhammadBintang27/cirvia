@@ -1,4 +1,5 @@
 'use client'
+import { Ico } from "@/components/ui/Ico";
 
 import React, { useState } from 'react';
 import { Resistor } from '@/lib/questions';
@@ -19,15 +20,15 @@ const DragDropResistorSelector: React.FC<DragDropResistorSelectorProps> = ({
   // Early return if no resistors available
   if (!availableResistors || availableResistors.length === 0) {
     return (
-      <div className="bg-gradient-to-br from-slate-800/80 to-slate-900/80 backdrop-blur-xl rounded-2xl p-8 border border-slate-700/50">
+      <div className="bg-paper rounded-2xl p-8 border-2 border-ink">
         <div className="text-center">
-          <div className="text-slate-400 mb-4">
+          <div className="text-muted mb-4">
             <svg className="w-16 h-16 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
             </svg>
           </div>
-          <h3 className="text-lg font-semibold text-slate-300 mb-2">Tidak Ada Resistor Tersedia</h3>
-          <p className="text-slate-400 text-sm">Belum ada resistor yang tersedia untuk dipilih.</p>
+          <h3 className="text-lg font-semibold text-muted mb-2">Tidak Ada Resistor Tersedia</h3>
+          <p className="text-muted text-sm">Belum ada resistor yang tersedia untuk dipilih.</p>
         </div>
       </div>
     );
@@ -65,7 +66,7 @@ const DragDropResistorSelector: React.FC<DragDropResistorSelectorProps> = ({
     }
     
     return (
-      <svg width="100" height="40" viewBox="0 0 100 40" className="drop-shadow-lg">
+      <svg width="100" height="40" viewBox="0 0 100 40" className="">
         <defs>
           <linearGradient id={`resistor-gradient-${resistor.id}`} x1="0%" y1="0%" x2="0%" y2="100%">
             <stop offset="0%" stopColor="#d4af37" />
@@ -127,13 +128,13 @@ const DragDropResistorSelector: React.FC<DragDropResistorSelectorProps> = ({
   };
 
   return (
-    <div className="w-full p-6 bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-xl rounded-2xl border border-slate-600/30 shadow-2xl">
+    <div className="w-full p-6 bg-paper rounded-2xl border-2 border-ink shadow-hard">
       <div className="text-center mb-6">
-        <h3 className="text-xl font-bold text-white mb-2 flex items-center justify-center">
-          <span className="mr-2">🔧</span>
+        <h3 className="text-xl font-bold text-ink mb-2 flex items-center justify-center">
+          <span className="mr-2"><Ico n="wrench" /></span>
           Pilih Resistor
         </h3>
-        <p className="text-blue-200/80 text-sm">
+        <p className="text-muted text-sm">
           Klik pada slot resistor untuk menempatkan komponen
         </p>
       </div>
@@ -150,11 +151,11 @@ const DragDropResistorSelector: React.FC<DragDropResistorSelectorProps> = ({
               className={`
                 relative p-6 rounded-xl transition-all duration-300 cursor-grab active:cursor-grabbing min-h-[120px] flex flex-col justify-center
                 ${isDragging 
-                  ? 'bg-gradient-to-br from-blue-500/30 to-purple-500/30 border-2 border-blue-400/60 scale-95' 
-                  : 'bg-gradient-to-br from-slate-700/50 to-slate-800/50 border border-slate-600/40 hover:border-cyan-400/50'
+                  ? 'bg-brand-soft border-2 border-ink scale-95' 
+                  : 'bg-paper border-2 border-ink hover:border-ink'
                 }
-                ${disabled ? 'opacity-50 cursor-not-allowed' : 'hover:scale-105 hover:-translate-y-1'}
-                transform shadow-lg backdrop-blur-sm
+                ${disabled ? 'opacity-50 cursor-not-allowed' : ''}
+                transform
               `}
               draggable={!disabled}
               onDragStart={(e) => handleDragStart(e, resistor)}
@@ -167,13 +168,13 @@ const DragDropResistorSelector: React.FC<DragDropResistorSelectorProps> = ({
               
               {/* Resistor value - large and clear */}
               <div className="text-center">
-                <div className={`font-bold text-2xl ${isDragging ? 'text-blue-300' : 'text-white'}`}>
+                <div className={`font-bold text-2xl ${isDragging ? 'text-brand' : 'text-ink'}`}>
                   {resistor.value}Ω
                 </div>
               </div>
               
               {/* Drag indicator - subtle */}
-              <div className="absolute top-3 right-3 text-slate-500 opacity-50">
+              <div className="absolute top-3 right-3 text-muted opacity-50">
                 <svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor">
                   <circle cx="3" cy="3" r="1" />
                   <circle cx="8" cy="3" r="1" />
@@ -188,7 +189,7 @@ const DragDropResistorSelector: React.FC<DragDropResistorSelectorProps> = ({
               </div>
               
               {/* Hover effect overlay */}
-              <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/0 to-blue-500/0 hover:from-cyan-500/10 hover:to-blue-500/10 transition-all duration-300 rounded-xl pointer-events-none"></div>
+              <div className="absolute inset-0 hover:bg-brand/10 transition-colors duration-300 rounded-xl pointer-events-none"></div>
             </div>
           );
         })}
@@ -196,9 +197,9 @@ const DragDropResistorSelector: React.FC<DragDropResistorSelectorProps> = ({
 
       {/* Instructions */}
       <div className="text-center">
-        <div className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-cyan-500/20 to-blue-500/20 rounded-full border border-cyan-400/30 backdrop-blur-sm">
-          <span className="text-cyan-300 text-sm font-medium">
-            💡 Klik pada slot resistor di rangkaian untuk menempatkan komponen
+        <div className="inline-flex items-center px-6 py-3 bg-brand-soft rounded-full border-2 border-ink">
+          <span className="text-brand text-sm font-medium">
+            Klik pada slot resistor di rangkaian untuk menempatkan komponen
           </span>
         </div>
       </div>

@@ -117,8 +117,8 @@ export default function ClassPackageAssignment({ teacherId, classes }: ClassPack
   if (loading) {
     return (
       <div className="flex items-center justify-center p-8">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
-        <span className="ml-2 text-gray-300">Memuat data...</span>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-ink"></div>
+        <span className="ml-2 text-muted">Memuat data...</span>
       </div>
     );
   }
@@ -126,9 +126,9 @@ export default function ClassPackageAssignment({ teacherId, classes }: ClassPack
   if (classes.length === 0) {
     return (
       <div className="text-center p-8">
-        <Users className="w-16 h-16 text-gray-500 mx-auto mb-4" />
-        <h3 className="text-lg font-medium text-gray-300 mb-2">Belum Ada Kelas</h3>
-        <p className="text-gray-500">
+        <Users className="w-16 h-16 text-muted mx-auto mb-4" />
+        <h3 className="text-lg font-medium text-muted mb-2">Belum Ada Kelas</h3>
+        <p className="text-muted">
           Anda belum memiliki kelas. Tambahkan siswa terlebih dahulu untuk membuat kelas.
         </p>
       </div>
@@ -140,11 +140,11 @@ export default function ClassPackageAssignment({ teacherId, classes }: ClassPack
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h2 className="text-2xl font-bold text-white flex items-center">
+          <h2 className="text-2xl font-bold text-ink flex items-center">
             <Settings className="w-6 h-6 mr-2" />
             Assignment Paket ke Kelas
           </h2>
-          <p className="text-gray-400 mt-1">
+          <p className="text-muted mt-1">
             Tetapkan paket soal pretest dan posttest untuk setiap kelas
           </p>
         </div>
@@ -152,7 +152,7 @@ export default function ClassPackageAssignment({ teacherId, classes }: ClassPack
           <button
             onClick={loadData}
             disabled={loading}
-            className="bg-gray-600 hover:bg-gray-700 disabled:opacity-50 text-white px-4 py-2 rounded-lg flex items-center transition-colors"
+            className="bg-ink/20 hover:bg-paper disabled:opacity-50 text-ink px-4 py-2 rounded-lg flex items-center transition-colors"
           >
             <RefreshCw className={`w-4 h-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
             Refresh
@@ -160,7 +160,7 @@ export default function ClassPackageAssignment({ teacherId, classes }: ClassPack
           <button
             onClick={saveAssignments}
             disabled={saving}
-            className="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white px-4 py-2 rounded-lg flex items-center transition-colors"
+            className="bg-brand border-2 border-ink hover:bg-brand disabled:opacity-50 text-white px-4 py-2 rounded-lg flex items-center transition-colors"
           >
             <Save className={`w-4 h-4 mr-2 ${saving ? 'animate-spin' : ''}`} />
             {saving ? 'Menyimpan...' : 'Simpan Assignment'}
@@ -169,12 +169,12 @@ export default function ClassPackageAssignment({ teacherId, classes }: ClassPack
       </div>
 
       {/* Info Panel */}
-      <div className="bg-blue-500/10 border border-blue-400/30 rounded-xl p-4">
+      <div className="bg-brand-soft border-2 border-ink rounded-xl p-4">
         <div className="flex items-start space-x-3">
-          <Package className="w-5 h-5 text-blue-400 mt-0.5" />
+          <Package className="w-5 h-5 text-brand mt-0.5" />
           <div>
-            <h3 className="font-medium text-blue-300 mb-1">Informasi Assignment Paket</h3>
-            <ul className="text-sm text-blue-200 space-y-1">
+            <h3 className="font-medium text-brand mb-1">Informasi Assignment Paket</h3>
+            <ul className="text-sm text-muted space-y-1">
               <li>• Jika tidak ada paket yang dipilih, sistem akan menggunakan paket default</li>
               <li>• Paket pretest digunakan untuk mengukur pemahaman awal siswa</li>
               <li>• Paket posttest digunakan untuk mengukur pemahaman akhir setelah pembelajaran</li>
@@ -187,24 +187,24 @@ export default function ClassPackageAssignment({ teacherId, classes }: ClassPack
       {/* Assignment Grid */}
       <div className="space-y-4">
         {classes.map((className) => (
-          <div key={className} className="bg-gray-800/50 backdrop-blur-xl border border-gray-700/50 rounded-xl p-6">
+          <div key={className} className="bg-paper border-2 border-ink rounded-xl p-6">
             {/* Class Header */}
             <div className="flex items-center mb-6">
-              <Users className="w-5 h-5 text-blue-400 mr-2" />
-              <h3 className="text-xl font-semibold text-white">Kelas {className}</h3>
+              <Users className="w-5 h-5 text-brand mr-2" />
+              <h3 className="text-xl font-semibold text-ink">Kelas {className}</h3>
             </div>
 
             {/* Package Assignment */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Pretest Package */}
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-3">
+                <label className="block text-sm font-medium text-muted mb-3">
                   Paket Pretest
                 </label>
                 <select
                   value={assignments[className]?.pretest || ''}
                   onChange={(e) => handleAssignmentChange(className, 'pretest', e.target.value)}
-                  className="w-full bg-gray-700/50 border border-gray-600 rounded-lg px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full bg-paper border-2 border-ink rounded-lg px-3 py-2 text-ink focus:outline-none focus:ring-2 focus:ring-brand"
                 >
                   <option value="">Gunakan Paket Default</option>
                   {getPretestPackages().map((pkg) => (
@@ -216,23 +216,23 @@ export default function ClassPackageAssignment({ teacherId, classes }: ClassPack
                 
                 {/* Package Info */}
                 {assignments[className]?.pretest && (
-                  <div className="mt-3 p-3 bg-gray-700/30 rounded-lg">
+                  <div className="mt-3 p-3 bg-paper rounded-lg">
                     {(() => {
                       const pkg = getPackageInfo(assignments[className].pretest);
                       return pkg ? (
                         <div className="space-y-2">
-                          <div className="flex items-center text-sm text-gray-300">
+                          <div className="flex items-center text-sm text-muted">
                             <FileText className="w-4 h-4 mr-2" />
                             <span>{pkg.question_ids.length} soal</span>
                           </div>
                           {pkg.time_limit && (
-                            <div className="flex items-center text-sm text-gray-300">
+                            <div className="flex items-center text-sm text-muted">
                               <Clock className="w-4 h-4 mr-2" />
                               <span>{pkg.time_limit} menit</span>
                             </div>
                           )}
                           {pkg.description && (
-                            <p className="text-sm text-gray-400">{pkg.description}</p>
+                            <p className="text-sm text-muted">{pkg.description}</p>
                           )}
                         </div>
                       ) : null;
@@ -243,13 +243,13 @@ export default function ClassPackageAssignment({ teacherId, classes }: ClassPack
 
               {/* Posttest Package */}
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-3">
+                <label className="block text-sm font-medium text-muted mb-3">
                   Paket Posttest
                 </label>
                 <select
                   value={assignments[className]?.posttest || ''}
                   onChange={(e) => handleAssignmentChange(className, 'posttest', e.target.value)}
-                  className="w-full bg-gray-700/50 border border-gray-600 rounded-lg px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full bg-paper border-2 border-ink rounded-lg px-3 py-2 text-ink focus:outline-none focus:ring-2 focus:ring-brand"
                 >
                   <option value="">Gunakan Paket Default</option>
                   {getPosttestPackages().map((pkg) => (
@@ -261,23 +261,23 @@ export default function ClassPackageAssignment({ teacherId, classes }: ClassPack
                 
                 {/* Package Info */}
                 {assignments[className]?.posttest && (
-                  <div className="mt-3 p-3 bg-gray-700/30 rounded-lg">
+                  <div className="mt-3 p-3 bg-paper rounded-lg">
                     {(() => {
                       const pkg = getPackageInfo(assignments[className].posttest);
                       return pkg ? (
                         <div className="space-y-2">
-                          <div className="flex items-center text-sm text-gray-300">
+                          <div className="flex items-center text-sm text-muted">
                             <FileText className="w-4 h-4 mr-2" />
                             <span>{pkg.question_ids.length} soal</span>
                           </div>
                           {pkg.time_limit && (
-                            <div className="flex items-center text-sm text-gray-300">
+                            <div className="flex items-center text-sm text-muted">
                               <Clock className="w-4 h-4 mr-2" />
                               <span>{pkg.time_limit} menit</span>
                             </div>
                           )}
                           {pkg.description && (
-                            <p className="text-sm text-gray-400">{pkg.description}</p>
+                            <p className="text-sm text-muted">{pkg.description}</p>
                           )}
                         </div>
                       ) : null;
@@ -291,26 +291,26 @@ export default function ClassPackageAssignment({ teacherId, classes }: ClassPack
       </div>
 
       {/* Summary */}
-      <div className="bg-gray-800/50 backdrop-blur-xl border border-gray-700/50 rounded-xl p-6">
-        <h3 className="text-lg font-semibold text-white mb-4">Ringkasan Assignment</h3>
+      <div className="bg-paper border-2 border-ink rounded-xl p-6">
+        <h3 className="text-lg font-semibold text-ink mb-4">Ringkasan Assignment</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {classes.map((className) => {
             const pretestPkg = assignments[className]?.pretest ? getPackageInfo(assignments[className].pretest) : null;
             const posttestPkg = assignments[className]?.posttest ? getPackageInfo(assignments[className].posttest) : null;
             
             return (
-              <div key={className} className="bg-gray-700/30 rounded-lg p-4">
-                <h4 className="font-medium text-white mb-3">Kelas {className}</h4>
+              <div key={className} className="bg-paper rounded-lg p-4">
+                <h4 className="font-medium text-ink mb-3">Kelas {className}</h4>
                 <div className="space-y-2 text-sm">
                   <div>
-                    <span className="text-gray-400">Pretest: </span>
-                    <span className="text-white">
+                    <span className="text-muted">Pretest: </span>
+                    <span className="text-ink">
                       {pretestPkg ? pretestPkg.name : 'Default System'}
                     </span>
                   </div>
                   <div>
-                    <span className="text-gray-400">Posttest: </span>
-                    <span className="text-white">
+                    <span className="text-muted">Posttest: </span>
+                    <span className="text-ink">
                       {posttestPkg ? posttestPkg.name : 'Default System'}
                     </span>
                   </div>

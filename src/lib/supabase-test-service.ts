@@ -162,7 +162,7 @@ export class SupabaseTestService {
       const { data: insertedAnswers, error: answersError } = await supabase
         .from('test_answers')
         .insert(answersToInsert)
-        .select()  // ✨ Add select to get inserted data back
+        .select()  // Add select to get inserted data back
 
       console.log('🔍 [DEBUG] Insert result - Data:', insertedAnswers);
       console.log('🔍 [DEBUG] Insert result - Error:', answersError);

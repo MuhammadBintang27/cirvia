@@ -1,4 +1,5 @@
 'use client'
+import { Ico } from "@/components/ui/Ico";
 
 import { useState, useEffect } from 'react'
 
@@ -69,7 +70,7 @@ export default function EmbeddedPythonCV() {
       <div className="bg-white rounded-lg shadow-lg overflow-hidden">
         <div className="p-6 text-center">
           <div className="mb-6">
-            <div className="text-6xl mb-4">🎮</div>
+            <div className="text-6xl mb-4"><Ico n="gamepad" /></div>
             <h3 className="text-2xl font-bold text-gray-800 mb-2">
               Python Computer Vision Circuit Builder
             </h3>
@@ -80,7 +81,7 @@ export default function EmbeddedPythonCV() {
 
           <div className="grid md:grid-cols-2 gap-6 mb-6 text-left">
             <div className="bg-blue-50 p-4 rounded-lg">
-              <h4 className="font-bold text-blue-800 mb-2">🤖 AI Features</h4>
+              <h4 className="font-bold text-blue-800 mb-2">AI Features</h4>
               <ul className="text-sm text-blue-700 space-y-1">
                 <li>• Hand gesture recognition</li>
                 <li>• Real-time pinch detection</li>
@@ -90,7 +91,7 @@ export default function EmbeddedPythonCV() {
             </div>
             
             <div className="bg-green-50 p-4 rounded-lg">
-              <h4 className="font-bold text-green-800 mb-2">⚡ Circuit Features</h4>
+              <h4 className="font-bold text-green-800 mb-2">Circuit Features</h4>
               <ul className="text-sm text-green-700 space-y-1">
                 <li>• Interactive component placement</li>
                 <li>• Real-time calculations</li>
@@ -101,20 +102,20 @@ export default function EmbeddedPythonCV() {
           </div>
 
           <div className="bg-yellow-50 border border-yellow-200 p-4 rounded-lg mb-6">
-            <h4 className="font-bold text-yellow-800 mb-2">📋 Gesture Controls</h4>
+            <h4 className="font-bold text-yellow-800 mb-2">Gesture Controls</h4>
             <div className="grid grid-cols-3 gap-4 text-sm text-yellow-700">
               <div className="text-center">
-                <div className="text-lg mb-1">🤏</div>
+                <div className="text-lg mb-1"><Ico n="hand" /></div>
                 <div className="font-medium">Pinch</div>
                 <div>Select & Drag</div>
               </div>
               <div className="text-center">
-                <div className="text-lg mb-1">👆</div>
+                <div className="text-lg mb-1"><Ico n="pointer" /></div>
                 <div className="font-medium">Point</div>
                 <div>Navigate</div>
               </div>
               <div className="text-center">
-                <div className="text-lg mb-1">✋</div>
+                <div className="text-lg mb-1"><Ico n="hand" /></div>
                 <div className="font-medium">Open</div>
                 <div>Release</div>
               </div>
@@ -125,7 +126,7 @@ export default function EmbeddedPythonCV() {
             onClick={startPythonCV}
             className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-bold py-4 px-6 rounded-lg transition-all transform hover:scale-[1.02] shadow-lg"
           >
-            🚀 Launch Python CV Application
+            Launch Python CV Application
           </button>
         </div>
       </div>
@@ -167,7 +168,7 @@ export default function EmbeddedPythonCV() {
     return (
       <div className="bg-white rounded-lg shadow-lg p-6">
         <div className="text-center">
-          <div className="text-red-500 text-4xl mb-4">❌</div>
+          <div className="text-red-500 text-4xl mb-4"><Ico n="x" /></div>
           <h3 className="text-xl font-bold text-red-800 mb-2">Failed to Start</h3>
           <p className="text-red-600 mb-4">{errorMessage}</p>
           
@@ -186,7 +187,7 @@ export default function EmbeddedPythonCV() {
               onClick={startPythonCV}
               className="bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-4 rounded-lg transition-colors"
             >
-              🔄 Try Again
+              Try Again
             </button>
             <button
               onClick={() => setStatus('idle')}
@@ -216,7 +217,7 @@ export default function EmbeddedPythonCV() {
               onClick={stopPythonCV}
               className="bg-red-500 hover:bg-red-600 text-white text-sm font-medium py-1 px-3 rounded transition-colors"
             >
-              ⏹️ Stop
+              Stop
             </button>
           </div>
         </div>
@@ -250,19 +251,19 @@ export default function EmbeddedPythonCV() {
       <div className="bg-gray-50 p-4">
         <div className="grid md:grid-cols-4 gap-4 text-center text-sm">
           <div className="text-blue-600">
-            <div className="font-bold">🤏 Pinch</div>
+            <div className="font-bold">Pinch</div>
             <div>Select & drag components</div>
           </div>
           <div className="text-green-600">
-            <div className="font-bold">👆 Point</div>
+            <div className="font-bold">Point</div>
             <div>Navigate interface</div>
           </div>
           <div className="text-yellow-600">
-            <div className="font-bold">✋ Open</div>
+            <div className="font-bold">Open</div>
             <div>Release components</div>
           </div>
           <div className="text-purple-600">
-            <div className="font-bold">📊 Live</div>
+            <div className="font-bold">Live</div>
             <div>Real-time calculations</div>
           </div>
         </div>

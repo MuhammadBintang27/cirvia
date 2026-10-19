@@ -37,7 +37,7 @@ export class CircuitController {
     // Only process high confidence gestures
     if (gesture.confidence < MIN_CONFIDENCE) {
       console.log(
-        `⚠️ ${gesture.name.toUpperCase()} confidence too low: ${gesture.confidence.toFixed(
+        `${gesture.name.toUpperCase()} confidence too low: ${gesture.confidence.toFixed(
           2
         )} (need > ${MIN_CONFIDENCE})`
       );
@@ -47,7 +47,7 @@ export class CircuitController {
     // Log gesture being processed
     if (gesture.name === "point") {
       console.log(
-        `👆 Processing POINT gesture | Confidence: ${gesture.confidence.toFixed(
+        `Processing POINT gesture | Confidence: ${gesture.confidence.toFixed(
           2
         )} | Handedness: ${gesture.handedness}`
       );
@@ -56,7 +56,7 @@ export class CircuitController {
     // Debug log for open_palm
     if (gesture.name === "open_palm") {
       console.log(
-        `🖐️ [CircuitController] Processing OPEN_PALM gesture | Handedness: ${
+        `[CircuitController] Processing OPEN_PALM gesture | Handedness: ${
           gesture.handedness
         } | FingerCount: ${gesture.metadata?.fingerCount || "N/A"}`
       );
@@ -75,11 +75,11 @@ export class CircuitController {
         case "open_palm":
           // LEFT hand open_palm is for DELETE with 3-second hold
           console.log(
-            `🗑️ [CircuitController] Calling handleLeftHandOpenPalm...`
+            `[CircuitController] Calling handleLeftHandOpenPalm...`
           );
           action = this.handleLeftHandOpenPalm(gesture);
           console.log(
-            `🗑️ [CircuitController] handleLeftHandOpenPalm returned:`,
+            `[CircuitController] handleLeftHandOpenPalm returned:`,
             action
           );
           break;
@@ -134,11 +134,11 @@ export class CircuitController {
           if (gesture.handedness === "Right") {
             action = this.handleThumbsUp(gesture);
             console.log(
-              `✅ [CONTROLLER DEBUG] Toggle action created for RIGHT hand`
+              `[CONTROLLER DEBUG] Toggle action created for RIGHT hand`
             );
           } else {
             console.log(
-              `❌ [CONTROLLER DEBUG] THUMBS_UP ignored - not RIGHT hand (handedness: ${gesture.handedness})`
+              `[CONTROLLER DEBUG] THUMBS_UP ignored - not RIGHT hand (handedness: ${gesture.handedness})`
             );
           }
           break;
@@ -189,7 +189,7 @@ export class CircuitController {
     this.isPinching = false;
 
     console.log(
-      "⚠️ GRAB gesture detected - DELETE is DISABLED to prevent accidental deletion"
+      "GRAB gesture detected - DELETE is DISABLED to prevent accidental deletion"
     );
 
     // Return move action instead to prevent deletion
@@ -413,7 +413,7 @@ export class CircuitController {
     const fingerCount = gesture.metadata?.fingerCount || 0;
 
     console.log(
-      `🗑️ [LEFT HAND] OPEN PALM detected with ${fingerCount} fingers - triggering delete action`
+      `[LEFT HAND] OPEN PALM detected with ${fingerCount} fingers - triggering delete action`
     );
 
     // Only trigger delete if it's truly 5 fingers (open palm)
@@ -482,7 +482,7 @@ export class CircuitController {
     const componentAtPosition = gesture.metadata?.componentId || null;
 
     console.log(
-      `👆 handleRightHandPoint called | Component: ${
+      `handleRightHandPoint called | Component: ${
         componentAtPosition || "none"
       } | Connecting: ${this.isConnecting}`
     );
@@ -502,7 +502,7 @@ export class CircuitController {
           this.pointHoldStartTime = now;
           this.lastPointComponent = componentAtPosition;
           console.log(
-            `👆 POINT → Hold started on TARGET component: ${componentAtPosition}`
+            `POINT → Hold started on TARGET component: ${componentAtPosition}`
           );
         }
 
@@ -513,7 +513,7 @@ export class CircuitController {
         );
 
         console.log(
-          `🕐 TARGET Hold: ${holdDuration}ms / ${this.pointHoldDuration}ms (${(
+          `TARGET Hold: ${holdDuration}ms / ${this.pointHoldDuration}ms (${(
             currentProgress * 100
           ).toFixed(0)}%)`
         );
@@ -522,7 +522,7 @@ export class CircuitController {
         if (holdDuration >= this.pointHoldDuration || currentProgress >= 1.0) {
           // ✅ COMPLETE WIRE after 3-second hold on target
           console.log(
-            `✅ POINT → COMPLETE WIRE: ${this.wireStartComponent} → ${componentAtPosition} (held for ${holdDuration}ms)`
+            `POINT → COMPLETE WIRE: ${this.wireStartComponent} → ${componentAtPosition} (held for ${holdDuration}ms)`
           );
 
           const action: CircuitAction = {
@@ -544,7 +544,7 @@ export class CircuitController {
 
         // 🕐 Still holding on target - return hold progress for visual feedback
         console.log(
-          `   📊 TARGET hold progress: ${(currentProgress * 100).toFixed(0)}%`
+          `   TARGET hold progress: ${(currentProgress * 100).toFixed(0)}%`
         );
 
         return {
@@ -559,7 +559,7 @@ export class CircuitController {
         // Reset hold timer when not pointing at any valid component
         if (this.pointHoldStartTime > 0) {
           console.log(
-            "👆 POINT → Target hold cancelled (moved away from target component)"
+            "POINT → Target hold cancelled (moved away from target component)"
           );
           this.pointHoldStartTime = 0;
           this.lastPointComponent = null;
@@ -583,7 +583,7 @@ export class CircuitController {
         this.pointHoldStartTime = now;
         this.lastPointComponent = componentAtPosition;
         console.log(
-          `👆 POINT → Hold started on component: ${componentAtPosition}`
+          `POINT → Hold started on component: ${componentAtPosition}`
         );
       }
 
@@ -594,7 +594,7 @@ export class CircuitController {
       );
 
       console.log(
-        `🕐 Hold duration: ${holdDuration}ms / ${this.pointHoldDuration}ms (${(
+        `Hold duration: ${holdDuration}ms / ${this.pointHoldDuration}ms (${(
           currentProgress * 100
         ).toFixed(0)}%)`
       );
@@ -607,7 +607,7 @@ export class CircuitController {
         this.pointHoldStartTime = 0; // Reset hold timer
 
         console.log(
-          `✅ POINT → START WIRE from component: ${componentAtPosition} (held for ${holdDuration}ms)`
+          `POINT → START WIRE from component: ${componentAtPosition} (held for ${holdDuration}ms)`
         );
 
         return {
@@ -620,7 +620,7 @@ export class CircuitController {
 
       // 🕐 Still holding - return hold progress for visual feedback
       console.log(
-        `   📊 Returning hold progress: ${(currentProgress * 100).toFixed(0)}%`
+        `   Returning hold progress: ${(currentProgress * 100).toFixed(0)}%`
       );
 
       return {
@@ -656,7 +656,7 @@ export class CircuitController {
     this.isPinching = false;
 
     console.log(
-      "⚠️ GRAB (FIST) gesture detected - Wire connection now uses POINT gesture (1 finger)"
+      "GRAB (FIST) gesture detected - Wire connection now uses POINT gesture (1 finger)"
     );
 
     return {

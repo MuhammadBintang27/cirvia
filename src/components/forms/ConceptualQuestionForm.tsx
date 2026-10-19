@@ -1,4 +1,5 @@
 'use client';
+import { Ico } from "@/components/ui/Ico";
 
 import React, { useState } from 'react';
 import { ConceptualQuestion } from '@/lib/questions';
@@ -151,14 +152,14 @@ export default function ConceptualQuestionForm({ onSubmit, initialData }: Concep
     <div className="space-y-8">
       {/* Toggle Preview/Edit */}
       <div className="flex items-center justify-between mb-6">
-        <h3 className="text-2xl font-bold text-white flex items-center">
-          <HelpCircle className="w-7 h-7 mr-3 text-purple-400" />
+        <h3 className="text-2xl font-bold text-ink flex items-center">
+          <HelpCircle className="w-7 h-7 mr-3 text-purple-700" />
           {showPreview ? 'Preview Soal Konseptual' : 'Form Soal Konseptual'}
         </h3>
         <button
           type="button"
           onClick={() => setShowPreview(!showPreview)}
-          className="flex items-center px-5 py-2.5 bg-gradient-to-r from-purple-500/20 to-pink-500/20 border border-purple-400/30 rounded-xl text-purple-300 hover:text-white hover:bg-purple-500/30 transition-all font-medium"
+          className="flex items-center px-5 py-2.5 bg-purple-100 border-2 border-ink rounded-xl text-purple-700 hover:text-ink hover:bg-purple-100 transition-all font-medium"
         >
           {showPreview ? (
             <>
@@ -178,12 +179,12 @@ export default function ConceptualQuestionForm({ onSubmit, initialData }: Concep
         /* PREVIEW MODE - Sama persis dengan tampilan di pretest/posttest */
         <div className="space-y-8 animate-fadeIn">
           {/* Question Display */}
-          <div className="bg-gradient-to-br from-blue-500/10 to-purple-500/10 backdrop-blur-xl rounded-2xl p-8 border border-blue-400/30">
-            <h3 className="text-2xl font-semibold text-white mb-4">
+          <div className="bg-brand-soft rounded-2xl p-8 border-2 border-ink">
+            <h3 className="text-2xl font-semibold text-ink mb-4">
               {formData.question || 'Pertanyaan akan muncul di sini...'}
             </h3>
             {formData.description && (
-              <p className="text-blue-200/80 text-base leading-relaxed">
+              <p className="text-muted text-base leading-relaxed">
                 {formData.description}
               </p>
             )}
@@ -193,29 +194,29 @@ export default function ConceptualQuestionForm({ onSubmit, initialData }: Concep
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             {/* Left Panel - Available Choices */}
             <div className="space-y-4">
-              <h4 className="text-xl font-bold text-white flex items-center">
-                <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white text-sm font-bold mr-3">
+              <h4 className="text-xl font-bold text-ink flex items-center">
+                <div className="w-8 h-8 bg-brand rounded-full flex items-center justify-center text-white text-sm font-bold mr-3">
                   ?
                 </div>
                 Pilihan Jawaban
               </h4>
               
-              <div className="space-y-3 p-4 rounded-xl border-2 border-dashed border-white/20 bg-white/5 min-h-[300px]">
+              <div className="space-y-3 p-4 rounded-xl border-2 border-dashed border-ink bg-paper min-h-[300px]">
                 {(formData.choices || []).map((choice, index) => (
                   <div
                     key={choice.id}
-                    className={`bg-gradient-to-r from-white/10 to-white/5 backdrop-blur-xl rounded-lg p-4 border transition-all ${
+                    className={`bg-paper rounded-lg p-4 border transition-all ${
                       choice.isCorrect
-                        ? 'border-green-400/60 bg-green-500/20'
-                        : 'border-white/20'
+                        ? 'border-ink bg-mint-soft'
+                        : 'border-ink'
                     }`}
                   >
                     <div className="flex items-center justify-between">
-                      <p className="text-white font-medium flex-1">
+                      <p className="text-ink font-medium flex-1">
                         {choice.text || `Pilihan ${String.fromCharCode(65 + index)}`}
                       </p>
                       {choice.isCorrect && (
-                        <CheckCircle2 className="w-5 h-5 text-green-400 ml-3" />
+                        <CheckCircle2 className="w-5 h-5 text-emerald-700 ml-3" />
                       )}
                     </div>
                   </div>
@@ -227,12 +228,12 @@ export default function ConceptualQuestionForm({ onSubmit, initialData }: Concep
             <div className="space-y-4">
               {/* Hint */}
               {formData.hint && (
-                <div className="bg-gradient-to-br from-yellow-500/10 to-amber-500/10 backdrop-blur-xl rounded-xl p-4 border border-yellow-400/30">
+                <div className="bg-lamp-soft rounded-xl p-4 border-2 border-ink">
                   <div className="flex items-start">
-                    <Lightbulb className="w-5 h-5 text-yellow-400 mr-3 flex-shrink-0 mt-0.5" />
+                    <Lightbulb className="w-5 h-5 text-amber-700 mr-3 flex-shrink-0 mt-0.5" />
                     <div>
-                      <h5 className="font-bold text-yellow-300 mb-2">Petunjuk:</h5>
-                      <p className="text-yellow-200/80 text-sm">{formData.hint}</p>
+                      <h5 className="font-bold text-amber-700 mb-2">Petunjuk:</h5>
+                      <p className="text-amber-700 text-sm">{formData.hint}</p>
                     </div>
                   </div>
                 </div>
@@ -240,38 +241,38 @@ export default function ConceptualQuestionForm({ onSubmit, initialData }: Concep
 
               {/* Explanation */}
               {formData.explanation && (
-                <div className="bg-gradient-to-br from-blue-500/10 to-cyan-500/10 backdrop-blur-xl rounded-xl p-4 border border-blue-400/30">
-                  <h5 className="font-bold text-blue-300 mb-2">Penjelasan:</h5>
-                  <p className="text-blue-200/80 text-sm">{formData.explanation}</p>
+                <div className="bg-brand-soft rounded-xl p-4 border-2 border-ink">
+                  <h5 className="font-bold text-brand mb-2">Penjelasan:</h5>
+                  <p className="text-muted text-sm">{formData.explanation}</p>
                 </div>
               )}
 
               {/* Summary */}
-              <div className="bg-gradient-to-br from-white/5 to-white/10 backdrop-blur-xl rounded-xl p-4 border border-white/20">
-                <h5 className="font-bold text-white mb-3">Info Soal:</h5>
+              <div className="bg-paper rounded-xl p-4 border-2 border-ink">
+                <h5 className="font-bold text-ink mb-3">Info Soal:</h5>
                 <div className="space-y-2 text-sm">
                   <div className="flex justify-between">
-                    <span className="text-white/70">Tipe:</span>
-                    <span className="text-white font-medium">Soal Konseptual</span>
+                    <span className="text-muted">Tipe:</span>
+                    <span className="text-ink font-medium">Soal Konseptual</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-white/70">Tingkat:</span>
+                    <span className="text-muted">Tingkat:</span>
                     <span className={`font-medium ${
-                      formData.difficulty === 'easy' ? 'text-green-400' :
-                      formData.difficulty === 'medium' ? 'text-yellow-400' :
-                      'text-red-400'
+                      formData.difficulty === 'easy' ? 'text-emerald-700' :
+                      formData.difficulty === 'medium' ? 'text-amber-700' :
+                      'text-red-600'
                     }`}>
                       {formData.difficulty === 'easy' ? 'Mudah' :
                        formData.difficulty === 'medium' ? 'Sedang' : 'Sulit'}
                     </span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-white/70">Pilihan:</span>
-                    <span className="text-white font-medium">{(formData.choices || []).length}</span>
+                    <span className="text-muted">Pilihan:</span>
+                    <span className="text-ink font-medium">{(formData.choices || []).length}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-white/70">Jawaban Benar:</span>
-                    <span className="text-green-400 font-medium">
+                    <span className="text-muted">Jawaban Benar:</span>
+                    <span className="text-emerald-700 font-medium">
                       {(formData.choices || []).filter(c => c.isCorrect).length}
                     </span>
                   </div>
@@ -281,18 +282,18 @@ export default function ConceptualQuestionForm({ onSubmit, initialData }: Concep
           </div>
 
           {/* Action Buttons */}
-          <div className="flex justify-end space-x-4 pt-6 border-t border-white/10">
+          <div className="flex justify-end space-x-4 pt-6 border-t border-ink/20">
             <button
               type="button"
               onClick={() => setShowPreview(false)}
-              className="px-6 py-3 bg-white/10 border border-white/20 text-white rounded-xl hover:bg-white/20 transition-all font-medium"
+              className="px-6 py-3 bg-paper border-2 border-ink text-ink rounded-xl hover:bg-lamp-soft transition-all font-medium"
             >
               Kembali Edit
             </button>
             <button
               type="button"
               onClick={handleSubmit}
-              className="px-6 py-3 bg-gradient-to-r from-blue-500 to-cyan-600 text-white rounded-xl hover:from-blue-600 hover:to-cyan-700 transition-all font-medium shadow-lg"
+              className="px-6 py-3 bg-brand border-2 border-ink text-white rounded-xl hover:bg-brand transition-all font-medium"
             >
               Simpan Soal
             </button>
@@ -304,87 +305,87 @@ export default function ConceptualQuestionForm({ onSubmit, initialData }: Concep
           
           {/* Informasi Dasar - Inline tanpa box */}
           <div className="space-y-6">
-            <h4 className="text-xl font-bold text-white flex items-center pb-3 border-b border-white/10">
-              <HelpCircle className="w-6 h-6 mr-3 text-purple-400" />
+            <h4 className="text-xl font-bold text-ink flex items-center pb-3 border-b border-ink/20">
+              <HelpCircle className="w-6 h-6 mr-3 text-purple-700" />
               Informasi Dasar
             </h4>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pl-9">
               <div>
-                <label className="block text-sm font-medium text-blue-200 mb-2">
+                <label className="block text-sm font-medium text-muted mb-2">
                   Judul Soal *
                 </label>
                 <input
                   type="text"
                   value={formData.title || ''}
                   onChange={(e) => handleInputChange('title', e.target.value)}
-                  className={`w-full px-4 py-3 bg-white/5 border-2 rounded-xl text-white placeholder-blue-300/40 focus:outline-none focus:border-purple-400/60 focus:bg-white/10 transition-all ${
-                    errors.title ? 'border-red-400/60 bg-red-500/10' : 'border-white/10 hover:border-white/20'
+                  className={`w-full px-4 py-3 bg-paper border-2 rounded-xl text-ink placeholder-muted focus:outline-none focus:border-ink focus:bg-paper transition-all ${
+                    errors.title ? 'border-ink bg-coral-soft' : 'border-ink/20 hover:border-ink'
                   }`}
                   placeholder="contoh: Konsep Dasar Rangkaian Seri"
                 />
-                {errors.title && <p className="text-red-300 text-sm mt-1.5">{errors.title}</p>}
+                {errors.title && <p className="text-red-600 text-sm mt-1.5">{errors.title}</p>}
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-blue-200 mb-2">
+                <label className="block text-sm font-medium text-muted mb-2">
                   Tingkat Kesulitan
                 </label>
                 <select
                   value={formData.difficulty || 'easy'}
                   onChange={(e) => handleInputChange('difficulty', e.target.value as 'easy' | 'medium' | 'hard')}
-                  className="w-full px-4 py-3 bg-white/5 border-2 border-white/10 hover:border-white/20 rounded-xl text-white focus:outline-none focus:border-purple-400/60 focus:bg-white/10 transition-all"
+                  className="w-full px-4 py-3 bg-paper border-2 border-ink/20 hover:border-ink rounded-xl text-ink focus:outline-none focus:border-ink focus:bg-paper transition-all"
                 >
-                  <option value="easy" className="bg-gray-800">Mudah</option>
-                  <option value="medium" className="bg-gray-800">Sedang</option>
-                  <option value="hard" className="bg-gray-800">Sulit</option>
+                  <option value="easy" className="bg-paper">Mudah</option>
+                  <option value="medium" className="bg-paper">Sedang</option>
+                  <option value="hard" className="bg-paper">Sulit</option>
                 </select>
               </div>
             </div>
 
             <div className="pl-9">
-              <label className="block text-sm font-medium text-blue-200 mb-2">
+              <label className="block text-sm font-medium text-muted mb-2">
                 Deskripsi Soal *
               </label>
               <textarea
                 value={formData.description || ''}
                 onChange={(e) => handleInputChange('description', e.target.value)}
                 rows={3}
-                className={`w-full px-4 py-3 bg-white/5 border-2 rounded-xl text-white placeholder-blue-300/40 focus:outline-none focus:border-purple-400/60 focus:bg-white/10 transition-all resize-none ${
-                  errors.description ? 'border-red-400/60 bg-red-500/10' : 'border-white/10 hover:border-white/20'
+                className={`w-full px-4 py-3 bg-paper border-2 rounded-xl text-ink placeholder-muted focus:outline-none focus:border-ink focus:bg-paper transition-all resize-none ${
+                  errors.description ? 'border-ink bg-coral-soft' : 'border-ink/20 hover:border-ink'
                 }`}
                 placeholder="Berikan konteks atau pengantar untuk soal ini..."
               />
-              {errors.description && <p className="text-red-300 text-sm mt-1.5">{errors.description}</p>}
+              {errors.description && <p className="text-red-600 text-sm mt-1.5">{errors.description}</p>}
             </div>
           </div>
 
           {/* Pertanyaan - Inline */}
           <div className="space-y-6">
-            <h4 className="text-xl font-bold text-white flex items-center pb-3 border-b border-white/10">
-              <HelpCircle className="w-6 h-6 mr-3 text-blue-400" />
+            <h4 className="text-xl font-bold text-ink flex items-center pb-3 border-b border-ink/20">
+              <HelpCircle className="w-6 h-6 mr-3 text-brand" />
               Pertanyaan
             </h4>
             
             <div className="pl-9">
-              <label className="block text-sm font-medium text-blue-200 mb-2">
+              <label className="block text-sm font-medium text-muted mb-2">
                 Pertanyaan Utama *
               </label>
               <textarea
                 value={formData.question || ''}
                 onChange={(e) => handleInputChange('question', e.target.value)}
                 rows={3}
-                className={`w-full px-4 py-3 bg-white/5 border-2 rounded-xl text-white placeholder-blue-300/40 focus:outline-none focus:border-purple-400/60 focus:bg-white/10 transition-all resize-none ${
-                  errors.question ? 'border-red-400/60 bg-red-500/10' : 'border-white/10 hover:border-white/20'
+                className={`w-full px-4 py-3 bg-paper border-2 rounded-xl text-ink placeholder-muted focus:outline-none focus:border-ink focus:bg-paper transition-all resize-none ${
+                  errors.question ? 'border-ink bg-coral-soft' : 'border-ink/20 hover:border-ink'
                 }`}
                 placeholder="Tuliskan pertanyaan yang akan dijawab siswa..."
               />
-              {errors.question && <p className="text-red-300 text-sm mt-1.5">{errors.question}</p>}
+              {errors.question && <p className="text-red-600 text-sm mt-1.5">{errors.question}</p>}
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pl-9">
               <div>
-                <label className="block text-sm font-medium text-yellow-300 mb-2 flex items-center">
+                <label className="block text-sm font-medium text-amber-700 mb-2 flex items-center">
                   <Lightbulb className="w-4 h-4 mr-2" />
                   Hint untuk Siswa *
                 </label>
@@ -392,16 +393,16 @@ export default function ConceptualQuestionForm({ onSubmit, initialData }: Concep
                   value={formData.hint || ''}
                   onChange={(e) => handleInputChange('hint', e.target.value)}
                   rows={3}
-                  className={`w-full px-4 py-3 bg-white/5 border-2 rounded-xl text-white placeholder-blue-300/40 focus:outline-none focus:border-yellow-400/60 focus:bg-white/10 transition-all resize-none ${
-                    errors.hint ? 'border-red-400/60 bg-red-500/10' : 'border-white/10 hover:border-white/20'
+                  className={`w-full px-4 py-3 bg-paper border-2 rounded-xl text-ink placeholder-muted focus:outline-none focus:border-ink focus:bg-paper transition-all resize-none ${
+                    errors.hint ? 'border-ink bg-coral-soft' : 'border-ink/20 hover:border-ink'
                   }`}
                   placeholder="Berikan petunjuk untuk membantu siswa..."
                 />
-                {errors.hint && <p className="text-red-300 text-sm mt-1.5">{errors.hint}</p>}
+                {errors.hint && <p className="text-red-600 text-sm mt-1.5">{errors.hint}</p>}
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-green-300 mb-2 flex items-center">
+                <label className="block text-sm font-medium text-emerald-700 mb-2 flex items-center">
                   <CheckCircle2 className="w-4 h-4 mr-2" />
                   Penjelasan Jawaban *
                 </label>
@@ -409,40 +410,40 @@ export default function ConceptualQuestionForm({ onSubmit, initialData }: Concep
                   value={formData.explanation || ''}
                   onChange={(e) => handleInputChange('explanation', e.target.value)}
                   rows={3}
-                  className={`w-full px-4 py-3 bg-white/5 border-2 rounded-xl text-white placeholder-blue-300/40 focus:outline-none focus:border-green-400/60 focus:bg-white/10 transition-all resize-none ${
-                    errors.explanation ? 'border-red-400/60 bg-red-500/10' : 'border-white/10 hover:border-white/20'
+                  className={`w-full px-4 py-3 bg-paper border-2 rounded-xl text-ink placeholder-muted focus:outline-none focus:border-ink focus:bg-paper transition-all resize-none ${
+                    errors.explanation ? 'border-ink bg-coral-soft' : 'border-ink/20 hover:border-ink'
                   }`}
                   placeholder="Jelaskan mengapa jawaban ini benar..."
                 />
-                {errors.explanation && <p className="text-red-300 text-sm mt-1.5">{errors.explanation}</p>}
+                {errors.explanation && <p className="text-red-600 text-sm mt-1.5">{errors.explanation}</p>}
               </div>
             </div>
           </div>
 
           {/* Pilihan Jawaban - Inline */}
           <div className="space-y-6">
-            <div className="flex items-center justify-between pb-3 border-b border-white/10">
-              <h4 className="text-xl font-bold text-white flex items-center">
-                <CheckCircle2 className="w-6 h-6 mr-3 text-green-400" />
+            <div className="flex items-center justify-between pb-3 border-b border-ink/20">
+              <h4 className="text-xl font-bold text-ink flex items-center">
+                <CheckCircle2 className="w-6 h-6 mr-3 text-emerald-700" />
                 Pilihan Jawaban
               </h4>
               <button
                 type="button"
                 onClick={addChoice}
-                className="px-4 py-2 text-sm bg-green-500/20 border border-green-400/40 text-green-300 hover:bg-green-500/30 hover:text-white rounded-lg transition-all font-medium"
+                className="px-4 py-2 text-sm bg-mint-soft border-2 border-ink text-emerald-700 hover:bg-mint-soft hover:text-ink rounded-lg transition-all font-medium"
               >
                 + Tambah Pilihan
               </button>
             </div>
             
-            <p className="text-sm text-blue-200/60 pl-9">
+            <p className="text-sm text-muted pl-9">
               Buat pilihan jawaban dan centang yang benar. Bisa multiple choice (beberapa jawaban benar).
             </p>
 
             <div className="space-y-3 pl-9">
               {(formData.choices || []).map((choice, index) => (
-                <div key={choice.id} className="flex items-center space-x-3 p-4 border-2 rounded-xl bg-white/5 transition-all hover:bg-white/10 border-white/10 hover:border-white/20">
-                  <span className="text-base font-bold text-purple-300 w-8 flex-shrink-0">
+                <div key={choice.id} className="flex items-center space-x-3 p-4 border-2 rounded-xl bg-paper transition-all hover:bg-lamp-soft border-ink/20 hover:border-ink">
+                  <span className="text-base font-bold text-purple-700 w-8 flex-shrink-0">
                     {String.fromCharCode(65 + index)}.
                   </span>
                   
@@ -450,53 +451,53 @@ export default function ConceptualQuestionForm({ onSubmit, initialData }: Concep
                     type="text"
                     value={choice.text}
                     onChange={(e) => handleChoiceChange(index, 'text', e.target.value)}
-                    className={`flex-1 px-4 py-2.5 bg-transparent border-0 text-white placeholder-blue-300/40 focus:outline-none ${
-                      errors[`choice-${index}`] ? 'text-red-300' : ''
+                    className={`flex-1 px-4 py-2.5 bg-transparent border-0 text-ink placeholder-muted focus:outline-none ${
+                      errors[`choice-${index}`] ? 'text-red-600' : ''
                     }`}
                     placeholder={`Pilihan ${String.fromCharCode(65 + index)}`}
                   />
                   
-                  <label className="flex items-center space-x-2 cursor-pointer px-3 py-2 rounded-lg hover:bg-green-500/10 transition-colors">
+                  <label className="flex items-center space-x-2 cursor-pointer px-3 py-2 rounded-lg hover:bg-mint-soft transition-colors">
                     <input
                       type="checkbox"
                       checked={choice.isCorrect}
                       onChange={(e) => handleChoiceChange(index, 'isCorrect', e.target.checked)}
-                      className="w-5 h-5 rounded border-white/30 bg-white/10 text-green-500 focus:ring-green-400 focus:ring-offset-0 cursor-pointer"
+                      className="w-5 h-5 rounded border-ink bg-paper text-emerald-700 focus:ring-brand focus:ring-offset-0 cursor-pointer"
                     />
-                    <span className="text-sm text-green-300 font-medium whitespace-nowrap">Benar</span>
+                    <span className="text-sm text-emerald-700 font-medium whitespace-nowrap">Benar</span>
                   </label>
                   
                   {(formData.choices || []).length > 2 && (
                     <button
                       type="button"
                       onClick={() => removeChoice(index)}
-                      className="px-3 py-2 text-sm bg-red-500/10 hover:bg-red-500/20 border border-red-400/20 hover:border-red-400/40 text-red-300 hover:text-red-200 rounded-lg transition-all"
+                      className="px-3 py-2 text-sm bg-coral-soft hover:bg-coral-soft border-2 border-ink hover:border-ink text-red-600 hover:text-red-600 rounded-lg transition-all"
                     >
-                      ✕
+                      <Ico n="x" />
                     </button>
                   )}
                 </div>
               ))}
             </div>
 
-            {errors.choices && <p className="text-red-300 text-sm mt-3 pl-9">{errors.choices}</p>}
-            {errors.correctAnswers && <p className="text-red-300 text-sm mt-3 pl-9">{errors.correctAnswers}</p>}
+            {errors.choices && <p className="text-red-600 text-sm mt-3 pl-9">{errors.choices}</p>}
+            {errors.correctAnswers && <p className="text-red-600 text-sm mt-3 pl-9">{errors.correctAnswers}</p>}
           </div>
 
           {/* Ringkasan - Compact */}
-          <div className="flex items-center justify-between px-9 py-5 bg-gradient-to-r from-blue-500/5 to-purple-500/5 border-y border-white/10">
+          <div className="flex items-center justify-between px-9 py-5 bg-brand-soft border-y border-ink/20">
             <div className="flex items-center space-x-8 text-sm">
               <div className="flex items-center space-x-2">
-                <span className="text-blue-200/60">Pilihan:</span>
-                <span className="font-bold text-white">{(formData.choices || []).length}</span>
+                <span className="text-muted">Pilihan:</span>
+                <span className="font-bold text-ink">{(formData.choices || []).length}</span>
               </div>
               <div className="flex items-center space-x-2">
-                <span className="text-blue-200/60">Jawaban Benar:</span>
-                <span className="font-bold text-green-400">{(formData.choices || []).filter(c => c.isCorrect).length}</span>
+                <span className="text-muted">Jawaban Benar:</span>
+                <span className="font-bold text-emerald-700">{(formData.choices || []).filter(c => c.isCorrect).length}</span>
               </div>
               <div className="flex items-center space-x-2">
-                <span className="text-blue-200/60">Tipe:</span>
-                <span className="font-medium text-purple-300">{(formData.choices || []).filter(c => c.isCorrect).length > 1 ? 'Multiple' : 'Single'}</span>
+                <span className="text-muted">Tipe:</span>
+                <span className="font-medium text-purple-700">{(formData.choices || []).filter(c => c.isCorrect).length > 1 ? 'Multiple' : 'Single'}</span>
               </div>
             </div>
           </div>
@@ -506,7 +507,7 @@ export default function ConceptualQuestionForm({ onSubmit, initialData }: Concep
             <button
               type="button"
               onClick={() => setShowPreview(true)}
-              className="px-7 py-3.5 bg-gradient-to-r from-purple-500/20 to-pink-500/20 border border-purple-400/40 text-purple-200 hover:text-white hover:bg-purple-500/30 hover:border-purple-400/60 rounded-xl transition-all font-medium flex items-center shadow-lg hover:shadow-purple-500/20"
+              className="px-7 py-3.5 bg-purple-100 border-2 border-ink text-muted hover:text-ink hover:bg-purple-100 hover:border-ink rounded-xl transition-all font-medium flex items-center"
             >
               <Eye className="w-5 h-5 mr-2" />
               Preview Soal
@@ -514,7 +515,7 @@ export default function ConceptualQuestionForm({ onSubmit, initialData }: Concep
             <button
               type="button"
               onClick={handleSubmit}
-              className="px-7 py-3.5 bg-gradient-to-r from-blue-500 to-cyan-600 text-white rounded-xl hover:from-blue-600 hover:to-cyan-700 hover:shadow-xl hover:shadow-blue-500/30 transition-all font-medium"
+              className="px-7 py-3.5 bg-brand border-2 border-ink text-white rounded-xl hover:bg-brand transition-all font-medium"
             >
               Simpan Soal
             </button>
